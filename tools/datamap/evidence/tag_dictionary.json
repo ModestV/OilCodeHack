@@ -1,0 +1,778 @@
+[
+  {
+    "stage": "avt",
+    "tag": "T1",
+    "description_source": "Температура верха К1. Выход на FIRC0955",
+    "source_cell": "КИП!B2",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "242000",
+    "tag": "F1",
+    "description_source": "Расход бензина c установки",
+    "source_cell": "КИП!D2",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "P2",
+    "description_source": "Давление бензиновых паров верха К1",
+    "source_cell": "КИП!B3",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "242000",
+    "tag": "F2",
+    "description_source": "Газовая схема. Расход на линии от ЦК-201",
+    "source_cell": "КИП!D3",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "F3",
+    "description_source": "Расход бензина на орошение К1",
+    "source_cell": "КИП!B4",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "242000",
+    "tag": "P3",
+    "description_source": "Полисеп. Сепаратор С-201. Давление на входе",
+    "source_cell": "КИП!D4",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "P4",
+    "description_source": "Давление низа К1 в Е6",
+    "source_cell": "КИП!B5",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "242000",
+    "tag": "W4",
+    "description_source": "Блок стабилизации. Массовый расход бензина в колонну К-206",
+    "source_cell": "КИП!D5",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "F5",
+    "description_source": "Расход пара в К1",
+    "source_cell": "КИП!B6",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "242000",
+    "tag": "T5",
+    "description_source": "Полисеп. Реактор Р-201. Температура ГСС на выходе",
+    "source_cell": "КИП!D6",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "T6",
+    "description_source": "Температура низ К1",
+    "source_cell": "КИП!B7",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "242000",
+    "tag": "T6",
+    "description_source": "Поточный анализатор серы в дизельном топливе между коллекторами нагнетания и приёма Н-202/1,2",
+    "source_cell": "КИП!D7",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "F7",
+    "description_source": "Расход обессоленной нефти (3-й ход) (Нефть обессоленная в Т-4/2)",
+    "source_cell": "КИП!B8",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "242000",
+    "tag": "W7",
+    "description_source": "Блок стабилизации. Поточный анализатор содержания серы в гидроочищенном ДТ",
+    "source_cell": "КИП!D8",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "F8",
+    "description_source": "Расход обессоленной нефти (1-й ход) (Нефть обессоленная в Т-6/1)",
+    "source_cell": "КИП!B9",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "242000",
+    "tag": "P8",
+    "description_source": "Полисеп. Реактор Р-202. Температура гсс на входе",
+    "source_cell": "КИП!D9",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "F9",
+    "description_source": "Расход обессоленной нефти (2-й ход) (Нефть обессоленная в Т-10/2)",
+    "source_cell": "КИП!B10",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "242000",
+    "tag": "F9",
+    "description_source": "Блок стабилизации. Расход газа поддува на входе в К-201. Массовый расход (АС КУБ)",
+    "source_cell": "КИП!D10",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "D10",
+    "description_source": "Плотность. Тр-д подачи обессолен. и обезвожен. Нефти",
+    "source_cell": "КИП!B11",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "242000",
+    "tag": "W10",
+    "description_source": "Реактор Р-202. Перепад давления.",
+    "source_cell": "КИП!D11",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "T11",
+    "description_source": "3-е ЦО после Т-46",
+    "source_cell": "КИП!B12",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "242000",
+    "tag": "T11",
+    "description_source": "Расход сырья на установку (массовый)",
+    "source_cell": "КИП!D12",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "F12",
+    "description_source": "Расход 2 ЦО в К2",
+    "source_cell": "КИП!B13",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "242000",
+    "tag": "T12",
+    "description_source": "Расход бензина c установки",
+    "source_cell": "КИП!D13",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "T13",
+    "description_source": "1-е ЦО К-2 после Т-30",
+    "source_cell": "КИП!B14",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "242000",
+    "tag": "P13",
+    "description_source": "Трубопровод на выходе из реактора Р-202: Качество продукции по S",
+    "source_cell": "КИП!D14",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "F14",
+    "description_source": "Расход 1 ЦО в К2",
+    "source_cell": "КИП!B15",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "242000",
+    "tag": "F14",
+    "description_source": "Блок стабилизации. Температура верха колонны К-201 /бензин,УВГ,Н2S",
+    "source_cell": "КИП!D15",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "T15",
+    "description_source": "3 -е ЦО К-2",
+    "source_cell": "КИП!B16",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "242000",
+    "tag": "F15",
+    "description_source": "Полисеп. Расход квенча в реактор Р-202",
+    "source_cell": "КИП!D16",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "F16",
+    "description_source": "Расход бензина от Н4 в Е6",
+    "source_cell": "КИП!B17",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "242000",
+    "tag": "T16",
+    "description_source": "Блок стабилизации. Колонна К-201. Температура стабильного гидрогенизата низ",
+    "source_cell": "КИП!D17",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "T17",
+    "description_source": "2-е ЦО из К-2",
+    "source_cell": "КИП!B18",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "242000",
+    "tag": "F17",
+    "description_source": "Расход гидроочищенного ДТ в цех №8 c установки",
+    "source_cell": "КИП!D18",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "T18",
+    "description_source": "1-е ЦО из К-2",
+    "source_cell": "КИП!B19",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "242000",
+    "tag": "T18",
+    "description_source": "Блок стабилизации. Колонна К-201. Давление на выходе",
+    "source_cell": "КИП!D19",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "F19",
+    "description_source": "Расход остр.орошения К2",
+    "source_cell": "КИП!B20",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "242000",
+    "tag": "F19",
+    "description_source": "Полисеп. Реактор Р-202. Давление на входе",
+    "source_cell": "КИП!D20",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "T20",
+    "description_source": "Температура верха К2. Выход на FIRC0953",
+    "source_cell": "КИП!B21",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "242000",
+    "tag": "Q20",
+    "description_source": "Блок стабилизации. Расход бензина в колонну К-201",
+    "source_cell": "КИП!D21",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "P21",
+    "description_source": "Давление бензиновых паров верха К2",
+    "source_cell": "КИП!B22",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "242000",
+    "tag": "Q21",
+    "description_source": "Блок стабилизации. Расход газа поддува на входе в К-201",
+    "source_cell": "КИП!D22",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "P22",
+    "description_source": "Давление верха К2",
+    "source_cell": "КИП!B23",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "242000",
+    "tag": "F22",
+    "description_source": "Блок стабилизации. Расход газа поддува на входе в К-201Температура в сепараторе С-205",
+    "source_cell": "КИП!D23",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "P23",
+    "description_source": "Давление верха К-2",
+    "source_cell": "КИП!B24",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "242000",
+    "tag": "T23",
+    "description_source": "Расход гидроочищенного ДТ в цех №8 c установки",
+    "source_cell": "КИП!D24",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "T24",
+    "description_source": "Переток из К-2 в К-6",
+    "source_cell": "КИП!B25",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "242000",
+    "tag": "P24",
+    "description_source": "Расход свежего ВСГ с КЦА на установку",
+    "source_cell": "КИП!D25",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "F25",
+    "description_source": "Расход бензина после Т26",
+    "source_cell": "КИП!B26",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "242000",
+    "tag": "F25",
+    "description_source": "APC. Показания виртуального анализатора \"Температура вспышки ГОДТ\"",
+    "source_cell": "КИП!D26",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "F26",
+    "description_source": "Расход пара в К6",
+    "source_cell": "КИП!B27",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "242000",
+    "tag": "F26",
+    "description_source": "Расход сырья на установку (объемный)",
+    "source_cell": "КИП!D27",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "F27",
+    "description_source": "Расход пара в К7",
+    "source_cell": "КИП!B28",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "F28",
+    "description_source": "Расход пара в К9",
+    "source_cell": "КИП!B29",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "F29",
+    "description_source": "Расход пара в К2",
+    "source_cell": "КИП!B30",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "F30",
+    "description_source": "Расход фр.290-350°С с установки",
+    "source_cell": "КИП!B31",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "F31",
+    "description_source": "Расход нефтепродукта в П3",
+    "source_cell": "КИП!B32",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "F32",
+    "description_source": "Расход фр.240-290°С с установки",
+    "source_cell": "КИП!B33",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "T33",
+    "description_source": "Температура низа К-2",
+    "source_cell": "КИП!B34",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "F34",
+    "description_source": "Расход фр.150-250°С с установки",
+    "source_cell": "КИП!B35",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "F35",
+    "description_source": "Расход ВЦО в К-10",
+    "source_cell": "КИП!B36",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "F36",
+    "description_source": "Расход СЦО в К-10",
+    "source_cell": "КИП!B37",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "T37",
+    "description_source": "Температура ВЦО в К-10",
+    "source_cell": "КИП!B38",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "T38",
+    "description_source": "Температура доп. ВЦО К10",
+    "source_cell": "КИП!B39",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "T39",
+    "description_source": "Температура в К10 (над секцией рег.насадки 1а)",
+    "source_cell": "КИП!B40",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "T40",
+    "description_source": "Температура ВЦО из К10",
+    "source_cell": "КИП!B41",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "F41",
+    "description_source": "Расход доп. ВЦО в К-10",
+    "source_cell": "КИП!B42",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "T42",
+    "description_source": "Температура фр.420-500°С из К10 в Е12",
+    "source_cell": "КИП!B43",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "L43",
+    "description_source": "Уровень в К10",
+    "source_cell": "КИП!B44",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "P44",
+    "description_source": "Вакуум низа К10",
+    "source_cell": "КИП!B45",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "F45",
+    "description_source": "Расход холодного гудрона в К10",
+    "source_cell": "КИП!B46",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "F46",
+    "description_source": "Расход НЦО К10 фракции 350-560",
+    "source_cell": "КИП!B47",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "T47",
+    "description_source": "Температура фр.350-560 °C после Т-40",
+    "source_cell": "КИП!B48",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "T48",
+    "description_source": "Описание: Температура низа К10",
+    "source_cell": "КИП!B49",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "T49",
+    "description_source": "Описание: Температура верха К10",
+    "source_cell": "КИП!B50",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "P50",
+    "description_source": "Вакуум верха К10",
+    "source_cell": "КИП!B51",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "P51",
+    "description_source": "Вакуум верха К-10 (пересчёт на мм рт.ст. с кгс/см2 от AVT6:PIR0825.P)",
+    "source_cell": "КИП!B52",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "P52",
+    "description_source": "Перепад давления над 4-й пак.насад. К10",
+    "source_cell": "КИП!B53",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "F53",
+    "description_source": "Расход НЦО  К10 (Регулятор)",
+    "source_cell": "КИП!B54",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "F54",
+    "description_source": "Расход от Н-34/1,2  К10",
+    "source_cell": "КИП!B55",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "T55",
+    "description_source": "Температура на выходе из печи П3 (общ. Выход на FIRC2470)",
+    "source_cell": "КИП!B56",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "F56",
+    "description_source": "Расход в трубопроводе фракции до 350 с установки",
+    "source_cell": "КИП!B57",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "F57",
+    "description_source": "Расход в трубопроводе фракции до 350 с установки",
+    "source_cell": "КИП!B58",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "T58",
+    "description_source": "Температура фракции до 350 С от Т-37",
+    "source_cell": "КИП!B59",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "F59",
+    "description_source": "Расход фр.420-500°С с установки. Объемный расход",
+    "source_cell": "КИП!B60",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "F60",
+    "description_source": "Расход в трубопроводе фракции 350-560 с установки",
+    "source_cell": "КИП!B61",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "T61",
+    "description_source": "Температура НЦО в К-10",
+    "source_cell": "КИП!B62",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "F62",
+    "description_source": "Расход НЦО К-10",
+    "source_cell": "КИП!B63",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "F63",
+    "description_source": "Расход гудрона на битумную установку",
+    "source_cell": "КИП!B64",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "F64",
+    "description_source": "Расход 3-го ЦО в К2",
+    "source_cell": "КИП!B65",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "F65",
+    "description_source": "Производительность К-2 по отбензиненной нефти",
+    "source_cell": "КИП!B66",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "T66",
+    "description_source": "Переток в К-9",
+    "source_cell": "КИП!B67",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "P67",
+    "description_source": "Давление верха К2.",
+    "source_cell": "КИП!B68",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "F68",
+    "description_source": "Расход гудрона с установки",
+    "source_cell": "КИП!B69",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "F69",
+    "description_source": "Расход гудрона с установки",
+    "source_cell": "КИП!B70",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "W70",
+    "description_source": "Массовый расход фр.290-350°С с установки",
+    "source_cell": "КИП!B71",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  },
+  {
+    "stage": "avt",
+    "tag": "T71",
+    "description_source": "Фр.290-350°С из К-2",
+    "source_cell": "КИП!B72",
+    "unit_confirmed": null,
+    "control_confirmed": false
+  }
+]

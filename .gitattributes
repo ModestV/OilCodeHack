@@ -1,0 +1,9 @@
+# Keep documentation portable without changing unrelated project files.
+DataMap/** text eol=lf
+tools/** text eol=lf
+DataMap/**/*.png binary
+README.md text eol=lf
+.gitignore text eol=lf
+.gitattributes text eol=lf
+# Preserve release bytes so SHA-256 checks also pass on Windows checkouts.
+tools/obsidian/folder-notes/* -text !eol

@@ -1,0 +1,14 @@
+{
+  "plugin": "folder-notes",
+  "version": "1.8.26",
+  "release": "https://github.com/LostPaul/obsidian-folder-notes/releases/tag/1.8.26",
+  "asset_base_url": "https://github.com/LostPaul/obsidian-folder-notes/releases/download/1.8.26/",
+  "license_url": "https://raw.githubusercontent.com/LostPaul/obsidian-folder-notes/1.8.26/LICENSE",
+  "retrieved": "2026-09-10",
+  "sha256": {
+    "main.js": "83d7b91819abac39626349c1b20aef2503a7cb4339334d52115650aec011a216",
+    "manifest.json": "d68704cb787fb687a3d6261a77e93d39c9409ef1dab4e37bfc67a6f96b493536",
+    "styles.css": "c736732880c7737a30f713d5496f36612a4f64cce96bab0315397ce14b975f6b",
+    "LICENSE": "7f8f48e4266aa8fd3033dfaa4bb7f6e83a60c6e099f82d4959b81de90e67cd8f"
+  }
+}
