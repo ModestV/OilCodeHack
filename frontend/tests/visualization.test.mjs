@@ -3,6 +3,9 @@ import assert from "node:assert/strict";
 import {
   sulfurComposition,
   chartTimeLabel,
+  composeChartOption,
+  formatChartTimestamp,
+  formatNumber,
   sourceEpoch,
 } from "../src/visualization.ts";
 import { buildOperatorAssessment } from "../src/operatorStatus.ts";
@@ -55,6 +58,107 @@ test("time display preserves source time and includes dates on long ranges", () 
   assert.equal(chartTimeLabel(t, 3600000, true), "01.07\n12:03");
   assert.equal(chartTimeLabel(t, 86400000), "01.07\n12:03");
   assert.equal(chartTimeLabel(t, 400 * 86400000), "01.07.2025");
+});
+
+test("formatNumber keeps UI values compact and detailed values precise", () => {
+  assert.equal(formatNumber(null), "—");
+  assert.equal(formatNumber(undefined), "—");
+  assert.equal(formatNumber(10), "10");
+  assert.equal(formatNumber(10.04), "10");
+  assert.equal(formatNumber(10.05), "10,1");
+  assert.equal(formatNumber(10.555, 2), "10,56");
+});
+
+test("formatChartTimestamp renders full tooltip timestamps", () => {
+  const t = sourceEpoch("2025-07-01T12:03:00");
+  assert.equal(formatChartTimestamp(t), "01.07.2025, 12:03");
+});
+
+test("chart composition formats axis tooltips without binary floats", () => {
+  const t = sourceEpoch("2025-07-01T12:03:00");
+  const option = composeChartOption({
+    tooltip: { trigger: "axis" },
+    series: [{ name: "ПАК", data: [[t, 0.30000000000000004]] }],
+  });
+  assert.equal(
+    option.tooltip.formatter([
+      {
+        axisValue: t,
+        seriesName: "ПАК",
+        data: [t, 0.30000000000000004],
+      },
+    ]),
+    "01.07.2025, 12:03\nПАК: 0,3",
+  );
+});
+
+test("sulfur overview composition removes slider and zero min/max service series", () => {
+  const t = sourceEpoch("2025-07-01T12:03:00");
+  const option = composeChartOption({
+    tooltip: { trigger: "axis" },
+    legend: { top: 0, data: ["ЛИМС · пробы", "ПАК · медиана"] },
+    dataZoom: [{ type: "inside" }, { type: "slider" }],
+    xAxis: { type: "time" },
+    yAxis: { type: "value", name: "мг/кг" },
+    series: [
+      { name: "ЛИМС · пробы", data: [[t, 10.234]] },
+      { name: "ПАК · медиана", data: [[t, 10.234]] },
+      { name: "ПАК · максимум", data: [[t, 10.234]] },
+      { name: "ПАК · минимум", data: [[t, 10.234]] },
+    ],
+  });
+  assert.equal(option.title, undefined);
+  assert.deepEqual(option.legend.data, ["ЛИМС", "ПАК"]);
+  assert.deepEqual(option.dataZoom, [{ type: "inside" }]);
+  assert.deepEqual(
+    option.series.map((item) => item.name),
+    ["ЛИМС", "ПАК"],
+  );
+  assert.equal(option.yAxis.name, "");
+});
+
+test("sulfur overview keeps aggregated min/max out of tooltip and legend", () => {
+  const t = sourceEpoch("2025-07-01T12:03:00");
+  const option = composeChartOption({
+    tooltip: { trigger: "axis" },
+    legend: { top: 0, data: ["ЛИМС · пробы", "ПАК · медиана"] },
+    dataZoom: [{ type: "inside" }, { type: "slider" }],
+    xAxis: { type: "time" },
+    yAxis: { type: "value", name: "мг/кг" },
+    series: [
+      { name: "ЛИМС · пробы", data: [[t, 9]] },
+      { name: "ПАК · медиана", data: [[t, 9.5]] },
+      { name: "ПАК · максимум", data: [[t, 11]] },
+      { name: "ПАК · минимум", data: [[t, 8]] },
+    ],
+  });
+  assert.deepEqual(option.legend.data, ["ЛИМС", "ПАК"]);
+  assert.deepEqual(
+    option.series.map((item) => item.name),
+    ["ЛИМС", "ПАК", "ПАК · максимум", "ПАК · минимум"],
+  );
+  assert.equal(option.series[2].tooltip.show, false);
+  assert.equal(option.series[3].tooltip.show, false);
+  assert.equal(
+    option.tooltip.formatter([
+      { axisValue: t, seriesName: "ЛИМС", data: [t, 9] },
+      { axisValue: t, seriesName: "ПАК", data: [t, 9.5] },
+      { axisValue: t, seriesName: "ПАК · максимум", data: [t, 11] },
+    ]),
+    "01.07.2025, 12:03\nЛИМС: 9 мг/кг\nПАК: 9,5 мг/кг",
+  );
+});
+
+test("sulfur overview legend only names sources present in the interval", () => {
+  const t = sourceEpoch("2025-07-01T12:03:00");
+  const option = composeChartOption({
+    tooltip: { trigger: "axis" },
+    legend: { data: ["ЛИМС · пробы"] },
+    dataZoom: [{ type: "inside" }, { type: "slider" }],
+    series: [{ name: "ЛИМС · пробы", data: [[t, 9]] }],
+  });
+  assert.deepEqual(option.legend.data, ["ЛИМС"]);
+  assert.deepEqual(option.dataZoom, [{ type: "inside" }]);
 });
 
 const periodAssessment = (sulfur) =>

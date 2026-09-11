@@ -4,15 +4,9 @@ import type { OperatorAssessment, AttentionTarget } from "../operatorStatus";
 import type { Metric, Snapshot, Stat, Summary } from "../types";
 import { HelpTooltip } from "./HelpTooltip";
 import { SignalSelector } from "./SignalSelector";
+import { formatNumber } from "../visualization";
 
 export type SidePanelMode = "metrics" | "filters" | "warnings" | "closed";
-
-const number = (value: number | null | undefined, digits = 2) =>
-  value == null
-    ? "—"
-    : new Intl.NumberFormat("ru-RU", { maximumFractionDigits: digits }).format(
-        value,
-      );
 
 const freshness = (value: string | undefined) =>
   value === "fresh"
@@ -126,13 +120,9 @@ export function OperatorPanel({
         <header>
           <div>
             <h2>{titles[open]}</h2>
-            <p>
-              {open === "metrics"
-                ? "Выбранные значения и их достоверность"
-                : open === "filters"
-                  ? "Настройки применяются только в разделе анализа"
-                  : `${assessment.findings.length} событий в выбранном контексте`}
-            </p>
+            {open === "warnings" && (
+              <p>{assessment.findings.length} событий по важности</p>
+            )}
           </div>
           <button
             className="icon-btn panel-close"
@@ -163,24 +153,23 @@ export function OperatorPanel({
                         {metric?.unit || "единица не подтверждена"}
                       </small>
                     </div>
-                    <strong>{number(displayed)}</strong>
-                    <span>
-                      {mode === "period"
-                        ? `n=${stat?.count ?? 0}`
-                        : `${freshness(value?.freshness)} · ${number(value?.age_minutes, 0)} мин`}
-                    </span>
+                    <strong>{formatNumber(displayed)}</strong>
                     <details>
                       <summary>Подробнее</summary>
                       {mode === "period" ? (
                         <p>
-                          Мин. {number(stat?.min)} · макс. {number(stat?.max)} ·
-                          Δ медианы {number(stat?.median_change)}
+                          {stat?.count ?? 0} измерений · мин.{" "}
+                          {formatNumber(stat?.min, 2)} · макс.{" "}
+                          {formatNumber(stat?.max, 2)} · изменение медианы{" "}
+                          {formatNumber(stat?.median_change, 2)}
                         </p>
                       ) : (
                         <p>
                           {value?.timestamp?.replace("T", " ") ||
                             "Нет измерения"}{" "}
-                          · Δ {number(value?.delta)}
+                          · {freshness(value?.freshness)} ·{" "}
+                          {formatNumber(value?.age_minutes, 0)} мин · изменение{" "}
+                          {formatNumber(value?.delta, 2)}
                         </p>
                       )}
                       {!!(mode === "period"
@@ -244,10 +233,7 @@ export function OperatorPanel({
                   checked={exclude}
                   onChange={(event) => setExclude(event.target.checked)}
                 />
-                <span>
-                  Исключить подозрительные измерения
-                  <small>Только из графиков и статистики анализа</small>
-                </span>
+                <span>Исключить подозрительные измерения</span>
                 <HelpTooltip label="Подозрительные измерения">
                   Диагностическое правило пометило измерение для проверки. Это
                   не доказывает неисправность прибора.
@@ -256,7 +242,7 @@ export function OperatorPanel({
             )}
             {mode === "period" && (
               <label className="stacked-field">
-                <span>Основная статистика</span>
+                <span>Показывать за период</span>
                 <select
                   value={statistic}
                   onChange={(event) => setStatistic(event.target.value)}
@@ -272,7 +258,6 @@ export function OperatorPanel({
               </label>
             )}
             <div className="panel-signal-picker">
-              <span>Сигналы для анализа</span>
               <SignalSelector
                 metrics={metrics}
                 selected={selected}

@@ -46,6 +46,7 @@ export function DataMenu({
         type="button"
         className="data-menu-trigger"
         aria-label="Данные"
+        title="Данные"
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
       >

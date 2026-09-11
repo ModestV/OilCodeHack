@@ -166,7 +166,7 @@ export function SignalSelector({
         }}
       >
         <SlidersHorizontal aria-hidden="true" />
-        <span>Показатели · {selected.length}</span>
+        <span>Выбрать сигналы · {selected.length}</span>
       </button>
       {open && (
         <div

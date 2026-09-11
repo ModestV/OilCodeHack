@@ -213,12 +213,12 @@ export function buildOperatorAssessment({
   const level = findings[0]?.level ?? "ok";
   const copy: Record<OperatorLevel, [string, string, string]> = {
     danger: [
-      "Требуется внимание оператора",
+      findings[0]?.title ?? "Зафиксировано отклонение",
       findings[0]?.description ?? "Зафиксировано отклонение.",
       "ЛИМС / ПАК",
     ],
     warning: [
-      "Данные требуют проверки",
+      findings[0]?.title ?? "Данные требуют проверки",
       findings[0]?.description ?? "Достоверность данных требует проверки.",
       "Контроль достоверности",
     ],
@@ -228,8 +228,8 @@ export function buildOperatorAssessment({
       "Доступность измерений",
     ],
     ok: [
-      "Известных превышений не обнаружено",
-      "Доступные достоверные измерения серы не превышают 10 мг/кг.",
+      "Превышений по доступным данным нет",
+      "Достоверные измерения серы не превышают 10 мг/кг.",
       "ЛИМС / ПАК",
     ],
   };

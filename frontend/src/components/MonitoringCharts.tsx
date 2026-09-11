@@ -1,13 +1,6 @@
 import { Chart } from "./Chart";
 import type { Metric, Quality, Snapshot, Stat, Summary } from "../types";
-import { sulfurComposition } from "../visualization";
-
-const number = (value: number | null | undefined, digits = 2) =>
-  value == null
-    ? "—"
-    : new Intl.NumberFormat("ru-RU", { maximumFractionDigits: digits }).format(
-        value,
-      );
+import { formatNumber, sulfurComposition } from "../visualization";
 
 export function SulfurCoverage({ summary }: { summary: Summary }) {
   const parts = sulfurComposition(summary);
@@ -21,7 +14,7 @@ export function SulfurCoverage({ summary }: { summary: Summary }) {
           grid: { left: 0, right: 0, top: 8, bottom: 25 },
           tooltip: {
             trigger: "item",
-            valueFormatter: (v: number) => `${number(v, 1)}%`,
+            valueFormatter: (v: number) => `${formatNumber(v)}%`,
           },
           xAxis: {
             type: "value",
@@ -49,8 +42,8 @@ export function SulfurCoverage({ summary }: { summary: Summary }) {
               {p.label}
             </dt>
             <dd>
-              {number(p.minutes / 60, 1)} ч{" "}
-              <small>{number(p.percent, 1)}%</small>
+              {formatNumber(p.minutes / 60)} ч{" "}
+              <small>{formatNumber(p.percent)}%</small>
             </dd>
           </div>
         ))}
@@ -73,7 +66,7 @@ export function SulfurAtMoment({ snapshot }: { snapshot: Snapshot }) {
         grid: { left: 55, right: 65, top: 25, bottom: 30 },
         tooltip: {
           trigger: "item",
-          valueFormatter: (v: number) => `${number(v)} мг/кг`,
+          valueFormatter: (v: number) => `${formatNumber(v)} мг/кг`,
         },
         xAxis: {
           type: "value",
@@ -108,7 +101,7 @@ export function SulfurAtMoment({ snapshot }: { snapshot: Snapshot }) {
             label: {
               show: true,
               position: "right",
-              formatter: (p: { value: number | null }) => number(p.value),
+              formatter: (p: { value: number | null }) => formatNumber(p.value),
             },
             markLine: {
               symbol: "none",
@@ -145,17 +138,17 @@ export function MedianComparison({
       <div className="comparison-numbers">
         <span>
           <i className="previous-dot" />
-          Предыдущий <b>{number(previous)}</b>
+          Предыдущий <b>{formatNumber(previous, 2)}</b>
         </span>
         <span>
           <i className="current-dot" />
-          Выбранный <b>{number(stat.median)}</b>
+          Выбранный <b>{formatNumber(stat.median, 2)}</b>
         </span>
         <span>
           Изменение{" "}
           <b>
             {stat.median_change != null && stat.median_change > 0 ? "+" : ""}
-            {number(stat.median_change)} {unit || ""}
+            {formatNumber(stat.median_change, 2)} {unit || ""}
           </b>
         </span>
       </div>
@@ -246,7 +239,7 @@ export function QualityRanking({
             trigger: "item",
             formatter: (p: { dataIndex: number }) => {
               const r = rows[p.dataIndex];
-              return `${r.metric_id}: ${number(r.percentage, 1)}% (${number(r.suspect_count, 0)} / ${number(r.count, 0)})`;
+              return `${r.metric_id}: ${formatNumber(r.percentage)}% (${formatNumber(r.suspect_count, 0)} / ${formatNumber(r.count, 0)})`;
             },
           },
           xAxis: {
@@ -272,7 +265,8 @@ export function QualityRanking({
               label: {
                 show: true,
                 position: "right",
-                formatter: (p: { value: number }) => `${number(p.value, 1)}%`,
+                formatter: (p: { value: number }) =>
+                  `${formatNumber(p.value)}%`,
               },
             },
           ],
@@ -286,7 +280,7 @@ export function QualityRanking({
               <b>{r.metric_id}</b>
               <span>{map.get(r.metric_id)?.label || r.metric_id}</span>
               <small>
-                {number(r.suspect_count, 0)} из {number(r.count, 0)}
+                {formatNumber(r.suspect_count, 0)} из {formatNumber(r.count, 0)}
               </small>
             </li>
           ))}

@@ -68,8 +68,8 @@ export function TimeControls({
             <>
               <input
                 type="datetime-local"
-                step="1"
-                value={from}
+                step="60"
+                value={from.slice(0, 16)}
                 onChange={(e) => setRange(e.target.value, to)}
                 aria-label="Начало периода"
               />
@@ -78,8 +78,8 @@ export function TimeControls({
           )}
           <input
             type="datetime-local"
-            step="1"
-            value={to}
+            step="60"
+            value={to.slice(0, 16)}
             onChange={(e) => setRange(from, e.target.value)}
             aria-label={
               mode === "moment"
@@ -145,26 +145,30 @@ export function TimeControls({
           <div>
             {[
               [
+                "Стабильный период",
                 "01.07.2025",
                 "2025-07-01T00:00",
                 "2025-07-02T00:00",
                 "2025-07-01T12:00",
               ],
               [
+                "Превышение серы",
                 "16–18.03.2025",
                 "2025-03-16T00:00",
                 "2025-03-19T00:00",
                 "2025-03-17T12:00",
               ],
               [
+                "Зависание ПАК",
                 "19.06.2026",
                 "2026-06-19T00:00",
                 "2026-06-20T00:00",
                 "2026-06-19T12:00",
               ],
-            ].map(([label, f, t, m]) => (
+            ].map(([label, date, f, t, m]) => (
               <button
                 key={label}
+                aria-label={`${label}, ${date}`}
                 onClick={(event) => {
                   setRange(f, mode === "moment" ? m : t);
                   event.currentTarget
@@ -172,7 +176,8 @@ export function TimeControls({
                     ?.removeAttribute("open");
                 }}
               >
-                {label}
+                <span>{label}</span>
+                <small>{date}</small>
               </button>
             ))}
           </div>

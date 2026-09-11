@@ -37,8 +37,15 @@ import type {
   Summary,
 } from "../types";
 const epoch = sourceEpoch;
-const stamp = (s: string | null | undefined) =>
-  s ? s.replace("T", " ").slice(0, 19) : "Нет измерения";
+const stamp = (value: string | null | undefined) => {
+  if (!value) return "Нет измерения";
+  const match = value.match(
+    /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/,
+  );
+  return match
+    ? `${match[3]}.${match[2]}.${match[1]}, ${match[4]}:${match[5]}`
+    : value.replace("T", " ").slice(0, 16);
+};
 const freshness = (s: string | undefined) =>
   s === "fresh" ? "Актуально" : s === "stale" ? "Устарело" : "Нет данных";
 const format = (v: number | null | undefined, d = 2) =>
@@ -90,6 +97,8 @@ export function Overview({
     metrics,
     pinned,
   });
+  const primaryFinding = assessment.findings[0];
+  const secondaryFindings = assessment.findings.slice(1, 3);
   const sulfurSeries =
     series?.series.filter((s) => s.metric_id.includes("Sulfur")) || [];
   const times = sulfurSeries.flatMap((s) =>
@@ -164,13 +173,10 @@ export function Overview({
   const history = (
     <section className="panel chart-panel">
       <header>
-        <div>
-          <h2>Содержание серы</h2>
-          <p>ЛИМС · контрольные пробы / ПАК · архив измерений</p>
-        </div>
+        <h2>Содержание серы, мг/кг</h2>
       </header>
       {sulfurSeries.some((s) => s.points.length) ? (
-        <Chart option={option} onSelectTime={onSelectTime} />
+        <Chart option={option} height={230} onSelectTime={onSelectTime} />
       ) : (
         <Empty text="Нет измерений серы в выбранном интервале" />
       )}
@@ -179,7 +185,7 @@ export function Overview({
   return (
     <>
       <section
-        className={`operator-summary ${assessment.level} ${assessment.findings.length ? "" : "solo"}`}
+        className={`operator-summary ${assessment.level} ${secondaryFindings.length ? "" : "solo"}`}
         aria-labelledby="operator-status-title"
       >
         <div className="operator-status">
@@ -193,29 +199,41 @@ export function Overview({
             )}
           </span>
           <div>
-            <p className="operator-kicker">
-              {mode === "period"
-                ? "Итог выбранного периода"
-                : "Состояние на выбранный момент"}
-            </p>
             <h2 id="operator-status-title">{assessment.title}</h2>
             <p>{assessment.description}</p>
-            <small>
-              {assessment.source} ·{" "}
-              {mode === "period"
-                ? `${stamp(summary?.from)} — ${stamp(summary?.to)}`
-                : stamp(snapshot?.at)}
-            </small>
+            <div className="operator-context">
+              <small>
+                {assessment.source} ·{" "}
+                {mode === "period"
+                  ? `${stamp(summary?.from)} — ${stamp(summary?.to)}`
+                  : stamp(snapshot?.at)}
+              </small>
+              <HelpTooltip label="Как интерпретировать вывод">
+                Вывод относится к доступным историческим данным после
+                гидроочистки. Он помогает оператору найти отклонение, но не
+                является заключением о соответствии товарного топлива.
+              </HelpTooltip>
+            </div>
+            {primaryFinding && (
+              <button
+                className="status-action"
+                onClick={() =>
+                  onNavigate?.(primaryFinding.target, primaryFinding.metricId)
+                }
+              >
+                {primaryFinding.action} <ArrowRight />
+              </button>
+            )}
           </div>
         </div>
-        {assessment.findings.length > 0 && (
+        {secondaryFindings.length > 0 && (
           <div className="attention-list">
             <div className="attention-heading">
-              <h3>Требует внимания</h3>
-              <span>{assessment.findings.length}</span>
+              <h3>Также проверить</h3>
+              <span>{secondaryFindings.length}</span>
             </div>
             <>
-              {assessment.findings.slice(0, 2).map((finding) => (
+              {secondaryFindings.map((finding) => (
                 <button
                   key={finding.code}
                   className={`attention-item ${finding.level}`}
@@ -266,16 +284,12 @@ export function Overview({
         </>
       ) : (
         <>
-          <section className="moment-trust panel">
-            <h2>Сера · состояние на момент</h2>
+          <section className="moment-trust panel chart-panel">
+            <h2>Содержание серы, мг/кг</h2>
             {snapshot && <SulfurAtMoment snapshot={snapshot} />}
             <div className="moment-sources">
               {["lims.ht.2.Mg.Sulfur", "pak.ht.Mg.Sulfur"].map((id) => {
-                const v = sv.get(id),
-                  reliable =
-                    v?.value != null &&
-                    v.freshness === "fresh" &&
-                    !v.flags.length;
+                const v = sv.get(id);
                 return (
                   <div key={id}>
                     <h3>
@@ -290,20 +304,11 @@ export function Overview({
                           : "ПАК — архив оперативного анализатора. Его значение оценивается вместе со свежестью и диагностическими флагами."}
                       </HelpTooltip>
                     </h3>
-                    <strong
-                      className={
-                        reliable ? (v.value! > 10 ? "warn" : "ok") : "muted"
-                      }
-                    >
-                      {reliable
-                        ? v.value! > 10
-                          ? "Выше порога 10 мг/кг"
-                          : "Не выше порога 10 мг/кг"
-                        : "Недостаточно достоверных данных"}
-                    </strong>
                     <p>
-                      {stamp(v?.timestamp)} · {freshness(v?.freshness)} ·{" "}
-                      {format(v?.age_minutes, 0)} мин
+                      {stamp(v?.timestamp)} · {freshness(v?.freshness)}
+                      {v?.age_minutes != null
+                        ? ` · ${format(v.age_minutes, 0)} мин`
+                        : ""}
                     </p>
                     <FlagLine flags={v?.flags} />
                   </div>
@@ -317,10 +322,6 @@ export function Overview({
           </details>
         </>
       )}
-      <p className="domain-note">
-        <Info /> Порог серы: 10 мг/кг. Продукт после гидроочистки, без
-        заключения о соответствии товарного топлива.
-      </p>
     </>
   );
 }
@@ -1114,12 +1115,7 @@ export function DataQuality({
     <>
       <section className="panel diagnostic-overview">
         <header>
-          <div>
-            <h2>Диагностика набора данных</h2>
-            <p>
-              Короткая сводка. Подробности и настройки открываются по запросу.
-            </p>
-          </div>
+          <h2>Диагностика набора данных</h2>
         </header>
         <div className="diagnostic-stats">
           <article>

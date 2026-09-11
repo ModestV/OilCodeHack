@@ -11,10 +11,12 @@ import {
   GridComponent,
   LegendComponent,
   MarkLineComponent,
+  TitleComponent,
   TooltipComponent,
 } from "echarts/components";
 import { CanvasRenderer } from "echarts/renderers";
 import type { EChartsCoreOption, ECharts } from "echarts/core";
+import { composeChartOption } from "../visualization";
 
 use([
   LineChart,
@@ -23,6 +25,7 @@ use([
   ScatterChart,
   GridComponent,
   LegendComponent,
+  TitleComponent,
   TooltipComponent,
   DataZoomComponent,
   MarkLineComponent,
@@ -38,13 +41,7 @@ interface ChartProps {
   label?: string;
 }
 
-const configured = (value: EChartsCoreOption) => ({
-  animation: false,
-  textStyle: { fontFamily: "Inter, Arial, sans-serif", fontSize: 12 },
-  color: ["#0079c2", "#168160", "#b77b19"],
-  ...value,
-  tooltip: { ...(value.tooltip as object), renderMode: "richText" },
-});
+const configured = (value: EChartsCoreOption) => composeChartOption(value);
 
 export function Chart({
   option,
