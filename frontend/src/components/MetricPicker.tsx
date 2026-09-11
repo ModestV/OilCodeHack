@@ -1,6 +1,7 @@
 import { useDeferredValue, useEffect, useRef, useState } from "react";
 import { ArrowDown, ArrowUp, Plus, Search, X } from "lucide-react";
 import type { Metric } from "../types";
+const MAX_PINNED = 6;
 export function MetricPicker({
   open,
   onClose,
@@ -67,9 +68,12 @@ export function MetricPicker({
         }}
       >
         <header>
-          <h2>
-            Показатели <small>{pinned.length}</small>
-          </h2>
+          <div>
+            <h2>Ключевые показатели</h2>
+            <p>
+              Выбрано {pinned.length} из {MAX_PINNED}
+            </p>
+          </div>
           <button
             className="icon-btn"
             onClick={onClose}
@@ -128,8 +132,13 @@ export function MetricPicker({
                   </>
                 ) : (
                   <button
+                    disabled={pinned.length >= MAX_PINNED}
                     aria-label={`Добавить: ${m.label}`}
-                    title="Добавить"
+                    title={
+                      pinned.length >= MAX_PINNED
+                        ? "Сначала уберите один из выбранных показателей"
+                        : "Добавить"
+                    }
                     onClick={() => setPinned([...pinned, m.id])}
                   >
                     <Plus />

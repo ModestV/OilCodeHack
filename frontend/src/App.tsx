@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  Bell,
   BarChart3,
   Beaker,
   Database,
+  Filter,
   FlaskConical,
+  Gauge,
   Lightbulb,
   Menu,
-  SlidersHorizontal,
   Upload,
   X,
 } from "lucide-react";
@@ -21,28 +23,31 @@ import type {
   Snapshot,
   Summary,
 } from "./types";
-import { MetricPicker } from "./components/MetricPicker";
+import { DataMenu } from "./components/DataMenu";
+import { OperatorPanel, type SidePanelMode } from "./components/OperatorPanel";
 import { TimeControls, offset, type Mode } from "./components/TimeControls";
 import { UploadModal } from "./components/UploadModal";
 import { Chart } from "./components/Chart";
 import {
   DataQuality,
   ExportButton,
-  Formulas,
   Kip,
   Overview,
   Statistics,
   Trends,
 } from "./views/MonitoringViews";
+import {
+  buildOperatorAssessment,
+  type AttentionTarget,
+} from "./operatorStatus";
 
-type Tab = "overview" | "trends" | "kip" | "formulas" | "quality";
+type Tab = "overview" | "trends" | "kip" | "quality";
 type Page = "monitoring" | "recommendations" | "sandbox";
 const tabs: [Tab, string][] = [
-  ["overview", "Обзор"],
-  ["trends", "Тренды и статистика"],
-  ["kip", "Технология и КИП"],
-  ["formulas", "Расчёты ВАК"],
-  ["quality", "Качество данных"],
+  ["overview", "Сводка"],
+  ["trends", "Анализ"],
+  ["kip", "Процесс и КИП"],
+  ["quality", "Диагностика"],
 ];
 const MAIN = [
   "Mg.Sulfur",
@@ -61,7 +66,7 @@ function preferences() {
       pinned:
         Array.isArray(p.pinned) &&
         p.pinned.every((x: unknown) => typeof x === "string")
-          ? (p.pinned as string[])
+          ? (p.pinned as string[]).slice(0, 6)
           : MAIN,
       statistic: ["median", "mean", "min", "max", "p05", "p95", "std"].includes(
         p.statistic,
@@ -73,11 +78,6 @@ function preferences() {
     return { pinned: MAIN, statistic: "median" };
   }
 }
-const statusName = {
-  ready: "Готов",
-  importing: "Обрабатывается",
-  error: "Ошибка",
-};
 export function App() {
   const [datasets, setDatasets] = useState<Manifest[]>([]),
     [datasetId, setDatasetId] = useState(""),
@@ -101,7 +101,7 @@ export function App() {
     [cardStatistic, setCardStatistic] = useState(() => preferences().statistic);
   const [exclude, setExclude] = useState(false),
     [upload, setUpload] = useState(false),
-    [picker, setPicker] = useState(false),
+    [sidePanel, setSidePanel] = useState<SidePanelMode>("closed"),
     [mobile, setMobile] = useState(false),
     [error, setError] = useState(""),
     [loading, setLoading] = useState(true),
@@ -240,7 +240,10 @@ export function App() {
     async function load() {
       try {
         const tasks: Promise<void>[] = [];
-        if (mode === "moment" && (tab === "overview" || tab === "kip"))
+        if (
+          mode === "moment" &&
+          (tab === "overview" || tab === "kip" || tab === "quality")
+        )
           tasks.push(
             api.snapshot(datasetId, to, c.signal).then((v) => {
               if (!c.signal.aborted) setSnapshot(v);
@@ -248,9 +251,17 @@ export function App() {
           );
         if (mode === "period" && ["overview", "trends", "kip"].includes(tab))
           tasks.push(
-            api.summary(datasetId, from, to, c.signal, exclude).then((v) => {
-              if (!c.signal.aborted) setSummary(v);
-            }),
+            api
+              .summary(
+                datasetId,
+                from,
+                to,
+                c.signal,
+                tab === "overview" ? false : exclude,
+              )
+              .then((v) => {
+                if (!c.signal.aborted) setSummary(v);
+              }),
           );
         if (tab === "overview" || tab === "trends") {
           const ids = (tab === "overview" ? SULFUR : selected).filter((id) =>
@@ -264,7 +275,7 @@ export function App() {
                 mode === "moment" ? offset(to, -1440) : from,
                 mode === "moment" ? offset(to, 1 / 60) : to,
                 c.signal,
-                exclude,
+                tab === "overview" ? false : exclude,
               )
               .then((v) => {
                 if (!c.signal.aborted) setSeries(v);
@@ -277,7 +288,7 @@ export function App() {
               if (!c.signal.aborted) setDistillation(v);
             }),
           );
-        if (tab === "formulas" && mode === "moment")
+        if (tab === "quality" && mode === "moment")
           tasks.push(
             api.formulas(datasetId, to, c.signal).then((v) => {
               if (!c.signal.aborted) setFormulas(v.formulas);
@@ -335,7 +346,7 @@ export function App() {
   );
   const setMode = (m: Mode) => {
     setModeState(m);
-    if (m === "moment" && tab === "trends") setTab("overview");
+    setStatsView(false);
   };
   const openMoment = useCallback((time: string) => {
     const value = /^\d{4}-/.test(time)
@@ -352,44 +363,41 @@ export function App() {
   function navigate(p: Page) {
     setPage(p);
     setMobile(false);
+    setSidePanel("closed");
   }
+  const assessment = buildOperatorAssessment({
+    mode,
+    snapshot,
+    summary,
+    metrics,
+    pinned,
+  });
+  const activeFilterCount =
+    Number(exclude) +
+    Number(cardStatistic !== "median") +
+    Number(
+      selected.join("|") !==
+        SULFUR.filter((id) => metrics.some((metric) => metric.id === id)).join(
+          "|",
+        ),
+    );
+  const navigateFromFinding = (target: AttentionTarget, metricId?: string) => {
+    setSidePanel("closed");
+    if (target === "analysis") {
+      if (metricId) setSelected([metricId]);
+      setStatsView(false);
+      setTab("trends");
+    } else if (target === "process") {
+      setTab("kip");
+    } else {
+      setTab("quality");
+    }
+  };
   const view = () => {
     if (!manifest) return null;
     if (tab === "overview")
       return (
         <>
-          <div className="overview-actions">
-            {mode === "period" && (
-              <label>
-                Карточки:{" "}
-                <select
-                  aria-label="Статистика карточек"
-                  value={cardStatistic}
-                  onChange={(e) => setCardStatistic(e.target.value)}
-                >
-                  {[
-                    ["median", "Медиана"],
-                    ["mean", "Среднее"],
-                    ["min", "Минимум"],
-                    ["max", "Максимум"],
-                    ["p05", "P05"],
-                    ["p95", "P95"],
-                    ["std", "Стандартное отклонение"],
-                  ].map(([value, label]) => (
-                    <option key={value} value={value}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            )}
-            <button
-              className="secondary metric-settings"
-              onClick={() => setPicker(true)}
-            >
-              <SlidersHorizontal /> Настроить показатели
-            </button>
-          </div>
           <Overview
             {...{
               mode,
@@ -399,9 +407,39 @@ export function App() {
               summary,
               series,
               pinned,
-              cardStatistic,
             }}
             onSelectTime={openMoment}
+            toolbar={
+              <div className="overview-tools" aria-label="Инструменты сводки">
+                <button
+                  className="secondary"
+                  onClick={() => setSidePanel("metrics")}
+                >
+                  <Gauge /> Показатели
+                </button>
+                <button
+                  className="secondary"
+                  onClick={() => setSidePanel("filters")}
+                >
+                  <Filter /> Фильтры
+                  {activeFilterCount > 0 && (
+                    <span className="control-badge">{activeFilterCount}</span>
+                  )}
+                </button>
+                {assessment.findings.length > 2 && (
+                  <button
+                    className="secondary"
+                    onClick={() => setSidePanel("warnings")}
+                  >
+                    <Bell /> Все предупреждения
+                    <span className="control-badge">
+                      {assessment.findings.length}
+                    </span>
+                  </button>
+                )}
+              </div>
+            }
+            onNavigate={navigateFromFinding}
           />
           {mode === "moment" && distillation && (
             <DistillationView data={distillation} />
@@ -419,10 +457,9 @@ export function App() {
         />
       ) : (
         <Trends
+          mode={mode}
           metrics={metrics}
           series={series}
-          selected={selected}
-          setSelected={setSelected}
           onSelectTime={openMoment}
         />
       );
@@ -430,6 +467,7 @@ export function App() {
       return (
         <Kip
           {...{ metrics, snapshot, mode, summary }}
+          selected={[...pinned, ...selected]}
           onTrend={(id) => {
             setSelected([id]);
             setStatsView(false);
@@ -437,20 +475,15 @@ export function App() {
           }}
         />
       );
-    if (tab === "formulas")
-      return mode === "moment" ? (
-        <Formulas formulas={formulas} />
-      ) : (
-        <section className="empty-state compact">
-          <FlaskConical />
-          <h2>Для расчёта ВАК нужен конкретный момент</h2>
-          <button className="primary" onClick={() => setMode("moment")}>
-            Открыть момент
-          </button>
-        </section>
-      );
     return (
-      <DataQuality quality={quality} datasetId={datasetId} metrics={metrics} />
+      <DataQuality
+        quality={quality}
+        datasetId={datasetId}
+        metrics={metrics}
+        formulas={formulas}
+        mode={mode}
+        onOpenMoment={() => setMode("moment")}
+      />
     );
   };
   return (
@@ -472,26 +505,29 @@ export function App() {
           </span>
           <b>Нефтекод</b>
         </div>
-        <nav>
+        <nav aria-label="Основные разделы">
           <button
             className={page === "monitoring" ? "active" : ""}
             onClick={() => navigate("monitoring")}
           >
-            <BarChart3 /> Мониторинг
+            <BarChart3 /> <span>Мониторинг</span>
           </button>
+        </nav>
+        <div className="nav-development">
+          <small>В разработке</small>
           <button
             className={page === "recommendations" ? "active" : ""}
             onClick={() => navigate("recommendations")}
           >
-            <Lightbulb /> Рекомендации
+            <Lightbulb /> <span>Рекомендации</span>
           </button>
           <button
             className={page === "sandbox" ? "active" : ""}
             onClick={() => navigate("sandbox")}
           >
-            <Beaker /> Песочница
+            <Beaker /> <span>Песочница</span>
           </button>
-        </nav>
+        </div>
         <div className="history">
           <Database />
           <span>Исторические данные</span>
@@ -516,10 +552,14 @@ export function App() {
             </h1>
             <p>Дизель после гидроочистки · Точка отбора 2</p>
           </div>
-          <button className="primary" onClick={() => setUpload(true)}>
-            <Upload />
-            <span>Загрузить данные</span>
-          </button>
+          {page === "monitoring" && datasets.length > 0 && (
+            <DataMenu
+              datasets={datasets}
+              datasetId={datasetId}
+              setDatasetId={setDatasetId}
+              onUpload={() => setUpload(true)}
+            />
+          )}
         </header>
         {error && (
           <div className="banner error" role="alert">
@@ -546,23 +586,6 @@ export function App() {
           </section>
         ) : (
           <>
-            {datasets.length > 0 && (
-              <div className="dataset-select">
-                <Database />
-                <label htmlFor="dataset">Набор данных</label>
-                <select
-                  id="dataset"
-                  value={datasetId}
-                  onChange={(e) => setDatasetId(e.target.value)}
-                >
-                  {datasets.map((d) => (
-                    <option key={d.id} value={d.id}>
-                      {d.name} · {statusName[d.status]}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
             {manifest?.status === "ready" && from && to && (
               <TimeControls
                 mode={mode}
@@ -577,61 +600,66 @@ export function App() {
             {manifest?.status === "ready" && (
               <>
                 <div className="tabs" role="tablist">
-                  {tabs
-                    .filter(([id]) => mode === "period" || id !== "trends")
-                    .map(([id, label]) => (
-                      <button
-                        role="tab"
-                        aria-selected={tab === id}
-                        key={id}
-                        className={tab === id ? "active" : ""}
-                        onClick={() => {
-                          setTab(id);
-                          setStatsView(false);
-                        }}
-                      >
-                        {label}
-                      </button>
-                    ))}
+                  {tabs.map(([id, label]) => (
+                    <button
+                      role="tab"
+                      aria-selected={tab === id}
+                      key={id}
+                      className={tab === id ? "active" : ""}
+                      onClick={() => {
+                        setTab(id);
+                        setStatsView(false);
+                      }}
+                    >
+                      {label}
+                    </button>
+                  ))}
                 </div>
-                {mode === "period" &&
-                  ["overview", "trends", "kip"].includes(tab) && (
-                    <div className="analysis-controls">
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={exclude}
-                          onChange={(e) => setExclude(e.target.checked)}
-                        />{" "}
-                        Исключить подозрительные измерения
-                      </label>
-                      {tab === "trends" && (
-                        <div className="view-switch">
-                          <button
-                            className={!statsView ? "active" : ""}
-                            onClick={() => setStatsView(false)}
-                          >
-                            Графики
-                          </button>
+                {(tab === "trends" || (mode === "period" && tab === "kip")) && (
+                  <div className="analysis-controls">
+                    {tab === "trends" && (
+                      <button
+                        className="secondary"
+                        onClick={() => setSidePanel("filters")}
+                      >
+                        <Filter /> Фильтры
+                        {activeFilterCount > 0 && (
+                          <span className="control-badge">
+                            {activeFilterCount}
+                          </span>
+                        )}
+                      </button>
+                    )}
+                    {tab === "kip" && <span />}
+                    {tab === "trends" && (
+                      <div className="view-switch">
+                        <button
+                          className={!statsView ? "active" : ""}
+                          onClick={() => setStatsView(false)}
+                        >
+                          Графики
+                        </button>
+                        {mode === "period" && (
                           <button
                             className={statsView ? "active" : ""}
                             onClick={() => setStatsView(true)}
                           >
                             Статистика
                           </button>
-                          {selected.length > 0 && (
-                            <ExportButton
-                              id={datasetId}
-                              ids={selected}
-                              from={from}
-                              to={to}
-                              exclude={exclude}
-                            />
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  )}
+                        )}
+                        {selected.length > 0 && (
+                          <ExportButton
+                            id={datasetId}
+                            ids={selected}
+                            from={from}
+                            to={to}
+                            exclude={exclude}
+                          />
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
               </>
             )}
             {loading ||
@@ -672,13 +700,26 @@ export function App() {
           setPage("monitoring");
         }}
       />
-      <MetricPicker
-        open={picker}
-        onClose={() => setPicker(false)}
-        metrics={metrics}
-        pinned={pinned}
-        setPinned={setPinned}
-      />
+      {sidePanel !== "closed" && (
+        <OperatorPanel
+          open={sidePanel}
+          onClose={() => setSidePanel("closed")}
+          metrics={metrics}
+          pinned={pinned}
+          setPinned={setPinned}
+          mode={mode}
+          snapshot={snapshot}
+          summary={summary}
+          statistic={cardStatistic}
+          setStatistic={setCardStatistic}
+          exclude={exclude}
+          setExclude={setExclude}
+          selected={selected}
+          setSelected={setSelected}
+          assessment={assessment}
+          onNavigate={navigateFromFinding}
+        />
+      )}
     </div>
   );
 }

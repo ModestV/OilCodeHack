@@ -1,4 +1,10 @@
-import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  CalendarDays,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import { HelpTooltip } from "./HelpTooltip";
 export type Mode = "period" | "moment";
 export const fmt = (d: Date) => d.toISOString().slice(0, 19);
 export const offset = (s: string, minutes: number) =>
@@ -29,20 +35,32 @@ export function TimeControls({
 }) {
   const shift = (min: number) =>
     setRange(mode === "period" ? offset(from, min) : from, offset(to, min));
+  const spanHours = Math.round(
+    (Date.parse(to.replace(/Z$/, "") + "Z") -
+      Date.parse(from.replace(/Z$/, "") + "Z")) /
+      3600000,
+  );
+  const activePreset = presets.find(([, hours]) => hours === spanHours)?.[0];
   return (
     <>
       <section className="timebar" aria-label="Выбор времени">
-        <div className="segment">
-          {(["period", "moment"] as const).map((m) => (
-            <button
-              key={m}
-              aria-pressed={mode === m}
-              className={mode === m ? "active" : ""}
-              onClick={() => setMode(m)}
-            >
-              {m === "period" ? "Период" : "Момент"}
-            </button>
-          ))}
+        <div className="mode-control">
+          <div className="segment">
+            {(["period", "moment"] as const).map((m) => (
+              <button
+                key={m}
+                aria-pressed={mode === m}
+                className={mode === m ? "active" : ""}
+                onClick={() => setMode(m)}
+              >
+                {m === "period" ? "Период" : "Момент"}
+              </button>
+            ))}
+          </div>
+          <HelpTooltip label="Режим времени">
+            «Период» показывает агрегаты и динамику между двумя датами. «Момент»
+            показывает последние доступные измерения к выбранному времени.
+          </HelpTooltip>
         </div>
         <div className="date-control">
           <CalendarDays />
@@ -87,47 +105,78 @@ export function TimeControls({
           </button>
         </div>
         {mode === "period" && (
-          <div className="presets">
-            {presets.map(([l, h]) => (
-              <button key={l} onClick={() => setRange(offset(to, -h * 60), to)}>
-                {l}
+          <details className="compact-menu interval-menu">
+            <summary>
+              {activePreset || "Интервал"} <ChevronDown />
+            </summary>
+            <div>
+              {presets.map(([label, hours]) => (
+                <button
+                  key={label}
+                  onClick={(event) => {
+                    setRange(offset(to, -hours * 60), to);
+                    event.currentTarget
+                      .closest("details")
+                      ?.removeAttribute("open");
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+              <button
+                onClick={(event) => {
+                  setRange(...allRange);
+                  event.currentTarget
+                    .closest("details")
+                    ?.removeAttribute("open");
+                }}
+              >
+                Всё
               </button>
-            ))}
-            <button onClick={() => setRange(...allRange)}>Всё</button>
-          </div>
+            </div>
+          </details>
         )}
       </section>
       {scenarios && (
-        <div className="scenarios">
-          <span>Сценарии:</span>
-          {[
-            [
-              "01.07.2025",
-              "2025-07-01T00:00",
-              "2025-07-02T00:00",
-              "2025-07-01T12:00",
-            ],
-            [
-              "16–18.03.2025",
-              "2025-03-16T00:00",
-              "2025-03-19T00:00",
-              "2025-03-17T12:00",
-            ],
-            [
-              "19.06.2026",
-              "2026-06-19T00:00",
-              "2026-06-20T00:00",
-              "2026-06-19T12:00",
-            ],
-          ].map(([label, f, t, m]) => (
-            <button
-              key={label}
-              onClick={() => setRange(f, mode === "moment" ? m : t)}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+        <details className="compact-menu scenario-menu">
+          <summary>
+            Демо-сценарии <ChevronDown />
+          </summary>
+          <div>
+            {[
+              [
+                "01.07.2025",
+                "2025-07-01T00:00",
+                "2025-07-02T00:00",
+                "2025-07-01T12:00",
+              ],
+              [
+                "16–18.03.2025",
+                "2025-03-16T00:00",
+                "2025-03-19T00:00",
+                "2025-03-17T12:00",
+              ],
+              [
+                "19.06.2026",
+                "2026-06-19T00:00",
+                "2026-06-20T00:00",
+                "2026-06-19T12:00",
+              ],
+            ].map(([label, f, t, m]) => (
+              <button
+                key={label}
+                onClick={(event) => {
+                  setRange(f, mode === "moment" ? m : t);
+                  event.currentTarget
+                    .closest("details")
+                    ?.removeAttribute("open");
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </details>
       )}
     </>
   );

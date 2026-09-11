@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   AlertTriangle,
+  ArrowRight,
+  CircleHelp,
   ChevronDown,
   Database,
   Download,
@@ -12,16 +14,20 @@ import {
 import { Chart } from "../components/Chart";
 import {
   SulfurAtMoment,
-  SulfurCoverage,
   MedianComparison,
   QualityRanking,
 } from "../components/MonitoringCharts";
-import { SignalSelector } from "../components/SignalSelector";
+import { HelpTooltip } from "../components/HelpTooltip";
 import { chartTimeLabel, sourceEpoch } from "../visualization";
+import {
+  buildOperatorAssessment,
+  type AttentionTarget,
+} from "../operatorStatus";
 import { api, exportUrl } from "../api";
 import type {
   Distribution,
   Formula,
+  Issue,
   Manifest,
   Metric,
   Quality,
@@ -35,15 +41,6 @@ const stamp = (s: string | null | undefined) =>
   s ? s.replace("T", " ").slice(0, 19) : "Нет измерения";
 const freshness = (s: string | undefined) =>
   s === "fresh" ? "Актуально" : s === "stale" ? "Устарело" : "Нет данных";
-const statLabels: Record<string, string> = {
-  median: "Медиана",
-  mean: "Среднее",
-  min: "Минимум",
-  max: "Максимум",
-  p05: "P05",
-  p95: "P95",
-  std: "Стандартное отклонение",
-};
 const format = (v: number | null | undefined, d = 2) =>
   v == null
     ? "—"
@@ -70,7 +67,8 @@ export function Overview({
   series,
   pinned,
   onSelectTime,
-  cardStatistic = "median",
+  onNavigate,
+  toolbar,
 }: {
   mode: "period" | "moment";
   manifest: Manifest;
@@ -80,11 +78,18 @@ export function Overview({
   series: SeriesResponse | null;
   pinned: string[];
   onSelectTime?: (time: string) => void;
-  cardStatistic?: string;
+  onNavigate?: (target: AttentionTarget, metricId?: string) => void;
+  toolbar?: ReactNode;
 }) {
   const map = metricMap(metrics),
-    sm = new Map(summary?.metrics.map((s) => [s.metric_id, s])),
     sv = new Map(snapshot?.values.map((v) => [v.metric_id, v]));
+  const assessment = buildOperatorAssessment({
+    mode,
+    snapshot,
+    summary,
+    metrics,
+    pinned,
+  });
   const sulfurSeries =
     series?.series.filter((s) => s.metric_id.includes("Sulfur")) || [];
   const times = sulfurSeries.flatMap((s) =>
@@ -173,124 +178,92 @@ export function Overview({
   );
   return (
     <>
-      <div className="cards">
-        {pinned.map((id) => {
-          const m = map.get(id),
-            stat = sm.get(id),
-            val = sv.get(id);
-          const pakId =
-            id === "lims.ht.2.Mg.Sulfur"
-              ? "pak.ht.Mg.Sulfur"
-              : id === "lims.ht.2.D15"
-                ? "pak.ht.D15"
-                : "";
-          const pak = sv.get(pakId),
-            pakStat = sm.get(pakId);
-          const displayed =
-            mode === "period"
-              ? (stat?.[cardStatistic as keyof Stat] as number | null)
-              : val?.value;
-          return (
-            <article className="metric-card" key={id}>
-              <div>
-                <strong>{m?.label || id}</strong>
-                <small>
-                  {m?.source.toUpperCase() || "НЕТ В НАБОРЕ"} ·{" "}
-                  {m?.unit || "единица не подтверждена"}
-                </small>
-              </div>
-              <b>{format(displayed)}</b>
-              {mode === "period" ? (
-                <>
-                  <p>
-                    {statLabels[cardStatistic]} · n={stat?.count ?? 0}
-                  </p>
-                  <p>
-                    Мин. {format(stat?.min)} · макс. {format(stat?.max)}
-                  </p>
-                  <p
-                    title={`Предыдущий период: ${stamp(summary?.comparison_from)} — ${stamp(summary?.comparison_to)}`}
-                  >
-                    Δ медианы: {format(stat?.median_change)}
-                  </p>
-                  {!!stat?.suspect_count && (
-                    <p className="warn">Подозрительных: {stat.suspect_count}</p>
-                  )}
-                </>
-              ) : (
-                <>
-                  <p>
-                    {val?.timestamp
-                      ? stamp(val.timestamp)
-                      : "Нет измерения к моменту"}
-                  </p>
-                  <p className={val?.freshness === "fresh" ? "" : "warn"}>
-                    {freshness(val?.freshness)}
-                    {val?.age_minutes != null
-                      ? " · " + format(val.age_minutes, 0) + " мин"
-                      : ""}
-                  </p>
-                  <p>Δ измерения: {format(val?.delta)}</p>
-                  <FlagLine flags={val?.flags} />
-                </>
-              )}
-              {pakId && (
-                <div className="companion">
-                  <p>
-                    ПАК · {mode === "period" ? "медиана" : "последний"}:{" "}
-                    {format(mode === "period" ? pakStat?.median : pak?.value)}
-                  </p>
-                  <small>
-                    {mode === "period"
-                      ? "n=" + (pakStat?.count || 0)
-                      : stamp(pak?.timestamp) +
-                        " · " +
-                        freshness(pak?.freshness)}
-                  </small>
-                </div>
-              )}
-              {m?.mapping_warning && (
-                <p className="warn">{m.mapping_warning}</p>
-              )}
-              {val?.reason && <p className="muted">{val.reason}</p>}
-            </article>
-          );
-        })}
-      </div>
-      {mode === "period" ? (
-        <div className="overview-grid">
-          {history}
-          <section className="panel trust">
-            <h2>Сера · контроль периода</h2>
-            {summary && <SulfurCoverage summary={summary} />}
-            <dl>
-              <div>
-                <dt>Проб ЛИМС</dt>
-                <dd>{summary?.sulfur.lab_count ?? 0}</dd>
-              </div>
-              <div>
-                <dt>Выше 10 мг/кг</dt>
-                <dd className={summary?.sulfur.lab_exceed_count ? "warn" : ""}>
-                  {summary?.sulfur.lab_exceed_count ?? 0}
-                </dd>
-              </div>
-              <div>
-                <dt>Покрытие ПАК</dt>
-                <dd>
-                  {format(
-                    (summary?.sulfur.pak_coverage_fraction ?? 0) * 100,
-                    1,
-                  )}
-                  %
-                </dd>
-              </div>
-            </dl>
-            <p className="muted">
-              Покрытие и часы превышения рассчитаны по достоверным измерениям
-              ПАК.
+      <section
+        className={`operator-summary ${assessment.level} ${assessment.findings.length ? "" : "solo"}`}
+        aria-labelledby="operator-status-title"
+      >
+        <div className="operator-status">
+          <span className="operator-status-icon" aria-hidden="true">
+            {assessment.level === "ok" ? (
+              <ShieldCheck />
+            ) : assessment.level === "unknown" ? (
+              <CircleHelp />
+            ) : (
+              <AlertTriangle />
+            )}
+          </span>
+          <div>
+            <p className="operator-kicker">
+              {mode === "period"
+                ? "Итог выбранного периода"
+                : "Состояние на выбранный момент"}
             </p>
-          </section>
+            <h2 id="operator-status-title">{assessment.title}</h2>
+            <p>{assessment.description}</p>
+            <small>
+              {assessment.source} ·{" "}
+              {mode === "period"
+                ? `${stamp(summary?.from)} — ${stamp(summary?.to)}`
+                : stamp(snapshot?.at)}
+            </small>
+          </div>
         </div>
+        {assessment.findings.length > 0 && (
+          <div className="attention-list">
+            <div className="attention-heading">
+              <h3>Требует внимания</h3>
+              <span>{assessment.findings.length}</span>
+            </div>
+            <>
+              {assessment.findings.slice(0, 2).map((finding) => (
+                <button
+                  key={finding.code}
+                  className={`attention-item ${finding.level}`}
+                  onClick={() => onNavigate?.(finding.target, finding.metricId)}
+                >
+                  <span>
+                    <b>{finding.title}</b>
+                    {finding.description !== assessment.description && (
+                      <small>{finding.description}</small>
+                    )}
+                  </span>
+                  <span className="attention-action">
+                    {finding.action} <ArrowRight />
+                  </span>
+                </button>
+              ))}
+            </>
+          </div>
+        )}
+      </section>
+      {toolbar}
+      {mode === "period" ? (
+        <>
+          {history}
+          <div className="coverage-strip">
+            <span>
+              Покрытие ПАК{" "}
+              <HelpTooltip label="Покрытие ПАК">
+                Доля выбранного периода, для которой есть пригодные измерения
+                ПАК. Пропуски и подозрительные интервалы не засчитываются.
+              </HelpTooltip>
+            </span>
+            <div aria-hidden="true">
+              <i
+                style={{
+                  width: `${Math.max(0, Math.min(100, (summary?.sulfur.pak_coverage_fraction ?? 0) * 100))}%`,
+                }}
+              />
+            </div>
+            <b>
+              {format((summary?.sulfur.pak_coverage_fraction ?? 0) * 100, 1)}%
+            </b>
+            <small>
+              {summary?.sulfur.lab_count ?? 0} проб ЛИМС ·{" "}
+              {summary?.sulfur.lab_exceed_count ?? 0} выше порога
+            </small>
+          </div>
+        </>
       ) : (
         <>
           <section className="moment-trust panel">
@@ -309,6 +282,13 @@ export function Overview({
                       {id.startsWith("lims")
                         ? "ЛИМС · контрольная проба"
                         : "ПАК · оперативная оценка"}
+                      <HelpTooltip
+                        label={id.startsWith("lims") ? "ЛИМС" : "ПАК"}
+                      >
+                        {id.startsWith("lims")
+                          ? "ЛИМС — независимый лабораторный результат. Пробы появляются реже оперативных измерений."
+                          : "ПАК — архив оперативного анализатора. Его значение оценивается вместе со свежестью и диагностическими флагами."}
+                      </HelpTooltip>
                     </h3>
                     <strong
                       className={
@@ -341,39 +321,6 @@ export function Overview({
         <Info /> Порог серы: 10 мг/кг. Продукт после гидроочистки, без
         заключения о соответствии товарного топлива.
       </p>
-      {mode === "period" && (
-        <details className="agreement">
-          <summary>Согласованность ЛИМС и ПАК</summary>
-          <div className="table-scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th>Показатель</th>
-                  <th>Пар</th>
-                  <th>Смещение ПАК − ЛИМС</th>
-                  <th>Средняя абсолютная ошибка</th>
-                </tr>
-              </thead>
-              <tbody>
-                {summary?.agreement.map((a) => (
-                  <tr key={a.metric_id}>
-                    <td>{map.get(a.metric_id)?.label || a.metric_id}</td>
-                    <td>{a.n}</td>
-                    <td>{format(a.bias)}</td>
-                    <td>{format(a.mae)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </details>
-      )}
-      <Passport
-        metrics={metrics}
-        snapshot={snapshot}
-        mode={mode}
-        summary={summary}
-      />
     </>
   );
 }
@@ -445,16 +392,14 @@ function Passport({
   );
 }
 export function Trends({
+  mode = "period",
   metrics,
   series,
-  selected,
-  setSelected,
   onSelectTime,
 }: {
+  mode?: "period" | "moment";
   metrics: Metric[];
   series: SeriesResponse | null;
-  selected: string[];
-  setSelected: (v: string[]) => void;
   onSelectTime?: (time: string) => void;
 }) {
   const map = metricMap(metrics);
@@ -463,25 +408,45 @@ export function Trends({
     [];
   const low = allTimes.length ? Math.min(...allTimes) : undefined,
     high = allTimes.length ? Math.max(...allTimes) : undefined;
+  const groups = Array.from(
+    (series?.series ?? []).reduce((result, item) => {
+      const metric = map.get(item.metric_id);
+      const key = metric?.unit || "Единица не подтверждена";
+      const values = result.get(key) ?? [];
+      values.push(item);
+      result.set(key, values);
+      return result;
+    }, new Map<string, NonNullable<SeriesResponse["series"]>>()),
+  );
+  const palette = [
+    "#0079c2",
+    "#16805b",
+    "#9b650b",
+    "#7559a6",
+    "#c1484b",
+    "#4b7189",
+  ];
   return (
     <section className="panel">
       <header>
         <div>
           <h2>Тренды показателей</h2>
-          <p>Динамика за выбранный период</p>
+          <p>
+            {mode === "period"
+              ? "Динамика за выбранный период"
+              : "Контекст за 24 часа до выбранного момента"}
+          </p>
         </div>
-        <SignalSelector
-          metrics={metrics}
-          selected={selected}
-          onChange={setSelected}
-        />
       </header>
-      {series?.series.length ? (
-        series.series.map((s) => {
-          const metric = map.get(s.metric_id);
+      {groups.length ? (
+        groups.map(([unit, groupedSeries]) => {
+          const sulfur = groupedSeries.some((item) =>
+            item.metric_id.includes("Mg.Sulfur"),
+          );
           const option = {
             tooltip: { trigger: "axis" },
-            grid: { left: 62, right: 24, top: 24, bottom: 70 },
+            legend: { top: 0, type: "scroll" },
+            grid: { left: 62, right: 24, top: 48, bottom: 70 },
             dataZoom: [
               { type: "inside" },
               { type: "slider", height: 18, bottom: 3, showDetail: false },
@@ -503,54 +468,43 @@ export function Trends({
                   ),
               },
             },
-            yAxis: { type: "value", scale: true, name: metric?.unit || "" },
-            series: [
-              {
-                name: metric?.label || s.metric_id,
+            yAxis: { type: "value", scale: true, name: unit },
+            series: groupedSeries.map((item, index) => {
+              const metric = map.get(item.metric_id);
+              const lab = metric?.source === "lims";
+              const source = metric?.source.toUpperCase() || "";
+              return {
+                name: `${metric?.label || item.metric_id} · ${source}`,
                 type: "line",
-                symbol: metric?.source === "lims" ? "diamond" : "circle",
-                showSymbol: metric?.source === "lims",
-                symbolSize: 8,
+                symbol: lab ? "diamond" : "circle",
+                showSymbol: lab,
+                symbolSize: lab ? 9 : 5,
                 connectNulls: false,
-                data: s.points.map((p) => [
+                data: item.points.map((p) => [
                   Date.parse(p.timestamp + "Z"),
                   p.value,
                 ]),
-                lineStyle: { width: metric?.source === "lims" ? 0 : 2 },
-              },
-              {
-                name: "Минимум",
-                type: "line",
-                symbol: "none",
-                data:
-                  metric?.source === "lims"
-                    ? []
-                    : s.points.map((p) => [
-                        Date.parse(p.timestamp + "Z"),
-                        p.min,
-                      ]),
-                lineStyle: { width: 1, opacity: 0.3 },
-              },
-              {
-                name: "Максимум",
-                type: "line",
-                symbol: "none",
-                data:
-                  metric?.source === "lims"
-                    ? []
-                    : s.points.map((p) => [
-                        Date.parse(p.timestamp + "Z"),
-                        p.max,
-                      ]),
-                lineStyle: { width: 1, opacity: 0.3 },
-              },
-            ],
+                lineStyle: { width: lab ? 0 : 2 },
+                itemStyle: { color: palette[index % palette.length] },
+                ...(sulfur
+                  ? {
+                      markLine: {
+                        silent: true,
+                        symbol: "none",
+                        label: { formatter: "Порог 10 мг/кг" },
+                        lineStyle: { color: "#bc3737" },
+                        data: [{ yAxis: 10 }],
+                      },
+                    }
+                  : {}),
+              };
+            }),
           };
           return (
-            <div key={s.metric_id}>
+            <div key={unit} className="trend-group">
               <h3>
-                {metric?.label || s.metric_id}{" "}
-                <small>{metric?.unit || "единица не указана"}</small>
+                {sulfur ? "Содержание серы" : `Показатели · ${unit}`}{" "}
+                <small>{groupedSeries.length} сигналов</small>
               </h3>
               <Chart
                 option={option}
@@ -727,10 +681,22 @@ export function Statistics({
                 <th>Среднее</th>
                 <th>Мин.</th>
                 <th>Макс.</th>
-                <th>P05–P95</th>
+                <th>
+                  P05–P95{" "}
+                  <HelpTooltip label="P05–P95">
+                    Диапазон, внутри которого находится 90% измерений: от 5-го
+                    до 95-го процентиля.
+                  </HelpTooltip>
+                </th>
                 <th>Пред. медиана</th>
                 <th>Изменение</th>
-                <th>σ / IQR / размах</th>
+                <th>
+                  σ / IQR / размах{" "}
+                  <HelpTooltip label="σ и IQR">
+                    σ показывает разброс относительно среднего. IQR — ширину
+                    центральной половины измерений.
+                  </HelpTooltip>
+                </th>
                 <th>Первое / последнее</th>
                 <th>Время min / max</th>
                 <th>Ошиб. / подозр.</th>
@@ -781,6 +747,47 @@ export function Statistics({
             </tbody>
           </table>
         </div>
+        <details className="agreement analysis-detail">
+          <summary>
+            Согласованность ЛИМС и ПАК
+            <HelpTooltip label="Согласованность ЛИМС и ПАК">
+              Смещение показывает систематическую разницу ПАК и ЛИМС. Средняя
+              абсолютная ошибка показывает типичный размер расхождения без учёта
+              его направления.
+            </HelpTooltip>
+          </summary>
+          <div className="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Показатель</th>
+                  <th>Пар</th>
+                  <th>Смещение ПАК − ЛИМС</th>
+                  <th>Средняя абсолютная ошибка</th>
+                </tr>
+              </thead>
+              <tbody>
+                {summary?.agreement.map((item) => (
+                  <tr key={item.metric_id}>
+                    <td>{map.get(item.metric_id)?.label || item.metric_id}</td>
+                    <td>{item.n}</td>
+                    <td>{format(item.bias)}</td>
+                    <td>{format(item.mae)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </details>
+        <details className="analysis-detail">
+          <summary>Лабораторный паспорт за период</summary>
+          <Passport
+            metrics={metrics}
+            snapshot={null}
+            mode="period"
+            summary={summary}
+          />
+        </details>
       </section>
     </>
   );
@@ -791,30 +798,53 @@ export function Kip({
   mode = "moment",
   summary,
   onTrend,
+  selected = [],
 }: {
   metrics: Metric[];
   snapshot: Snapshot | null;
   mode?: "period" | "moment";
   summary?: Summary | null;
   onTrend?: (id: string) => void;
+  selected?: string[];
 }) {
   const [q, setQ] = useState(""),
     [plant, setPlant] = useState<"all" | "avt" | "ht">("all");
   const vals = new Map(snapshot?.values.map((v) => [v.metric_id, v])),
     stats = new Map(summary?.metrics.map((v) => [v.metric_id, v]));
-  const rows = metrics.filter(
-    (m) =>
-      m.source === "kip" &&
-      (plant === "all" || m.plant === plant) &&
-      `${m.label} ${m.id} ${m.group} ${m.description || ""}`
-        .toLowerCase()
-        .includes(q.toLowerCase()),
-  );
+  const selectedSet = new Set(selected);
+  const rows = metrics
+    .filter(
+      (m) =>
+        m.source === "kip" &&
+        (plant === "all" || m.plant === plant) &&
+        `${m.label} ${m.id} ${m.group} ${m.description || ""}`
+          .toLowerCase()
+          .includes(q.toLowerCase()),
+    )
+    .sort((a, b) => {
+      const aProblem =
+        mode === "period"
+          ? (stats.get(a.id)?.suspect_count ?? 0) > 0
+          : (vals.get(a.id)?.flags.length ?? 0) > 0;
+      const bProblem =
+        mode === "period"
+          ? (stats.get(b.id)?.suspect_count ?? 0) > 0
+          : (vals.get(b.id)?.flags.length ?? 0) > 0;
+      return (
+        Number(bProblem) - Number(aProblem) ||
+        Number(selectedSet.has(b.id)) - Number(selectedSet.has(a.id))
+      );
+    });
   return (
     <section className="panel">
       <header>
         <div>
-          <h2>Технология и КИП</h2>
+          <h2>
+            Технология и КИП{" "}
+            <HelpTooltip label="КИП">
+              КИП — технологические контрольно-измерительные приборы установки.
+            </HelpTooltip>
+          </h2>
           <p>Показателей: {rows.length}</p>
         </div>
         <div className="filters">
@@ -950,7 +980,13 @@ function AvtScheme() {
 export function Formulas({ formulas }: { formulas: Formula[] }) {
   return (
     <section className="panel">
-      <h2>Расчёты ВАК</h2>
+      <h2>
+        Расчёты ВАК{" "}
+        <HelpTooltip label="ВАК">
+          Диагностические расчёты по значениям КИП. Они помогают анализу, но не
+          заменяют лабораторную оценку.
+        </HelpTooltip>
+      </h2>
       <p className="lead">
         Диагностические формулы. Результаты не заменяют лабораторную оценку.
       </p>
@@ -1015,111 +1051,284 @@ export function DataQuality({
   quality,
   datasetId,
   metrics = [],
+  formulas = [],
+  mode = "period",
+  onOpenMoment,
 }: {
   quality: Quality | null;
   datasetId?: string;
   metrics?: Metric[];
+  formulas?: Formula[];
+  mode?: "period" | "moment";
+  onOpenMoment?: () => void;
 }) {
+  const metricCount = quality?.metrics.length ?? 0;
+  const coveredCount =
+    quality?.metrics.filter((metric) => metric.count > 0).length ?? 0;
+  const invalidCount =
+    quality?.metrics.reduce((sum, metric) => sum + metric.invalid_count, 0) ??
+    0;
+  const suspectCount =
+    quality?.metrics.reduce((sum, metric) => sum + metric.suspect_count, 0) ??
+    0;
+  const signalsToCheck =
+    quality?.metrics.filter(
+      (metric) => metric.invalid_count > 0 || metric.suspect_count > 0,
+    ).length ?? 0;
+  const issueGroups = Array.from(
+    (quality?.issues ?? [])
+      .reduce(
+        (groups, issue) => {
+          const group = groups.get(issue.code) ?? {
+            code: issue.code,
+            message: issue.message,
+            count: 0,
+            items: [] as Issue[],
+          };
+          group.count += issue.count;
+          group.items.push(issue);
+          groups.set(issue.code, group);
+          return groups;
+        },
+        new Map<
+          string,
+          {
+            code: string;
+            message: string;
+            count: number;
+            items: Issue[];
+          }
+        >(),
+      )
+      .values(),
+  ).sort((a, b) => b.count - a.count);
+  const issueNames: Record<string, string> = {
+    flatline: "Возможные зависания сигналов",
+    duplicate: "Повторяющиеся записи",
+    conflict: "Конфликтующие значения",
+    suspect: "Значения вне контрольного диапазона",
+    invalid: "Некорректные значения",
+    invalid_timestamp: "Некорректные временные метки",
+  };
   return (
     <>
-      <section className="quality-grid">
-        {quality?.sources.map((s) => (
-          <article className="panel" key={`${s.kind}-${s.filename}`}>
-            <Database />
-            <h3>{s.kind.toUpperCase()}</h3>
-            <p>{s.filename}</p>
-            <dl>
-              <div>
-                <dt>Наблюдений</dt>
-                <dd>{format(s.rows, 0)}</dd>
-              </div>
-              <div>
-                <dt>Фреймов</dt>
-                <dd>
-                  {format(
-                    typeof s.frame_count === "number" ? s.frame_count : null,
-                    0,
-                  )}
-                </dd>
-              </div>
-              <div>
-                <dt>Метрик</dt>
-                <dd>{s.metrics}</dd>
-              </div>
-              <div>
-                <dt>Некорректных</dt>
-                <dd>{s.invalid_count}</dd>
-              </div>
-              <div>
-                <dt>Подозрительных</dt>
-                <dd>{s.suspect_count}</dd>
-              </div>
-            </dl>
+      <section className="panel diagnostic-overview">
+        <header>
+          <div>
+            <h2>Диагностика набора данных</h2>
+            <p>
+              Короткая сводка. Подробности и настройки открываются по запросу.
+            </p>
+          </div>
+        </header>
+        <div className="diagnostic-stats">
+          <article>
+            <small>Пригодность данных</small>
+            <strong>
+              {coveredCount} <i>из {metricCount}</i>
+            </strong>
+            <span>Метрик содержат наблюдения</span>
           </article>
-        ))}
+          <article className={invalidCount ? "danger" : "ok"}>
+            <small>Некорректных</small>
+            <strong>{format(invalidCount, 0)}</strong>
+            <span>Не участвуют в статистике</span>
+          </article>
+          <article className={signalsToCheck ? "warning" : "ok"}>
+            <small>
+              Сигналов требуют проверки{" "}
+              <HelpTooltip label="Сигналы требуют проверки">
+                Есть некорректные или подозрительные отметки. Подозрение не
+                доказывает неисправность прибора.
+              </HelpTooltip>
+            </small>
+            <strong>{format(signalsToCheck, 0)}</strong>
+            <span>{format(suspectCount, 0)} подозрительных отметок</span>
+          </article>
+        </div>
       </section>
-      {quality && <QualityRanking quality={quality} metrics={metrics} />}
-      <section className="panel">
-        <h2>Проблемы и допущения · весь набор</h2>
-        {quality?.issues.length ? (
-          quality.issues.map((i, n) => (
-            <div className="issue" key={`${i.code}-${n}`}>
-              <AlertTriangle />
-              <span>
-                <b>{i.message}</b>
-                <small>
-                  {i.code}
-                  {i.metric_id ? ` · ${i.metric_id}` : ""}
-                </small>
-              </span>
-              <strong>{i.count}</strong>
-            </div>
-          ))
+
+      <details className="panel diagnostic-section">
+        <summary>
+          <span>
+            <b>Выявленные проблемы</b>
+            <small>
+              {issueGroups.length
+                ? `${issueGroups.length} групп · весь набор`
+                : "Зарегистрированных проблем нет"}
+            </small>
+          </span>
+          <ChevronDown />
+        </summary>
+        {issueGroups.length ? (
+          <div className="issue-groups">
+            {issueGroups.map((group) => (
+              <details key={group.code}>
+                <summary>
+                  <AlertTriangle />
+                  <span>
+                    <b>{issueNames[group.code] || group.message}</b>
+                    <small>{group.message}</small>
+                  </span>
+                  <strong>{format(group.count, 0)}</strong>
+                  <ChevronDown />
+                </summary>
+                <ul>
+                  {group.items.map((issue, index) => (
+                    <li key={`${issue.metric_id || issue.code}-${index}`}>
+                      <span>{issue.metric_id || "Источник целиком"}</span>
+                      <b>{format(issue.count, 0)}</b>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            ))}
+          </div>
         ) : (
           <p className="empty-line">
-            <ShieldCheck /> Зарегистрированных проблем нет. Это не означает, что
-            данные прошли пороговую проверку.
+            <ShieldCheck /> Зарегистрированных проблем нет. Это не означает
+            прохождение всех возможных проверок.
           </p>
         )}
-        {quality?.assumptions.map((a, i) => (
-          <div className="assumption" key={i}>
-            <Info /> {a}
-          </div>
-        ))}
-      </section>
-      {datasetId ? <FreshnessSettings datasetId={datasetId} /> : null}
-      <details className="quality-detail">
-        <summary>Покрытие и качество по показателям · весь набор</summary>
-        <div className="table-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>Показатель</th>
-                <th>Измерений</th>
-                <th>Некорректных</th>
-                <th>Подозрительных</th>
-                <th>Зависших</th>
-                <th>Начало / конец</th>
-              </tr>
-            </thead>
-            <tbody>
-              {quality?.metrics.map((m) => (
-                <tr key={m.metric_id}>
-                  <td>{m.metric_id}</td>
-                  <td>{format(m.count, 0)}</td>
-                  <td>{format(m.invalid_count, 0)}</td>
-                  <td>{format(m.suspect_count, 0)}</td>
-                  <td>{format(m.flatline_count, 0)}</td>
-                  <td>
-                    {stamp(m.start)}
-                    <small>{stamp(m.end)}</small>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <details className="assumptions-detail">
+          <summary>Методические допущения</summary>
+          {quality?.assumptions.map((assumption, index) => (
+            <div className="assumption" key={index}>
+              <Info /> {assumption}
+            </div>
+          ))}
+        </details>
+      </details>
+
+      <details className="panel diagnostic-section">
+        <summary>
+          <span>
+            <b>Паспорт набора</b>
+            <small>Файлы, объём, фреймы и состав источников</small>
+          </span>
+          <ChevronDown />
+        </summary>
+        <div className="quality-grid">
+          {quality?.sources.map((source) => (
+            <article key={`${source.kind}-${source.filename}`}>
+              <Database />
+              <h3>{source.kind.toUpperCase()}</h3>
+              <p>{source.filename}</p>
+              <dl>
+                <div>
+                  <dt>Наблюдений</dt>
+                  <dd>{format(source.rows, 0)}</dd>
+                </div>
+                <div>
+                  <dt>Фреймов</dt>
+                  <dd>
+                    {format(
+                      typeof source.frame_count === "number"
+                        ? source.frame_count
+                        : null,
+                      0,
+                    )}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Метрик</dt>
+                  <dd>{source.metrics}</dd>
+                </div>
+                <div>
+                  <dt>Некорректных</dt>
+                  <dd>{source.invalid_count}</dd>
+                </div>
+                <div>
+                  <dt>Подозрительных</dt>
+                  <dd>{source.suspect_count}</dd>
+                </div>
+              </dl>
+            </article>
+          ))}
         </div>
       </details>
+
+      <details className="panel diagnostic-section">
+        <summary>
+          <span>
+            <b>Экспертный анализ сигналов</b>
+            <small>Рейтинг и полная таблица качества</small>
+          </span>
+          <ChevronDown />
+        </summary>
+        {quality ? (
+          <QualityRanking quality={quality} metrics={metrics} />
+        ) : null}
+        <details className="quality-detail">
+          <summary>Покрытие и качество по всем показателям</summary>
+          <div className="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Показатель</th>
+                  <th>Измерений</th>
+                  <th>Некорректных</th>
+                  <th>Подозрительных</th>
+                  <th>Зависших</th>
+                  <th>Начало / конец</th>
+                </tr>
+              </thead>
+              <tbody>
+                {quality?.metrics.map((m) => (
+                  <tr key={m.metric_id}>
+                    <td>{m.metric_id}</td>
+                    <td>{format(m.count, 0)}</td>
+                    <td>{format(m.invalid_count, 0)}</td>
+                    <td>{format(m.suspect_count, 0)}</td>
+                    <td>{format(m.flatline_count, 0)}</td>
+                    <td>
+                      {stamp(m.start)}
+                      <small>{stamp(m.end)}</small>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </details>
+      </details>
+
+      <details className="panel diagnostic-section">
+        <summary>
+          <span>
+            <b>Расчёты ВАК</b>
+            <small>
+              {mode === "moment"
+                ? "Диагностические формулы для выбранного момента"
+                : "Доступны для конкретного момента"}
+            </small>
+          </span>
+          <ChevronDown />
+        </summary>
+        {mode === "moment" ? (
+          <Formulas formulas={formulas} />
+        ) : (
+          <div className="diagnostic-prompt">
+            <p>Выберите конкретный момент, чтобы подставить значения КИП.</p>
+            <button className="secondary" onClick={onOpenMoment}>
+              Открыть момент
+            </button>
+          </div>
+        )}
+      </details>
+
+      {datasetId ? (
+        <details className="panel diagnostic-section">
+          <summary>
+            <span>
+              <b>Настройки диагностики</b>
+              <small>Экспериментальные пороги свежести</small>
+            </span>
+            <ChevronDown />
+          </summary>
+          <FreshnessSettings datasetId={datasetId} />
+        </details>
+      ) : null}
     </>
   );
 }
