@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OilCode Agent Testbench</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <h1>OilCode Agent Testbench</h1>
+        <p>Проверка входов, внутренней логики и выходов агентов на тестовых данных хакатона.</p>
+      </div>
+      <div class="run-panel">
+        <label for="snapshotSelect">ProcessState</label>
+        <select id="snapshotSelect"></select>
+        <button id="runButton" type="button">Запустить</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="summary-grid">
+        <article>
+          <span class="label">Решение</span>
+          <strong id="decision">-</strong>
+        </article>
+        <article>
+          <span class="label">Сценарий</span>
+          <strong id="scenario">-</strong>
+        </article>
+        <article>
+          <span class="label">Уверенность</span>
+          <strong id="confidence">-</strong>
+        </article>
+        <article>
+          <span class="label">Сообщение оператору</span>
+          <strong id="operatorMessage">-</strong>
+        </article>
+      </section>
+
+      <section class="workspace">
+        <aside class="tables">
+          <div class="section-head">
+            <h2>Тестовые таблицы</h2>
+          </div>
+          <div id="tableList" class="table-list"></div>
+          <div class="table-preview">
+            <h3 id="tableTitle">Выберите таблицу</h3>
+            <div id="tablePreview"></div>
+          </div>
+        </aside>
+
+        <section class="trace">
+          <div class="section-head">
+            <h2>Проход оркестратора</h2>
+            <span id="timestamp" class="pill">-</span>
+          </div>
+          <div id="trace"></div>
+        </section>
+      </section>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

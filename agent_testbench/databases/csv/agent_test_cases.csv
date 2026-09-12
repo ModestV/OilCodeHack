@@ -1,0 +1,7 @@
+case_id,target_agent,input_table,condition,expected_behavior
+DQ-001,dq_agent,unit_242000_telemetry,F26 is missing for one timestamp,return limited data_status and include F26 in missing_critical_tags
+DQ-002,dq_agent,unit_242000_telemetry,F9 is unchanged for several sequential timestamps,flag flatline_signal anomaly without stopping the pipeline
+QA-001,quality_agent,lims_measurements and pak_measurements,LIMS and PAK are joined only by latest timestamp before ProcessState.timestamp,choose trusted quality source by LIMS -> PAK -> VAK -> KIP priority
+RA-001,reliability_agent,unit_242000_telemetry,T5 is above the local test baseline,increase risk_score and forbid further T5 increase
+SA-001,scenario_agent,process_state_snapshots,ProcessState has Quality and Reliability restrictions,"generate candidate_scenarios, not final operator recommendation"
+SG-001,safety_gate,candidate_scenarios,scenario forecast_sulfur_mg_kg exceeds 10 or changes forbidden parameter,reject scenario and return rejected_scenarios with reason
