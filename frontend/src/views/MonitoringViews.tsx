@@ -39,9 +39,7 @@ import type {
 const epoch = sourceEpoch;
 const stamp = (value: string | null | undefined) => {
   if (!value) return "Нет измерения";
-  const match = value.match(
-    /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/,
-  );
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);
   return match
     ? `${match[3]}.${match[2]}.${match[1]}, ${match[4]}:${match[5]}`
     : value.replace("T", " ").slice(0, 16);
@@ -360,8 +358,8 @@ function Passport({
                 <b>
                   {format(
                     mode === "period" ? stats.get(m.id)?.median : v?.value,
-                  )}{" "}
-                  {m.unit || "единица не указана"}
+                  )}
+                  {m.unit ? ` ${m.unit}` : ""}
                 </b>
                 <small>
                   {mode === "period"
@@ -412,7 +410,9 @@ export function Trends({
   const groups = Array.from(
     (series?.series ?? []).reduce((result, item) => {
       const metric = map.get(item.metric_id);
-      const key = metric?.unit || "Единица не подтверждена";
+      const key = metric?.unit
+        ? `unit:${metric.unit}`
+        : `metric:${item.metric_id}`;
       const values = result.get(key) ?? [];
       values.push(item);
       result.set(key, values);
@@ -440,7 +440,9 @@ export function Trends({
         </div>
       </header>
       {groups.length ? (
-        groups.map(([unit, groupedSeries]) => {
+        groups.map(([groupKey, groupedSeries]) => {
+          const firstMetric = map.get(groupedSeries[0].metric_id);
+          const unit = firstMetric?.unit || "";
           const sulfur = groupedSeries.some((item) =>
             item.metric_id.includes("Mg.Sulfur"),
           );
@@ -469,7 +471,11 @@ export function Trends({
                   ),
               },
             },
-            yAxis: { type: "value", scale: true, name: unit },
+            yAxis: {
+              type: "value",
+              scale: true,
+              name: unit || "Значение",
+            },
             series: groupedSeries.map((item, index) => {
               const metric = map.get(item.metric_id);
               const lab = metric?.source === "lims";
@@ -502,10 +508,16 @@ export function Trends({
             }),
           };
           return (
-            <div key={unit} className="trend-group">
+            <div key={groupKey} className="trend-group">
               <h3>
-                {sulfur ? "Содержание серы" : `Показатели · ${unit}`}{" "}
-                <small>{groupedSeries.length} сигналов</small>
+                {sulfur
+                  ? "Содержание серы"
+                  : unit
+                    ? `Показатели · ${unit}`
+                    : firstMetric?.label || groupedSeries[0].metric_id}{" "}
+                {groupedSeries.length > 1 && (
+                  <small>Сигналов: {groupedSeries.length}</small>
+                )}
               </h3>
               <Chart
                 option={option}
@@ -588,8 +600,13 @@ export function Statistics({
           </select>
         </header>
         <h3 className="selected-stat-title">
-          {map.get(selected)?.label}{" "}
-          <small>{map.get(selected)?.unit || "единица не подтверждена"}</small>
+          {map.get(selected)?.label}
+          {map.get(selected)?.unit && (
+            <>
+              {" "}
+              <small>{map.get(selected)?.unit}</small>
+            </>
+          )}
         </h3>
         {distribution &&
         distribution.count > 1 &&
@@ -605,8 +622,10 @@ export function Statistics({
             </div>
             <div>
               <h3>
-                Квартили ·{" "}
-                {map.get(selected)?.unit || "единица не подтверждена"}
+                Квартили
+                {map.get(selected)?.unit
+                  ? ` · ${map.get(selected)?.unit}`
+                  : ""}
               </h3>
               {distribution?.count ? (
                 <Chart
@@ -894,8 +913,8 @@ export function Kip({
                     </small>
                   </td>
                   <td>
-                    {format(mode === "period" ? s?.median : v?.value)}{" "}
-                    {m.unit || "единица не подтверждена"}
+                    {format(mode === "period" ? s?.median : v?.value)}
+                    {m.unit ? ` ${m.unit}` : ""}
                     {mode === "period" ? (
                       <small>
                         мин. {format(s?.min)} · макс. {format(s?.max)} · n=
@@ -1055,6 +1074,7 @@ export function DataQuality({
   formulas = [],
   mode = "period",
   onOpenMoment,
+  onSettingsSaved,
 }: {
   quality: Quality | null;
   datasetId?: string;
@@ -1062,6 +1082,7 @@ export function DataQuality({
   formulas?: Formula[];
   mode?: "period" | "moment";
   onOpenMoment?: () => void;
+  onSettingsSaved?: () => void;
 }) {
   const metricCount = quality?.metrics.length ?? 0;
   const coveredCount =
@@ -1322,7 +1343,7 @@ export function DataQuality({
             </span>
             <ChevronDown />
           </summary>
-          <FreshnessSettings datasetId={datasetId} />
+          <FreshnessSettings datasetId={datasetId} onSaved={onSettingsSaved} />
         </details>
       ) : null}
     </>
@@ -1358,7 +1379,13 @@ function Empty({ text }: { text: string }) {
     </div>
   );
 }
-function FreshnessSettings({ datasetId }: { datasetId: string }) {
+function FreshnessSettings({
+  datasetId,
+  onSaved,
+}: {
+  datasetId: string;
+  onSaved?: () => void;
+}) {
   const [values, setValues] = useState({ kip: 10, pak: 30, lims: 2880 }),
     [message, setMessage] = useState("");
   useEffect(() => {
@@ -1377,6 +1404,7 @@ function FreshnessSettings({ datasetId }: { datasetId: string }) {
     try {
       await api.saveSettings(datasetId, { freshness_minutes: values });
       setMessage("Настройки сохранены");
+      onSaved?.();
     } catch {
       setMessage("Не удалось сохранить настройки");
     }

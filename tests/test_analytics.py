@@ -6,7 +6,8 @@ import pyarrow.parquet as pq
 import pytest
 
 from backend import analytics as a
-from backend.formulas import evaluate_expression
+from backend.config import REGISTRY
+from backend.formulas import evaluate_expression, formula_results
 from backend.ingest import SCHEMA
 
 
@@ -67,10 +68,61 @@ def test_snapshot_no_future_and_lab_delta_is_previous_probe(tmp_path):
     result = {v["metric_id"]: v for v in a.snapshot(path, "2025-01-01T12:03:00")["values"]}
     assert result["avt.T1"]["value"] == 100
     assert result["avt.T1"]["age_minutes"] == 3
-    assert result["lims.ht.2.Mg.Sulfur"]["delta"] == 1
-    assert result["derived.sulfur_margin.lims"]["value"] == 1
+    lab_result = {v["metric_id"]: v for v in a.snapshot(path, "2025-01-01T14:03:00")["values"]}
+    assert lab_result["lims.ht.2.Mg.Sulfur"]["delta"] == 1
+    assert lab_result["derived.sulfur_margin.lims"]["value"] == 1
     stale = {v["metric_id"]: v for v in a.snapshot(path, "2025-01-05T12:03:00")["values"]}
     assert stale["lims.ht.2.Mg.Sulfur"]["freshness"] == "stale"
+
+
+def test_lims_sample_becomes_visible_four_hours_after_sampling(tmp_path):
+    path = make_dataset(
+        tmp_path / "data",
+        [("lims.ht.2.Mg.Sulfur", "2025-01-01T10:00:00", 8, "")],
+    )
+    before = {v["metric_id"]: v for v in a.snapshot(path, "2025-01-01T13:59:00")["values"]}
+    after = {v["metric_id"]: v for v in a.snapshot(path, "2025-01-01T14:00:00")["values"]}
+    assert before["lims.ht.2.Mg.Sulfur"]["value"] is None
+    assert after["lims.ht.2.Mg.Sulfur"]["value"] == 8
+    assert after["lims.ht.2.Mg.Sulfur"]["available_at"] == "2025-01-01T14:00:00"
+
+
+def test_expert_formula_overrides_stale_manifest_and_resolves_available_lims(tmp_path):
+    path = make_dataset(
+        tmp_path / "data",
+        [
+            ("ht.F9", "2025-01-01T12:00:00", 10, ""),
+            ("ht.F2", "2025-01-01T12:00:00", 20, ""),
+            ("ht.T6", "2025-01-01T12:00:00", 300, ""),
+            ("lims.ht.2.95%.T", "2025-01-01T08:00:00", 350, ""),
+        ],
+    )
+    manifest = json.loads((path / "manifest.json").read_text())
+    manifest["formulas"] = [
+        {"id": "24-2000:GODT:T95", "expression": "1", "version": "old", "status": "invalid"}
+    ]
+    (path / "manifest.json").write_text(json.dumps(manifest))
+    result = next(
+        item
+        for item in formula_results(path, "2025-01-01T12:00:00")["formulas"]
+        if item["id"] == "24-2000:GODT:T95"
+    )
+    assert result["version"] == "expert-2026-09-13"
+    assert result["result"] == pytest.approx(310.3035)
+
+
+def test_expert_formula_corrections_are_canonical():
+    formulas = {item["id"]: item for item in json.loads(REGISTRY.read_text())["formulas"]}
+    expected = {
+        "24-2000:GODT:T90": "162.998+0.12945*T12+59.57*(F15/2000)+0.00036*W7+0.26366*T23-424.72638*F1/F26",
+        "24-2000:GODT:T50": "44.625+10.0224*P13+0.06981*F9+0.471*T6",
+        "24-2000:GODT:CloudPoint": "0.0002*F22+0.0021*W7+0.00008*F25-0.30656*F1+0.12018*T6+0.01916*F9-48.254-0.05249*T16+0.00011",
+        "24-2000:GODT:CFPP": "0.22088*T23-102.375-47.75834*P8+0.03862*F9+43.60207*W7+43.81849*P24",
+        "24-2000:GODT:T95": "0.03814*F9-9.201-0.00002*F2+0.50*T6+0.48321*LIMS:24-2000.Pipeline.95%.T",
+        "AVT6:240-350:CFPP": "31,40363 - 0,06784xT33 + 17,411xP67 - 8,11544xP4 - 0,47309x(F65/F32+F30)",
+    }
+    assert {key: formulas[key]["expression"] for key in expected} == expected
+    assert all(formulas[key]["status"] == "experimental" for key in expected)
 
 
 def test_period_raw_lab_count_boundary_and_pak_coverage(tmp_path):

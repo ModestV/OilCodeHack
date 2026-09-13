@@ -11,6 +11,10 @@ from pathlib import Path
 from .analytics import snapshot
 from .config import REGISTRY
 
+LIMS_ALIASES = {
+    "LIMS:24-2000.Pipeline.95%.T": ("LIMS_95_T", "lims.ht.2.95%.T"),
+}
+
 
 def evaluate_expression(expression: str, inputs: dict[str, float]) -> float:
     tree = ast.parse(expression, mode="eval")
@@ -50,12 +54,21 @@ def evaluate_expression(expression: str, inputs: dict[str, float]) -> float:
 def formula_results(directory: Path, at: str) -> dict:
     registry = json.loads(REGISTRY.read_text())
     manifest = json.loads((directory / "manifest.json").read_text())
-    definitions = manifest.get("formulas", registry.get("formulas", []))
+    stored = {item["id"]: item for item in manifest.get("formulas", [])}
+    definitions = []
+    for canonical in registry.get("formulas", []):
+        item = stored.get(canonical["id"], {})
+        definitions.append({**item, **canonical})
     values = {v["metric_id"]: v for v in snapshot(directory, at)["values"]}
     results = []
     for definition in definitions:
         f = dict(definition)
         expression = f["expression"].replace(",", ".").replace("x", "*").replace("×", "*")
+        dependencies = []
+        for alias, (variable, metric_id) in LIMS_ALIASES.items():
+            if alias in expression:
+                expression = expression.replace(alias, variable)
+                dependencies.append((variable, metric_id))
         plant = f.get("plant", "ht" if f["id"].startswith("24") else "avt")
         tags = list(dict.fromkeys(re.findall(r"\b[A-Z]\d+\b", expression)))
         data = [
@@ -68,6 +81,16 @@ def formula_results(directory: Path, at: str) -> dict:
             }
             for tag in tags
         ]
+        data.extend(
+            {
+                "tag": variable,
+                **{
+                    k: values.get(metric_id, {}).get(k)
+                    for k in ("value", "timestamp", "flags", "freshness")
+                },
+            }
+            for variable, metric_id in dependencies
+        )
         for item in data:
             item["flags"] = item["flags"] or []
         inputs = {item["tag"]: item["value"] for item in data}

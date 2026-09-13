@@ -11,7 +11,7 @@ from pathlib import Path
 
 import duckdb
 
-from .config import FRESHNESS
+from .config import FRESHNESS, LIMS_PUBLICATION_DELAY_MINUTES, REGISTRY
 
 VALID = "value IS NOT NULL AND isfinite(value) AND NOT contains(flags, 'invalid') AND NOT contains(flags, 'conflict')"
 SUSPECT = "(contains(flags, 'flatline') OR contains(flags, 'suspect'))"
@@ -57,6 +57,15 @@ def manifest(directory: Path) -> dict:
 
 def metric_catalog(directory: Path) -> list[dict]:
     metrics = [dict(m) for m in manifest(directory).get("metrics", [])]
+    canonical = {
+        metric["id"]: metric for metric in json.loads(REGISTRY.read_text()).get("metrics", [])
+    }
+    for metric in metrics:
+        registry_metric = canonical.get(metric["id"])
+        if registry_metric:
+            metric.update(registry_metric)
+            if "mapping_warning" not in registry_metric:
+                metric.pop("mapping_warning", None)
     by_id = {m["id"]: m for m in metrics}
     for source in ("lims", "pak"):
         base = "lims.ht.2.Mg.Sulfur" if source == "lims" else "pak.ht.Mg.Sulfur"
@@ -153,14 +162,16 @@ def settings(directory: Path) -> dict:
 
 def snapshot(directory: Path, at: str) -> dict:
     target = parse_time(at)
+    lims_cutoff = target - timedelta(minutes=LIMS_PUBLICATION_DELAY_MINUTES)
     with connection(directory) as db:
         rows = records(
             db.execute(
                 """SELECT metric_id,
             arg_max(struct_pack("timestamp":=timestamp,"value":=value,flags:=flags,source_row:=source_row),
                 struct_pack("timestamp":=timestamp,source_row:=source_row),2) AS recent
-            FROM obs WHERE timestamp<=? GROUP BY metric_id""",
-                [target],
+            FROM obs WHERE timestamp<=?
+              AND (source!='lims' OR timestamp<=?) GROUP BY metric_id""",
+                [target, lims_cutoff],
             )
         )
     grouped: dict[str, list] = {}
@@ -204,6 +215,16 @@ def snapshot(directory: Path, at: str) -> dict:
                 "freshness": state,
                 "delta": delta,
                 "reason": reason,
+                "available_at": (
+                    (
+                        parse_time(current["timestamp"])
+                        + timedelta(minutes=LIMS_PUBLICATION_DELAY_MINUTES)
+                    ).isoformat()
+                    if current and metric["source"] == "lims"
+                    else current["timestamp"]
+                    if current
+                    else None
+                ),
             }
         )
         if metric["id"] in ("lims.ht.2.Mg.Sulfur", "pak.ht.Mg.Sulfur"):
@@ -488,10 +509,16 @@ def quality(directory: Path) -> dict:
             count(*) FILTER(WHERE contains(flags,'flatline')) AS flatline_count,
             min(timestamp) AS start,max(timestamp) AS end FROM raw GROUP BY metric_id""")
         )
+    assumptions = list(m.get("assumptions", []))
+    lims_assumption = (
+        "Метка ЛИМС означает момент отбора; в историческом кадре результат доступен через 4 часа."
+    )
+    if lims_assumption not in assumptions:
+        assumptions.append(lims_assumption)
     return {
         "sources": m.get("sources", []),
         "issues": m.get("issues", []),
-        "assumptions": m.get("assumptions", []),
+        "assumptions": assumptions,
         "metrics": rows,
     }
 

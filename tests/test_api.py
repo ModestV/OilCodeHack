@@ -81,3 +81,42 @@ def test_bad_import_finishes_with_error_not_forever_loading(client):
     response = client.post("/api/datasets", files=[("files", ("broken.xlsx", b"not excel"))])
     result = client.get("/api/datasets/" + response.json()["id"]).json()
     assert result["status"] == "error"
+
+
+def test_scenario_returns_editable_recommendation_and_blend(client):
+    response = client.post(
+        "/api/datasets",
+        files=[
+            (
+                "files",
+                (
+                    "242000_tags.csv",
+                    b"date,P8,T11,F19\n2025-01-01 00:00:00,300,100,5\n",
+                    "text/csv",
+                ),
+            )
+        ],
+    )
+    base = f"/api/datasets/{response.json()['id']}"
+    result = client.post(
+        base + "/scenario",
+        json={
+            "at": "2025-01-01T00:00:00",
+            "current_sulfur": 12,
+            "current_t95": 350,
+            "current_cetane": 49,
+            "horizon_minutes": 180,
+            "step_minutes": 30,
+            "tanks": [
+                {"name": "A", "share": 60, "sulfur": 8, "t95": 350, "cetane": 50},
+                {"name": "B", "share": 40, "sulfur": 12, "t95": 355, "cetane": 48},
+            ],
+            "additive_pct": 0.5,
+        },
+    )
+    assert result.status_code == 200
+    body = result.json()
+    assert set(body["controls"]) == {"ht.P8", "ht.T11", "ht.F19"}
+    assert body["trajectory"][-1]["minute"] == 180
+    assert body["blend"]["cetane"] == pytest.approx(51.2)
+    assert body["blend"]["cost_index"] > 1

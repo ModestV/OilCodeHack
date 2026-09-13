@@ -5,6 +5,8 @@ import type {
   Metric,
   Quality,
   SeriesResponse,
+  ScenarioRequest,
+  ScenarioResult,
   Settings,
   Snapshot,
   Summary,
@@ -97,6 +99,12 @@ export const api = {
     ),
   distillation: (id: string, at: string, s?: AbortSignal) =>
     request<Distillation>(`${base(id)}/distillation?at=${enc(at)}`, s),
+  scenario: (id: string, value: ScenarioRequest, s?: AbortSignal) =>
+    request<ScenarioResult>(`${base(id)}/scenario`, s, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(value),
+    }),
   upload: (data: FormData) =>
     request<Manifest>("/api/datasets", undefined, {
       method: "POST",

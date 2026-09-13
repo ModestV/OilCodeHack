@@ -57,6 +57,7 @@ export interface SnapshotValue {
   freshness: "fresh" | "stale" | "missing";
   delta: number | null;
   reason?: string;
+  available_at?: string | null;
 }
 export interface Alert {
   code?: string;
@@ -172,4 +173,63 @@ export interface Distribution {
 }
 export interface Settings {
   freshness_minutes: { kip: number; pak: number; lims: number };
+}
+
+export interface ScenarioRequest {
+  at: string;
+  horizon_minutes: number;
+  step_minutes: number;
+  baseline_feed_sulfur: number;
+  feed_sulfur: number;
+  current_sulfur?: number;
+  current_t95?: number;
+  current_cetane?: number;
+  targets: { sulfur_max: number; t95_max: number; cetane_min: number };
+  parameters: {
+    lag_minutes: number;
+    feed_sulfur_transfer: number;
+    temperature_effect: number;
+    feed_rate_effect: number;
+    pressure_effect: number;
+    cetane_gain_per_pct: number;
+  };
+  changes?: { temperature: number; feed_rate_pct: number; pressure: number };
+  tanks: {
+    name: string;
+    share: number;
+    sulfur: number;
+    t95: number;
+    cetane: number;
+    cost_index: number;
+  }[];
+  additive_pct: number;
+}
+
+export interface ScenarioResult {
+  at: string;
+  horizon_minutes: number;
+  step_minutes: number;
+  baseline: { sulfur: number; t95: number | null; cetane: number | null };
+  controls: Record<
+    "ht.P8" | "ht.T11" | "ht.F19",
+    {
+      current: number | null;
+      change: number;
+      recommended: number | null;
+      relative: boolean;
+    }
+  >;
+  predicted_sulfur: number;
+  sulfur_target_met: boolean;
+  trajectory: { minute: number; timestamp: string; sulfur: number }[];
+  blend: null | {
+    sulfur: number;
+    t95: number;
+    cetane: number;
+    cost_index: number;
+    normalized_shares: { name: string; share: number }[];
+    meets_targets: { sulfur: boolean; t95: boolean; cetane: boolean };
+    all_targets_met: boolean;
+  };
+  assumptions: string[];
 }

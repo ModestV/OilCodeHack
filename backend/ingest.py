@@ -125,6 +125,8 @@ class Sink:
             "primary",
             "mapping_warning",
             "group",
+            "role",
+            "control_kind",
         ):
             if description and key in {"label", "description"}:
                 continue
@@ -439,6 +441,9 @@ def import_dataset(files: list[Path], output_dir: Path, name: str) -> dict:
     for formula in sink.formulas:
         fid = str(formula.get("id", ""))
         if fid in formula_overrides and formula_overrides[fid] != formula.get("expression"):
+            if str(formula.get("version", "")).startswith("expert-"):
+                formula["source_expression"] = formula_overrides[fid]
+                continue
             formula["registry_expression"] = formula.get("expression")
             formula["expression"] = formula_overrides[fid]
             digest = hashlib.sha256(formula_overrides[fid].encode("utf-8")).hexdigest()[:12]
@@ -502,6 +507,7 @@ def import_dataset(files: list[Path], output_dir: Path, name: str) -> dict:
             "Поле rows источника считает записанные наблюдения после объединения одинаковых дублей.",
             "Поле frame_count считает различные временные метки источника.",
             "Единицы КИП берутся только из реестра; неизвестные единицы не создаются.",
+            "Метка ЛИМС означает момент отбора; в историческом кадре результат доступен через 4 часа.",
         ],
     }
     if not good_rows:

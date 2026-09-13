@@ -28,6 +28,7 @@ from pydantic import BaseModel, Field
 from . import analytics as a
 from .config import ROOT, STORAGE
 from .formulas import formula_results
+from .scenarios import ScenarioRequest, calculate_scenario
 
 IMPORT_LOCK = threading.Lock()
 
@@ -243,6 +244,14 @@ def distribution(
 @app.get("/api/datasets/{dataset_id}/formulas")
 def formulas(dataset_id: str, at: str):
     return formula_results(dataset(dataset_id), at)
+
+
+@app.post("/api/datasets/{dataset_id}/scenario")
+def scenario(dataset_id: str, body: ScenarioRequest):
+    try:
+        return calculate_scenario(dataset(dataset_id), body)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 @app.get("/api/datasets/{dataset_id}/quality")

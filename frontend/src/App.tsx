@@ -4,11 +4,11 @@ import {
   BarChart3,
   Beaker,
   Database,
-  Filter,
   FlaskConical,
   Gauge,
   Lightbulb,
   Menu,
+  SlidersHorizontal,
   Upload,
   X,
 } from "lucide-react";
@@ -36,6 +36,7 @@ import {
   Statistics,
   Trends,
 } from "./views/MonitoringViews";
+import { DecisionSupportView } from "./views/DecisionSupportView";
 import {
   buildOperatorAssessment,
   type AttentionTarget,
@@ -107,6 +108,7 @@ export function App() {
     [loading, setLoading] = useState(true),
     [statsView, setStatsView] = useState(false);
   const [completedKey, setCompletedKey] = useState("");
+  const [dataRevision, setDataRevision] = useState(0);
   const requestKey = JSON.stringify([
     datasetId,
     from,
@@ -118,6 +120,7 @@ export function App() {
     statsView,
     statMetric,
     exclude,
+    dataRevision,
   ]);
   useEffect(() => {
     try {
@@ -257,7 +260,7 @@ export function App() {
                 from,
                 to,
                 c.signal,
-                tab === "overview" ? false : exclude,
+                tab === "trends" ? exclude : false,
               )
               .then((v) => {
                 if (!c.signal.aborted) setSummary(v);
@@ -372,15 +375,7 @@ export function App() {
     metrics,
     pinned,
   });
-  const activeFilterCount =
-    Number(exclude) +
-    Number(cardStatistic !== "median") +
-    Number(
-      selected.join("|") !==
-        SULFUR.filter((id) => metrics.some((metric) => metric.id === id)).join(
-          "|",
-        ),
-    );
+  const visibleFilterCount = statsView ? Number(exclude) : selected.length;
   const navigateFromFinding = (target: AttentionTarget, metricId?: string) => {
     setSidePanel("closed");
     if (target === "analysis") {
@@ -416,15 +411,6 @@ export function App() {
                   onClick={() => setSidePanel("metrics")}
                 >
                   <Gauge /> Показатели
-                </button>
-                <button
-                  className="secondary"
-                  onClick={() => setSidePanel("filters")}
-                >
-                  <Filter /> Фильтры
-                  {activeFilterCount > 0 && (
-                    <span className="control-badge">{activeFilterCount}</span>
-                  )}
                 </button>
                 {assessment.findings.length > 2 && (
                   <button
@@ -483,6 +469,7 @@ export function App() {
         formulas={formulas}
         mode={mode}
         onOpenMoment={() => setMode("moment")}
+        onSettingsSaved={() => setDataRevision((value) => value + 1)}
       />
     );
   };
@@ -514,7 +501,6 @@ export function App() {
           </button>
         </nav>
         <div className="nav-development">
-          <small>В разработке</small>
           <button
             className={page === "recommendations" ? "active" : ""}
             onClick={() => navigate("recommendations")}
@@ -574,16 +560,22 @@ export function App() {
           </div>
         )}
         {page !== "monitoring" ? (
-          <section className="empty-state compact">
-            {page === "recommendations" ? <Lightbulb /> : <Beaker />}
-            <h2>В разработке</h2>
-            <button
-              className="secondary"
-              onClick={() => navigate("monitoring")}
-            >
-              К мониторингу
-            </button>
-          </section>
+          manifest?.status === "ready" && datasetId && to ? (
+            <DecisionSupportView
+              key={`${datasetId}:${page}`}
+              datasetId={datasetId}
+              at={to}
+              sandbox={page === "sandbox"}
+            />
+          ) : (
+            <section className="empty-state compact">
+              <Database />
+              <h2>Для расчёта нужен набор данных</h2>
+              <button className="primary" onClick={() => setUpload(true)}>
+                <Upload /> Загрузить данные
+              </button>
+            </section>
+          )
         ) : (
           <>
             {manifest?.status === "ready" && from && to && (
@@ -622,10 +614,11 @@ export function App() {
                         className="secondary"
                         onClick={() => setSidePanel("filters")}
                       >
-                        <Filter /> Фильтры
-                        {activeFilterCount > 0 && (
+                        <SlidersHorizontal />{" "}
+                        {statsView ? "Фильтры статистики" : "Сигналы и фильтры"}
+                        {visibleFilterCount > 0 && (
                           <span className="control-badge">
-                            {activeFilterCount}
+                            {visibleFilterCount}
                           </span>
                         )}
                       </button>
@@ -647,10 +640,14 @@ export function App() {
                             Статистика
                           </button>
                         )}
-                        {selected.length > 0 && (
+                        {(statsView
+                          ? Boolean(statMetric)
+                          : selected.length > 0) && (
                           <ExportButton
                             id={datasetId}
-                            ids={selected}
+                            ids={
+                              statsView && statMetric ? [statMetric] : selected
+                            }
                             from={from}
                             to={to}
                             exclude={exclude}
@@ -717,6 +714,7 @@ export function App() {
           selected={selected}
           setSelected={setSelected}
           assessment={assessment}
+          filterTarget={statsView ? "statistics" : "trends"}
           onNavigate={navigateFromFinding}
         />
       )}

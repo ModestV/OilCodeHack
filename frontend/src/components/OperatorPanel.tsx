@@ -7,6 +7,7 @@ import { SignalSelector } from "./SignalSelector";
 import { formatNumber } from "../visualization";
 
 export type SidePanelMode = "metrics" | "filters" | "warnings" | "closed";
+const MAX_PINNED = 6;
 
 const freshness = (value: string | undefined) =>
   value === "fresh"
@@ -31,6 +32,7 @@ export function OperatorPanel({
   selected,
   setSelected,
   assessment,
+  filterTarget,
   onNavigate,
 }: {
   open: Exclude<SidePanelMode, "closed">;
@@ -48,6 +50,7 @@ export function OperatorPanel({
   selected: string[];
   setSelected: (ids: string[]) => void;
   assessment: OperatorAssessment;
+  filterTarget: "trends" | "statistics";
   onNavigate: (target: AttentionTarget, metricId?: string) => void;
 }) {
   const panel = useRef<HTMLElement>(null);
@@ -61,7 +64,10 @@ export function OperatorPanel({
   const stats = new Map(summary?.metrics.map((stat) => [stat.metric_id, stat]));
   const titles = {
     metrics: "Показатели",
-    filters: "Фильтры анализа",
+    filters:
+      filterTarget === "statistics"
+        ? "Фильтры статистики"
+        : "Сигналы и фильтры",
     warnings: "Все предупреждения",
   };
 
@@ -100,11 +106,21 @@ export function OperatorPanel({
     }
   }
 
-  const available = metrics.filter(
-    (metric) =>
-      metric.available !== false &&
-      `${metric.label} ${metric.id}`.toLowerCase().includes(deferredQuery),
-  );
+  const pinnedOrder = new Map(pinned.map((id, index) => [id, index]));
+  const available = metrics
+    .filter(
+      (metric) =>
+        metric.available !== false &&
+        `${metric.label} ${metric.id}`.toLowerCase().includes(deferredQuery),
+    )
+    .sort((a, b) => {
+      const aOrder = pinnedOrder.get(a.id);
+      const bOrder = pinnedOrder.get(b.id);
+      if (aOrder !== undefined && bOrder !== undefined) return aOrder - bOrder;
+      if (aOrder !== undefined) return -1;
+      if (bOrder !== undefined) return 1;
+      return a.label.localeCompare(b.label, "ru");
+    });
 
   return (
     <div className="side-panel-backdrop" onPointerDown={close}>
@@ -135,8 +151,25 @@ export function OperatorPanel({
 
         {open === "metrics" && (
           <>
+            {mode === "period" && (
+              <label className="metric-statistic">
+                <span>Значение за период</span>
+                <select
+                  value={statistic}
+                  onChange={(event) => setStatistic(event.target.value)}
+                >
+                  <option value="median">Медиана</option>
+                  <option value="mean">Среднее</option>
+                  <option value="min">Минимум</option>
+                  <option value="max">Максимум</option>
+                  <option value="p05">P05</option>
+                  <option value="p95">P95</option>
+                  <option value="std">Стандартное отклонение</option>
+                </select>
+              </label>
+            )}
             <div className="side-metric-list">
-              {pinned.slice(0, 6).map((id) => {
+              {pinned.slice(0, MAX_PINNED).map((id) => {
                 const metric = metricById.get(id);
                 const value = values.get(id);
                 const stat = stats.get(id);
@@ -149,8 +182,9 @@ export function OperatorPanel({
                     <div>
                       <b>{metric?.label || id}</b>
                       <small>
-                        {metric?.source.toUpperCase() || "—"} ·{" "}
-                        {metric?.unit || "единица не подтверждена"}
+                        {[metric?.source.toUpperCase(), metric?.unit]
+                          .filter(Boolean)
+                          .join(" · ") || "Источник не указан"}
                       </small>
                     </div>
                     <strong>{formatNumber(displayed)}</strong>
@@ -186,6 +220,16 @@ export function OperatorPanel({
               <summary>
                 <Settings2 /> Настроить набор
               </summary>
+              <div className="panel-selection-status" role="status">
+                <span>
+                  Выбрано <b>{pinned.length}</b> из {MAX_PINNED}
+                </span>
+                <small>
+                  {pinned.length >= MAX_PINNED
+                    ? "Снимите один из выбранных показателей, чтобы добавить другой."
+                    : "Отмеченные показатели отображаются в панели выше."}
+                </small>
+              </div>
               <label className="search">
                 <Search />
                 <input
@@ -203,7 +247,7 @@ export function OperatorPanel({
                       <input
                         type="checkbox"
                         checked={checked}
-                        disabled={!checked && pinned.length >= 6}
+                        disabled={!checked && pinned.length >= MAX_PINNED}
                         onChange={() =>
                           setPinned(
                             checked
@@ -240,30 +284,15 @@ export function OperatorPanel({
                 </HelpTooltip>
               </label>
             )}
-            {mode === "period" && (
-              <label className="stacked-field">
-                <span>Показывать за период</span>
-                <select
-                  value={statistic}
-                  onChange={(event) => setStatistic(event.target.value)}
-                >
-                  <option value="median">Медиана</option>
-                  <option value="mean">Среднее</option>
-                  <option value="min">Минимум</option>
-                  <option value="max">Максимум</option>
-                  <option value="p05">P05</option>
-                  <option value="p95">P95</option>
-                  <option value="std">Стандартное отклонение</option>
-                </select>
-              </label>
+            {filterTarget === "trends" && (
+              <div className="panel-signal-picker">
+                <SignalSelector
+                  metrics={metrics}
+                  selected={selected}
+                  onChange={setSelected}
+                />
+              </div>
             )}
-            <div className="panel-signal-picker">
-              <SignalSelector
-                metrics={metrics}
-                selected={selected}
-                onChange={setSelected}
-              />
-            </div>
           </div>
         )}
 
