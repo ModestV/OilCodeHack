@@ -9,6 +9,7 @@
 - `databases/json/process_state_snapshots.jsonl` - готовые снапшоты `ProcessState` для запуска агентов.
 - `databases/oilcode_agent_test.db` - SQLite-версия тех же тестовых данных.
 - `docs/agents.md` - контракт работы каждого агента: вход, анализ, выход.
+- `docs/assumptions-and-limits.md` - паспорт временных допущений и границ применимости стенда.
 - `docs/database.md` - описание тестовых баз и связи с исходными данными хакатона.
 - `scripts/build_test_databases.py` - генератор тестовых CSV, JSONL и SQLite.
 - `app.py` и `public/` - примитивный интерфейс для запуска оркестратора и просмотра agent trace.
@@ -43,7 +44,7 @@
 Запускать из корня репозитория:
 
 ```bash
-/Users/vozderjus/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 "Code 3.0/agent_testbench/scripts/build_test_databases.py"
+/Users/vozderjus/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 "Code 3.0/OilCodeHack/agent_testbench/scripts/build_test_databases.py"
 ```
 
 Скрипт не изменяет исходные файлы хакатона. Он только читает их и перезаписывает тестовые файлы внутри `Code 3.0/agent_testbench/databases/`.
@@ -53,7 +54,7 @@
 Из корня репозитория:
 
 ```bash
-/Users/vozderjus/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 "Code 3.0/agent_testbench/app.py"
+/Users/vozderjus/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 "Code 3.0/OilCodeHack/agent_testbench/app.py"
 ```
 
 После запуска открыть:

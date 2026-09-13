@@ -112,8 +112,8 @@ def recent_rows(table: str, time_col: str, timestamp: str, limit: int = 12) -> l
         rows = conn.execute(
             f'''
             select * from "{table}"
-            where "{time_col}" <= ?
-            order by "{time_col}" desc
+            where datetime("{time_col}") <= datetime(?)
+            order by datetime("{time_col}") desc
             limit ?
             ''',
             (timestamp, limit),

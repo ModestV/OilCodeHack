@@ -2,7 +2,12 @@ from __future__ import annotations
 
 from typing import Any
 
-from .common import SULFUR_LIMIT_MG_KG, AgentResult, CONTROLLED_PARAMETERS
+from .common import (
+    MIN_RECOMMEND_CONFIDENCE,
+    SULFUR_LIMIT_MG_KG,
+    AgentResult,
+    CONTROLLED_PARAMETERS,
+)
 
 
 def _violates_forbidden(change: dict[str, Any], forbidden: list[dict[str, Any]]) -> str | None:
@@ -26,7 +31,9 @@ def run(process_state: dict[str, Any]) -> dict[str, Any]:
 
     accepted = []
     rejected = []
-    forbidden_changes = reliability.get("forbidden_changes", [])
+    reliability_forbidden = reliability.get("forbidden_changes", [])
+    dq_forbidden = dq.get("forbidden_changes", [])
+    forbidden_changes = [*reliability_forbidden, *dq_forbidden]
 
     for scenario in scenarios:
         reasons = []
@@ -43,7 +50,7 @@ def run(process_state: dict[str, Any]) -> dict[str, Any]:
 
             forbidden_reason = _violates_forbidden(change, forbidden_changes)
             if forbidden_reason:
-                reasons.append(f"{parameter} change forbidden by Reliability Agent: {forbidden_reason}")
+                reasons.append(f"{parameter} change forbidden by safety policy: {forbidden_reason}")
 
         effect = scenario.get("expected_effect", {})
         sulfur = effect.get("sulfur_mg_kg")
@@ -55,6 +62,12 @@ def run(process_state: dict[str, Any]) -> dict[str, Any]:
         risk = effect.get("reliability_risk_score")
         if risk is not None and float(risk) >= 0.8:
             reasons.append("reliability_risk_score >= 0.8")
+
+        confidence = scenario.get("confidence")
+        if confidence is None or float(confidence) < MIN_RECOMMEND_CONFIDENCE:
+            reasons.append(
+                f"scenario confidence < {MIN_RECOMMEND_CONFIDENCE:.2f} or unavailable"
+            )
 
         if not dq.get("can_recommend", False):
             reasons.append("DQ Agent returned can_recommend = false")
@@ -76,14 +89,17 @@ def run(process_state: dict[str, Any]) -> dict[str, Any]:
         input_summary={
             "candidate_count": len(scenarios),
             "can_recommend": dq.get("can_recommend"),
-            "forbidden_changes": forbidden_changes,
+            "reliability_forbidden_changes": reliability_forbidden,
+            "dq_forbidden_changes": dq_forbidden,
             "sulfur_limit_mg_kg": SULFUR_LIMIT_MG_KG,
+            "min_recommend_confidence": MIN_RECOMMEND_CONFIDENCE,
         },
         analysis_steps=[
             "Проверен whitelist управляемых параметров.",
             "Проверены модельные диапазоны proposed-значений.",
             "Проверен предел sulfur <= 10 mg/kg.",
-            "Проверены запреты Reliability Agent и флаг can_recommend от DQ.",
+            "Проверен минимальный confidence сценария для операторской рекомендации.",
+            "Проверены запреты Reliability Agent, DQ Agent и флаг can_recommend от DQ.",
         ],
         output={
             "accepted_scenarios": accepted,

@@ -39,6 +39,23 @@
         </article>
       </section>
 
+      <section class="explainability" aria-labelledby="explainabilityTitle">
+        <div class="section-head">
+          <div>
+            <h2 id="explainabilityTitle">Почему система приняла это решение</h2>
+            <p>Краткий разбор для оператора и для demo.</p>
+          </div>
+        </div>
+        <div class="explanation-tabs" role="tablist" aria-label="Разбор решения">
+          <button type="button" class="explanation-tab active" data-view="recommendation" role="tab">Рекомендация</button>
+          <button type="button" class="explanation-tab" data-view="why" role="tab">Почему</button>
+          <button type="button" class="explanation-tab" data-view="constraints" role="tab">Ограничения</button>
+          <button type="button" class="explanation-tab" data-view="rejections" role="tab">Отклонённые сценарии</button>
+          <button type="button" class="explanation-tab" data-view="trace" role="tab">Трассировка</button>
+        </div>
+        <div id="explanationContent" class="explanation-content" aria-live="polite"></div>
+      </section>
+
       <section class="workspace">
         <aside class="tables">
           <div class="section-head">

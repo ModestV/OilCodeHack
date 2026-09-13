@@ -4,6 +4,7 @@ from typing import Any
 
 from .common import (
     CRITICAL_TAGS,
+    CONTROLLED_PARAMETERS,
     FRESH_LIMS_HOURS,
     FRESH_PAK_HOURS,
     AgentResult,
@@ -27,6 +28,8 @@ def run(process_state: dict[str, Any]) -> dict[str, Any]:
             if source.get(tag) is None:
                 missing_critical_tags.append(tag)
 
+    sulfur_lims = latest_lims.get("Mg.Sulfur")
+    sulfur_pak = latest_pak.get("24-2000:Mg.Sulfur")
     lims_ages = [
         float(item.get("age_hours", 999))
         for item in latest_lims.values()
@@ -37,11 +40,35 @@ def run(process_state: dict[str, Any]) -> dict[str, Any]:
         for item in latest_pak.values()
         if item.get("age_hours") is not None
     ]
-    lims_age_hours = min(lims_ages) if lims_ages else None
-    pak_age_hours = min(pak_ages) if pak_ages else None
+    lims_age_hours = (
+        float(sulfur_lims["age_hours"])
+        if sulfur_lims and sulfur_lims.get("age_hours") is not None
+        else (min(lims_ages) if lims_ages else None)
+    )
+    pak_age_hours = (
+        float(sulfur_pak["age_hours"])
+        if sulfur_pak and sulfur_pak.get("age_hours") is not None
+        else (min(pak_ages) if pak_ages else None)
+    )
 
     anomalies: list[str] = []
+    forbidden_changes: list[dict[str, str]] = []
     statistical_checks: dict[str, Any] = {}
+
+    def forbid_parameter(parameter: str, reason: str) -> None:
+        if parameter not in CONTROLLED_PARAMETERS:
+            return
+        for direction in ("increase", "decrease"):
+            forbidden_changes.append(
+                {
+                    "parameter": parameter,
+                    "direction": direction,
+                    "reason": reason,
+                }
+            )
+
+    for tag in missing_critical_tags:
+        forbid_parameter(tag, f"{tag}: критичный тег недоступен, управление запрещено")
     if lims_age_hours is None:
         anomalies.append("ЛИМС недоступен для выбранного среза")
     elif lims_age_hours > FRESH_LIMS_HOURS:
@@ -52,8 +79,6 @@ def run(process_state: dict[str, Any]) -> dict[str, Any]:
     elif pak_age_hours > FRESH_PAK_HOURS:
         anomalies.append(f"ПАК устарел: {pak_age_hours:.1f} ч")
 
-    sulfur_lims = latest_lims.get("Mg.Sulfur")
-    sulfur_pak = latest_pak.get("24-2000:Mg.Sulfur")
     if sulfur_lims and sulfur_pak:
         diff = abs(float(sulfur_lims["value"]) - float(sulfur_pak["value"]))
         if diff > 1.5 and float(sulfur_lims.get("age_hours", 999)) <= FRESH_LIMS_HOURS:
@@ -84,6 +109,7 @@ def run(process_state: dict[str, Any]) -> dict[str, Any]:
                 anomalies.append(f"{tag}: robust z-score {z_score} за пределами нормы")
             if flatline["is_flatline"]:
                 anomalies.append(f"{tag}: flatline за последние {flatline['run_length']} точек")
+                forbid_parameter(tag, f"{tag}: flatline, управление по недостоверному тегу запрещено")
             if tag_trend["delta"] is not None:
                 p05 = profile["p05"]
                 p95 = profile["p95"]
@@ -149,6 +175,7 @@ def run(process_state: dict[str, Any]) -> dict[str, Any]:
             },
             "missing_critical_tags": missing_critical_tags,
             "anomalies": anomalies,
+            "forbidden_changes": forbidden_changes,
             "statistical_checks": statistical_checks,
             "source_priority_used": {
                 "sulfur": sulfur_source,

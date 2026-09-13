@@ -7,7 +7,7 @@ from pathlib import Path
 import pandas as pd
 
 
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = Path(__file__).resolve().parents[4]
 BENCH_ROOT = Path(__file__).resolve().parents[1]
 DB_DIR = BENCH_ROOT / "databases"
 CSV_DIR = DB_DIR / "csv"
@@ -94,8 +94,8 @@ def build_unit_242000() -> pd.DataFrame:
         df.loc[36, "test_case"] = "missing_feed_flow"
     if "F9" in df.columns:
         flat_value = df.loc[50, "F9"]
-        df.loc[50:56, "F9"] = flat_value
-        df.loc[50:56, "test_case"] = "flatline_signal"
+        df.loc[49:56, "F9"] = flat_value
+        df.loc[49:56, "test_case"] = "flatline_signal"
     return df
 
 

@@ -93,6 +93,7 @@ def _recommendation_packet(
         }
 
     confidence = min(
+        float(state["agent_results"]["data_quality"].get("confidence", 0.0)),
         float(selected.get("confidence", 0.0)),
         float(state["agent_results"]["quality_state"].get("confidence", 0.0)),
         float(state["agent_results"]["reliability_state"].get("confidence", 0.0)),

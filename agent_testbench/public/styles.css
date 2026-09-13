@@ -120,6 +120,98 @@ main {
   background: var(--surface);
 }
 
+.explainability {
+  margin-bottom: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.explainability .section-head p {
+  margin-top: 4px;
+}
+
+.explanation-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 12px 14px 0;
+  border-bottom: 1px solid var(--line);
+  overflow-x: auto;
+}
+
+.explanation-tab {
+  height: 34px;
+  flex: 0 0 auto;
+  color: var(--ink);
+  background: white;
+  border-color: var(--line);
+}
+
+.explanation-tab.active {
+  color: white;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.explanation-content {
+  min-height: 148px;
+  padding: 14px;
+}
+
+.explanation-grid,
+.reason-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.reason-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.explanation-grid article,
+.reason-grid article,
+.rejection-card {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface-soft);
+}
+
+.explanation-grid strong {
+  display: block;
+  margin-top: 7px;
+  line-height: 1.35;
+}
+
+.reason-grid p,
+.explanation-message {
+  margin: 0 0 8px;
+  color: var(--ink);
+}
+
+.explanation-content ul {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.empty-state {
+  margin: 0;
+  color: var(--muted);
+}
+
+.rejection-card + .rejection-card {
+  margin-top: 10px;
+}
+
+.trace-json {
+  min-height: 0;
+  max-height: 300px;
+}
+
 .summary-grid strong {
   display: block;
   margin-top: 8px;
@@ -306,7 +398,9 @@ pre,
   .run-panel,
   .summary-grid,
   .workspace,
-  .step-body {
+  .step-body,
+  .explanation-grid,
+  .reason-grid {
     grid-template-columns: 1fr;
   }
 }
