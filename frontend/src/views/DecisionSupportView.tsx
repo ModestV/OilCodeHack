@@ -1,15 +1,26 @@
 import { useMemo, useState, type FormEvent } from "react";
 import {
   AlertTriangle,
+  ArrowRight,
   CheckCircle2,
+  Clipboard,
+  Database,
   FlaskConical,
+  History,
+  Info,
+  Lightbulb,
   Play,
+  RotateCcw,
   SlidersHorizontal,
 } from "lucide-react";
 import { api } from "../api";
 import type { ScenarioRequest, ScenarioResult } from "../types";
 import { Chart } from "../components/Chart";
 import { formatNumber } from "../visualization";
+import {
+  pipelineStages,
+  recommendationScenarios,
+} from "../demo/decisionSupportDemo";
 
 const controls = [
   ["ht.P8", "Температура на входе Р-202", "ед."],
@@ -64,15 +75,24 @@ export function DecisionSupportView({
   datasetId,
   at,
   sandbox,
+  onOpenSandbox,
 }: {
   datasetId: string;
   at: string;
   sandbox: boolean;
+  onOpenSandbox?: () => void;
 }) {
   const [request, setRequest] = useState(() => initial(at, sandbox));
   const [result, setResult] = useState<ScenarioResult | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [sourceMode, setSourceMode] = useState<"latest" | "period">("latest");
+  const [pipelineStarted, setPipelineStarted] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(
+    "Последний доступный срез · 14:20",
+  );
+  const [manualMode, setManualMode] = useState(false);
+  const [copied, setCopied] = useState(false);
   const applyPreset = (preset: "base" | "feed" | "strict") => {
     const next = initial(at, sandbox);
     if (preset === "feed") next.feed_sulfur = 30;
@@ -137,8 +157,122 @@ export function DecisionSupportView({
     [request.targets.sulfur_max, result],
   );
 
+  if (!sandbox) {
+    return (
+      <section className="decision-page recommendation-page">
+        <section className="decision-band recommendation-hero">
+          <div className="section-heading">
+            <div>
+              <h2>
+                <Lightbulb /> Рекомендации по качеству
+              </h2>
+              <p>
+                Соберите рекомендацию по последним данным или выбранному
+                периоду.
+              </p>
+              <small className="model-context">
+                Демонстрационный pipeline: данные → агенты → 10 сценариев → 6
+                сценариев → текст рекомендации
+              </small>
+            </div>
+            <button
+              className="primary"
+              type="button"
+              onClick={() => setPipelineStarted(true)}
+            >
+              <Play />{" "}
+              {pipelineStarted ? "Обновить расчёт" : "Получить рекомендацию"}
+            </button>
+          </div>
+          <div
+            className="support-switch"
+            role="group"
+            aria-label="Период рекомендации"
+          >
+            <button
+              type="button"
+              className={sourceMode === "latest" ? "active" : ""}
+              onClick={() => setSourceMode("latest")}
+            >
+              Последние данные
+            </button>
+            <button
+              type="button"
+              className={sourceMode === "period" ? "active" : ""}
+              onClick={() => setSourceMode("period")}
+            >
+              Выбранный период
+            </button>
+          </div>
+          {sourceMode === "period" && (
+            <div className="scenario-fields three">
+              <label>
+                Начало периода
+                <input type="datetime-local" defaultValue={at.slice(0, 16)} />
+              </label>
+              <label>
+                Конец периода
+                <input type="datetime-local" defaultValue={at.slice(0, 16)} />
+              </label>
+              <label>
+                Горизонт
+                <select defaultValue="180">
+                  <option value="60">1 час</option>
+                  <option value="120">2 часа</option>
+                  <option value="180">3 часа</option>
+                </select>
+              </label>
+            </div>
+          )}
+          <div className="support-meta">
+            <span>
+              <Database /> Набор данных: {datasetId}
+            </span>
+            <span>
+              <History /> Момент: {at.replace("T", " ")}
+            </span>
+            <span className="status-chip ok">
+              <CheckCircle2 /> Входные данные готовы
+            </span>
+          </div>
+        </section>
+        {pipelineStarted && (
+          <PipelinePreview
+            onOpenSandbox={onOpenSandbox}
+            onCopy={() => {
+              setCopied(true);
+              setTimeout(() => setCopied(false), 1600);
+            }}
+            copied={copied}
+          />
+        )}
+        {!pipelineStarted && (
+          <section className="empty-state compact">
+            <Lightbulb />
+            <h2>Рекомендация ещё не рассчитана</h2>
+            <p>
+              Выберите область данных и запустите демонстрационный pipeline.
+            </p>
+          </section>
+        )}
+      </section>
+    );
+  }
+
   return (
     <form className="decision-page" onSubmit={run}>
+      <DatasetRowPicker
+        selectedRow={selectedRow}
+        setSelectedRow={setSelectedRow}
+        manualMode={manualMode}
+        setManualMode={setManualMode}
+      />
+      {selectedRow && !manualMode && (
+        <div className="context-banner">
+          <Info /> Загружена строка «{selectedRow}». Изменения применяются
+          только к этому сценарию.
+        </div>
+      )}
       <section className="decision-band">
         <div className="section-heading">
           <div>
@@ -152,9 +286,13 @@ export function DecisionSupportView({
                 ? "Измените исходное качество, воздействия и состав смеси."
                 : "Расчёт по простой линейной модели с явным лагом отклика."}
             </p>
+            <small className="model-context">
+              Локальный расчёт для закрытой сети · LLM не требуется · качество и
+              безопасность имеют приоритет над стоимостью
+            </small>
           </div>
           <button className="primary" type="submit" disabled={loading}>
-            <Play /> {loading ? "Расчёт…" : "Рассчитать"}
+            <Play /> {loading ? "Расчёт…" : "Рассчитать сценарий"}
           </button>
         </div>
         <div className="scenario-fields">
@@ -554,6 +692,182 @@ export function DecisionSupportView({
           </details>
         </>
       )}
+      <button
+        className="secondary reset-scenario"
+        type="button"
+        onClick={() => {
+          setRequest(initial(at, true));
+          setResult(null);
+          setError("");
+        }}
+      >
+        <RotateCcw /> Сбросить к исходным
+      </button>
     </form>
+  );
+}
+
+function DatasetRowPicker({
+  selectedRow,
+  setSelectedRow,
+  manualMode,
+  setManualMode,
+}: {
+  selectedRow: string;
+  setSelectedRow: (value: string) => void;
+  manualMode: boolean;
+  setManualMode: (value: boolean) => void;
+}) {
+  return (
+    <section className="decision-band dataset-picker">
+      <div className="section-heading">
+        <div>
+          <h2>
+            <Database /> Исходные данные
+          </h2>
+          <p>
+            Начните с готового среза датасета или переключитесь на ручной ввод.
+          </p>
+        </div>
+        <span className="subtle-badge">Рекомендуемый путь</span>
+      </div>
+      <div className="picker-row">
+        <label>
+          Строка датасета
+          <select
+            disabled={manualMode}
+            value={selectedRow}
+            onChange={(e) => setSelectedRow(e.target.value)}
+          >
+            <option>Последний доступный срез · 14:20</option>
+            <option>Проба ЛИМС · 12:00</option>
+            <option>Срез перед отклонением · 08:30</option>
+          </select>
+        </label>
+        <button
+          type="button"
+          className={manualMode ? "secondary" : "ghost-button"}
+          onClick={() => setManualMode(!manualMode)}
+        >
+          {manualMode ? "Выбрать строку" : "Ввести вручную"}
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function PipelinePreview({
+  onOpenSandbox,
+  onCopy,
+  copied,
+}: {
+  onOpenSandbox?: () => void;
+  onCopy: () => void;
+  copied: boolean;
+}) {
+  return (
+    <>
+      <section className="decision-band pipeline-card">
+        <div className="section-heading">
+          <div>
+            <h2>Состояние pipeline</h2>
+            <p>
+              Статусы ниже демонстрационные и готовы к замене реальным adapter.
+            </p>
+          </div>
+          <span className="status-chip ok">
+            <CheckCircle2 /> Готово
+          </span>
+        </div>
+        <ol className="pipeline-list">
+          {pipelineStages.map((stage, index) => (
+            <li key={stage} className="complete">
+              <span>{index + 1}</span>
+              <div>
+                <b>{stage}</b>
+                <small>{index < 3 ? "Подтверждено" : "Demo-результат"}</small>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </section>
+      <section className="decision-band recommendation-result">
+        <div className="section-heading">
+          <div>
+            <h2>Рекомендация для оператора</h2>
+            <p>
+              Модель предлагает удерживать качество в целевом диапазоне и
+              проверить комбинацию воздействий.
+            </p>
+          </div>
+          <span className="confidence">Уверенность 86%</span>
+        </div>
+        <div className="recommendation-grid">
+          <article>
+            <small>Ожидаемый эффект</small>
+            <strong>−2,6 мг/кг серы</strong>
+            <span>за 90 минут</span>
+          </article>
+          <article>
+            <small>Риск</small>
+            <strong>Средний</strong>
+            <span>нужна проверка отклика</span>
+          </article>
+          <article>
+            <small>Стоимость</small>
+            <strong>+1%</strong>
+            <span>к базовому режиму</span>
+          </article>
+        </div>
+        <div className="recommendation-actions">
+          <button type="button" className="primary" onClick={onOpenSandbox}>
+            <FlaskConical /> Открыть в песочнице <ArrowRight />
+          </button>
+          <button type="button" className="secondary" onClick={onCopy}>
+            <Clipboard /> {copied ? "Скопировано" : "Скопировать"}
+          </button>
+          <button type="button" className="secondary">
+            <History /> Сравнить сценарии
+          </button>
+        </div>
+      </section>
+      <section className="decision-band">
+        <div className="section-heading">
+          <div>
+            <h2>Отобранные сценарии</h2>
+            <p>
+              Из 10 вариантов оставлены 6 с лучшим балансом качества, риска и
+              стоимости.
+            </p>
+          </div>
+        </div>
+        <div className="scenario-list">
+          {recommendationScenarios.map((scenario) => (
+            <article key={scenario.id}>
+              <div>
+                <b>{scenario.title}</b>
+                <small>
+                  {scenario.effect} · риск: {scenario.risk}
+                </small>
+              </div>
+              <span>
+                {scenario.cost}
+                <small>{scenario.confidence}%</small>
+              </span>
+            </article>
+          ))}
+        </div>
+        <details className="model-assumptions">
+          <summary>Источники и допущения</summary>
+          <ul>
+            <li>Использован выбранный датасет и последний доступный момент.</li>
+            <li>
+              Статусы агентов и текст рекомендации являются демонстрационными.
+            </li>
+            <li>Текущая линейная модель не заменяет промышленную валидацию.</li>
+          </ul>
+        </details>
+      </section>
+    </>
   );
 }

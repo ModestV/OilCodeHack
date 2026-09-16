@@ -2587,6 +2587,216 @@ select:focus-visible {
 .model-assumptions li + li {
   margin-top: 6px;
 }
+.recommendation-hero h2,
+.dataset-picker h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.recommendation-hero h2 svg,
+.dataset-picker h2 svg {
+  width: 20px;
+  color: var(--blue);
+}
+.support-switch {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 3px;
+  margin: 18px 0 12px;
+  background: #f7f9fb;
+}
+.support-switch button,
+.ghost-button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.support-switch button.active,
+.ghost-button:hover {
+  background: #fff;
+  color: var(--blue);
+  box-shadow: 0 1px 3px #12263d18;
+}
+.support-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  color: var(--muted);
+  font-size: 12px;
+  align-items: center;
+}
+.support-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.support-meta svg {
+  width: 14px;
+}
+.status-chip,
+.subtle-badge,
+.confidence {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 999px;
+  padding: 5px 9px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.status-chip.ok {
+  color: #157344;
+  background: #eaf8f0;
+}
+.status-chip svg {
+  width: 13px;
+}
+.subtle-badge {
+  color: var(--blue);
+  background: #edf6fc;
+}
+.confidence {
+  color: #157344;
+  background: #eaf8f0;
+}
+.pipeline-list {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.pipeline-list li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: #fbfcfd;
+}
+.pipeline-list li > span {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #eaf8f0;
+  color: #157344;
+  font-weight: 700;
+  font-size: 11px;
+  flex: 0 0 auto;
+}
+.pipeline-list b,
+.pipeline-list small {
+  display: block;
+}
+.pipeline-list small,
+.scenario-list small {
+  color: var(--muted);
+  margin-top: 4px;
+  font-size: 11px;
+}
+.recommendation-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.recommendation-grid article {
+  border: 1px solid var(--border);
+  padding: 14px;
+  border-radius: 7px;
+}
+.recommendation-grid small,
+.recommendation-grid span {
+  display: block;
+  color: var(--muted);
+}
+.recommendation-grid strong {
+  display: block;
+  font-size: 24px;
+  margin: 9px 0 3px;
+}
+.recommendation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 18px;
+}
+.recommendation-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.recommendation-actions svg {
+  width: 16px;
+}
+.scenario-list {
+  display: grid;
+  gap: 8px;
+}
+.scenario-list article {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.scenario-list article > div,
+.scenario-list article > span {
+  display: flex;
+  flex-direction: column;
+}
+.scenario-list article > span {
+  text-align: right;
+  color: var(--blue);
+  font-weight: 700;
+}
+.dataset-picker {
+  border-left: 3px solid var(--blue);
+}
+.picker-row {
+  display: flex;
+  gap: 12px;
+  align-items: end;
+  flex-wrap: wrap;
+}
+.picker-row label {
+  min-width: min(420px, 100%);
+}
+.picker-row button {
+  height: 38px;
+}
+.context-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #b7d9ed;
+  background: #f0f8fd;
+  color: #225b7e;
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-bottom: 14px;
+  font-size: 13px;
+}
+.context-banner svg {
+  width: 16px;
+}
+.reset-scenario {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 16px;
+}
+.reset-scenario svg {
+  width: 15px;
+}
 
 @media (max-width: 1050px) {
   .decision-results {
@@ -2622,5 +2832,13 @@ select:focus-visible {
   }
   .decision-results article:last-child {
     border-bottom: 0;
+  }
+  .pipeline-list,
+  .recommendation-grid {
+    grid-template-columns: 1fr;
+  }
+  .recommendation-actions button {
+    flex: 1 1 180px;
+    justify-content: center;
   }
 }

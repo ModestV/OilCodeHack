@@ -566,6 +566,7 @@ export function App() {
               datasetId={datasetId}
               at={to}
               sandbox={page === "sandbox"}
+              onOpenSandbox={() => setPage("sandbox")}
             />
           ) : (
             <section className="empty-state compact">
