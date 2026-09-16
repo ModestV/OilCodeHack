@@ -494,26 +494,28 @@ export function App() {
         </div>
         <nav aria-label="Основные разделы">
           <button
+            aria-current={page === "monitoring" ? "page" : undefined}
             className={page === "monitoring" ? "active" : ""}
             onClick={() => navigate("monitoring")}
           >
             <BarChart3 /> <span>Мониторинг</span>
           </button>
-        </nav>
-        <div className="nav-development">
+
           <button
+            aria-current={page === "recommendations" ? "page" : undefined}
             className={page === "recommendations" ? "active" : ""}
             onClick={() => navigate("recommendations")}
           >
             <Lightbulb /> <span>Рекомендации</span>
           </button>
           <button
+            aria-current={page === "sandbox" ? "page" : undefined}
             className={page === "sandbox" ? "active" : ""}
             onClick={() => navigate("sandbox")}
           >
             <Beaker /> <span>Песочница</span>
           </button>
-        </div>
+        </nav>
         <div className="history">
           <Database />
           <span>Исторические данные</span>
@@ -564,6 +566,8 @@ export function App() {
             <DecisionSupportView
               key={`${datasetId}:${page}`}
               datasetId={datasetId}
+              datasetName={manifest.name}
+              latestAt={manifest.telemetry_end || manifest.end || to}
               at={to}
               sandbox={page === "sandbox"}
               onOpenSandbox={() => setPage("sandbox")}

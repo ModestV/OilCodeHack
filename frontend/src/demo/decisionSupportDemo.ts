@@ -13,7 +13,7 @@ export const pipelineStages = [
   "Оркестратор распределил задачи агентам",
   "Сформировано 10 сценариев",
   "Отобрано 6 сценариев",
-  "Подготовлена человекочитаемая рекомендация",
+  "Подготовлен текст рекомендации",
 ];
 
 export const recommendationScenarios: RecommendationScenario[] = [
@@ -35,7 +35,7 @@ export const recommendationScenarios: RecommendationScenario[] = [
   },
   {
     id: "s3",
-    title: "Комбинация P8 + T11",
+    title: "Температура и расход · P8 + T11",
     effect: "−2,6 мг/кг серы",
     risk: "Средний",
     cost: "+1%",
@@ -51,7 +51,7 @@ export const recommendationScenarios: RecommendationScenario[] = [
   },
   {
     id: "s5",
-    title: "Блендинг резервуаров 1/2",
+    title: "Смесь из двух резервуаров",
     effect: "T95 −4 °C",
     risk: "Средний",
     cost: "−5%",
@@ -59,7 +59,7 @@ export const recommendationScenarios: RecommendationScenario[] = [
   },
   {
     id: "s6",
-    title: "Блендинг с присадкой",
+    title: "Смесь с присадкой",
     effect: "Цетан +1,4",
     risk: "Высокий",
     cost: "+7%",

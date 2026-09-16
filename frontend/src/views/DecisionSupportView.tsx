@@ -4,18 +4,13 @@ import {
   ArrowRight,
   CheckCircle2,
   Clipboard,
-  Database,
-  FlaskConical,
-  History,
-  Info,
-  Lightbulb,
   Play,
   RotateCcw,
-  SlidersHorizontal,
 } from "lucide-react";
 import { api } from "../api";
 import type { ScenarioRequest, ScenarioResult } from "../types";
 import { Chart } from "../components/Chart";
+import { offset } from "../components/TimeControls";
 import { formatNumber } from "../visualization";
 import {
   pipelineStages,
@@ -76,10 +71,14 @@ export function DecisionSupportView({
   at,
   sandbox,
   onOpenSandbox,
+  datasetName,
+  latestAt,
 }: {
   datasetId: string;
   at: string;
   sandbox: boolean;
+  datasetName: string;
+  latestAt: string;
   onOpenSandbox?: () => void;
 }) {
   const [request, setRequest] = useState(() => initial(at, sandbox));
@@ -88,11 +87,15 @@ export function DecisionSupportView({
   const [loading, setLoading] = useState(false);
   const [sourceMode, setSourceMode] = useState<"latest" | "period">("latest");
   const [pipelineStarted, setPipelineStarted] = useState(false);
-  const [selectedRow, setSelectedRow] = useState(
-    "Последний доступный срез · 14:20",
+  const [selectedRow, setSelectedRow] = useState<"base" | "feed" | "strict">(
+    "base",
   );
+  const [periodFrom, setPeriodFrom] = useState(
+    offset(latestAt, -1440).slice(0, 16),
+  );
+  const [periodTo, setPeriodTo] = useState(latestAt.slice(0, 16));
+  const [recommendationPeriod, setRecommendationPeriod] = useState("");
   const [manualMode, setManualMode] = useState(false);
-  const [copied, setCopied] = useState(false);
   const applyPreset = (preset: "base" | "feed" | "strict") => {
     const next = initial(at, sandbox);
     if (preset === "feed") next.feed_sulfur = 30;
@@ -106,6 +109,7 @@ export function DecisionSupportView({
     setError("");
   };
   const update = (path: string, value: number) => {
+    setResult(null);
     setRequest((current) => {
       const next = structuredClone(current);
       const parts = path.split(".");
@@ -158,101 +162,105 @@ export function DecisionSupportView({
   );
 
   if (!sandbox) {
+    const validPeriod =
+      sourceMode === "latest" ||
+      Boolean(periodFrom && periodTo && periodFrom < periodTo);
     return (
       <section className="decision-page recommendation-page">
-        <section className="decision-band recommendation-hero">
-          <div className="section-heading">
-            <div>
-              <h2>
-                <Lightbulb /> Рекомендации по качеству
-              </h2>
-              <p>
-                Соберите рекомендацию по последним данным или выбранному
-                периоду.
-              </p>
-              <small className="model-context">
-                Демонстрационный pipeline: данные → агенты → 10 сценариев → 6
-                сценариев → текст рекомендации
-              </small>
+        <section className="decision-band recommendation-controls">
+          <div className="support-toolbar">
+            <div
+              className="support-switch"
+              role="group"
+              aria-label="Данные для рекомендации"
+            >
+              <button
+                type="button"
+                aria-pressed={sourceMode === "latest"}
+                className={sourceMode === "latest" ? "active" : ""}
+                onClick={() => {
+                  setSourceMode("latest");
+                  setPipelineStarted(false);
+                }}
+              >
+                Последние данные
+              </button>
+              <button
+                type="button"
+                aria-pressed={sourceMode === "period"}
+                className={sourceMode === "period" ? "active" : ""}
+                onClick={() => {
+                  setSourceMode("period");
+                  setPipelineStarted(false);
+                }}
+              >
+                За период
+              </button>
             </div>
             <button
               className="primary"
               type="button"
-              onClick={() => setPipelineStarted(true)}
+              disabled={!validPeriod}
+              onClick={() => {
+                setRecommendationPeriod(
+                  sourceMode === "latest"
+                    ? `На ${displayTime(latestAt)}`
+                    : `${displayTime(periodFrom)} — ${displayTime(periodTo)}`,
+                );
+                setPipelineStarted(true);
+              }}
             >
-              <Play />{" "}
-              {pipelineStarted ? "Обновить расчёт" : "Получить рекомендацию"}
-            </button>
-          </div>
-          <div
-            className="support-switch"
-            role="group"
-            aria-label="Период рекомендации"
-          >
-            <button
-              type="button"
-              className={sourceMode === "latest" ? "active" : ""}
-              onClick={() => setSourceMode("latest")}
-            >
-              Последние данные
-            </button>
-            <button
-              type="button"
-              className={sourceMode === "period" ? "active" : ""}
-              onClick={() => setSourceMode("period")}
-            >
-              Выбранный период
+              {pipelineStarted ? "Пересчитать" : "Получить рекомендацию"}
             </button>
           </div>
           {sourceMode === "period" && (
-            <div className="scenario-fields three">
+            <div className="support-dates">
               <label>
-                Начало периода
-                <input type="datetime-local" defaultValue={at.slice(0, 16)} />
+                С
+                <input
+                  type="datetime-local"
+                  value={periodFrom}
+                  onChange={(e) => {
+                    setPeriodFrom(e.target.value);
+                    setPipelineStarted(false);
+                  }}
+                />
               </label>
               <label>
-                Конец периода
-                <input type="datetime-local" defaultValue={at.slice(0, 16)} />
+                По
+                <input
+                  type="datetime-local"
+                  value={periodTo}
+                  onChange={(e) => {
+                    setPeriodTo(e.target.value);
+                    setPipelineStarted(false);
+                  }}
+                />
               </label>
-              <label>
-                Горизонт
-                <select defaultValue="180">
-                  <option value="60">1 час</option>
-                  <option value="120">2 часа</option>
-                  <option value="180">3 часа</option>
-                </select>
-              </label>
+              {!validPeriod && (
+                <span className="error" role="status">
+                  Конец периода должен быть позже начала.
+                </span>
+              )}
             </div>
           )}
           <div className="support-meta">
-            <span>
-              <Database /> Набор данных: {datasetId}
-            </span>
-            <span>
-              <History /> Момент: {at.replace("T", " ")}
-            </span>
-            <span className="status-chip ok">
-              <CheckCircle2 /> Входные данные готовы
-            </span>
+            <span>{datasetName}</span>
+            <span>Последняя запись · {displayTime(latestAt)}</span>
           </div>
         </section>
-        {pipelineStarted && (
+        <p className="support-notice">
+          Пример рекомендации · значения условные
+        </p>
+        {pipelineStarted ? (
           <PipelinePreview
             onOpenSandbox={onOpenSandbox}
-            onCopy={() => {
-              setCopied(true);
-              setTimeout(() => setCopied(false), 1600);
-            }}
-            copied={copied}
+            period={recommendationPeriod}
           />
-        )}
-        {!pipelineStarted && (
-          <section className="empty-state compact">
-            <Lightbulb />
-            <h2>Рекомендация ещё не рассчитана</h2>
-            <p>
-              Выберите область данных и запустите демонстрационный pipeline.
-            </p>
+        ) : (
+          <section className="support-empty">
+            <h2>Здесь появится рекомендация</h2>
+            <p>Изменения режима, ожидаемое качество и риски.</p>
           </section>
         )}
       </section>
@@ -263,33 +271,20 @@ export function DecisionSupportView({
     <form className="decision-page" onSubmit={run}>
       <DatasetRowPicker
         selectedRow={selectedRow}
-        setSelectedRow={setSelectedRow}
+        onSelect={(value) => {
+          setSelectedRow(value);
+          applyPreset(value);
+        }}
         manualMode={manualMode}
-        setManualMode={setManualMode}
+        setManualMode={(value) => {
+          setManualMode(value);
+          setResult(null);
+        }}
       />
-      {selectedRow && !manualMode && (
-        <div className="context-banner">
-          <Info /> Загружена строка «{selectedRow}». Изменения применяются
-          только к этому сценарию.
-        </div>
-      )}
       <section className="decision-band">
         <div className="section-heading">
           <div>
-            <h2>
-              {sandbox
-                ? "Сценарий режима и блендинга"
-                : "Рекомендация по гидроочистке"}
-            </h2>
-            <p>
-              {sandbox
-                ? "Измените исходное качество, воздействия и состав смеси."
-                : "Расчёт по простой линейной модели с явным лагом отклика."}
-            </p>
-            <small className="model-context">
-              Локальный расчёт для закрытой сети · LLM не требуется · качество и
-              безопасность имеют приоритет над стоимостью
-            </small>
+            <h2>Условия расчёта</h2>
           </div>
           <button className="primary" type="submit" disabled={loading}>
             <Play /> {loading ? "Расчёт…" : "Рассчитать сценарий"}
@@ -297,7 +292,7 @@ export function DecisionSupportView({
         </div>
         <div className="scenario-fields">
           <label>
-            Сера в сырье, исходная
+            Сера в сырье до изменения
             <input
               type="number"
               min="0"
@@ -309,7 +304,7 @@ export function DecisionSupportView({
             />
           </label>
           <label>
-            Сера в сырье, сценарий
+            Сера в сырье после изменения
             <input
               type="number"
               min="0"
@@ -344,7 +339,7 @@ export function DecisionSupportView({
             </select>
           </label>
           <label>
-            Шаг рекомендаций
+            Шаг прогноза
             <select
               value={request.step_minutes}
               onChange={(e) => update("step_minutes", number(e.target.value))}
@@ -355,7 +350,7 @@ export function DecisionSupportView({
             </select>
           </label>
           <label>
-            Лаг отклика, минут
+            Задержка отклика, мин
             <input
               type="number"
               min="0"
@@ -368,32 +363,18 @@ export function DecisionSupportView({
             />
           </label>
         </div>
-        <div className="scenario-presets" aria-label="Тестовые сценарии">
-          <span>Тестовые сценарии</span>
-          <button type="button" onClick={() => applyPreset("base")}>
-            Базовый режим
-          </button>
-          <button type="button" onClick={() => applyPreset("feed")}>
-            Рост серы сырья
-          </button>
-          <button type="button" onClick={() => applyPreset("strict")}>
-            Строгая цель
-          </button>
-        </div>
       </section>
 
       {sandbox && request.changes && (
         <section className="decision-band">
           <div className="section-heading">
             <div>
-              <h2>Воздействия</h2>
-              <p>Три переменные подтверждены экспертом.</p>
+              <h2>Изменения режима</h2>
             </div>
-            <SlidersHorizontal />
           </div>
           <div className="scenario-fields three">
             <label>
-              Δ температуры P8
+              Изменение температуры · P8
               <input
                 type="number"
                 min="-10"
@@ -406,7 +387,7 @@ export function DecisionSupportView({
               />
             </label>
             <label>
-              Δ расхода T11, %
+              Изменение расхода · T11, %
               <input
                 type="number"
                 min="-10"
@@ -419,7 +400,7 @@ export function DecisionSupportView({
               />
             </label>
             <label>
-              Δ давления F19
+              Изменение давления · F19
               <input
                 type="number"
                 min="-2"
@@ -436,92 +417,12 @@ export function DecisionSupportView({
       )}
 
       {sandbox && (
-        <details className="model-parameters">
-          <summary>Коэффициенты простой модели</summary>
-          <div className="scenario-fields">
-            <label>
-              Перенос серы сырья
-              <input
-                type="number"
-                min="0.01"
-                step="0.01"
-                value={request.parameters.feed_sulfur_transfer}
-                onChange={(e) =>
-                  update(
-                    "parameters.feed_sulfur_transfer",
-                    number(e.target.value),
-                  )
-                }
-              />
-            </label>
-            <label>
-              Эффект температуры
-              <input
-                type="number"
-                max="-0.001"
-                step="0.01"
-                value={request.parameters.temperature_effect}
-                onChange={(e) =>
-                  update(
-                    "parameters.temperature_effect",
-                    number(e.target.value),
-                  )
-                }
-              />
-            </label>
-            <label>
-              Эффект расхода
-              <input
-                type="number"
-                min="0.01"
-                step="0.01"
-                value={request.parameters.feed_rate_effect}
-                onChange={(e) =>
-                  update("parameters.feed_rate_effect", number(e.target.value))
-                }
-              />
-            </label>
-            <label>
-              Эффект давления
-              <input
-                type="number"
-                max="-0.001"
-                step="0.01"
-                value={request.parameters.pressure_effect}
-                onChange={(e) =>
-                  update("parameters.pressure_effect", number(e.target.value))
-                }
-              />
-            </label>
-            <label>
-              Прирост цетана на 1%
-              <input
-                type="number"
-                min="0"
-                step="0.1"
-                value={request.parameters.cetane_gain_per_pct}
-                onChange={(e) =>
-                  update(
-                    "parameters.cetane_gain_per_pct",
-                    number(e.target.value),
-                  )
-                }
-              />
-            </label>
-          </div>
-        </details>
-      )}
-
-      {sandbox && (
         <section className="decision-band">
           <div className="section-heading">
             <div>
-              <h2>Блендинг</h2>
-              <p>
-                Доли нормализуются; контролируются сера, T95 и цетановое число.
-              </p>
+              <h2>Состав смеси</h2>
+              <p>Доли компонентов пересчитываются до 100%.</p>
             </div>
-            <FlaskConical />
           </div>
           <div className="blend-table-wrap">
             <table className="blend-table">
@@ -542,7 +443,7 @@ export function DecisionSupportView({
                       (key) => (
                         <td key={key}>
                           <input
-                            aria-label={`${tank.name} ${key}`}
+                            aria-label={`${tank.name}: ${{ share: "доля", sulfur: "сера", t95: "T95", cetane: "цетановое число" }[key]}`}
                             type="number"
                             min="0"
                             step="0.1"
@@ -602,6 +503,83 @@ export function DecisionSupportView({
         </section>
       )}
 
+      {sandbox && (
+        <details className="model-parameters">
+          <summary>Параметры модели</summary>
+          <div className="scenario-fields">
+            <label>
+              Перенос серы сырья
+              <input
+                type="number"
+                min="0.01"
+                step="0.01"
+                value={request.parameters.feed_sulfur_transfer}
+                onChange={(e) =>
+                  update(
+                    "parameters.feed_sulfur_transfer",
+                    number(e.target.value),
+                  )
+                }
+              />
+            </label>
+            <label>
+              Эффект температуры
+              <input
+                type="number"
+                max="-0.001"
+                step="0.01"
+                value={request.parameters.temperature_effect}
+                onChange={(e) =>
+                  update(
+                    "parameters.temperature_effect",
+                    number(e.target.value),
+                  )
+                }
+              />
+            </label>
+            <label>
+              Эффект расхода
+              <input
+                type="number"
+                min="0.01"
+                step="0.01"
+                value={request.parameters.feed_rate_effect}
+                onChange={(e) =>
+                  update("parameters.feed_rate_effect", number(e.target.value))
+                }
+              />
+            </label>
+            <label>
+              Эффект давления
+              <input
+                type="number"
+                max="-0.001"
+                step="0.01"
+                value={request.parameters.pressure_effect}
+                onChange={(e) =>
+                  update("parameters.pressure_effect", number(e.target.value))
+                }
+              />
+            </label>
+            <label>
+              Прирост цетанового числа на 1% присадки
+              <input
+                type="number"
+                min="0"
+                step="0.1"
+                value={request.parameters.cetane_gain_per_pct}
+                onChange={(e) =>
+                  update(
+                    "parameters.cetane_gain_per_pct",
+                    number(e.target.value),
+                  )
+                }
+              />
+            </label>
+          </div>
+        </details>
+      )}
+
       {error && (
         <div className="banner error" role="alert">
           {error}
@@ -649,7 +627,7 @@ export function DecisionSupportView({
             })}
           </section>
           <section className="decision-band">
-            <h2>Отклик по горизонту</h2>
+            <h2>Прогноз серы</h2>
             <Chart option={option} />
           </section>
           {result.blend && (
@@ -696,60 +674,59 @@ export function DecisionSupportView({
         className="secondary reset-scenario"
         type="button"
         onClick={() => {
-          setRequest(initial(at, true));
-          setResult(null);
-          setError("");
+          applyPreset(selectedRow);
         }}
       >
-        <RotateCcw /> Сбросить к исходным
+        <RotateCcw /> Сбросить изменения
       </button>
     </form>
   );
 }
 
+function displayTime(value: string) {
+  const [date, time] = value.split("T");
+  return `${date.split("-").reverse().join(".")} ${time?.slice(0, 5) || ""}`.trim();
+}
+
 function DatasetRowPicker({
   selectedRow,
-  setSelectedRow,
+  onSelect,
   manualMode,
   setManualMode,
 }: {
-  selectedRow: string;
-  setSelectedRow: (value: string) => void;
+  selectedRow: "base" | "feed" | "strict";
+  onSelect: (value: "base" | "feed" | "strict") => void;
   manualMode: boolean;
   setManualMode: (value: boolean) => void;
 }) {
   return (
     <section className="decision-band dataset-picker">
       <div className="section-heading">
-        <div>
-          <h2>
-            <Database /> Исходные данные
-          </h2>
-          <p>
-            Начните с готового среза датасета или переключитесь на ручной ввод.
-          </p>
-        </div>
-        <span className="subtle-badge">Рекомендуемый путь</span>
+        <h2>Исходные данные</h2>
+        <span className="support-notice">Учебный пример</span>
       </div>
       <div className="picker-row">
-        <label>
-          Строка датасета
-          <select
-            disabled={manualMode}
-            value={selectedRow}
-            onChange={(e) => setSelectedRow(e.target.value)}
-          >
-            <option>Последний доступный срез · 14:20</option>
-            <option>Проба ЛИМС · 12:00</option>
-            <option>Срез перед отклонением · 08:30</option>
-          </select>
-        </label>
+        {!manualMode ? (
+          <label>
+            Набор значений
+            <select
+              value={selectedRow}
+              onChange={(e) => onSelect(e.target.value as typeof selectedRow)}
+            >
+              <option value="base">Базовый режим</option>
+              <option value="feed">Рост серы в сырье</option>
+              <option value="strict">Сниженная цель по сере</option>
+            </select>
+          </label>
+        ) : (
+          <span className="muted">Ручной ввод</span>
+        )}
         <button
           type="button"
-          className={manualMode ? "secondary" : "ghost-button"}
+          className="ghost-button"
           onClick={() => setManualMode(!manualMode)}
         >
-          {manualMode ? "Выбрать строку" : "Ввести вручную"}
+          {manualMode ? "Выбрать пример" : "Ввести вручную"}
         </button>
       </div>
     </section>
@@ -758,116 +735,111 @@ function DatasetRowPicker({
 
 function PipelinePreview({
   onOpenSandbox,
-  onCopy,
-  copied,
+  period,
 }: {
   onOpenSandbox?: () => void;
-  onCopy: () => void;
-  copied: boolean;
+  period: string;
 }) {
+  const [copyStatus, setCopyStatus] = useState("");
+  const summary =
+    "Пример рекомендации: изменение температуры и расхода сырья. Ожидаемое снижение серы на 2,6 мг/кг за 90 минут; средний риск; стоимость +1%. Значения условные.";
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(`${period}\n${summary}`);
+      setCopyStatus("Текст скопирован");
+    } catch {
+      setCopyStatus("Не удалось скопировать. Выделите текст рекомендации.");
+    }
+  }
   return (
     <>
-      <section className="decision-band pipeline-card">
-        <div className="section-heading">
-          <div>
-            <h2>Состояние pipeline</h2>
-            <p>
-              Статусы ниже демонстрационные и готовы к замене реальным adapter.
-            </p>
-          </div>
-          <span className="status-chip ok">
-            <CheckCircle2 /> Готово
-          </span>
-        </div>
-        <ol className="pipeline-list">
-          {pipelineStages.map((stage, index) => (
-            <li key={stage} className="complete">
-              <span>{index + 1}</span>
-              <div>
-                <b>{stage}</b>
-                <small>{index < 3 ? "Подтверждено" : "Demo-результат"}</small>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </section>
       <section className="decision-band recommendation-result">
-        <div className="section-heading">
+        <p className="support-meta">{period}</p>
+        <h2>Скорректировать температуру и расход сырья</h2>
+        <p className="recommendation-copy">
+          Ожидаемое снижение серы — 2,6 мг/кг за 90 минут.
+        </p>
+        <dl className="recommendation-metrics">
           <div>
-            <h2>Рекомендация для оператора</h2>
-            <p>
-              Модель предлагает удерживать качество в целевом диапазоне и
-              проверить комбинацию воздействий.
-            </p>
+            <dt>Снижение серы</dt>
+            <dd>
+              2,6 <span>мг/кг</span>
+            </dd>
           </div>
-          <span className="confidence">Уверенность 86%</span>
-        </div>
-        <div className="recommendation-grid">
-          <article>
-            <small>Ожидаемый эффект</small>
-            <strong>−2,6 мг/кг серы</strong>
-            <span>за 90 минут</span>
-          </article>
-          <article>
-            <small>Риск</small>
-            <strong>Средний</strong>
-            <span>нужна проверка отклика</span>
-          </article>
-          <article>
-            <small>Стоимость</small>
-            <strong>+1%</strong>
-            <span>к базовому режиму</span>
-          </article>
-        </div>
+          <div>
+            <dt>Риск</dt>
+            <dd>Средний</dd>
+          </div>
+          <div>
+            <dt>Стоимость к исходной</dt>
+            <dd>
+              +1 <span>%</span>
+            </dd>
+          </div>
+        </dl>
         <div className="recommendation-actions">
           <button type="button" className="primary" onClick={onOpenSandbox}>
-            <FlaskConical /> Открыть в песочнице <ArrowRight />
+            Проверить в песочнице <ArrowRight />
           </button>
-          <button type="button" className="secondary" onClick={onCopy}>
-            <Clipboard /> {copied ? "Скопировано" : "Скопировать"}
+          <button type="button" className="ghost-button" onClick={copy}>
+            <Clipboard /> Скопировать текст
           </button>
-          <button type="button" className="secondary">
-            <History /> Сравнить сценарии
-          </button>
+          <span className="support-notice" role="status">
+            {copyStatus}
+          </span>
         </div>
       </section>
       <section className="decision-band">
         <div className="section-heading">
-          <div>
-            <h2>Отобранные сценарии</h2>
-            <p>
-              Из 10 вариантов оставлены 6 с лучшим балансом качества, риска и
-              стоимости.
-            </p>
-          </div>
+          <h2>Сравнение сценариев</h2>
+          <span className="support-notice">6 из 10 вариантов</span>
         </div>
-        <div className="scenario-list">
-          {recommendationScenarios.map((scenario) => (
-            <article key={scenario.id}>
-              <div>
-                <b>{scenario.title}</b>
-                <small>
-                  {scenario.effect} · риск: {scenario.risk}
-                </small>
-              </div>
-              <span>
-                {scenario.cost}
-                <small>{scenario.confidence}%</small>
-              </span>
-            </article>
-          ))}
+        <div
+          className="scenario-table-scroll"
+          tabIndex={0}
+          role="region"
+          aria-label="Сравнение сценариев"
+        >
+          <table className="scenario-comparison">
+            <thead>
+              <tr>
+                <th scope="col">Сценарий</th>
+                <th scope="col">Ожидаемый эффект</th>
+                <th scope="col">Риск</th>
+                <th scope="col">Стоимость</th>
+              </tr>
+            </thead>
+            <tbody>
+              {recommendationScenarios.map((scenario) => (
+                <tr
+                  key={scenario.id}
+                  className={scenario.id === "s3" ? "is-preferred" : undefined}
+                >
+                  <td>
+                    {scenario.title}
+                    {scenario.id === "s3" && <small>В рекомендации</small>}
+                  </td>
+                  <td>{scenario.effect}</td>
+                  <td>{scenario.risk}</td>
+                  <td>{scenario.cost}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-        <details className="model-assumptions">
-          <summary>Источники и допущения</summary>
-          <ul>
-            <li>Использован выбранный датасет и последний доступный момент.</li>
-            <li>
-              Статусы агентов и текст рекомендации являются демонстрационными.
-            </li>
-            <li>Текущая линейная модель не заменяет промышленную валидацию.</li>
-          </ul>
-        </details>
       </section>
+      <details className="support-details">
+        <summary>Как получена рекомендация</summary>
+        <p>Это пример результата. Расчёт рекомендаций пока не подключён.</p>
+        <ol>
+          {pipelineStages.map((stage) => (
+            <li key={stage}>{stage}</li>
+          ))}
+        </ol>
+        <p>
+          Результат модели требует проверки перед изменением режима установки.
+        </p>
+      </details>
     </>
   );
 }

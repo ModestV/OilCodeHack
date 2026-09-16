@@ -435,7 +435,7 @@ export function Trends({
           <p>
             {mode === "period"
               ? "Динамика за выбранный период"
-              : "Контекст за 24 часа до выбранного момента"}
+              : "За 24 часа до выбранного момента"}
           </p>
         </div>
       </header>
@@ -585,7 +585,7 @@ export function Statistics({
         <header>
           <div>
             <h2>Статистика периода</h2>
-            <p>Интервал расчёта [начало, конец)</p>
+            <p>Конец периода не включён в расчёт</p>
           </div>
           <select
             aria-label="Показатель распределения"
@@ -623,9 +623,7 @@ export function Statistics({
             <div>
               <h3>
                 Квартили
-                {map.get(selected)?.unit
-                  ? ` · ${map.get(selected)?.unit}`
-                  : ""}
+                {map.get(selected)?.unit ? ` · ${map.get(selected)?.unit}` : ""}
               </h3>
               {distribution?.count ? (
                 <Chart
@@ -1007,9 +1005,6 @@ export function Formulas({ formulas }: { formulas: Formula[] }) {
           заменяют лабораторную оценку.
         </HelpTooltip>
       </h2>
-      <p className="lead">
-        Диагностические формулы. Результаты не заменяют лабораторную оценку.
-      </p>
       <div className="formula-list">
         {formulas.map((f) => (
           <details key={f.id}>
@@ -1024,7 +1019,7 @@ export function Formulas({ formulas }: { formulas: Formula[] }) {
                 {{
                   experimental: "Экспериментальный",
                   invalid: "Некорректная формула",
-                  unresolved: "Нет зависимостей",
+                  unresolved: "Требует уточнения",
                   verified: "Проверен",
                 }[f.status] || f.status}
               </span>
@@ -1038,7 +1033,7 @@ export function Formulas({ formulas }: { formulas: Formula[] }) {
                 <strong>Результат:</strong> {format(f.result)} {f.unit || ""}
               </p>
               <p>
-                <strong>Основание статуса:</strong> {f.reason || "не указано"}
+                <strong>Причина:</strong> {f.reason || "не указано"}
               </p>
               <table>
                 <thead>
@@ -1208,7 +1203,7 @@ export function DataQuality({
           </p>
         )}
         <details className="assumptions-detail">
-          <summary>Методические допущения</summary>
+          <summary>Особенности расчёта</summary>
           {quality?.assumptions.map((assumption, index) => (
             <div className="assumption" key={index}>
               <Info /> {assumption}
@@ -1220,8 +1215,8 @@ export function DataQuality({
       <details className="panel diagnostic-section">
         <summary>
           <span>
-            <b>Паспорт набора</b>
-            <small>Файлы, объём, фреймы и состав источников</small>
+            <b>Источники данных</b>
+            <small>Файлы и количество измерений</small>
           </span>
           <ChevronDown />
         </summary>
@@ -1268,8 +1263,7 @@ export function DataQuality({
       <details className="panel diagnostic-section">
         <summary>
           <span>
-            <b>Экспертный анализ сигналов</b>
-            <small>Рейтинг и полная таблица качества</small>
+            <b>Качество сигналов</b>
           </span>
           <ChevronDown />
         </summary>
@@ -1339,7 +1333,7 @@ export function DataQuality({
           <summary>
             <span>
               <b>Настройки диагностики</b>
-              <small>Экспериментальные пороги свежести</small>
+              <small>Когда считать данные устаревшими</small>
             </span>
             <ChevronDown />
           </summary>
@@ -1411,7 +1405,7 @@ function FreshnessSettings({
   }
   return (
     <section className="panel">
-      <h2>Порог свежести</h2>
+      <h2>Срок актуальности данных</h2>
       <p className="lead">
         Экспериментальные пороги давности, не производственный регламент.
       </p>
