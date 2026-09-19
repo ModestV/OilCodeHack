@@ -40,6 +40,7 @@ class StandardizedRidge:
         self.alpha = float(alpha)
 
     def fit(self, frame: pd.DataFrame, target: pd.Series) -> "StandardizedRidge":
+        self.feature_columns_ = list(frame.columns)
         values = frame.to_numpy(dtype=float)
         self.medians_ = np.nanmedian(values, axis=0)
         self.medians_[~np.isfinite(self.medians_)] = 0.0
@@ -55,11 +56,37 @@ class StandardizedRidge:
         return self
 
     def predict(self, frame: pd.DataFrame) -> np.ndarray:
+        if hasattr(self, "feature_columns_"):
+            missing = [column for column in self.feature_columns_ if column not in frame.columns]
+            if missing:
+                raise ValueError(f"missing model features: {missing[:5]}")
+            frame = frame.loc[:, self.feature_columns_]
         values = frame.to_numpy(dtype=float)
         values = np.where(np.isfinite(values), values, self.medians_)
         standardized = (values - self.mean_) / self.scale_
         design = np.column_stack([np.ones(len(standardized)), standardized])
         return design @ self.coef_
+
+    def artifact(self) -> dict:
+        """Return a JSON-safe inference artifact for the runtime service.
+
+        The artifact contains only fitted parameters and feature ordering.  It
+        deliberately does not contain source observations, so the production
+        endpoint can reconstruct an as-of feature vector from its own Parquet
+        dataset while preserving the training availability boundary.
+        """
+        if not hasattr(self, "feature_columns_"):
+            raise ValueError("fit the model before exporting an artifact")
+        return {
+            "version": 1,
+            "model": "standardized_ridge_log1p",
+            "alpha": self.alpha,
+            "feature_columns": self.feature_columns_,
+            "medians": self.medians_.tolist(),
+            "mean": self.mean_.tolist(),
+            "scale": self.scale_.tolist(),
+            "coef": self.coef_.tolist(),
+        }
 
 
 def _json_default(value):
@@ -291,6 +318,20 @@ def run(source: Path, output: Path, availability_lag: pd.Timedelta) -> dict:
 
     predictions = aligned[["target_time", "feature_time", "target", "previous_lab_available", "prediction_previous_lab", "prediction_ridge", "prediction_risk_guard"]].copy()
     predictions.to_csv(output / "predictions.csv", index=False, encoding="utf-8-sig")
+    artifact = model.artifact()
+    artifact.update(
+        {
+            "target": {"point": TARGET_POINT, "parameter": TARGET_PARAMETER, "unit": "мг/кг"},
+            "availability_lag_minutes": float(availability_lag.total_seconds() / 60),
+            "feature_engineering": "current value + past-only 1h/6h rolling means + previous lab available at cutoff",
+            "risk_guard": "max(prediction_ridge, previous_lab_available)",
+            "selected_alpha": selected_alpha,
+        }
+    )
+    (output / "model.json").write_text(
+        json.dumps(artifact, ensure_ascii=False, indent=2, default=_json_default),
+        encoding="utf-8",
+    )
     metadata = {
         "source": str(source),
         "source_files": {str(p.relative_to(source)): {"bytes": p.stat().st_size, "sha256": sha256(p)}
@@ -313,6 +354,7 @@ def run(source: Path, output: Path, availability_lag: pd.Timedelta) -> dict:
         "metrics_by_year": year_metrics,
         "leakage_check": leakage,
         "metrics": metrics,
+        "model_artifact": "model.json",
     }
     (output / "metrics.json").write_text(json.dumps(metadata, ensure_ascii=False, indent=2, default=_json_default), encoding="utf-8")
     write_report(output / "REPORT.md", metadata)
@@ -363,7 +405,7 @@ def write_report(path: Path, metadata: dict) -> None:
         "",
         "Ridge на log1p-цели сопоставим с сильным baseline по MAE, но не заменяет его без дополнительной проверки по режимам. `risk_guard` намеренно сохраняет доступный высокий лабораторный результат для порогового предупреждения; его метрики нельзя читать как независимый прогноз. Это benchmark предсказательной ценности, а не доказательство причинного эффекта изменения режима. Вне области исторических признаков и при плохом качестве датчиков система должна переходить в abstain. Экстремумы не удалялись автоматически.",
         "",
-        "Артефакты: `metrics.json` (параметры, хэши источников, метрики), `predictions.csv` (малый файл результатов). Исходные CSV/XLSX в репозиторий не копируются.",
+        "Артефакты: `model.json` (параметры для runtime-инференса), `metrics.json` (параметры, хэши источников, метрики), `predictions.csv` (малый файл результатов). Исходные CSV/XLSX в репозиторий не копируются.",
     ]
     path.write_text("\n".join(rows) + "\n", encoding="utf-8")
 

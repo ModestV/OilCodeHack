@@ -47,6 +47,14 @@ class FirstIterationContractTests(unittest.TestCase):
         self.assertEqual(metrics["predicted_above_10"], 1)
         self.assertEqual(metrics["recall_above_10"], 1.0)
 
+    def test_fitted_model_exports_ordered_runtime_artifact(self):
+        train = pd.DataFrame({"sensor": [1.0, 2.0, 3.0], "other": [4.0, 5.0, 6.0]})
+        model = StandardizedRidge(alpha=10.0).fit(train, pd.Series([2.0, 4.0, 6.0]))
+        artifact = model.artifact()
+        self.assertEqual(artifact["feature_columns"], ["sensor", "other"])
+        self.assertEqual(len(artifact["coef"]), 3)
+        self.assertEqual(len(artifact["medians"]), 2)
+
 
 if __name__ == "__main__":
     unittest.main()
