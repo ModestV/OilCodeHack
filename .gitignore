@@ -1,8 +1,11 @@
-# Vault state is personal. Shared defaults are applied by tools/setup_vault.py.
-DataMap/.obsidian/
-DataMap/.trash/
-DataMap/.DS_Store
-DataMap/Thumbs.db
-__pycache__/
-*.py[cod]
 .venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+storage/
+frontend/node_modules/
+frontend/dist/
+*.tsbuildinfo
+.ruff_cache/
+.DS_Store
+*.log
