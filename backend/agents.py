@@ -304,14 +304,19 @@ class OptimizationAgent:
         predicted = result["predicted_sulfur"]
         target = result["sulfur_target_met"]
         model_forecast = (quality or {}).get("evidence", {}).get("model_forecast")
+        summary = (
+            "Сценарий достигает цели по сере"
+            if target
+            else "Сценарий не достигает цели по сере; требуется ручная проверка"
+        )
+        summary = (
+            f"{summary}; кандидатов: {len(candidates)}, выбрано: {selected['id']}, "
+            f"safety gate: {'passed' if selected['safety_gate']['passed'] else 'failed'}"
+        )
         return {
             "role": self.role,
             "status": "ok",
-            "summary": (
-                "Сценарий достигает цели по сере"
-                if target
-                else "Сценарий не достигает цели по сере; требуется ручная проверка"
-            ),
+            "summary": summary,
             "scenario": result,
             "candidates": candidates,
             "selected_candidate": selected["id"],
