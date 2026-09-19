@@ -26,6 +26,7 @@ import pandas as pd
 TARGET_POINT = "Гидроочистка"
 TARGET_PARAMETER = "Mg.Sulfur"
 DEFAULT_LAG = pd.Timedelta(hours=4)
+ALPHA_GRID = (30.0, 100.0, 300.0, 1000.0, 3000.0)
 
 
 class StandardizedRidge:
@@ -233,8 +234,17 @@ def run(source: Path, output: Path, availability_lag: pd.Timedelta) -> dict:
     X = aligned[feature_columns]
     # Sulphur has a highly skewed contamination/error tail (one 2120 mg/kg
     # value).  Log1p training keeps the first-pass model numerically stable;
-    # metrics are reported after transforming back to mg/kg.
-    model = StandardizedRidge(alpha=1000.0)
+    # metrics are reported after transforming back to mg/kg.  Select alpha on
+    # validation only; test is not consulted during model selection.
+    validation_mask = masks["validation"]
+    alpha_scores: dict[str, float] = {}
+    for alpha in ALPHA_GRID:
+        candidate = StandardizedRidge(alpha=alpha)
+        candidate.fit(X.loc[train_mask], np.log1p(y.loc[train_mask]))
+        candidate_prediction = np.maximum(0.0, np.expm1(candidate.predict(X.loc[validation_mask])))
+        alpha_scores[str(alpha)] = regression_metrics(y.loc[validation_mask], candidate_prediction)["mae"]
+    selected_alpha = min(ALPHA_GRID, key=lambda alpha: alpha_scores[str(alpha)])
+    model = StandardizedRidge(alpha=selected_alpha)
     model.fit(X.loc[train_mask], np.log1p(y.loc[train_mask]))
     aligned["prediction_ridge"] = np.maximum(0.0, np.expm1(model.predict(X)))
     aligned["prediction_previous_lab"] = aligned["previous_lab_available"]
@@ -246,6 +256,15 @@ def run(source: Path, output: Path, availability_lag: pd.Timedelta) -> dict:
             "ridge": regression_metrics(y.loc[mask], aligned.loc[mask, "prediction_ridge"]),
             "previous_lab": regression_metrics(y.loc[valid_baseline], aligned.loc[valid_baseline, "prediction_previous_lab"]),
             "rows_without_previous_lab": int((mask & ~aligned["prediction_previous_lab"].notna()).sum()),
+        }
+    year_metrics: dict[str, dict] = {}
+    years = pd.to_datetime(aligned["target_time"]).dt.year
+    for year in sorted(years.unique()):
+        mask = years.eq(year)
+        valid_baseline = mask & aligned["prediction_previous_lab"].notna()
+        year_metrics[str(int(year))] = {
+            "ridge": regression_metrics(y.loc[mask], aligned.loc[mask, "prediction_ridge"]),
+            "previous_lab": regression_metrics(y.loc[valid_baseline], aligned.loc[valid_baseline, "prediction_previous_lab"]),
         }
 
     # Explicit availability/leakage checks become part of the report, not just
@@ -275,9 +294,13 @@ def run(source: Path, output: Path, availability_lag: pd.Timedelta) -> dict:
         "aligned_rows": int(len(aligned)),
         "feature_count": int(len(feature_columns)),
         "feature_engineering": "current value + past-only 1h/6h rolling means + previous lab available at cutoff; train-only median imputation",
-        "model": "standardized Ridge (alpha=1000) on log1p(target), inverse transformed for metrics",
+        "model": "standardized Ridge on log1p(target), inverse transformed for metrics",
+        "alpha_grid": list(ALPHA_GRID),
+        "selected_alpha": selected_alpha,
+        "alpha_selection": {"split": "validation", "metric": "MAE", "scores": alpha_scores},
         "split_boundaries": {"train_end_exclusive": "2025-01-01", "validation_end_exclusive": "2026-01-01"},
         "split_rows": {name: int(mask.sum()) for name, mask in masks.items()},
+        "metrics_by_year": year_metrics,
         "leakage_check": leakage,
         "metrics": metrics,
     }
@@ -293,11 +316,12 @@ def write_report(path: Path, metadata: dict) -> None:
         "",
         "## Что проверено",
         "",
-        f"Цель: `{TARGET_POINT}`, `{TARGET_PARAMETER}`, мг/кг. Использованы {metadata['aligned_rows']} лабораторных наблюдений, сопоставленных с {metadata['feature_count']} признаками телеметрии.",
+        f"Цель: `{TARGET_POINT}`, `{TARGET_PARAMETER}`, мг/кг. Использованы {metadata['aligned_rows']} лабораторных наблюдений, сопоставленных с {metadata['feature_count']} признаками (291 телеметрический признак и доступный предыдущий лабораторный результат).",
         "",
         f"Признак доступен только не позднее чем за **{metadata['leakage_check']['required_lag_minutes']:.0f} минут** до времени отбора. В признаки вошли текущие значения, средние за 1 и 6 часов (только прошлые строки) и предыдущий лабораторный результат, если он уже доступен к этому cutoff.",
         "",
         "Разбиение по времени: train до 2025-01-01, validation — 2025 год, test — с 2026-01-01. Лабораторная цель не протягивалась вперёд и не интерполировалась.",
+        f"Гиперпараметр Ridge выбран только по MAE на validation из сетки {metadata['alpha_grid']}; выбранное значение: **{metadata['selected_alpha']}**. Test не использовался при выборе.",
         "",
         "## Метрики",
         "",
@@ -308,6 +332,17 @@ def write_report(path: Path, metadata: dict) -> None:
         for name, label in (("ridge", "Ridge"), ("previous_lab", "предыдущая проба")):
             m = metrics[split][name]
             rows.append(f"| {split} | {label} | {m['n']} | {m['mae']:.3f} | {m['rmse']:.3f} | {m['median_absolute_error']:.3f} | {m['bias_pred_minus_actual']:.3f} | {m['recall_above_10'] if m['recall_above_10'] is not None else '—'} | {m['false_alarm_rate']:.3f} |")
+    rows += [
+        "",
+        "## Стабильность по годам",
+        "",
+        "| год | n | Ridge MAE | baseline MAE | Ridge RMSE | baseline RMSE |",
+        "|---:|---:|---:|---:|---:|---:|",
+    ]
+    for year, year_metric in metadata["metrics_by_year"].items():
+        ridge = year_metric["ridge"]
+        baseline = year_metric["previous_lab"]
+        rows.append(f"| {year} | {ridge['n']} | {ridge['mae']:.3f} | {baseline['mae']:.3f} | {ridge['rmse']:.3f} | {baseline['rmse']:.3f} |")
     rows += [
         "",
         "## Проверка утечки",
