@@ -455,7 +455,7 @@ export function DecisionSupportView({
           <div className="section-heading">
             <div>
               <h2>Состав смеси</h2>
-              <p>Доли компонентов пересчитываются до 100%.</p>
+              <p>Сумма долей компонентов должна быть ровно 100%.</p>
             </div>
           </div>
           <div className="blend-table-wrap">
@@ -887,6 +887,41 @@ function PipelinePreview({
           </table>
         </div>
       </section>
+      {decision?.forecast && (
+        <section className="decision-band model-forecast" aria-label="Модельный прогноз серы">
+          <div className="section-heading">
+            <h2>Отдельный прогноз качества</h2>
+            <span className="support-notice">
+              Ridge · доступность признаков −{decision.forecast.availability_lag_minutes / 60} ч
+            </span>
+          </div>
+          <p className="recommendation-copy">
+            Математическая модель оценивает серу по исторической телеметрии до
+            контрольного времени. Сценарная траектория выше остаётся отдельным
+            расчётом эффекта изменения режима.
+          </p>
+          <dl className="recommendation-metrics">
+            <div>
+              <dt>Ridge прогноз</dt>
+              <dd>{formatNumber(decision.forecast.prediction_ridge, 2)} <span>мг/кг</span></dd>
+            </div>
+            <div>
+              <dt>Risk guard</dt>
+              <dd>{formatNumber(decision.forecast.prediction_risk_guard, 2)} <span>мг/кг</span></dd>
+            </div>
+            <div>
+              <dt>Признаки</dt>
+              <dd>{decision.forecast.feature_count - decision.forecast.imputed_feature_count}/{decision.forecast.feature_count}</dd>
+            </div>
+          </dl>
+          <p className="support-notice">
+            {decision.forecast.alarm_above_10
+              ? "Risk guard выше порога 10 мг/кг: требуется проверка технологом."
+              : "Risk guard ниже порога 10 мг/кг; recall превышений в benchmark ограничен."}
+            {decision.forecast.leakage_check.passed ? " Утечка по времени не обнаружена." : " Обнаружена временная утечка."}
+          </p>
+        </section>
+      )}
       <details className="support-details">
         <summary>Как получена рекомендация</summary>
         <p>

@@ -241,6 +241,33 @@ export interface DecisionTraceItem {
   summary: string;
 }
 
+export interface SulfurForecast {
+  at: string;
+  target: { metric_id: string; unit: string };
+  prediction_ridge: number;
+  prediction_previous_lab: number | null;
+  prediction_risk_guard: number;
+  alarm_above_10: boolean;
+  feature_cutoff: string;
+  feature_time: string | null;
+  availability_lag_minutes: number;
+  feature_count: number;
+  imputed_feature_count: number;
+  model: {
+    name: string;
+    alpha: number;
+    artifact: string;
+    risk_guard: string;
+  };
+  leakage_check: {
+    passed: boolean;
+    feature_time: string | null;
+    cutoff: string;
+    violations: number;
+  };
+  warnings: string[];
+}
+
 export interface DecisionResult {
   at: string;
   status: "recommendation" | "abstain";
@@ -250,9 +277,11 @@ export interface DecisionResult {
     target_sulfur: number;
     target_met: boolean;
     controls: ScenarioResult["controls"];
+    model_forecast: SulfurForecast | null;
   } | null;
   scenario: ScenarioResult | null;
   abstain: { reason: string; missing: string[] } | null;
+  forecast: SulfurForecast | null;
   trace: DecisionTraceItem[];
   assumptions: string[];
 }

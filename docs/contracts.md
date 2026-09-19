@@ -38,6 +38,7 @@ Manifest: `{id: output_dir.name, name, status:'ready', created_at, start, end, t
 - GET /api/datasets/{id}/quality => `{sources:manifest.sources,issues:manifest.issues,assumptions:manifest.assumptions, metrics:[{metric_id,count,invalid_count,suspect_count,flatline_count,start,end}]}`
 - POST /api/datasets/{id}/scenario accepts editable source sulfur, targets, horizon 0–180 min, step 15–60 min, linear model parameters, optional control changes, reservoir components and additive 0–3%. Returns the three confirmed controls, sulfur trajectory, blend quality, cost index and explicit assumptions.
 - POST /api/datasets/{id}/decision runs the local QualityAgent → ReliabilityAgent → OptimizationAgent → Orchestrator contour with the same request body. It returns an explainable trace and either a scenario recommendation or `abstain` with a reason when quality/freshness/control evidence is insufficient.
+- GET /api/datasets/{id}/forecast?at=ISO runs the fitted first-iteration Ridge adapter for `lims.ht.2.Mg.Sulfur`. Features are reconstructed only up to `at−4h`, missing values use train-only medians, and the response includes the leakage check, imputation count and separate `risk_guard`. The forecast is evidence for review; it does not replace the scenario model or authorize an operator action. The same object is embedded in `POST .../decision` as `forecast`.
 - GET /api/datasets/{id}/export?metrics=commaIDs&from=ISO&to=ISO&exclude_suspect=false => raw observations CSV streaming.
 - GET /api/health => `{status:'ok'}`
 

@@ -1,11 +1,27 @@
 from fastapi.testclient import TestClient
 
 from backend import app as module
+from backend.scenarios import select_sulfur
 
 
 def _client(tmp_path, monkeypatch):
     monkeypatch.setattr(module, "STORAGE", tmp_path / "storage")
     return TestClient(module.app)
+
+
+def test_sulfur_source_priority_prefers_lims_then_pak_then_kip():
+    values = {
+        "lims.ht.2.Mg.Sulfur": {"value": 8.2},
+        "pak.ht.Mg.Sulfur": {"value": 6.1},
+        "ht.Q21": {"value": 5.4},
+    }
+    assert select_sulfur(values) == (8.2, "lims.ht.2.Mg.Sulfur")
+
+    values.pop("lims.ht.2.Mg.Sulfur")
+    assert select_sulfur(values) == (6.1, "pak.ht.Mg.Sulfur")
+
+    values.pop("pak.ht.Mg.Sulfur")
+    assert select_sulfur(values) == (5.4, "ht.Q21")
 
 
 def test_decision_runs_deterministic_agents_and_returns_trace(tmp_path, monkeypatch):
@@ -44,6 +60,8 @@ def test_decision_runs_deterministic_agents_and_returns_trace(tmp_path, monkeypa
     assert body["recommendation"]["target_met"] is False
     assert body["recommendation"]["action"] == "escalate"
     assert body["scenario"]["baseline"]["sulfur"] == 12
+    assert body["forecast"]["model"]["name"].startswith("standardized Ridge")
+    assert body["forecast"]["leakage_check"]["passed"] is True
     assert "внешний LLM" in body["assumptions"][0]
 
 

@@ -29,6 +29,7 @@ from . import analytics as a
 from .agents import make_decision
 from .config import ROOT, STORAGE
 from .formulas import formula_results
+from .forecast import ForecastUnavailable, forecast_sulfur
 from .scenarios import ScenarioRequest, calculate_scenario
 
 IMPORT_LOCK = threading.Lock()
@@ -263,6 +264,16 @@ def decision(dataset_id: str, body: ScenarioRequest):
         return make_decision(dataset(dataset_id), body)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.get("/api/datasets/{dataset_id}/forecast")
+def forecast(dataset_id: str, at: str):
+    """Run the fitted, leakage-safe first-iteration sulphur forecast."""
+
+    try:
+        return forecast_sulfur(dataset(dataset_id), at)
+    except ForecastUnavailable as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
 @app.get("/api/datasets/{dataset_id}/quality")

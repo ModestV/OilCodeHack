@@ -10,6 +10,25 @@ from pydantic import BaseModel, Field, model_validator
 from .analytics import parse_time, snapshot
 
 
+# The source order follows the case requirement: a laboratory result is the
+# control fact, then the online analyser, then a future VAK result if one is
+# registered, and only then the available KIP sulphur analysers.  The current
+# bundle has no VAK metric for sulphur; ``vak.ht.Mg.Sulfur`` is kept as an
+# explicit insertion slot so a future registered VAK value is considered
+# before KIP without changing the source-priority contract.  It does not
+# invent a derived value while the metric is absent.  Keep this list in one
+# place so the scenario and agent paths cannot drift.
+SULFUR_PRIORITY_IDS = (
+    "lims.ht.2.Mg.Sulfur",
+    "pak.ht.Mg.Sulfur",
+    "vak.ht.Mg.Sulfur",
+    # Q21 is the mapped online sulphur analyser after hydro-treatment.  Q20
+    # is an upstream analyser and must not silently become the product
+    # quality baseline.
+    "ht.Q21",
+)
+
+
 class QualityTargets(BaseModel):
     sulfur_max: float = Field(default=10, gt=0)
     t95_max: float = Field(default=360, gt=0)
@@ -67,6 +86,23 @@ def _value(values: dict, metric_id: str) -> float | None:
     return item.get("value") if item else None
 
 
+def select_sulfur(values: dict) -> tuple[float | None, str | None]:
+    """Select the best available sulphur baseline and identify its source.
+
+    ``values`` is the metric-id keyed snapshot map.  Values marked invalid or
+    conflicting are already represented as ``None`` by ``snapshot`` and are
+    therefore skipped.  A stale higher-priority result is still selected and
+    is subsequently handled by the reliability gate; silently replacing it
+    with a lower-priority source would violate the source-priority contract.
+    """
+
+    for metric_id in SULFUR_PRIORITY_IDS:
+        value = _value(values, metric_id)
+        if value is not None:
+            return value, metric_id
+    return None, None
+
+
 def _automatic_changes(required_reduction: float, model: ModelParameters) -> ControlChanges:
     if required_reduction <= 0:
         return ControlChanges()
@@ -84,6 +120,14 @@ def _blend(request: ScenarioRequest) -> dict | None:
     total = sum(tank.share for tank in request.tanks)
     if total <= 0:
         raise ValueError("Суммарная доля резервуаров должна быть больше нуля")
+    # A blend recipe is a hard constraint.  Do not silently renormalize an
+    # invalid recipe: doing so can make the displayed input differ from the
+    # simulated one and hides an unsafe request.  A tiny tolerance covers
+    # decimal representation noise while still rejecting meaningful errors.
+    if abs(total - 100.0) > 1e-6:
+        raise ValueError(
+            f"Суммарная доля резервуаров должна быть равна 100%, сейчас {total:g}%"
+        )
     base = {
         key: sum(getattr(tank, key) * tank.share for tank in request.tanks) / total
         for key in ("sulfur", "t95", "cetane", "cost_index")
@@ -112,9 +156,7 @@ def calculate_scenario(directory: Path, request: ScenarioRequest) -> dict:
     values = {item["metric_id"]: item for item in frame["values"]}
     sulfur = request.current_sulfur
     if sulfur is None:
-        sulfur = _value(values, "pak.ht.Mg.Sulfur")
-    if sulfur is None:
-        sulfur = _value(values, "lims.ht.2.Mg.Sulfur")
+        sulfur, _ = select_sulfur(values)
     t95 = request.current_t95 or _value(values, "lims.ht.2.95%.T")
     cetane = request.current_cetane or _value(values, "lims.ht.2.CetaneNumber")
     if sulfur is None:

@@ -12,10 +12,10 @@ from pathlib import Path
 from typing import Any
 
 from .analytics import snapshot
-from .scenarios import ScenarioRequest, calculate_scenario
+from .scenarios import ScenarioRequest, calculate_scenario, select_sulfur
+from .forecast import ForecastUnavailable, forecast_sulfur
 
 CONTROL_IDS = ("ht.T6", "ht.F9", "ht.P13")
-SULFUR_IDS = ("pak.ht.Mg.Sulfur", "lims.ht.2.Mg.Sulfur")
 
 
 @dataclass(frozen=True)
@@ -54,16 +54,8 @@ class QualityAgent:
             sulfur_source = "request.current_sulfur"
             sulfur_item = None
         else:
-            sulfur_source = next(
-                (
-                    metric_id
-                    for metric_id in SULFUR_IDS
-                    if values.get(metric_id, {}).get("value") is not None
-                ),
-                None,
-            )
+            sulfur, sulfur_source = select_sulfur(values)
             sulfur_item = values.get(sulfur_source) if sulfur_source else None
-            sulfur = sulfur_item.get("value") if sulfur_item else None
 
         controls = {metric_id: _evidence(values.get(metric_id)) for metric_id in CONTROL_IDS}
         available_controls = [
@@ -76,6 +68,15 @@ class QualityAgent:
             warnings.append("Базовое измерение серы устарело")
         if not available_controls:
             warnings.append("Нет текущих значений управляющих тегов T6/F9/P13")
+
+        # Keep the benchmark model as an auditable evidence source.  A missing
+        # artifact must not hide the transparent scenario fallback, so this is
+        # a warning/evidence field rather than a hard quality gate.
+        model_forecast = None
+        try:
+            model_forecast = forecast_sulfur(context.directory, request.at)
+        except ForecastUnavailable as exc:
+            warnings.append(f"Прогноз серы недоступен: {exc}")
 
         return {
             "role": self.role,
@@ -91,6 +92,7 @@ class QualityAgent:
                 "sulfur": {"source": sulfur_source, **_evidence(sulfur_item), "value": sulfur},
                 "controls": controls,
                 "available_control_count": len(available_controls),
+                "model_forecast": model_forecast,
             },
             "warnings": warnings,
             "missing": missing,
@@ -160,7 +162,12 @@ class OptimizationAgent:
 
     role = "optimization"
 
-    def run(self, context: AgentContext, reliability: dict[str, Any]) -> dict[str, Any]:
+    def run(
+        self,
+        context: AgentContext,
+        reliability: dict[str, Any],
+        quality: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         if not reliability.get("can_recommend"):
             return {
                 "role": self.role,
@@ -180,6 +187,7 @@ class OptimizationAgent:
             }
         predicted = result["predicted_sulfur"]
         target = result["sulfur_target_met"]
+        model_forecast = (quality or {}).get("evidence", {}).get("model_forecast")
         return {
             "role": self.role,
             "status": "ok",
@@ -189,12 +197,14 @@ class OptimizationAgent:
                 else "Сценарий не достигает цели по сере; требуется ручная проверка"
             ),
             "scenario": result,
+            "model_forecast": model_forecast,
             "recommendation": {
                 "action": "apply_controls" if target else "escalate",
                 "predicted_sulfur": predicted,
                 "target_sulfur": context.request.targets.sulfur_max,
                 "target_met": target,
                 "controls": result["controls"],
+                "model_forecast": model_forecast,
             },
         }
 
@@ -212,7 +222,7 @@ class Orchestrator:
         context = AgentContext(directory=directory, request=request, frame=frame)
         quality = self.quality.run(context)
         reliability = self.reliability.run(context, quality)
-        optimization = self.optimization.run(context, reliability)
+        optimization = self.optimization.run(context, reliability, quality)
         trace = [
             {
                 "step": index,
@@ -231,6 +241,7 @@ class Orchestrator:
             "status": "abstain" if abstained else "recommendation",
             "recommendation": None if abstained else optimization.get("recommendation"),
             "scenario": None if abstained else optimization.get("scenario"),
+            "forecast": quality.get("evidence", {}).get("model_forecast"),
             "abstain": (
                 {
                     "reason": abstain_reason or optimization["summary"],
@@ -253,6 +264,11 @@ class Orchestrator:
                 (
                     "Рекомендация основана на snapshot без будущих измерений и "
                     "на линейной сценарной модели."
+                ),
+                (
+                    "Ridge-прогноз серы показывается как отдельный контрольный "
+                    "сигнал; он не доказывает причинный эффект изменения режима "
+                    "и не заменяет проверку технологом."
                 ),
             ],
         }

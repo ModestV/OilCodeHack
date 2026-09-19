@@ -121,3 +121,63 @@ def test_scenario_returns_editable_recommendation_and_blend(client):
     assert body["blend"]["cetane"] == pytest.approx(51.2)
     assert body["blend"]["cost_index"] > 1
 
+
+def test_scenario_rejects_blend_shares_that_do_not_sum_to_100(client):
+    response = client.post(
+        "/api/datasets",
+        files=[
+            (
+                "files",
+                (
+                    "242000_tags.csv",
+                    b"date,T6,F9,P13\n2025-01-01 00:00:00,300,100,5\n",
+                    "text/csv",
+                ),
+            )
+        ],
+    )
+    base = f"/api/datasets/{response.json()['id']}"
+    result = client.post(
+        base + "/scenario",
+        json={
+            "at": "2025-01-01T00:00:00",
+            "current_sulfur": 8,
+            "tanks": [
+                {"name": "A", "share": 60, "sulfur": 8, "t95": 350, "cetane": 50},
+                {"name": "B", "share": 30, "sulfur": 12, "t95": 355, "cetane": 48},
+            ],
+        },
+    )
+    assert result.status_code == 422
+    assert "100%" in result.json()["detail"]
+
+
+def test_scenario_rejects_blend_shares_that_do_not_sum_to_100(client):
+    response = client.post(
+        "/api/datasets",
+        files=[
+            (
+                "files",
+                (
+                    "242000_tags.csv",
+                    b"date,T6,F9,P13\n2025-01-01 00:00:00,300,100,5\n",
+                    "text/csv",
+                ),
+            )
+        ],
+    )
+    base = f"/api/datasets/{response.json()['id']}"
+    result = client.post(
+        base + "/scenario",
+        json={
+            "at": "2025-01-01T00:00:00",
+            "current_sulfur": 8,
+            "tanks": [
+                {"name": "A", "share": 60, "sulfur": 8, "t95": 350, "cetane": 50},
+                {"name": "B", "share": 30, "sulfur": 12, "t95": 355, "cetane": 48},
+            ],
+        },
+    )
+    assert result.status_code == 422
+    assert "100%" in result.json()["detail"]
+
