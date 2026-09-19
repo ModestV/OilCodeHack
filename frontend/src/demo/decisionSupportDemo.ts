@@ -19,7 +19,7 @@ export const pipelineStages = [
 export const recommendationScenarios: RecommendationScenario[] = [
   {
     id: "s1",
-    title: "Стабилизация температуры P8",
+    title: "Стабилизация температуры T6",
     effect: "−1,8 мг/кг серы",
     risk: "Низкий",
     cost: "+2%",
@@ -27,7 +27,7 @@ export const recommendationScenarios: RecommendationScenario[] = [
   },
   {
     id: "s2",
-    title: "Снижение расхода T11",
+    title: "Снижение расхода F9",
     effect: "−1,2 мг/кг серы",
     risk: "Средний",
     cost: "−3%",
@@ -35,7 +35,7 @@ export const recommendationScenarios: RecommendationScenario[] = [
   },
   {
     id: "s3",
-    title: "Температура и расход · P8 + T11",
+    title: "Температура и расход · T6 + F9",
     effect: "−2,6 мг/кг серы",
     risk: "Средний",
     cost: "+1%",
@@ -43,7 +43,7 @@ export const recommendationScenarios: RecommendationScenario[] = [
   },
   {
     id: "s4",
-    title: "Коррекция давления F19",
+    title: "Коррекция давления P13",
     effect: "−0,9 мг/кг серы",
     risk: "Низкий",
     cost: "+1%",
@@ -66,3 +66,5 @@ export const recommendationScenarios: RecommendationScenario[] = [
     confidence: 73,
   },
 ];
+
+

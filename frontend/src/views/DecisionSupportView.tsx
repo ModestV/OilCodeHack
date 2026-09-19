@@ -14,13 +14,12 @@ import { offset } from "../components/TimeControls";
 import { formatNumber } from "../visualization";
 import {
   pipelineStages,
-  recommendationScenarios,
 } from "../demo/decisionSupportDemo";
 
 const controls = [
-  ["ht.P8", "Температура на входе Р-202", "ед."],
-  ["ht.T11", "Массовый расход сырья", "%"],
-  ["ht.F19", "Давление на входе Р-202", "ед."],
+  ["ht.T6", "Температура на входе Р-202", "ед."],
+  ["ht.F9", "Массовый расход сырья", "%"],
+  ["ht.P13", "Давление на входе Р-202", "ед."],
 ] as const;
 
 const initial = (at: string, sandbox: boolean): ScenarioRequest => ({
@@ -134,6 +133,32 @@ export function DecisionSupportView({
       setLoading(false);
     }
   };
+  const runRecommendation = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const recommendationAt =
+        sourceMode === "period" && periodTo ? periodTo : at;
+      const next = {
+        ...initial(recommendationAt, false),
+        at: recommendationAt,
+      };
+      setResult(await api.scenario(datasetId, next));
+      setRecommendationPeriod(
+        sourceMode === "latest"
+          ? `На ${displayTime(latestAt)}`
+          : `${displayTime(periodFrom)} — ${displayTime(periodTo)}`,
+      );
+      setPipelineStarted(true);
+    } catch (caught) {
+      setError(
+        caught instanceof Error ? caught.message : "Ошибка сценарного расчёта",
+      );
+      setPipelineStarted(false);
+    } finally {
+      setLoading(false);
+    }
+  };
   const option = useMemo(
     () => ({
       grid: { left: 58, right: 24, top: 32, bottom: 42 },
@@ -201,16 +226,13 @@ export function DecisionSupportView({
               className="primary"
               type="button"
               disabled={!validPeriod}
-              onClick={() => {
-                setRecommendationPeriod(
-                  sourceMode === "latest"
-                    ? `На ${displayTime(latestAt)}`
-                    : `${displayTime(periodFrom)} — ${displayTime(periodTo)}`,
-                );
-                setPipelineStarted(true);
-              }}
+              onClick={runRecommendation}
             >
-              {pipelineStarted ? "Пересчитать" : "Получить рекомендацию"}
+              {loading
+                ? "Расчёт…"
+                : pipelineStarted
+                  ? "Пересчитать"
+                  : "Рассчитать сценарий"}
             </button>
           </div>
           {sourceMode === "period" && (
@@ -249,13 +271,15 @@ export function DecisionSupportView({
             <span>Последняя запись · {displayTime(latestAt)}</span>
           </div>
         </section>
+        {error && <p className="error" role="alert">{error}</p>}
         <p className="support-notice">
-          Пример рекомендации · значения условные
+          Локальная сценарная модель · коэффициенты и ограничения являются допущениями
         </p>
         {pipelineStarted ? (
           <PipelinePreview
             onOpenSandbox={onOpenSandbox}
             period={recommendationPeriod}
+            result={result}
           />
         ) : (
           <section className="support-empty">
@@ -374,7 +398,7 @@ export function DecisionSupportView({
           </div>
           <div className="scenario-fields three">
             <label>
-              Изменение температуры · P8
+              Изменение температуры · T6
               <input
                 type="number"
                 min="-10"
@@ -387,7 +411,7 @@ export function DecisionSupportView({
               />
             </label>
             <label>
-              Изменение расхода · T11, %
+              Изменение расхода · F9, %
               <input
                 type="number"
                 min="-10"
@@ -400,7 +424,7 @@ export function DecisionSupportView({
               />
             </label>
             <label>
-              Изменение давления · F19
+              Изменение давления · P13
               <input
                 type="number"
                 min="-2"
@@ -736,13 +760,20 @@ function DatasetRowPicker({
 function PipelinePreview({
   onOpenSandbox,
   period,
+  result,
 }: {
   onOpenSandbox?: () => void;
   period: string;
+  result: ScenarioResult | null;
 }) {
   const [copyStatus, setCopyStatus] = useState("");
-  const summary =
-    "Пример рекомендации: изменение температуры и расхода сырья. Ожидаемое снижение серы на 2,6 мг/кг за 90 минут; средний риск; стоимость +1%. Значения условные.";
+  const predicted = result?.predicted_sulfur;
+  const baseline = result?.baseline.sulfur;
+  const reduction =
+    baseline != null && predicted != null ? baseline - predicted : null;
+  const summary = result
+    ? `Сценарный расчёт: сера ${formatNumber(predicted)} мг/кг после ${result.horizon_minutes} минут; исходное значение ${formatNumber(baseline)} мг/кг.`
+    : "Расчёт не вернул результат.";
   async function copy() {
     try {
       await navigator.clipboard.writeText(`${period}\n${summary}`);
@@ -755,25 +786,31 @@ function PipelinePreview({
     <>
       <section className="decision-band recommendation-result">
         <p className="support-meta">{period}</p>
-        <h2>Скорректировать температуру и расход сырья</h2>
+        <h2>
+          {result?.sulfur_target_met
+            ? "Текущий сценарий укладывается в цель"
+            : "Цель по сере не достигается текущими изменениями"}
+        </h2>
         <p className="recommendation-copy">
-          Ожидаемое снижение серы — 2,6 мг/кг за 90 минут.
+          {result
+            ? `Прогноз: ${formatNumber(predicted)} мг/кг после ${result.horizon_minutes} минут.`
+            : "Нет данных для сценарного расчёта."}
         </p>
         <dl className="recommendation-metrics">
           <div>
             <dt>Снижение серы</dt>
             <dd>
-              2,6 <span>мг/кг</span>
+              {formatNumber(reduction)} <span>мг/кг</span>
             </dd>
           </div>
           <div>
             <dt>Риск</dt>
-            <dd>Средний</dd>
+            <dd>{result?.sulfur_target_met ? "Допустимый" : "Требует проверки"}</dd>
           </div>
           <div>
             <dt>Стоимость к исходной</dt>
             <dd>
-              +1 <span>%</span>
+              {result ? "Модельная оценка" : "—"}
             </dd>
           </div>
         </dl>
@@ -792,7 +829,7 @@ function PipelinePreview({
       <section className="decision-band">
         <div className="section-heading">
           <h2>Сравнение сценариев</h2>
-          <span className="support-notice">6 из 10 вариантов</span>
+          <span className="support-notice">Результат одного сценария</span>
         </div>
         <div
           className="scenario-table-scroll"
@@ -810,27 +847,21 @@ function PipelinePreview({
               </tr>
             </thead>
             <tbody>
-              {recommendationScenarios.map((scenario) => (
-                <tr
-                  key={scenario.id}
-                  className={scenario.id === "s3" ? "is-preferred" : undefined}
-                >
-                  <td>
-                    {scenario.title}
-                    {scenario.id === "s3" && <small>В рекомендации</small>}
-                  </td>
-                  <td>{scenario.effect}</td>
-                  <td>{scenario.risk}</td>
-                  <td>{scenario.cost}</td>
-                </tr>
-              ))}
+              <tr className="is-preferred">
+                <td>Линейный сценарий изменения режима</td>
+                <td>
+                  {reduction == null ? "—" : `${formatNumber(reduction)} мг/кг серы`}
+                </td>
+                <td>{result?.sulfur_target_met ? "Допустимый" : "Требует проверки"}</td>
+                <td>Не задана</td>
+              </tr>
             </tbody>
           </table>
         </div>
       </section>
       <details className="support-details">
         <summary>Как получена рекомендация</summary>
-        <p>Это пример результата. Расчёт рекомендаций пока не подключён.</p>
+        <p>Расчёт выполнен локальным endpoint сценарной модели. LLM в этом шаге не используется.</p>
         <ol>
           {pipelineStages.map((stage) => (
             <li key={stage}>{stage}</li>
@@ -843,3 +874,5 @@ function PipelinePreview({
     </>
   );
 }
+
+

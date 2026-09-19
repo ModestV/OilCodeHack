@@ -211,7 +211,7 @@ export interface ScenarioResult {
   step_minutes: number;
   baseline: { sulfur: number; t95: number | null; cetane: number | null };
   controls: Record<
-    "ht.P8" | "ht.T11" | "ht.F19",
+    "ht.T6" | "ht.F9" | "ht.P13",
     {
       current: number | null;
       change: number;
@@ -233,3 +233,4 @@ export interface ScenarioResult {
   };
   assumptions: string[];
 }
+

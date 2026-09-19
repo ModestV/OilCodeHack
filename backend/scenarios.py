@@ -157,9 +157,9 @@ def calculate_scenario(directory: Path, request: ScenarioRequest) -> dict:
 
     controls = {}
     for metric_id, change, relative in (
-        ("ht.P8", changes.temperature, False),
-        ("ht.T11", changes.feed_rate_pct, True),
-        ("ht.F19", changes.pressure, False),
+        ("ht.T6", changes.temperature, False),
+        ("ht.F9", changes.feed_rate_pct, True),
+        ("ht.P13", changes.pressure, False),
     ):
         current = _value(values, metric_id)
         controls[metric_id] = {

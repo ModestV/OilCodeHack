@@ -39,7 +39,7 @@ async def lifespan(app):
     # An interrupted import must not leave the UI polling forever after a restart.
     for file in STORAGE.glob("*/manifest.json"):
         try:
-            m = json.loads(file.read_text())
+            m = json.loads(file.read_text(encoding="utf-8"))
             if m.get("status") == "importing":
                 m.update(
                     status="error",
@@ -62,7 +62,7 @@ app.add_middleware(
 
 def write_manifest(directory: Path, value: dict):
     temporary = directory / "manifest.tmp"
-    temporary.write_text(json.dumps(a.clean(value), ensure_ascii=False, indent=2))
+    temporary.write_text(json.dumps(a.clean(value), ensure_ascii=False, indent=2), encoding="utf-8")
     temporary.replace(directory / "manifest.json")
 
 
@@ -104,7 +104,7 @@ def datasets():
     items = []
     for path in STORAGE.glob("*/manifest.json"):
         try:
-            items.append(json.loads(path.read_text()))
+            items.append(json.loads(path.read_text(encoding="utf-8")))
         except (OSError, ValueError):
             continue
     items.sort(key=lambda m: m.get("created_at", ""), reverse=True)
@@ -284,7 +284,7 @@ def update_settings(dataset_id: str, body: Settings):
     directory = dataset(dataset_id)
     value = body.model_dump()
     temp = directory / "settings.tmp"
-    temp.write_text(json.dumps(value))
+    temp.write_text(json.dumps(value), encoding="utf-8")
     temp.replace(directory / "settings.json")
     return value
 

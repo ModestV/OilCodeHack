@@ -248,6 +248,14 @@ def run(source: Path, output: Path, availability_lag: pd.Timedelta) -> dict:
     model.fit(X.loc[train_mask], np.log1p(y.loc[train_mask]))
     aligned["prediction_ridge"] = np.maximum(0.0, np.expm1(model.predict(X)))
     aligned["prediction_previous_lab"] = aligned["previous_lab_available"]
+    # A numerical regressor is too conservative around the hard 10 mg/kg
+    # alarm threshold.  Keep a separate, auditable risk signal: when an
+    # already-available lab result exists, never lower it with the smoother
+    # Ridge estimate.  This is an alarm guard, not a second quality forecast.
+    aligned["prediction_risk_guard"] = np.maximum(
+        aligned["prediction_ridge"],
+        aligned["prediction_previous_lab"].fillna(-np.inf),
+    )
 
     metrics: dict[str, dict] = {}
     for split_name, mask in masks.items():
@@ -255,6 +263,7 @@ def run(source: Path, output: Path, availability_lag: pd.Timedelta) -> dict:
         metrics[split_name] = {
             "ridge": regression_metrics(y.loc[mask], aligned.loc[mask, "prediction_ridge"]),
             "previous_lab": regression_metrics(y.loc[valid_baseline], aligned.loc[valid_baseline, "prediction_previous_lab"]),
+            "risk_guard": regression_metrics(y.loc[mask], aligned.loc[mask, "prediction_risk_guard"]),
             "rows_without_previous_lab": int((mask & ~aligned["prediction_previous_lab"].notna()).sum()),
         }
     year_metrics: dict[str, dict] = {}
@@ -265,6 +274,7 @@ def run(source: Path, output: Path, availability_lag: pd.Timedelta) -> dict:
         year_metrics[str(int(year))] = {
             "ridge": regression_metrics(y.loc[mask], aligned.loc[mask, "prediction_ridge"]),
             "previous_lab": regression_metrics(y.loc[valid_baseline], aligned.loc[valid_baseline, "prediction_previous_lab"]),
+            "risk_guard": regression_metrics(y.loc[mask], aligned.loc[mask, "prediction_risk_guard"]),
         }
 
     # Explicit availability/leakage checks become part of the report, not just
@@ -279,7 +289,7 @@ def run(source: Path, output: Path, availability_lag: pd.Timedelta) -> dict:
     if not leakage["passed"]:
         raise AssertionError(f"feature availability violation: {leakage}")
 
-    predictions = aligned[["target_time", "feature_time", "target", "previous_lab_available", "prediction_previous_lab", "prediction_ridge"]].copy()
+    predictions = aligned[["target_time", "feature_time", "target", "previous_lab_available", "prediction_previous_lab", "prediction_ridge", "prediction_risk_guard"]].copy()
     predictions.to_csv(output / "predictions.csv", index=False, encoding="utf-8-sig")
     metadata = {
         "source": str(source),
@@ -294,7 +304,7 @@ def run(source: Path, output: Path, availability_lag: pd.Timedelta) -> dict:
         "aligned_rows": int(len(aligned)),
         "feature_count": int(len(feature_columns)),
         "feature_engineering": "current value + past-only 1h/6h rolling means + previous lab available at cutoff; train-only median imputation",
-        "model": "standardized Ridge on log1p(target), inverse transformed for metrics",
+        "model": "standardized Ridge on log1p(target), inverse transformed for metrics; risk_guard=max(Ridge, available previous lab)",
         "alpha_grid": list(ALPHA_GRID),
         "selected_alpha": selected_alpha,
         "alpha_selection": {"split": "validation", "metric": "MAE", "scores": alpha_scores},
@@ -329,7 +339,7 @@ def write_report(path: Path, metadata: dict) -> None:
         "|---|---|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for split in ("train", "validation", "test"):
-        for name, label in (("ridge", "Ridge"), ("previous_lab", "предыдущая проба")):
+        for name, label in (("ridge", "Ridge"), ("previous_lab", "предыдущая проба"), ("risk_guard", "risk guard")):
             m = metrics[split][name]
             rows.append(f"| {split} | {label} | {m['n']} | {m['mae']:.3f} | {m['rmse']:.3f} | {m['median_absolute_error']:.3f} | {m['bias_pred_minus_actual']:.3f} | {m['recall_above_10'] if m['recall_above_10'] is not None else '—'} | {m['false_alarm_rate']:.3f} |")
     rows += [
@@ -351,7 +361,7 @@ def write_report(path: Path, metadata: dict) -> None:
         "",
         "## Интерпретация и ограничения",
         "",
-        "Ridge на log1p-цели сопоставим с сильным baseline по MAE, но не заменяет его без дополнительной проверки по режимам. Это baseline для измерения предсказательной ценности, а не доказательство причинного эффекта изменения режима. Вне области исторических признаков и при плохом качестве датчиков система должна переходить в abstain. Экстремумы не удалялись автоматически.",
+        "Ridge на log1p-цели сопоставим с сильным baseline по MAE, но не заменяет его без дополнительной проверки по режимам. `risk_guard` намеренно сохраняет доступный высокий лабораторный результат для порогового предупреждения; его метрики нельзя читать как независимый прогноз. Это benchmark предсказательной ценности, а не доказательство причинного эффекта изменения режима. Вне области исторических признаков и при плохом качестве датчиков система должна переходить в abstain. Экстремумы не удалялись автоматически.",
         "",
         "Артефакты: `metrics.json` (параметры, хэши источников, метрики), `predictions.csv` (малый файл результатов). Исходные CSV/XLSX в репозиторий не копируются.",
     ]

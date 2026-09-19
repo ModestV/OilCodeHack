@@ -52,8 +52,8 @@ def evaluate_expression(expression: str, inputs: dict[str, float]) -> float:
 
 
 def formula_results(directory: Path, at: str) -> dict:
-    registry = json.loads(REGISTRY.read_text())
-    manifest = json.loads((directory / "manifest.json").read_text())
+    registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
+    manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
     stored = {item["id"]: item for item in manifest.get("formulas", [])}
     definitions = []
     for canonical in registry.get("formulas", []):

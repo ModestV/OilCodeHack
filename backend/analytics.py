@@ -52,13 +52,13 @@ def records(cursor):
 
 
 def manifest(directory: Path) -> dict:
-    return json.loads((directory / "manifest.json").read_text())
+    return json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
 
 
 def metric_catalog(directory: Path) -> list[dict]:
     metrics = [dict(m) for m in manifest(directory).get("metrics", [])]
     canonical = {
-        metric["id"]: metric for metric in json.loads(REGISTRY.read_text()).get("metrics", [])
+        metric["id"]: metric for metric in json.loads(REGISTRY.read_text(encoding="utf-8")).get("metrics", [])
     }
     for metric in metrics:
         registry_metric = canonical.get(metric["id"])
@@ -157,7 +157,7 @@ def connection(directory: Path, derived: bool = True):
 
 def settings(directory: Path) -> dict:
     path = directory / "settings.json"
-    return json.loads(path.read_text()) if path.exists() else {"freshness_minutes": FRESHNESS}
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {"freshness_minutes": FRESHNESS}
 
 
 def snapshot(directory: Path, at: str) -> dict:

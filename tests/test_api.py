@@ -91,7 +91,7 @@ def test_scenario_returns_editable_recommendation_and_blend(client):
                 "files",
                 (
                     "242000_tags.csv",
-                    b"date,P8,T11,F19\n2025-01-01 00:00:00,300,100,5\n",
+                    b"date,T6,F9,P13\n2025-01-01 00:00:00,300,100,5\n",
                     "text/csv",
                 ),
             )
@@ -116,7 +116,8 @@ def test_scenario_returns_editable_recommendation_and_blend(client):
     )
     assert result.status_code == 200
     body = result.json()
-    assert set(body["controls"]) == {"ht.P8", "ht.T11", "ht.F19"}
+    assert set(body["controls"]) == {"ht.T6", "ht.F9", "ht.P13"}
     assert body["trajectory"][-1]["minute"] == 180
     assert body["blend"]["cetane"] == pytest.approx(51.2)
     assert body["blend"]["cost_index"] > 1
+

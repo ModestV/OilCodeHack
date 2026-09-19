@@ -53,7 +53,8 @@ def main():
                 "status": "importing",
                 "created_at": datetime.now().isoformat(),
             }
-        )
+        ),
+        encoding="utf-8",
     )
     start = time.perf_counter()
     result = import_dataset(paths, directory, args.name)

@@ -1,0 +1,19 @@
+[Unit]
+Description=OilCode hackathon application
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=__DEPLOY_USER__
+WorkingDirectory=__APP_ROOT__
+Environment=OILCODE_STORAGE=__APP_ROOT__/storage
+Environment=PYTHONUTF8=1
+ExecStart=__VENV__/bin/uvicorn backend.app:app --host 127.0.0.1 --port __PORT__
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
