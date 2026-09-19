@@ -37,6 +37,7 @@ Manifest: `{id: output_dir.name, name, status:'ready', created_at, start, end, t
 - GET /api/datasets/{id}/formulas?at=ISO => `{formulas:[{id,label,plant,expression,version,status:'experimental'|'invalid'|'unresolved'|'verified',reason,inputs:[{tag,value,timestamp,flags}],substitution,result:number|null,unit}]}`. All 17 shown; numerical impl parent. No raw eval. Registry provided by Terra.
 - GET /api/datasets/{id}/quality => `{sources:manifest.sources,issues:manifest.issues,assumptions:manifest.assumptions, metrics:[{metric_id,count,invalid_count,suspect_count,flatline_count,start,end}]}`
 - POST /api/datasets/{id}/scenario accepts editable source sulfur, targets, horizon 0–180 min, step 15–60 min, linear model parameters, optional control changes, reservoir components and additive 0–3%. Returns the three confirmed controls, sulfur trajectory, blend quality, cost index and explicit assumptions.
+- POST /api/datasets/{id}/decision runs the local QualityAgent → ReliabilityAgent → OptimizationAgent → Orchestrator contour with the same request body. It returns an explainable trace and either a scenario recommendation or `abstain` with a reason when quality/freshness/control evidence is insufficient.
 - GET /api/datasets/{id}/export?metrics=commaIDs&from=ISO&to=ISO&exclude_suspect=false => raw observations CSV streaming.
 - GET /api/health => `{status:'ok'}`
 
