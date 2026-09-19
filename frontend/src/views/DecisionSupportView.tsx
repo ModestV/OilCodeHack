@@ -8,7 +8,11 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { api } from "../api";
-import type { ScenarioRequest, ScenarioResult } from "../types";
+import type {
+  DecisionResult,
+  ScenarioRequest,
+  ScenarioResult,
+} from "../types";
 import { Chart } from "../components/Chart";
 import { offset } from "../components/TimeControls";
 import { formatNumber } from "../visualization";
@@ -82,6 +86,7 @@ export function DecisionSupportView({
 }) {
   const [request, setRequest] = useState(() => initial(at, sandbox));
   const [result, setResult] = useState<ScenarioResult | null>(null);
+  const [decision, setDecision] = useState<DecisionResult | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [sourceMode, setSourceMode] = useState<"latest" | "period">("latest");
@@ -105,10 +110,12 @@ export function DecisionSupportView({
     }
     setRequest(next);
     setResult(null);
+    setDecision(null);
     setError("");
   };
   const update = (path: string, value: number) => {
     setResult(null);
+    setDecision(null);
     setRequest((current) => {
       const next = structuredClone(current);
       const parts = path.split(".");
@@ -143,7 +150,9 @@ export function DecisionSupportView({
         ...initial(recommendationAt, false),
         at: recommendationAt,
       };
-      setResult(await api.scenario(datasetId, next));
+      const nextDecision = await api.decision(datasetId, next);
+      setDecision(nextDecision);
+      setResult(nextDecision.scenario);
       setRecommendationPeriod(
         sourceMode === "latest"
           ? `На ${displayTime(latestAt)}`
@@ -280,6 +289,7 @@ export function DecisionSupportView({
             onOpenSandbox={onOpenSandbox}
             period={recommendationPeriod}
             result={result}
+            decision={decision}
           />
         ) : (
           <section className="support-empty">
@@ -761,10 +771,12 @@ function PipelinePreview({
   onOpenSandbox,
   period,
   result,
+  decision,
 }: {
   onOpenSandbox?: () => void;
   period: string;
   result: ScenarioResult | null;
+  decision: DecisionResult | null;
 }) {
   const [copyStatus, setCopyStatus] = useState("");
   const predicted = result?.predicted_sulfur;
@@ -787,12 +799,16 @@ function PipelinePreview({
       <section className="decision-band recommendation-result">
         <p className="support-meta">{period}</p>
         <h2>
-          {result?.sulfur_target_met
+          {decision?.status === "abstain"
+            ? "Надёжной рекомендации нет"
+            : result?.sulfur_target_met
             ? "Текущий сценарий укладывается в цель"
             : "Цель по сере не достигается текущими изменениями"}
         </h2>
         <p className="recommendation-copy">
-          {result
+          {decision?.status === "abstain"
+            ? decision.abstain?.reason || "Пайплайн остановлен из-за качества данных."
+            : result
             ? `Прогноз: ${formatNumber(predicted)} мг/кг после ${result.horizon_minutes} минут.`
             : "Нет данных для сценарного расчёта."}
         </p>
@@ -805,7 +821,13 @@ function PipelinePreview({
           </div>
           <div>
             <dt>Риск</dt>
-            <dd>{result?.sulfur_target_met ? "Допустимый" : "Требует проверки"}</dd>
+            <dd>
+              {decision?.status === "abstain"
+                ? "Отказ"
+                : result?.sulfur_target_met
+                  ? "Допустимый"
+                  : "Требует проверки"}
+            </dd>
           </div>
           <div>
             <dt>Стоимость к исходной</dt>
@@ -852,7 +874,13 @@ function PipelinePreview({
                 <td>
                   {reduction == null ? "—" : `${formatNumber(reduction)} мг/кг серы`}
                 </td>
-                <td>{result?.sulfur_target_met ? "Допустимый" : "Требует проверки"}</td>
+                <td>
+                  {decision?.status === "abstain"
+                    ? "Отказ"
+                    : result?.sulfur_target_met
+                      ? "Допустимый"
+                      : "Требует проверки"}
+                </td>
                 <td>Не задана</td>
               </tr>
             </tbody>
@@ -861,11 +889,18 @@ function PipelinePreview({
       </section>
       <details className="support-details">
         <summary>Как получена рекомендация</summary>
-        <p>Расчёт выполнен локальным endpoint сценарной модели. LLM в этом шаге не используется.</p>
+        <p>
+          Решение выполнено локально. Роли качества, надёжности и оптимизации
+          передают результаты оркестратору; внешний LLM в этом закрытом smoke-контуре
+          не вызывается.
+        </p>
         <ol>
-          {pipelineStages.map((stage) => (
-            <li key={stage}>{stage}</li>
-          ))}
+          {(decision?.trace?.length
+            ? decision.trace.map(
+                (stage) => `${stage.role}: ${stage.summary} (${stage.status})`,
+              )
+            : pipelineStages
+          ).map((stage) => <li key={stage}>{stage}</li>)}
         </ol>
         <p>
           Результат модели требует проверки перед изменением режима установки.

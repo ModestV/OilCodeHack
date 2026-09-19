@@ -118,8 +118,20 @@ class ReliabilityAgent:
             warnings.append("Свежесть базового измерения ниже порога")
         elif freshness == "missing" or sulfur.get("value") is None:
             confidence = 0.0
-        if quality["evidence"]["available_control_count"] == 0:
-            confidence -= 0.15
+        control_count = quality["evidence"]["available_control_count"]
+        if control_count == 0:
+            # A quality value alone cannot yield an actionable control
+            # recommendation.  Keep the response explainable, but abstain.
+            confidence = min(confidence, 0.4)
+        else:
+            stale_controls = sum(
+                evidence.get("freshness") == "stale"
+                and evidence.get("value") is not None
+                for evidence in quality["evidence"]["controls"].values()
+            )
+            if stale_controls:
+                confidence -= min(0.1 * stale_controls, 0.3)
+                warnings.append(f"Управляющих тегов с истёкшей давностью: {stale_controls}")
         confidence = round(max(0.0, min(1.0, confidence)), 3)
 
         can_recommend = not missing and confidence >= 0.5

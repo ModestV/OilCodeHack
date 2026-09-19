@@ -234,3 +234,26 @@ export interface ScenarioResult {
   assumptions: string[];
 }
 
+export interface DecisionTraceItem {
+  step: number;
+  role: "quality" | "reliability" | "optimization";
+  status: string;
+  summary: string;
+}
+
+export interface DecisionResult {
+  at: string;
+  status: "recommendation" | "abstain";
+  recommendation: {
+    action: string;
+    predicted_sulfur: number;
+    target_sulfur: number;
+    target_met: boolean;
+    controls: ScenarioResult["controls"];
+  } | null;
+  scenario: ScenarioResult | null;
+  abstain: { reason: string; missing: string[] } | null;
+  trace: DecisionTraceItem[];
+  assumptions: string[];
+}
+

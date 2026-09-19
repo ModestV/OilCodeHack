@@ -1,5 +1,6 @@
 import type {
   Distribution,
+  DecisionResult,
   Formula,
   Manifest,
   Metric,
@@ -101,6 +102,12 @@ export const api = {
     request<Distillation>(`${base(id)}/distillation?at=${enc(at)}`, s),
   scenario: (id: string, value: ScenarioRequest, s?: AbortSignal) =>
     request<ScenarioResult>(`${base(id)}/scenario`, s, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(value),
+    }),
+  decision: (id: string, value: ScenarioRequest, s?: AbortSignal) =>
+    request<DecisionResult>(`${base(id)}/decision`, s, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(value),
