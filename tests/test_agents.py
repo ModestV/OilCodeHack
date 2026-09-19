@@ -77,3 +77,32 @@ def test_decision_abstains_when_sulfur_baseline_is_missing(tmp_path, monkeypatch
     assert body["abstain"]["missing"] == ["sulfur_baseline"]
     assert body["agents"]["optimization"]["status"] == "skipped"
     assert body["trace"][-1]["status"] == "skipped"
+
+
+def test_decision_abstains_when_quality_exists_but_controls_are_missing(tmp_path, monkeypatch):
+    with _client(tmp_path, monkeypatch) as client:
+        uploaded = client.post(
+            "/api/datasets",
+            files=[
+                (
+                    "files",
+                    (
+                        "242000_tags.csv",
+                        b"date,T1\n2025-01-01 00:00:00,1\n",
+                        "text/csv",
+                    ),
+                )
+            ],
+        )
+        dataset_id = uploaded.json()["id"]
+        assert client.get(f"/api/datasets/{dataset_id}").json()["status"] == "ready"
+        result = client.post(
+            f"/api/datasets/{dataset_id}/decision",
+            json={"at": "2025-01-01T00:00:00", "current_sulfur": 8},
+        )
+
+    body = result.json()
+    assert body["status"] == "abstain"
+    assert body["agents"]["quality"]["evidence"]["available_control_count"] == 0
+    assert body["agents"]["reliability"]["confidence"] < 0.5
+    assert body["recommendation"] is None
