@@ -1,6 +1,7 @@
 from fastapi.testclient import TestClient
 
 from backend import app as module
+from backend.agents import AgentContext, QualityAgent
 from backend.scenarios import select_sulfur
 
 
@@ -22,6 +23,45 @@ def test_sulfur_source_priority_prefers_lims_then_pak_then_kip():
 
     values.pop("pak.ht.Mg.Sulfur")
     assert select_sulfur(values) == (5.4, "ht.Q21")
+
+
+def test_quality_agent_exposes_the_selected_lab_source(tmp_path):
+    frame = {
+        "values": [
+            {
+                "metric_id": "lims.ht.2.Mg.Sulfur",
+                "value": 8.2,
+                "freshness": "fresh",
+                "flags": [],
+                "timestamp": "2025-01-01T00:00:00",
+            },
+            {
+                "metric_id": "pak.ht.Mg.Sulfur",
+                "value": 6.1,
+                "freshness": "fresh",
+                "flags": [],
+                "timestamp": "2025-01-01T00:00:00",
+            },
+            *[
+                {
+                    "metric_id": metric_id,
+                    "value": value,
+                    "freshness": "fresh",
+                    "flags": [],
+                    "timestamp": "2025-01-01T00:00:00",
+                }
+                for metric_id, value in (("ht.T6", 300), ("ht.F9", 100), ("ht.P13", 5))
+            ],
+        ]
+    }
+    context = AgentContext(
+        directory=tmp_path,
+        request=module.ScenarioRequest(at="2025-01-01T00:00:00"),
+        frame=frame,
+    )
+    quality = QualityAgent().run(context)
+    assert quality["evidence"]["sulfur"]["source"] == "lims.ht.2.Mg.Sulfur"
+    assert quality["evidence"]["sulfur"]["value"] == 8.2
 
 
 def test_decision_runs_deterministic_agents_and_returns_trace(tmp_path, monkeypatch):
