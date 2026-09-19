@@ -41,6 +41,7 @@ jobs:
       - name: Build frontend
         run: |
           npm --prefix frontend ci
+          npm --prefix frontend test
           npm --prefix frontend run build
 
       - name: Configure SSH
