@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from .analytics import snapshot
-from .scenarios import ScenarioRequest, calculate_scenario, select_sulfur
+from .scenarios import ControlChanges, ScenarioRequest, calculate_scenario, select_sulfur
 from .forecast import ForecastUnavailable, forecast_sulfur
 
 CONTROL_IDS = ("ht.T6", "ht.F9", "ht.P13")
@@ -121,10 +121,15 @@ class ReliabilityAgent:
         elif freshness == "missing" or sulfur.get("value") is None:
             confidence = 0.0
         control_count = quality["evidence"]["available_control_count"]
-        if control_count == 0:
-            # A quality value alone cannot yield an actionable control
-            # recommendation.  Keep the response explainable, but abstain.
+        if control_count < len(CONTROL_IDS):
+            # A partial control vector is unsafe for a multi-variable action:
+            # the model would render missing recommended values as ``None``.
+            # Require the complete whitelist before proposing any change.
             confidence = min(confidence, 0.4)
+            if control_count:
+                warnings.append(
+                    f"Доступны не все управляющие теги: {control_count}/{len(CONTROL_IDS)}"
+                )
         else:
             stale_controls = sum(
                 evidence.get("freshness") == "stale"
@@ -162,6 +167,107 @@ class OptimizationAgent:
 
     role = "optimization"
 
+    @staticmethod
+    def _effort(changes: ControlChanges) -> float:
+        """Comparable normalized magnitude of a candidate intervention."""
+
+        return round(
+            abs(changes.temperature) / 10
+            + abs(changes.feed_rate_pct) / 10
+            + abs(changes.pressure) / 2,
+            4,
+        )
+
+    def _candidates(self, context: AgentContext) -> list[dict[str, Any]]:
+        request = context.request
+        # First calculate the editable automatic action.  The other candidates
+        # are derived from this same transparent model, so their comparison is
+        # deterministic and does not claim an independently validated policy.
+        automatic_request = request.model_copy(deep=True)
+        automatic_request.changes = None
+        automatic = calculate_scenario(context.directory, automatic_request)
+        # Controls in the scenario result use metric ids; map them explicitly
+        # to the public request fields to keep this adapter independent of dict
+        # ordering and future control additions.
+        automatic_changes = ControlChanges(
+            temperature=automatic["controls"]["ht.T6"]["change"],
+            feed_rate_pct=automatic["controls"]["ht.F9"]["change"],
+            pressure=automatic["controls"]["ht.P13"]["change"],
+        )
+        definitions = (
+            ("hold", "Удержать текущий режим", ControlChanges()),
+            (
+                "conservative",
+                "Консервативное изменение (50% от automatic)",
+                ControlChanges(
+                    temperature=automatic_changes.temperature * 0.5,
+                    feed_rate_pct=automatic_changes.feed_rate_pct * 0.5,
+                    pressure=automatic_changes.pressure * 0.5,
+                ),
+            ),
+            ("automatic", "Automatic target-сценарий", automatic_changes),
+        )
+        candidates = []
+        for candidate_id, label, changes in definitions:
+            candidate_request = request.model_copy(deep=True)
+            candidate_request.changes = changes
+            try:
+                scenario = calculate_scenario(context.directory, candidate_request)
+            except ValueError as exc:
+                candidates.append(
+                    {
+                        "id": candidate_id,
+                        "label": label,
+                        "status": "error",
+                        "feasible": False,
+                        "reason": str(exc),
+                        "scenario": None,
+                    }
+                )
+                continue
+            target_met = bool(scenario["sulfur_target_met"])
+            effort = self._effort(changes)
+            reasons = [] if target_met else ["Цель по сере не достигнута"]
+            candidates.append(
+                {
+                    "id": candidate_id,
+                    "label": label,
+                    "status": "ok",
+                    "feasible": target_met,
+                    "reason": None if target_met else reasons[0],
+                    "predicted_sulfur": scenario["predicted_sulfur"],
+                    "target_met": target_met,
+                    "effort": effort,
+                    "controls": scenario["controls"],
+                    "safety_gate": {
+                        "passed": target_met,
+                        "reasons": reasons,
+                    },
+                    "scenario": scenario,
+                }
+            )
+        # Feasible candidates win first; among them prefer the smallest
+        # intervention and then the lowest predicted sulfur.  If no candidate
+        # is feasible, return the least-bad candidate for explicit escalation.
+        feasible = [item for item in candidates if item.get("feasible", False)]
+        infeasible = [item for item in candidates if not item.get("feasible", False)]
+        feasible.sort(
+            key=lambda item: (
+                item.get("effort", float("inf")),
+                item.get("predicted_sulfur", float("inf")),
+            )
+        )
+        # When the target is unreachable, show the lowest predicted quality
+        # first so the operator can see the strongest escalation candidate.
+        infeasible.sort(
+            key=lambda item: (
+                item.get("predicted_sulfur", float("inf")),
+                item.get("effort", float("inf")),
+            )
+        )
+        candidates = feasible + infeasible
+        return candidates
+
     def run(
         self,
         context: AgentContext,
@@ -176,7 +282,7 @@ class OptimizationAgent:
                 "scenario": None,
             }
         try:
-            result = calculate_scenario(context.directory, context.request)
+            candidates = self._candidates(context)
         except ValueError as exc:
             return {
                 "role": self.role,
@@ -185,6 +291,16 @@ class OptimizationAgent:
                 "error": str(exc),
                 "scenario": None,
             }
+        selected = next((candidate for candidate in candidates if candidate.get("status") == "ok"), None)
+        if selected is None or selected.get("scenario") is None:
+            return {
+                "role": self.role,
+                "status": "error",
+                "summary": "Сценарная модель не построила допустимый кандидат",
+                "candidates": candidates,
+                "scenario": None,
+            }
+        result = selected["scenario"]
         predicted = result["predicted_sulfur"]
         target = result["sulfur_target_met"]
         model_forecast = (quality or {}).get("evidence", {}).get("model_forecast")
@@ -197,6 +313,9 @@ class OptimizationAgent:
                 else "Сценарий не достигает цели по сере; требуется ручная проверка"
             ),
             "scenario": result,
+            "candidates": candidates,
+            "selected_candidate": selected["id"],
+            "safety_gate": selected["safety_gate"],
             "model_forecast": model_forecast,
             "recommendation": {
                 "action": "apply_controls" if target else "escalate",
@@ -204,6 +323,7 @@ class OptimizationAgent:
                 "target_sulfur": context.request.targets.sulfur_max,
                 "target_met": target,
                 "controls": result["controls"],
+                "candidate_id": selected["id"],
                 "model_forecast": model_forecast,
             },
         }
@@ -241,6 +361,9 @@ class Orchestrator:
             "status": "abstain" if abstained else "recommendation",
             "recommendation": None if abstained else optimization.get("recommendation"),
             "scenario": None if abstained else optimization.get("scenario"),
+            "candidates": None if abstained else optimization.get("candidates", []),
+            "selected_candidate": None if abstained else optimization.get("selected_candidate"),
+            "safety_gate": None if abstained else optimization.get("safety_gate"),
             "forecast": quality.get("evidence", {}).get("model_forecast"),
             "abstain": (
                 {

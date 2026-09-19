@@ -280,6 +280,21 @@ export interface DecisionResult {
     model_forecast: SulfurForecast | null;
   } | null;
   scenario: ScenarioResult | null;
+  candidates?: {
+    id: string;
+    label: string;
+    status: string;
+    feasible: boolean;
+    reason?: string | null;
+    predicted_sulfur?: number;
+    target_met?: boolean;
+    effort?: number;
+    controls?: ScenarioResult["controls"];
+    safety_gate?: { passed: boolean; reasons: string[] };
+    scenario?: ScenarioResult | null;
+  }[];
+  selected_candidate?: string;
+  safety_gate?: { passed: boolean; reasons: string[] };
   abstain: { reason: string; missing: string[] } | null;
   forecast: SulfurForecast | null;
   trace: DecisionTraceItem[];

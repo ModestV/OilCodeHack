@@ -869,20 +869,47 @@ function PipelinePreview({
               </tr>
             </thead>
             <tbody>
-              <tr className="is-preferred">
-                <td>Линейный сценарий изменения режима</td>
-                <td>
-                  {reduction == null ? "—" : `${formatNumber(reduction)} мг/кг серы`}
-                </td>
-                <td>
-                  {decision?.status === "abstain"
-                    ? "Отказ"
-                    : result?.sulfur_target_met
-                      ? "Допустимый"
-                      : "Требует проверки"}
-                </td>
-                <td>Не задана</td>
-              </tr>
+              {(decision?.candidates?.length
+                ? decision.candidates
+                : [
+                    {
+                      id: "scenario",
+                      label: "Линейный сценарий изменения режима",
+                      status: "ok",
+                      feasible: Boolean(result?.sulfur_target_met),
+                      predicted_sulfur: predicted,
+                      target_met: result?.sulfur_target_met,
+                      effort: null,
+                    },
+                  ]
+              ).map((candidate) => (
+                <tr
+                  key={candidate.id}
+                  className={candidate.id === decision?.selected_candidate ? "is-preferred" : ""}
+                >
+                  <td>
+                    {candidate.label}
+                    {candidate.id === decision?.selected_candidate && (
+                      <span className="support-notice"> · выбрано</span>
+                    )}
+                  </td>
+                  <td>
+                    {candidate.predicted_sulfur == null
+                      ? "—"
+                      : `${formatNumber(candidate.predicted_sulfur)} мг/кг серы`}
+                  </td>
+                  <td>
+                    {candidate.status === "error"
+                      ? "Ошибка"
+                      : candidate.target_met
+                        ? "Допустимый"
+                        : "Требует проверки"}
+                  </td>
+                  <td>
+                    {candidate.effort == null ? "—" : formatNumber(candidate.effort, 2)}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

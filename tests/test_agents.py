@@ -102,6 +102,13 @@ def test_decision_runs_deterministic_agents_and_returns_trace(tmp_path, monkeypa
     assert body["scenario"]["baseline"]["sulfur"] == 12
     assert body["forecast"]["model"]["name"].startswith("standardized Ridge")
     assert body["forecast"]["leakage_check"]["passed"] is True
+    assert [candidate["id"] for candidate in body["candidates"]] == [
+        "automatic",
+        "conservative",
+        "hold",
+    ]
+    assert body["selected_candidate"] == "automatic"
+    assert body["safety_gate"]["passed"] is False
     assert "внешний LLM" in body["assumptions"][0]
 
 
@@ -164,3 +171,30 @@ def test_decision_abstains_when_quality_exists_but_controls_are_missing(tmp_path
     assert body["agents"]["quality"]["evidence"]["available_control_count"] == 0
     assert body["agents"]["reliability"]["confidence"] < 0.5
     assert body["recommendation"] is None
+
+
+def test_decision_abstains_when_control_vector_is_partial(tmp_path, monkeypatch):
+    with _client(tmp_path, monkeypatch) as client:
+        uploaded = client.post(
+            "/api/datasets",
+            files=[
+                (
+                    "files",
+                    (
+                        "242000_tags.csv",
+                        b"date,T6,F9\n2025-01-01 00:00:00,300,100\n",
+                        "text/csv",
+                    ),
+                )
+            ],
+        )
+        dataset_id = uploaded.json()["id"]
+        result = client.post(
+            f"/api/datasets/{dataset_id}/decision",
+            json={"at": "2025-01-01T00:00:00", "current_sulfur": 8},
+        )
+
+    body = result.json()
+    assert body["status"] == "abstain"
+    assert body["agents"]["quality"]["evidence"]["available_control_count"] == 2
+    assert body["agents"]["reliability"]["confidence"] < 0.5
