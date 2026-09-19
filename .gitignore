@@ -9,3 +9,4 @@ frontend/dist/
 .ruff_cache/
 .DS_Store
 *.log
+build_revision.txt

@@ -91,7 +91,9 @@ async def value_error(request, exc):
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok"}
+    revision_path = ROOT / "build_revision.txt"
+    revision = revision_path.read_text(encoding="utf-8").strip() if revision_path.exists() else "development"
+    return {"status": "ok", "revision": revision}
 
 
 @app.get("/api/reference/avt/{page}")

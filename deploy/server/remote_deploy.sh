@@ -43,5 +43,5 @@ if command -v nginx >/dev/null 2>&1 && [ -f deploy/server/nginx.conf ]; then
   sudo systemctl reload nginx
 fi
 
-curl --fail --silent --show-error "http://127.0.0.1:${PORT}/api/health"
+curl --fail --silent --show-error --retry 15 --retry-connrefused --retry-delay 2 "http://127.0.0.1:${PORT}/api/health"
 printf '\nOilCode deployment is healthy at %s\n' "$(date --iso-8601=seconds)"

@@ -10,7 +10,7 @@ permissions:
 
 concurrency:
   group: oilcode-production
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   verify-and-deploy:
@@ -46,21 +46,38 @@ jobs:
 
       - name: Configure SSH
         shell: bash
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
         run: |
+          set -euo pipefail
+          for name in DEPLOY_HOST DEPLOY_USER DEPLOY_PATH DEPLOY_SSH_KEY DEPLOY_KNOWN_HOSTS; do
+            if [[ -z "${!name}" ]]; then
+              echo "::error::Missing repository Actions secret: $name"
+              exit 1
+            fi
+          done
+          [[ "$DEPLOY_USER" =~ ^[a-z_][a-z0-9_-]*$ ]]
+          [[ "$DEPLOY_HOST" =~ ^[a-zA-Z0-9.-]+$ ]]
+          [[ "$DEPLOY_PATH" =~ ^/home/$DEPLOY_USER/[a-zA-Z0-9_-]+$ ]]
           install -d -m 700 ~/.ssh
-          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_ed25519
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+          ssh -o BatchMode=yes -o StrictHostKeyChecking=yes "$DEPLOY_USER@$DEPLOY_HOST" true
 
       - name: Copy release
         shell: bash
         run: |
-          test -n "$DEPLOY_PATH"
+          set -euo pipefail
+          printf '%s\n' "$GITHUB_SHA" > build_revision.txt
           ssh "$DEPLOY_USER@$DEPLOY_HOST" "mkdir -p '$DEPLOY_PATH'"
           rsync -az --delete \
             --exclude '.git/' \
             --exclude '.venv/' \
             --exclude 'storage/' \
+            --exclude '__pycache__/' \
+            --exclude '.pytest_cache/' \
             --exclude 'frontend/node_modules/' \
             ./ "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/"
 
@@ -74,4 +91,5 @@ jobs:
       - name: Verify public health endpoint
         shell: bash
         run: |
-          curl --fail --retry 10 --retry-delay 3 "http://$DEPLOY_HOST/api/health"
+          curl --fail --retry 10 --retry-delay 3 "http://$DEPLOY_HOST/api/health" > health.json
+          python -c 'import json,os; h=json.load(open("health.json")); assert h["status"] == "ok"; assert h["revision"] == os.environ["GITHUB_SHA"], h; print(h)'
