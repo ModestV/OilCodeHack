@@ -112,7 +112,7 @@ def test_expert_formula_overrides_stale_manifest_and_resolves_available_lims(tmp
 
 
 def test_expert_formula_corrections_are_canonical():
-    formulas = {item["id"]: item for item in json.loads(REGISTRY.read_text())["formulas"]}
+    formulas = {item["id"]: item for item in json.loads(REGISTRY.read_text(encoding="utf-8"))["formulas"]}
     expected = {
         "24-2000:GODT:T90": "162.998+0.12945*T12+59.57*(F15/2000)+0.00036*W7+0.26366*T23-424.72638*F1/F26",
         "24-2000:GODT:T50": "44.625+10.0224*P13+0.06981*F9+0.471*T6",

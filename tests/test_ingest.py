@@ -46,7 +46,7 @@ def test_imports_partial_kip_with_quality_flags(tmp_path):
     assert len(last) == 2 and all("conflict" in flags for flags in last["flags"])
     bad = table[(table.metric_id == "avt.F26") & table.value.isna()]
     assert len(bad) == 1 and bad.iloc[0]["flags"] == "conflict|invalid"
-    assert json.loads((out / "manifest.json").read_text())["id"] == "dataset"
+    assert json.loads((out / "manifest.json").read_text(encoding="utf-8"))["id"] == "dataset"
 
 
 def test_lims_pairs_keep_independent_timestamps_units_and_ids(tmp_path):
