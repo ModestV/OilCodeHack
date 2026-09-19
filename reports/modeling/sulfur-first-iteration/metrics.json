@@ -1,0 +1,169 @@
+{
+  "source": "C:\\Users\\Roma\\Desktop\\нефтекод\\hakathon-data",
+  "source_files": {
+    "data\\242000_tags.csv": {
+      "bytes": 91324015,
+      "sha256": "19b9744e6315a395d3d77ac53a6e09b6d69488fa7f84bd21147cd8d7c9be7e21"
+    },
+    "data\\avt_tags.csv": {
+      "bytes": 247429640,
+      "sha256": "514adfcad05c1e7bd80616889bfe8bb0617aad792ab4248f178a721606f0e10f"
+    },
+    "Updates\\doc00628320260914104432.pdf": {
+      "bytes": 579088,
+      "sha256": "169225416aa796d284f25a7cac4d5cef654a3c5b79f01e3f536a8f3c9b2290fd"
+    },
+    "Updates\\doc00628420260914104535.pdf": {
+      "bytes": 579775,
+      "sha256": "abdaedfb3f61c951720ee46bbaf83073d61b810263fec90d09ceaca13fbac385"
+    },
+    "Updates\\doc00628520260914104632.pdf": {
+      "bytes": 513966,
+      "sha256": "3665a5d4ecce907be9f7b7fc5c1ce5a0edf7454da873e2396b43be448b918be5"
+    },
+    "Updates\\Ustanovka_AVT_merged.pdf": {
+      "bytes": 181908,
+      "sha256": "fafcaec3124ee95364f36d2ca1c943cb28b5550d9a498a774d40b0b000df829a"
+    },
+    "Updates\\теги АВТ_24-2000.xlsx": {
+      "bytes": 12779,
+      "sha256": "d5550fe945a3424cf859c86d1feff2dc6a008d5738a0ef9f370973c659f2b224"
+    },
+    "Updates\\формулы_ВАК.xlsx": {
+      "bytes": 12419,
+      "sha256": "8badbfa10d5b2d909222f8a9ab4227d2a8a4938074585e98e60410592e4adc8d"
+    },
+    "АВТ_схемы.pdf": {
+      "bytes": 605566,
+      "sha256": "68720db70819c86c4eb2380b5cf916ff27b12f6ca00578b3217cd0a2f159cc18"
+    },
+    "Выгрузка ПАК 01.01.2023 - н.в_.xlsx": {
+      "bytes": 7060689,
+      "sha256": "7b85733176f559c15932173518620a0e98176676c73c17becc4316b2ded771f0"
+    },
+    "ЛИМСы 01.01.2023 - н.в_ (2).xlsx": {
+      "bytes": 426340,
+      "sha256": "7bf3a14d8d3d9d99712beeb9860a2b8988adc554c670e4fa3c5cc5d4c0c02cd2"
+    },
+    "Теги_хакатон.xlsx": {
+      "bytes": 18109,
+      "sha256": "398441f9bcd25d0acb15f12d1c06a8fbedc24bd3cdc5e74b0cf1f6a6b32a07c4"
+    },
+    "ТЗ_нефтекод.docx": {
+      "bytes": 38990,
+      "sha256": "58cba9b58598a3f16032b3fbc2e8cb928cfecca543ca981b08bc94ccf8414558"
+    }
+  },
+  "target": {
+    "point": "Гидроочистка",
+    "parameter": "Mg.Sulfur",
+    "unit": "мг/кг"
+  },
+  "availability_lag": "0 days 04:00:00",
+  "telemetry_rows": 189217,
+  "telemetry_signals": 97,
+  "target_rows": 1462,
+  "aligned_rows": 1458,
+  "feature_count": 292,
+  "feature_engineering": "current value + past-only 1h/6h rolling means + previous lab available at cutoff; train-only median imputation",
+  "model": "standardized Ridge (alpha=1000) on log1p(target), inverse transformed for metrics",
+  "split_boundaries": {
+    "train_end_exclusive": "2025-01-01",
+    "validation_end_exclusive": "2026-01-01"
+  },
+  "split_rows": {
+    "train": 792,
+    "validation": 417,
+    "test": 249
+  },
+  "leakage_check": {
+    "rows": 1458,
+    "violating_rows": 0,
+    "minimum_lag_minutes": 240.0,
+    "required_lag_minutes": 240.0,
+    "passed": true
+  },
+  "metrics": {
+    "train": {
+      "ridge": {
+        "n": 792,
+        "mae": 4.0101541016758375,
+        "rmse": 70.67871550694947,
+        "median_absolute_error": 1.037156681998888,
+        "bias_pred_minus_actual": -2.748868535866116,
+        "actual_above_10": 118,
+        "predicted_above_10": 14,
+        "precision_above_10": 0.5714285714285714,
+        "recall_above_10": 0.06779661016949153,
+        "false_alarm_rate": 0.008902077151335312
+      },
+      "previous_lab": {
+        "n": 791,
+        "mae": 7.461946905186746,
+        "rmse": 106.5070681889205,
+        "median_absolute_error": 1.2000007629394531,
+        "bias_pred_minus_actual": -0.07914032857728517,
+        "actual_above_10": 118,
+        "predicted_above_10": 110,
+        "precision_above_10": 0.22727272727272727,
+        "recall_above_10": 0.211864406779661,
+        "false_alarm_rate": 0.1263001485884101
+      },
+      "rows_without_previous_lab": 1
+    },
+    "validation": {
+      "ridge": {
+        "n": 417,
+        "mae": 1.7979002009304668,
+        "rmse": 6.2478806574425265,
+        "median_absolute_error": 1.0953612632195409,
+        "bias_pred_minus_actual": -0.6998230011317333,
+        "actual_above_10": 76,
+        "predicted_above_10": 11,
+        "precision_above_10": 0.36363636363636365,
+        "recall_above_10": 0.05263157894736842,
+        "false_alarm_rate": 0.020527859237536656
+      },
+      "previous_lab": {
+        "n": 417,
+        "mae": 2.0800958640283818,
+        "rmse": 6.488358854719685,
+        "median_absolute_error": 1.1999998092651367,
+        "bias_pred_minus_actual": -0.3995203897535658,
+        "actual_above_10": 76,
+        "predicted_above_10": 71,
+        "precision_above_10": 0.29577464788732394,
+        "recall_above_10": 0.27631578947368424,
+        "false_alarm_rate": 0.1466275659824047
+      },
+      "rows_without_previous_lab": 0
+    },
+    "test": {
+      "ridge": {
+        "n": 249,
+        "mae": 1.8813536506485051,
+        "rmse": 3.1535298370148905,
+        "median_absolute_error": 1.1258351364579386,
+        "bias_pred_minus_actual": -0.3385133812745192,
+        "actual_above_10": 36,
+        "predicted_above_10": 9,
+        "precision_above_10": 0.2222222222222222,
+        "recall_above_10": 0.05555555555555555,
+        "false_alarm_rate": 0.03286384976525822
+      },
+      "previous_lab": {
+        "n": 249,
+        "mae": 1.8244979890833897,
+        "rmse": 2.637275273159565,
+        "median_absolute_error": 1.1999998092651367,
+        "bias_pred_minus_actual": -0.06867470032718766,
+        "actual_above_10": 36,
+        "predicted_above_10": 33,
+        "precision_above_10": 0.15151515151515152,
+        "recall_above_10": 0.1388888888888889,
+        "false_alarm_rate": 0.13145539906103287
+      },
+      "rows_without_previous_lab": 0
+    }
+  }
+}
