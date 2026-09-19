@@ -26,6 +26,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from . import analytics as a
+from .agents import make_decision
 from .config import ROOT, STORAGE
 from .formulas import formula_results
 from .scenarios import ScenarioRequest, calculate_scenario
@@ -250,6 +251,16 @@ def formulas(dataset_id: str, at: str):
 def scenario(dataset_id: str, body: ScenarioRequest):
     try:
         return calculate_scenario(dataset(dataset_id), body)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.post("/api/datasets/{dataset_id}/decision")
+def decision(dataset_id: str, body: ScenarioRequest):
+    """Run the local quality → reliability → optimization agent pipeline."""
+
+    try:
+        return make_decision(dataset(dataset_id), body)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
