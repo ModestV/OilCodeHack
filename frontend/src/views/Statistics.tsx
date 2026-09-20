@@ -417,7 +417,7 @@ function Passport({
                       format(stats.get(m.id)?.min) +
                       "–" +
                       format(stats.get(m.id)?.max)
-                    : v?.timestamp?.replace("T", " ") || "Нет пробы к моменту"}
+                    : v?.timestamp ? stamp(v.timestamp) : "Нет пробы к моменту"}
                 </small>
                 {mode === "moment" && (
                   <>

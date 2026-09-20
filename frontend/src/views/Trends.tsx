@@ -102,7 +102,10 @@ export function Trends({
                   markLine: {
                     silent: true,
                     symbol: "none",
-                    label: { formatter: "Порог 10 мг/кг" },
+                    label: {
+                      formatter: "Порог 10 мг/кг",
+                      position: "insideEndTop",
+                    },
                     lineStyle: { color: theme.danger },
                     data: [{ yAxis: 10 }],
                   },

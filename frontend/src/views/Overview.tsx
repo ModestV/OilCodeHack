@@ -3,6 +3,7 @@ import {
   AlertTriangle,
   ArrowRight,
   CircleHelp,
+  OctagonAlert,
   ShieldCheck,
 } from "lucide-react";
 import { Chart } from "../components/Chart";
@@ -44,6 +45,7 @@ export function Overview({
   onSelectTime,
   onNavigate,
   toolbar,
+  tiles,
 }: {
   mode: "period" | "moment";
   manifest: Manifest;
@@ -55,6 +57,7 @@ export function Overview({
   onSelectTime?: (time: string) => void;
   onNavigate?: (target: AttentionTarget, metricId?: string) => void;
   toolbar?: ReactNode;
+  tiles?: ReactNode;
 }) {
   const theme = useChartTheme();
   const map = useMemo(() => metricMap(metrics), [metrics]);
@@ -172,6 +175,8 @@ export function Overview({
               <ShieldCheck />
             ) : assessment.level === "unknown" ? (
               <CircleHelp />
+            ) : assessment.level === "danger" ? (
+              <OctagonAlert />
             ) : (
               <AlertTriangle />
             )}
@@ -218,7 +223,22 @@ export function Overview({
                   onClick={() => onNavigate?.(finding.target, finding.metricId)}
                 >
                   <span>
-                    <b>{finding.title}</b>
+                    <b>
+                      {finding.level === "danger" ? (
+                        <OctagonAlert
+                          className="level-icon"
+                          aria-hidden="true"
+                        />
+                      ) : finding.level === "warning" ? (
+                        <AlertTriangle
+                          className="level-icon"
+                          aria-hidden="true"
+                        />
+                      ) : (
+                        <CircleHelp className="level-icon" aria-hidden="true" />
+                      )}
+                      {finding.title}
+                    </b>
                     {finding.description !== assessment.description && (
                       <small>{finding.description}</small>
                     )}
@@ -232,6 +252,7 @@ export function Overview({
           </div>
         )}
       </section>
+      {tiles}
       {toolbar}
       {mode === "period" ? (
         <>

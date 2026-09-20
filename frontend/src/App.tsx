@@ -4,6 +4,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import {
@@ -12,7 +13,6 @@ import {
   Beaker,
   Database,
   FlaskConical,
-  Gauge,
   Lightbulb,
   PanelLeftClose,
   PanelLeftOpen,
@@ -33,10 +33,12 @@ import type {
   Summary,
 } from "./types";
 import { DataMenu } from "./components/DataMenu";
+import { KpiTiles } from "./components/KpiTiles";
 import { ThemeSwitch } from "./ui/ThemeSwitch";
 import { Disclosure, Segmented, Tabs } from "./ui/Controls";
 import { Tooltip } from "./ui/Tooltip";
 import { useViewport } from "./ui/hooks";
+import { readUrlState, writeUrlState, type UrlState } from "./urlState";
 import { stamp } from "./views/shared";
 import { useChartTheme } from "./ui/useChartTheme";
 import { OperatorPanel, type SidePanelMode } from "./components/OperatorPanel";
@@ -68,6 +70,11 @@ const UploadModal = lazy(() =>
 
 type Tab = "overview" | "trends" | "kip" | "quality";
 type Page = "monitoring" | "recommendations" | "sandbox";
+const isTab = (v: unknown): v is Tab =>
+  v === "overview" || v === "trends" || v === "kip" || v === "quality";
+const isPage = (v: unknown): v is Page =>
+  v === "monitoring" || v === "recommendations" || v === "sandbox";
+const initialUrl = readUrlState();
 const tabs: [Tab, string][] = [
   ["overview", "Сводка"],
   ["trends", "Анализ"],
@@ -112,9 +119,15 @@ export function App() {
     [datasetId, setDatasetId] = useState(""),
     [manifest, setManifest] = useState<Manifest | null>(null),
     [metrics, setMetrics] = useState<Metric[]>([]);
-  const [page, setPage] = useState<Page>("monitoring"),
-    [tab, setTab] = useState<Tab>("overview"),
-    [mode, setModeState] = useState<Mode>("period"),
+  const [page, setPage] = useState<Page>(() =>
+      isPage(initialUrl.page) ? initialUrl.page : "monitoring",
+    ),
+    [tab, setTab] = useState<Tab>(() =>
+      isTab(initialUrl.tab) ? initialUrl.tab : "overview",
+    ),
+    [mode, setModeState] = useState<Mode>(() =>
+      initialUrl.mode === "moment" ? "moment" : "period",
+    ),
     [from, setFrom] = useState(""),
     [to, setTo] = useState("");
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null),
@@ -148,6 +161,19 @@ export function App() {
   const shapeKey = JSON.stringify([datasetId, mode, tab, statsView]);
   const [loadedShape, setLoadedShape] = useState("");
   const [qualityRevision, setQualityRevision] = useState<string | null>(null);
+  const urlOnce = useRef<UrlState | null>(initialUrl);
+  useEffect(() => {
+    if (!datasetId || !to) return;
+    writeUrlState({
+      dataset: datasetId,
+      page,
+      tab,
+      mode,
+      from,
+      to,
+      signals: selected,
+    });
+  }, [datasetId, page, tab, mode, from, to, selected]);
   const requestKey = JSON.stringify([
     datasetId,
     from,
@@ -177,7 +203,13 @@ export function App() {
       .datasets(c.signal)
       .then((r) => {
         setDatasets(r.datasets);
-        setDatasetId(r.default_id || r.datasets[0]?.id || "");
+        const wanted = initialUrl.dataset;
+        setDatasetId(
+          (wanted && r.datasets.some((d) => d.id === wanted) ? wanted : "") ||
+            r.default_id ||
+            r.datasets[0]?.id ||
+            "",
+        );
         setLoading(false);
       })
       .catch((e) => {
@@ -222,17 +254,33 @@ export function App() {
           setMetrics(mm.metrics);
           const end = m.telemetry_end || m.end;
           const start = m.telemetry_start || m.start;
+          const url = urlOnce.current;
+          urlOnce.current = null;
           if (end && start) {
-            setTo(end);
-            const day = offset(end, -1440);
-            setFrom(day < start ? start : day);
-            if (start === end) setFrom(offset(start, -10));
+            const wantedTo =
+              url?.to && url.to <= end && url.to >= start ? url.to : end;
+            setTo(wantedTo);
+            const day = offset(wantedTo, -1440);
+            const wantedFrom =
+              url?.from && url.from < wantedTo && url.from >= start
+                ? url.from
+                : day < start
+                  ? start
+                  : day;
+            setFrom(start === end ? offset(start, -10) : wantedFrom);
           }
+          const fromUrl = (url?.signals ?? []).filter((id) =>
+            available.some((m) => m.id === id),
+          );
           const defaults = SULFUR.filter((id) =>
             available.some((m) => m.id === id),
           );
           setSelected(
-            defaults.length ? defaults : available.slice(0, 2).map((x) => x.id),
+            fromUrl.length
+              ? fromUrl
+              : defaults.length
+                ? defaults
+                : available.slice(0, 2).map((x) => x.id),
           );
           setStatMetric(
             available.find((x) => x.id === MAIN[0])?.id ||
@@ -468,14 +516,19 @@ export function App() {
               assessment,
             }}
             onSelectTime={openMoment}
+            tiles={
+              <KpiTiles
+                pinned={pinned}
+                metrics={metrics}
+                mode={mode}
+                snapshot={snapshot}
+                summary={summary}
+                statistic={cardStatistic}
+                onConfigure={() => setSidePanel("metrics")}
+              />
+            }
             toolbar={
               <div className="overview-tools" aria-label="Инструменты сводки">
-                <button
-                  className="secondary"
-                  onClick={() => setSidePanel("metrics")}
-                >
-                  <Gauge /> Показатели
-                </button>
                 {assessment.findings.length > 2 && (
                   <button
                     className="secondary"
@@ -554,6 +607,9 @@ export function App() {
     <div
       className={`app${phone ? " with-bottom-nav" : ""}${rail ? " rail" : ""}`}
     >
+      <a className="skip-link" href="#main">
+        К содержимому
+      </a>
       {!phone && (
         <aside aria-label="Навигация">
           <div className="brand">
@@ -611,7 +667,7 @@ export function App() {
           </div>
         </aside>
       )}
-      <main>
+      <main id="main" tabIndex={-1}>
         <header className="top">
           <div>
             <h1>{title}</h1>
@@ -753,7 +809,13 @@ export function App() {
               busy && loadedShape !== shapeKey ? (
                 <LoadingLine text="Расчёт показателей…" />
               ) : (
-                <div className={busy ? "view busy" : "view"} aria-busy={busy}>
+                <div
+                  className={busy ? "view busy" : "view"}
+                  aria-busy={busy}
+                  id={`panel-${tab}`}
+                  role="tabpanel"
+                  aria-labelledby={`tab-${tab}`}
+                >
                   {busy && (
                     <div className="loading-line view-progress" role="status" />
                   )}

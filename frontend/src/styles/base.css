@@ -167,3 +167,23 @@ dd {
   line-gap-override: 0%;
   size-adjust: 107.4%;
 }
+
+/* Skip link for keyboard users */
+.skip-link {
+  position: fixed;
+  top: var(--sp-2);
+  left: var(--sp-2);
+  z-index: var(--z-tooltip);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-1);
+  background: var(--surface);
+  color: var(--accent-text);
+  box-shadow: var(--shadow-popover);
+  transform: translateY(-200%);
+}
+.skip-link:focus {
+  transform: none;
+}
+main:focus {
+  outline: none;
+}

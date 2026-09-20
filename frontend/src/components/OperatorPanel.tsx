@@ -1,5 +1,13 @@
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
-import { AlertTriangle, ArrowRight, Settings2 } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowRight,
+  ChevronDown,
+  ChevronUp,
+  CircleHelp,
+  OctagonAlert,
+  Settings2,
+} from "lucide-react";
 import type { OperatorAssessment, AttentionTarget } from "../operatorStatus";
 import type { Metric, Snapshot, Stat, Summary } from "../types";
 import { HelpTooltip } from "./HelpTooltip";
@@ -230,22 +238,53 @@ export function OperatorPanel({
             />
             <div className="panel-check-list">
               {available.map((metric) => {
-                const checked = pinned.includes(metric.id);
+                const index = pinned.indexOf(metric.id);
+                const checked = index >= 0;
+                const move = (delta: number) => {
+                  const next = [...pinned];
+                  const target = index + delta;
+                  if (target < 0 || target >= next.length) return;
+                  [next[index], next[target]] = [next[target], next[index]];
+                  setPinned(next);
+                };
                 return (
-                  <Checkbox
-                    key={metric.id}
-                    checked={checked}
-                    disabled={!checked && pinned.length >= MAX_PINNED}
-                    onChange={() =>
-                      setPinned(
-                        checked
-                          ? pinned.filter((id) => id !== metric.id)
-                          : [...pinned, metric.id],
-                      )
-                    }
-                    label={metric.label}
-                    description={metric.id}
-                  />
+                  <div className="panel-check-row" key={metric.id}>
+                    <Checkbox
+                      checked={checked}
+                      disabled={!checked && pinned.length >= MAX_PINNED}
+                      onChange={() =>
+                        setPinned(
+                          checked
+                            ? pinned.filter((id) => id !== metric.id)
+                            : [...pinned, metric.id],
+                        )
+                      }
+                      label={metric.label}
+                      description={metric.id}
+                    />
+                    {checked && !deferredQuery && (
+                      <span className="panel-check-order">
+                        <button
+                          type="button"
+                          className="icon-button"
+                          aria-label={`Поднять ${metric.label}`}
+                          disabled={index === 0}
+                          onClick={() => move(-1)}
+                        >
+                          <ChevronUp />
+                        </button>
+                        <button
+                          type="button"
+                          className="icon-button"
+                          aria-label={`Опустить ${metric.label}`}
+                          disabled={index === pinned.length - 1}
+                          onClick={() => move(1)}
+                        >
+                          <ChevronDown />
+                        </button>
+                      </span>
+                    )}
+                  </div>
                 );
               })}
             </div>
@@ -290,7 +329,13 @@ export function OperatorPanel({
                 onNavigate(finding.target, finding.metricId);
               }}
             >
-              <AlertTriangle aria-hidden="true" />
+              {finding.level === "danger" ? (
+                <OctagonAlert aria-hidden="true" />
+              ) : finding.level === "warning" ? (
+                <AlertTriangle aria-hidden="true" />
+              ) : (
+                <CircleHelp aria-hidden="true" />
+              )}
               <span>
                 <b>{finding.title}</b>
                 <small>{finding.description}</small>

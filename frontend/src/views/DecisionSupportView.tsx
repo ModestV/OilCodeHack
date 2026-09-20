@@ -15,6 +15,7 @@ import { NumberField } from "../ui/NumberField";
 import { Select } from "../ui/Select";
 import { DateTimeField } from "../ui/DateTimeField";
 import { Disclosure, Segmented } from "../ui/Controls";
+import { stamp } from "./shared";
 import { DataTable } from "../ui/DataTable";
 import { pipelineStages } from "../demo/decisionSupportDemo";
 
@@ -708,10 +709,7 @@ export function DecisionSupportView({
   );
 }
 
-function displayTime(value: string) {
-  const [date, time] = value.split("T");
-  return `${date.split("-").reverse().join(".")} ${time?.slice(0, 5) || ""}`.trim();
-}
+const displayTime = (value: string) => stamp(value);
 
 function DatasetRowPicker({
   selectedRow,

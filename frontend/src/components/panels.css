@@ -61,9 +61,25 @@
   overflow: auto;
   border-top: 1px solid var(--border);
 }
-.panel-check-list .checkbox {
+.panel-check-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
   border-bottom: 1px solid var(--border);
+}
+.panel-check-row .checkbox {
+  flex: 1;
+  min-width: 0;
   padding: var(--sp-2) 2px;
+}
+.panel-check-order {
+  display: flex;
+  flex-shrink: 0;
+}
+.panel-check-order .icon-button {
+  width: 28px;
+  height: 28px;
+  min-height: 28px;
 }
 .panel-filter-list {
   display: grid;
