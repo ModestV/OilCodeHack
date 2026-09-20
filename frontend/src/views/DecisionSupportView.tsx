@@ -29,15 +29,19 @@ const initial = (at: string, sandbox: boolean): ScenarioRequest => ({
   at,
   horizon_minutes: 180,
   step_minutes: 30,
-  baseline_feed_sulfur: 15,
-  feed_sulfur: 15,
-  targets: { sulfur_max: 10, t95_max: 360, cetane_min: 51 },
+  // Feed sulphur in % mass (typical straight-run diesel ~0.93 %).
+  baseline_feed_sulfur: 0.93,
+  feed_sulfur: 0.93,
+  // 1 mg/kg technological margin (expert) and 30 % residual exceedance risk.
+  targets: { sulfur_max: 9, t95_max: 360, cetane_min: 51, max_exceedance_probability: 0.3 },
+  // Log-domain surrogate: analyser step-response estimates from
+  // reports/modeling/sulfur-forecast (editable assumptions, direction confirmed for T6).
   parameters: {
-    lag_minutes: 90,
-    feed_sulfur_transfer: 0.2,
-    temperature_effect: -0.08,
-    feed_rate_effect: 0.05,
-    pressure_effect: -0.15,
+    lag_minutes: 120,
+    feed_sulfur_elasticity: 1,
+    temperature_effect: -0.0365,
+    feed_rate_effect: 0.0186,
+    pressure_effect: -0.185,
     cetane_gain_per_pct: 4,
   },
   changes: sandbox
@@ -68,12 +72,16 @@ const initial = (at: string, sandbox: boolean): ScenarioRequest => ({
 
 const number = (value: string) => Number(value.replace(",", "."));
 const forecastReason = (reason: string) => ({
-  no_telemetry_evidence: "нет свежей телеметрии",
+  no_sulfur_evidence: "нет ни анализатора, ни опубликованной пробы серы",
+  no_control_telemetry: "нет свежей телеметрии T6/F9/P13",
   too_many_missing_features: "слишком много пропусков",
-  outside_training_support: "данные за пределами области обучения",
+  outside_training_support: "режим установки за пределами области обучения",
+  insufficient_lab_anchor: "мало пар ЛИМС/анализатор для калибровки",
   model_not_yet_available_at_origin: "момент предшествует завершению обучения и выбора модели (01.01.2026)",
   nonfinite_model_output: "некорректный численный результат",
 }[reason] || reason);
+const percent = (value: number | null | undefined) =>
+  value == null ? "—" : `${Math.round(value * 100)} %`;
 
 export function DecisionSupportView({
   datasetId,
@@ -107,9 +115,9 @@ export function DecisionSupportView({
   const [manualMode, setManualMode] = useState(false);
   const applyPreset = (preset: "base" | "feed" | "strict") => {
     const next = initial(at, sandbox);
-    if (preset === "feed") next.feed_sulfur = 30;
+    if (preset === "feed") next.feed_sulfur = 1.15;
     if (preset === "strict") {
-      next.feed_sulfur = 22;
+      next.feed_sulfur = 1.05;
       next.targets.sulfur_max = 8;
       next.additive_pct = sandbox ? 1 : 0;
     }
@@ -185,14 +193,25 @@ export function DecisionSupportView({
       yAxis: { type: "value", name: "мг/кг", scale: true },
       series: [
         {
-          name: "Прогноз серы",
+          name: "Без воздействия",
+          type: "line",
+          smooth: false,
+          symbolSize: 5,
+          lineStyle: { type: "dashed" },
+          data: result?.trajectory.map((p) => p.baseline_sulfur) || [],
+        },
+        {
+          name: "Сценарий",
           type: "line",
           smooth: false,
           symbolSize: 7,
           data: result?.trajectory.map((p) => p.sulfur) || [],
           markLine: {
             silent: true,
-            data: [{ yAxis: request.targets.sulfur_max, name: "Цель" }],
+            data: [
+              { yAxis: request.targets.sulfur_max, name: "Цель" },
+              { yAxis: 10, name: "Предел 10" },
+            ],
           },
         },
       ],
@@ -321,11 +340,11 @@ export function DecisionSupportView({
         </div>
         <div className="scenario-fields">
           <label>
-            Сера в сырье до изменения
+            Сера в сырье до изменения, % масс.
             <input
               type="number"
-              min="0"
-              step="0.1"
+              min="0.01"
+              step="any"
               value={request.baseline_feed_sulfur}
               onChange={(e) =>
                 update("baseline_feed_sulfur", number(e.target.value))
@@ -333,13 +352,26 @@ export function DecisionSupportView({
             />
           </label>
           <label>
-            Сера в сырье после изменения
+            Сера в сырье после изменения, % масс.
+            <input
+              type="number"
+              min="0.01"
+              step="any"
+              value={request.feed_sulfur}
+              onChange={(e) => update("feed_sulfur", number(e.target.value))}
+            />
+          </label>
+          <label>
+            Допустимая вероятность превышения 10 мг/кг
             <input
               type="number"
               min="0"
-              step="0.1"
-              value={request.feed_sulfur}
-              onChange={(e) => update("feed_sulfur", number(e.target.value))}
+              max="1"
+              step="any"
+              value={request.targets.max_exceedance_probability}
+              onChange={(e) =>
+                update("targets.max_exceedance_probability", number(e.target.value))
+              }
             />
           </label>
           <label>
@@ -537,26 +569,27 @@ export function DecisionSupportView({
           <summary>Параметры модели</summary>
           <div className="scenario-fields">
             <label>
-              Перенос серы сырья
+              Эластичность по сере сырья (ln S_out / ln S_in)
               <input
                 type="number"
-                min="0.01"
-                step="0.01"
-                value={request.parameters.feed_sulfur_transfer}
+                min="0"
+                max="2"
+                step="0.05"
+                value={request.parameters.feed_sulfur_elasticity}
                 onChange={(e) =>
                   update(
-                    "parameters.feed_sulfur_transfer",
+                    "parameters.feed_sulfur_elasticity",
                     number(e.target.value),
                   )
                 }
               />
             </label>
             <label>
-              Эффект температуры
+              Эффект температуры, ln(мг/кг) на °C
               <input
                 type="number"
-                max="-0.001"
-                step="0.01"
+                max="-0.0001"
+                step="any"
                 value={request.parameters.temperature_effect}
                 onChange={(e) =>
                   update(
@@ -567,11 +600,11 @@ export function DecisionSupportView({
               />
             </label>
             <label>
-              Эффект расхода
+              Эффект расхода, ln(мг/кг) на % расхода
               <input
                 type="number"
-                min="0.01"
-                step="0.01"
+                min="0.0001"
+                step="any"
                 value={request.parameters.feed_rate_effect}
                 onChange={(e) =>
                   update("parameters.feed_rate_effect", number(e.target.value))
@@ -579,11 +612,11 @@ export function DecisionSupportView({
               />
             </label>
             <label>
-              Эффект давления
+              Эффект давления, ln(мг/кг) на МПа
               <input
                 type="number"
-                max="-0.001"
-                step="0.01"
+                max="-0.0001"
+                step="any"
                 value={request.parameters.pressure_effect}
                 onChange={(e) =>
                   update("parameters.pressure_effect", number(e.target.value))
@@ -620,19 +653,27 @@ export function DecisionSupportView({
             <article>
               <small>Сера сейчас</small>
               <strong>{formatNumber(result.baseline.sulfur, 2)}</strong>
-              <span>мг/кг</span>
+              <span>
+                мг/кг ·{" "}
+                {result.baseline.sulfur_source === "model.nowcast"
+                  ? "nowcast анализатора, калиброванный по ЛИМС"
+                  : result.baseline.sulfur_source}
+              </span>
             </article>
-            <article className={result.sulfur_target_met && result.hard_sulfur_limit_met ? "ok" : "danger"}>
+            <article className={result.sulfur_target_met && result.hard_sulfur_limit_met && result.exceedance_target_met !== false ? "ok" : "danger"}>
               <small>Через {result.horizon_minutes} мин</small>
               <strong>{formatNumber(result.predicted_sulfur, 2)}</strong>
               <span>
-                {result.sulfur_target_met && result.hard_sulfur_limit_met ? (
+                {result.predicted_sulfur_lower != null && result.predicted_sulfur_upper != null && (
+                  <>80 %: {formatNumber(result.predicted_sulfur_lower, 1)}–{formatNumber(result.predicted_sulfur_upper, 1)} · P(&gt;10) {percent(result.exceedance_probability)} · </>
+                )}
+                {result.sulfur_target_met && result.hard_sulfur_limit_met && result.exceedance_target_met !== false ? (
                   <>
                     <CheckCircle2 /> цель достигнута
                   </>
                 ) : (
                   <>
-                    <AlertTriangle /> превышение цели или 10 мг/кг
+                    <AlertTriangle /> превышение цели, 10 мг/кг или допустимого риска
                   </>
                 )}
               </span>
@@ -899,6 +940,7 @@ function PipelinePreview({
               <tr>
                 <th scope="col">Сценарий</th>
                 <th scope="col">Сера в конце горизонта</th>
+                <th scope="col">P(&gt;10)</th>
                 <th scope="col">Проверка ограничений</th>
                 <th scope="col">Масштаб изменения</th>
                 <th scope="col">Выпуск, Δ%</th>
@@ -923,6 +965,7 @@ function PipelinePreview({
                       ? "—"
                       : `${formatNumber(candidate.predicted_sulfur)} мг/кг серы`}
                   </td>
+                  <td>{percent(candidate.exceedance_probability)}</td>
                   <td>
                     {candidate.status === "error"
                       ? "Ошибка"
@@ -942,7 +985,7 @@ function PipelinePreview({
                 </tr>
               ))}
               {!decision?.candidates?.length && (
-                <tr><td colSpan={7}>Сравнение не выполнено: сначала нужны достоверные исходные данные.</td></tr>
+                <tr><td colSpan={8}>Сравнение не выполнено: сначала нужны достоверные исходные данные.</td></tr>
               )}
             </tbody>
           </table>
@@ -952,14 +995,15 @@ function PipelinePreview({
       {decision?.forecast && (
         <section className="decision-band model-forecast" aria-label="Модельный прогноз серы">
           <div className="section-heading">
-            <h2>Отдельный прогноз качества</h2>
+            <h2>Прогноз качества без воздействия</h2>
             <span className="support-notice">
-              Ridge · горизонт {decision.forecast.forecast_horizon_minutes / 60} ч
+              Анализатор, калиброванный по ЛИМС · горизонт {decision.forecast.horizon_minutes / 60} ч
             </span>
           </div>
           <p className="recommendation-copy">
             Расчёт на {displayTime(decision.forecast.target_time)} по данным, доступным на {displayTime(decision.forecast.at)}.
             Результат ЛИМС доступен через {decision.forecast.lims_publication_delay_minutes / 60} ч после отбора пробы.
+            Смещение анализатора относительно ЛИМС оценено по {decision.forecast.lab_anchor.pairs} последним парам.
             Прогноз не оценивает эффект предложенного изменения режима.
           </p>
           {decision.forecast.status === "abstain" && (
@@ -967,12 +1011,32 @@ function PipelinePreview({
           )}
           <dl className="recommendation-metrics">
             <div>
-              <dt>Ridge прогноз</dt>
-              <dd>{formatNumber(decision.forecast.prediction_ridge, 2)} <span>мг/кг</span></dd>
+              <dt>Сера сейчас (nowcast)</dt>
+              <dd>{formatNumber(decision.forecast.nowcast?.prediction, 2)} <span>мг/кг</span></dd>
             </div>
             <div>
-              <dt>Консервативная оценка</dt>
-              <dd>{formatNumber(decision.forecast.prediction_risk_guard, 2)} <span>мг/кг</span></dd>
+              <dt>Через {decision.forecast.horizon_minutes} мин</dt>
+              <dd>
+                {formatNumber(decision.forecast.prediction, 2)} <span>мг/кг</span>
+                {decision.forecast.prediction_lower != null && (
+                  <small> · 80 %: {formatNumber(decision.forecast.prediction_lower, 1)}–{formatNumber(decision.forecast.prediction_upper, 1)}</small>
+                )}
+              </dd>
+            </div>
+            <div>
+              <dt>P(&gt;10 мг/кг)</dt>
+              <dd>{percent(decision.forecast.exceedance_probability)} <span>порог тревоги {percent(decision.forecast.alarm_probability)}</span></dd>
+            </div>
+            <div>
+              <dt>Последняя проба ЛИМС</dt>
+              <dd>{formatNumber(decision.forecast.prediction_previous_lab, 2)} <span>мг/кг</span></dd>
+            </div>
+            <div>
+              <dt>Анализатор Q21 / ПАК</dt>
+              <dd>
+                {formatNumber(decision.forecast.analysers?.q21?.adjusted, 2)} / {formatNumber(decision.forecast.analysers?.pak?.adjusted, 2)}
+                <span> калибр. мг/кг</span>
+              </dd>
             </div>
             <div>
               <dt>Признаки</dt>
@@ -983,8 +1047,8 @@ function PipelinePreview({
             {decision.forecast.status === "abstain"
               ? "Числовой прогноз скрыт, поскольку проверка входных данных не пройдена."
               : decision.forecast.alarm_above_10
-                ? "Консервативная оценка выше 10 мг/кг: нужна проверка технологом."
-                : "Оценка ниже 10 мг/кг не исключает превышение: модель пропускает часть опасных проб."}
+                ? "Вероятность превышения 10 мг/кг выше порога тревоги: контур подбирает корректирующее действие, нужна проверка технологом."
+                : "Точечная оценка на горизонте 2–3 ч близка к локальному уровню; ориентируйтесь на интервал и вероятность превышения."}
             {decision.forecast.leakage_check.passed ? " Временные границы признаков соблюдены." : " Нарушены временные границы признаков."}
           </p>
           {!!decision.forecast.warnings.length && (

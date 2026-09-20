@@ -10,3 +10,4 @@ frontend/dist/
 .DS_Store
 *.log
 build_revision.txt
+.claude/

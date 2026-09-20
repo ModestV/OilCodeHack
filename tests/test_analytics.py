@@ -111,18 +111,23 @@ def test_expert_formula_overrides_stale_manifest_and_resolves_available_lims(tmp
     assert result["result"] == pytest.approx(310.3035)
 
 
-def test_expert_formula_corrections_are_canonical():
-    formulas = {item["id"]: item for item in json.loads(REGISTRY.read_text(encoding="utf-8"))["formulas"]}
-    expected = {
-        "24-2000:GODT:T90": "162.998+0.12945*T12+59.57*(F15/2000)+0.00036*W7+0.26366*T23-424.72638*F1/F26",
-        "24-2000:GODT:T50": "44.625+10.0224*P13+0.06981*F9+0.471*T6",
-        "24-2000:GODT:CloudPoint": "0.0002*F22+0.0021*W7+0.00008*F25-0.30656*F1+0.12018*T6+0.01916*F9-48.254-0.05249*T16+0.00011",
-        "24-2000:GODT:CFPP": "0.22088*T23-102.375-47.75834*P8+0.03862*F9+43.60207*W7+43.81849*P24",
-        "24-2000:GODT:T95": "0.03814*F9-9.201-0.00002*F2+0.50*T6+0.48321*LIMS:24-2000.Pipeline.95%.T",
-        "AVT6:240-350:CFPP": "31,40363 - 0,06784xT33 + 17,411xP67 - 8,11544xP4 - 0,47309x(F65/F32+F30)",
-    }
-    assert {key: formulas[key]["expression"] for key in expected} == expected
-    assert all(formulas[key]["status"] == "experimental" for key in expected)
+def test_all_registry_formulas_reproduce_organiser_control_examples():
+    """Every VAK formula equals the corrected organiser file (Updates/формулы_ВАК.xlsx)."""
+    formulas = json.loads(REGISTRY.read_text(encoding="utf-8"))["formulas"]
+    assert len(formulas) == 17
+    for item in formulas:
+        example = item["control_example"]
+        expression = item["expression"].replace(",", ".").replace("×", "*").replace("x", "*")
+        result = evaluate_expression(expression, example["inputs"])
+        assert result == pytest.approx(example["expected"], abs=0.05 + 0.0005 * abs(example["expected"])), item["id"]
+        assert item["version"].startswith("expert-") and item["status"] in {"experimental", "invalid"}
+    by_id = {item["id"]: item["expression"] for item in formulas}
+    # Bracket and coefficient corrections confirmed by the expert.
+    assert "F65/(F32+F30)" in by_id["AVT6:240-350:CFPP"]
+    assert "F65/(F32+F30)" in by_id["AVT6:240-350:D15"]
+    assert "+ 0.76664*T6" in by_id["AVT6:350:I350"]
+    assert "0.50*T6" in by_id["24-2000:GODT:T95"] and "LIMS_95_T" in by_id["24-2000:GODT:T95"]
+    assert "LIMS_D15" in by_id["24-2000:GODT:D15"]
 
 
 def test_period_raw_lab_count_boundary_and_pak_coverage(tmp_path):

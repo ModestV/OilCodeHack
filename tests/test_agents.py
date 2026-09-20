@@ -83,7 +83,7 @@ def test_decision_runs_deterministic_agents_and_returns_trace(tmp_path, monkeypa
         assert client.get(f"/api/datasets/{dataset_id}").json()["status"] == "ready"
         result = client.post(
             f"/api/datasets/{dataset_id}/decision",
-            json={"at": "2025-01-01T00:00:00", "current_sulfur": 12},
+            json={"at": "2025-01-01T00:00:00", "current_sulfur": 25},
         )
 
     assert result.status_code == 200
@@ -98,7 +98,7 @@ def test_decision_runs_deterministic_agents_and_returns_trace(tmp_path, monkeypa
     # An unreachable target is diagnostic evidence, never an action suggestion.
     assert body["recommendation"] is None
     assert body["scenario"] is None
-    assert body["candidates"][0]["scenario"]["baseline"]["sulfur"] == 12
+    assert body["candidates"][0]["scenario"]["baseline"]["sulfur"] == 25
     assert [candidate["id"] for candidate in body["candidates"]] == [
         "automatic",
         "conservative",
