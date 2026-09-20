@@ -180,7 +180,8 @@ def probability_metrics(actual, probability, alarm_probability: float, threshold
     auc = None
     if dangerous.any() and (~dangerous).any():
         order = np.argsort(probability)
-        ranks = np.empty(len(order)); ranks[order] = np.arange(1, len(order) + 1)
+        ranks = np.empty(len(order))
+        ranks[order] = np.arange(1, len(order) + 1)
         # average ranks for ties
         for value in np.unique(probability):
             tie = probability == value

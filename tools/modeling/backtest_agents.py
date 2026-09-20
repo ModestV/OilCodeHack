@@ -110,7 +110,6 @@ def run_decisions(directory: Path, labs: pd.DataFrame, horizon: int) -> pd.DataF
 
 
 def summarize_decisions(frame: pd.DataFrame, horizon: int) -> dict:
-    actual = frame["actual"].to_numpy(dtype=float)
     ok = frame["forecast_status"].eq("ok").to_numpy()
     accepted = frame[ok]
     exceed = frame["actual"] > HARD_LIMIT
