@@ -1,0 +1,6 @@
+*.md text eol=lf
+materials/QAs/*.md -text
+*.pdf binary
+*.xlsx binary
+*.docx binary
+*.rar binary
