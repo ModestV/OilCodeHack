@@ -9,16 +9,16 @@
   min-height: 38px;
   padding: 8px 11px;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--r-2);
   background: var(--surface);
-  color: var(--navy);
+  color: var(--text);
   font-weight: 600;
   white-space: nowrap;
 }
 .signal-selector__trigger:hover,
 .signal-selector__trigger[aria-expanded="true"] {
-  border-color: var(--blue);
-  color: var(--blue);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 .signal-selector__trigger svg {
   width: 16px;
@@ -37,9 +37,9 @@
   padding: 14px;
   overflow: hidden;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--r-2);
   background: var(--surface);
-  box-shadow: 0 12px 28px rgba(12, 36, 80, 0.18);
+  box-shadow: var(--shadow-popover);
 }
 .signal-selector__topline {
   display: flex;
@@ -54,12 +54,12 @@
   padding: 0;
   place-items: center;
   border: 1px solid transparent;
-  border-radius: 4px;
-  color: var(--muted);
+  border-radius: var(--r-1);
+  color: var(--text-3);
   background: transparent;
 }
 .signal-selector__icon-button:hover {
-  color: var(--navy);
+  color: var(--text);
   border-color: var(--border);
 }
 .signal-selector__icon-button svg,
@@ -74,12 +74,12 @@
   min-width: 0;
   padding: 0 9px;
   border: 1px solid var(--border);
-  border-radius: 5px;
-  color: var(--muted);
+  border-radius: var(--r-1);
+  color: var(--text-3);
 }
 .signal-selector__search:focus-within {
-  border-color: var(--blue);
-  box-shadow: 0 0 0 2px rgba(0, 121, 194, 0.13);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
 }
 .signal-selector__search svg {
   width: 16px;
@@ -92,7 +92,7 @@
   height: 36px;
   border: 0;
   outline: 0;
-  color: var(--navy);
+  color: var(--text);
   background: transparent;
 }
 .signal-selector__filters {
@@ -104,8 +104,8 @@
   display: grid;
   gap: 4px;
   min-width: 0;
-  color: var(--muted);
-  font-size: 12px;
+  color: var(--text-3);
+  font-size: var(--fs-sm);
 }
 .signal-selector__filters select {
   width: 100%;
@@ -113,8 +113,8 @@
   height: 34px;
   padding: 0 7px;
   border: 1px solid var(--border);
-  border-radius: 4px;
-  color: var(--navy);
+  border-radius: var(--r-1);
+  color: var(--text);
   background: var(--surface);
 }
 .signal-selector__chips {
@@ -131,11 +131,11 @@
   gap: 3px;
   max-width: 100%;
   padding: 3px 4px 3px 7px;
-  border: 1px solid #b9dced;
-  border-radius: 5px;
-  color: #075d96;
-  background: #eaf6fc;
-  font-size: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-1);
+  color: var(--accent-text);
+  background: var(--accent-soft);
+  font-size: var(--fs-sm);
 }
 .signal-selector__chip > span {
   overflow: hidden;
@@ -155,13 +155,13 @@
   margin-left: auto;
   padding: 3px 5px;
   border: 0;
-  border-radius: 4px;
-  color: var(--blue);
+  border-radius: var(--r-1);
+  color: var(--accent);
   background: transparent;
-  font-size: 12px;
+  font-size: var(--fs-sm);
 }
 .signal-selector__clear:hover {
-  background: #eaf6fc;
+  background: var(--accent-soft);
 }
 .signal-selector__list {
   display: grid;
@@ -176,17 +176,17 @@
   gap: 10px;
   min-width: 0;
   padding: 9px 4px;
-  border-bottom: 1px solid #edf2f6;
-  color: var(--navy);
+  border-bottom: 1px solid var(--surface-3);
+  color: var(--text);
 }
 .signal-selector__row:hover {
-  background: #f5faff;
+  background: var(--surface-2);
 }
 .signal-selector__row input {
   width: 16px;
   height: 16px;
   flex: 0 0 auto;
-  accent-color: var(--blue);
+  accent-color: var(--accent);
 }
 .signal-selector__metric {
   display: grid;
@@ -200,11 +200,11 @@
   white-space: nowrap;
 }
 .signal-selector__metric strong {
-  font-size: 13px;
+  font-size: var(--fs-sm);
 }
 .signal-selector__metric small {
-  color: var(--muted);
-  font-size: 12px;
+  color: var(--text-3);
+  font-size: var(--fs-sm);
 }
 .signal-selector__row--disabled {
   cursor: not-allowed;
@@ -218,13 +218,13 @@
   height: 16px;
   margin-left: auto;
   flex: 0 0 auto;
-  color: #b97916;
+  color: var(--warn);
 }
 .signal-selector__empty {
   margin: 18px 0;
-  color: var(--muted);
+  color: var(--text-3);
   text-align: center;
-  font-size: 13px;
+  font-size: var(--fs-sm);
 }
 .signal-selector__sr-only {
   position: absolute;
@@ -239,7 +239,7 @@
 .signal-selector button:focus-visible,
 .signal-selector input:focus-visible,
 .signal-selector select:focus-visible {
-  outline: 2px solid var(--blue);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 .signal-selector__popover {
@@ -264,7 +264,7 @@
   border-top: 1px solid var(--border);
 }
 .signal-selector__footer .primary {
-  font-size: 13px;
+  font-size: var(--fs-sm);
   padding: 7px 15px;
 }
 @media (max-width: 560px) {

@@ -19,6 +19,7 @@ import {
 } from "../components/MonitoringCharts";
 import { HelpTooltip } from "../components/HelpTooltip";
 import { chartTimeLabel, sourceEpoch } from "../visualization";
+import { useChartTheme } from "../ui/useChartTheme";
 import {
   buildOperatorAssessment,
   type AttentionTarget,
@@ -86,6 +87,7 @@ export function Overview({
   onNavigate?: (target: AttentionTarget, metricId?: string) => void;
   toolbar?: ReactNode;
 }) {
+  const theme = useChartTheme();
   const map = metricMap(metrics),
     sv = new Map(snapshot?.values.map((v) => [v.metric_id, v]));
   const assessment = buildOperatorAssessment({
@@ -137,13 +139,13 @@ export function Overview({
           symbolSize: lab ? 9 : 5,
           connectNulls: false,
           lineStyle: { width: lab ? 0 : 2 },
-          itemStyle: { color: lab ? "#15805b" : "#0079c2" },
+          itemStyle: { color: lab ? theme.ok : theme.accent },
           data: s.points.map((p) => [epoch(p.timestamp), p.value]),
           markLine: {
             silent: true,
             symbol: "none",
             label: { formatter: "10 мг/кг", position: "insideEndTop" },
-            lineStyle: { color: "#c53a3a" },
+            lineStyle: { color: theme.danger },
             data: [{ yAxis: 10 }],
           },
         },
@@ -401,6 +403,7 @@ export function Trends({
   series: SeriesResponse | null;
   onSelectTime?: (time: string) => void;
 }) {
+  const theme = useChartTheme();
   const map = metricMap(metrics);
   const allTimes =
     series?.series.flatMap((s) => s.points.map((p) => epoch(p.timestamp))) ||
@@ -419,14 +422,7 @@ export function Trends({
       return result;
     }, new Map<string, NonNullable<SeriesResponse["series"]>>()),
   );
-  const palette = [
-    "#0079c2",
-    "#16805b",
-    "#9b650b",
-    "#7559a6",
-    "#c1484b",
-    "#4b7189",
-  ];
+  const palette = theme.series;
   return (
     <section className="panel">
       <header>
@@ -499,7 +495,7 @@ export function Trends({
                         silent: true,
                         symbol: "none",
                         label: { formatter: "Порог 10 мг/кг" },
-                        lineStyle: { color: "#bc3737" },
+                        lineStyle: { color: theme.danger },
                         data: [{ yAxis: 10 }],
                       },
                     }
@@ -547,6 +543,7 @@ export function Statistics({
   selected: string;
   setSelected: (s: string) => void;
 }) {
+  const theme = useChartTheme();
   const map = metricMap(metrics);
   const [query, setQuery] = useState("");
   const selectedStat = summary?.metrics.find((s) => s.metric_id === selected);
@@ -575,7 +572,7 @@ export function Statistics({
       {
         type: "bar",
         data: bins.map((b) => b.count),
-        itemStyle: { color: "#0786d8", borderRadius: [3, 3, 0, 0] },
+        itemStyle: { color: theme.accent, borderRadius: [2, 2, 0, 0] },
       },
     ],
   };
@@ -637,7 +634,7 @@ export function Statistics({
                       {
                         type: "boxplot",
                         data: [distribution.quartiles],
-                        itemStyle: { color: "#dceef9", borderColor: "#0079c2" },
+                        itemStyle: { color: theme.band, borderColor: theme.accent },
                       },
                     ],
                   }}

@@ -1,6 +1,7 @@
 import { Chart } from "./Chart";
 import type { Metric, Quality, Snapshot, Stat, Summary } from "../types";
 import { formatNumber, sulfurComposition } from "../visualization";
+import { useChartTheme } from "../ui/useChartTheme";
 
 export function SulfurCoverage({ summary }: { summary: Summary }) {
   const parts = sulfurComposition(summary);
@@ -53,6 +54,7 @@ export function SulfurCoverage({ summary }: { summary: Summary }) {
 }
 
 export function SulfurAtMoment({ snapshot }: { snapshot: Snapshot }) {
+  const theme = useChartTheme();
   const values = ["lims.ht.2.Mg.Sulfur", "pak.ht.Mg.Sulfur"].map((id) =>
     snapshot.values.find((v) => v.metric_id === id),
   );
@@ -92,10 +94,10 @@ export function SulfurAtMoment({ snapshot }: { snapshot: Snapshot }) {
               itemStyle: {
                 color:
                   !v || v.freshness !== "fresh" || v.flags.length
-                    ? "#748391"
+                    ? theme.muted
                     : v.value! > 10
-                      ? "#bf3d42"
-                      : "#0079c2",
+                      ? theme.danger
+                      : theme.accent,
               },
             })),
             label: {
@@ -106,7 +108,7 @@ export function SulfurAtMoment({ snapshot }: { snapshot: Snapshot }) {
             markLine: {
               symbol: "none",
               silent: true,
-              lineStyle: { color: "#bf3d42" },
+              lineStyle: { color: theme.danger },
               label: {
                 formatter: "Порог 10",
                 position: "insideEndTop",
@@ -128,6 +130,7 @@ export function MedianComparison({
   stat: Stat | undefined;
   unit: string | null;
 }) {
+  const theme = useChartTheme();
   if (!stat || stat.median == null)
     return <p className="muted">Нет измерений для сравнения.</p>;
   const previous = stat.previous_median;
@@ -175,7 +178,7 @@ export function MedianComparison({
                 ],
                 symbol: "none",
                 silent: true,
-                lineStyle: { color: "#a3b0be", width: 2 },
+                lineStyle: { color: theme.axis, width: 2 },
               },
               {
                 name: "Предыдущий",
@@ -183,7 +186,7 @@ export function MedianComparison({
                 data: [[previous, 0]],
                 symbol: "emptyCircle",
                 symbolSize: 13,
-                itemStyle: { color: "#61748a" },
+                itemStyle: { color: theme.text3 },
               },
               {
                 name: "Выбранный",
@@ -191,7 +194,7 @@ export function MedianComparison({
                 data: [[stat.median, 0]],
                 symbol: "diamond",
                 symbolSize: 13,
-                itemStyle: { color: "#0079c2" },
+                itemStyle: { color: theme.accent },
               },
             ],
           }}
@@ -210,6 +213,7 @@ export function QualityRanking({
   quality: Quality;
   metrics: Metric[];
 }) {
+  const theme = useChartTheme();
   const map = new Map(metrics.map((m) => [m.id, m]));
   const rows = quality.metrics
     .filter((m) => m.count > 0 && m.suspect_count > 0)
@@ -261,7 +265,7 @@ export function QualityRanking({
               type: "bar",
               barWidth: 12,
               data: rows.map((r) => r.percentage),
-              itemStyle: { color: "#b77b19" },
+              itemStyle: { color: theme.warn },
               label: {
                 show: true,
                 position: "right",

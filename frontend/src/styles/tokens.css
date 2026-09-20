@@ -1,0 +1,191 @@
+/* Design tokens. Light palette on :root; dark palette overrides the same names.
+   Only these names are allowed in component CSS — no colour literals elsewhere. */
+:root {
+  color-scheme: light;
+
+  /* Neutral surfaces and text (cool grey, low chroma) */
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --surface-2: #f1f3f5;
+  --surface-3: #e6e9ed;
+  --border: #e1e4e8;
+  --border-strong: #a9b1bb;
+  --text: #1c2128;
+  --text-2: #49515b;
+  --text-3: #626b76;
+  --text-inverse: #f1f3f5;
+
+  /* Accent: muted steel blue. Actions, selection, primary series only. */
+  --accent: #35618f;
+  --accent-hover: #2c5279;
+  --accent-active: #244466;
+  --accent-soft: #e8eef5;
+  --accent-text: #2c5279;
+  --on-accent: #ffffff;
+
+  /* Status: text, icons, thin borders and 2–3 px strips. Never large fills. */
+  --ok: #2b7654;
+  --ok-soft: #e6f1eb;
+  --warn: #8f6210;
+  --warn-soft: #f7f0de;
+  --danger: #b1403a;
+  --danger-soft: #f8e9e7;
+  --unknown: var(--text-3);
+  --unknown-soft: var(--surface-3);
+
+  /* Chart series and chrome */
+  --series-1: var(--accent);
+  --series-2: #3a8a68;
+  --series-3: #a97f22;
+  --series-4: #75689f;
+  --series-5: #b5544c;
+  --series-6: #5d7a90;
+  --chart-grid: #e8ebef;
+  --chart-axis: #a9b1bb;
+  --chart-muted: #8a939e;
+  --chart-band: #d8e2ee;
+
+  /* Overlays */
+  --overlay: rgb(20 24 30 / 0.4);
+  --tooltip-bg: #24292f;
+  --tooltip-text: #f1f3f5;
+  --shadow-popover:
+    0 4px 16px rgb(20 24 30 / 0.1), 0 0 0 1px rgb(20 24 30 / 0.04);
+  --shadow-sheet: 0 -4px 24px rgb(20 24 30 / 0.14);
+
+  /* Shape */
+  --r-1: 4px;
+  --r-2: 6px;
+  --r-3: 8px;
+
+  /* Spacing (4 px grid) */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-7: 32px;
+  --sp-8: 40px;
+
+  /* Type scale */
+  --font: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+  --fs-xs: 11px;
+  --fs-sm: 12px;
+  --fs-base: 13px;
+  --fs-md: 14px;
+  --fs-lg: 16px;
+  --fs-xl: 20px;
+  --fs-2xl: 24px;
+
+  /* Motion: short, only opacity/transform */
+  --dur-1: 80ms;
+  --dur-2: 120ms;
+  --dur-3: 160ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Layout */
+  --sidebar-w: 220px;
+  --rail-w: 56px;
+  --content-max: 1440px;
+
+  /* Layers */
+  --z-nav: 5;
+  --z-sticky: 10;
+  --z-popover: 40;
+  --z-overlay: 50;
+  --z-dialog: 60;
+  --z-tooltip: 70;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #131619;
+    --surface: #1b1f24;
+    --surface-2: #22272e;
+    --surface-3: #2b323a;
+    --border: #2e353d;
+    --border-strong: #4a535e;
+    --text: #e6e9ec;
+    --text-2: #b0b7bf;
+    --text-3: #8f98a3;
+    --text-inverse: #1c2128;
+
+    --accent: #7ea6d0;
+    --accent-hover: #93b6da;
+    --accent-active: #6c96c2;
+    --accent-soft: #22303f;
+    --accent-text: #93b6da;
+    --on-accent: #10161d;
+
+    --ok: #62b18c;
+    --ok-soft: #1d3028;
+    --warn: #d4a44d;
+    --warn-soft: #33291a;
+    --danger: #e17c74;
+    --danger-soft: #3a2321;
+
+    --series-2: #62b18c;
+    --series-3: #d4a44d;
+    --series-4: #a598d0;
+    --series-5: #e17c74;
+    --series-6: #8aa4b8;
+    --chart-grid: #262c33;
+    --chart-axis: #4a535e;
+    --chart-muted: #7d8791;
+    --chart-band: #2c3a4a;
+
+    --overlay: rgb(0 0 0 / 0.55);
+    --tooltip-bg: #e6e9ec;
+    --tooltip-text: #1c2128;
+    --shadow-popover:
+      0 4px 16px rgb(0 0 0 / 0.45), 0 0 0 1px rgb(255 255 255 / 0.06);
+    --shadow-sheet: 0 -4px 24px rgb(0 0 0 / 0.5);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #131619;
+  --surface: #1b1f24;
+  --surface-2: #22272e;
+  --surface-3: #2b323a;
+  --border: #2e353d;
+  --border-strong: #4a535e;
+  --text: #e6e9ec;
+  --text-2: #b0b7bf;
+  --text-3: #8f98a3;
+  --text-inverse: #1c2128;
+
+  --accent: #7ea6d0;
+  --accent-hover: #93b6da;
+  --accent-active: #6c96c2;
+  --accent-soft: #22303f;
+  --accent-text: #93b6da;
+  --on-accent: #10161d;
+
+  --ok: #62b18c;
+  --ok-soft: #1d3028;
+  --warn: #d4a44d;
+  --warn-soft: #33291a;
+  --danger: #e17c74;
+  --danger-soft: #3a2321;
+
+  --series-2: #62b18c;
+  --series-3: #d4a44d;
+  --series-4: #a598d0;
+  --series-5: #e17c74;
+  --series-6: #8aa4b8;
+  --chart-grid: #262c33;
+  --chart-axis: #4a535e;
+  --chart-muted: #7d8791;
+  --chart-band: #2c3a4a;
+
+  --overlay: rgb(0 0 0 / 0.55);
+  --tooltip-bg: #e6e9ec;
+  --tooltip-text: #1c2128;
+  --shadow-popover:
+    0 4px 16px rgb(0 0 0 / 0.45), 0 0 0 1px rgb(255 255 255 / 0.06);
+  --shadow-sheet: 0 -4px 24px rgb(0 0 0 / 0.5);
+}

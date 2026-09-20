@@ -25,6 +25,8 @@ import type {
   Summary,
 } from "./types";
 import { DataMenu } from "./components/DataMenu";
+import { ThemeSwitch } from "./ui/ThemeSwitch";
+import { useChartTheme } from "./ui/useChartTheme";
 import { OperatorPanel, type SidePanelMode } from "./components/OperatorPanel";
 import { TimeControls, offset, type Mode } from "./components/TimeControls";
 import { UploadModal } from "./components/UploadModal";
@@ -519,8 +521,11 @@ export function App() {
           </button>
         </nav>
         <div className="history">
-          <Database />
-          <span>Исторические данные</span>
+          <div>
+            <Database />
+            <span>Исторические данные</span>
+          </div>
+          <ThemeSwitch />
         </div>
       </aside>
       <main>
@@ -734,6 +739,7 @@ export function App() {
   );
 }
 function DistillationView({ data }: { data: Distillation }) {
+  const theme = useChartTheme();
   const option = useMemo(
     () => ({
       grid: { left: 55, right: 30, top: 35, bottom: 40 },
@@ -745,11 +751,11 @@ function DistillationView({ data }: { data: Distillation }) {
           type: "line",
           data: data.points.map((p) => [p.fraction, p.temperature]),
           symbolSize: 7,
-          lineStyle: { color: "#0079c2" },
+          lineStyle: { color: theme.accent },
         },
       ],
     }),
-    [data],
+    [data, theme],
   );
   return (
     <details className="distillation">

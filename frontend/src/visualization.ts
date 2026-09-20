@@ -1,4 +1,5 @@
 import type { Summary } from "./types";
+import { chartTheme } from "./chartTheme.ts";
 
 export const sourceEpoch = (value: string) =>
   Date.parse(value.replace(/Z$/, "") + "Z");
@@ -49,25 +50,26 @@ export function sulfurComposition(summary: Summary) {
     total - trusted,
     Math.max(0, summary.sulfur.pak_suspect_minutes),
   );
+  const theme = chartTheme();
   return [
     {
       key: "below",
       label: "Не выше 10 мг/кг",
       minutes: trusted - above,
-      color: "#0079c2",
+      color: theme.accent,
     },
-    { key: "above", label: "Выше 10 мг/кг", minutes: above, color: "#bf3d42" },
+    { key: "above", label: "Выше 10 мг/кг", minutes: above, color: theme.danger },
     {
       key: "suspect",
       label: "Подозрительный сигнал",
       minutes: suspect,
-      color: "#b77b19",
+      color: theme.warn,
     },
     {
       key: "missing",
       label: "Нет достоверного наблюдения",
       minutes: Math.max(0, total - trusted - suspect),
-      color: "#748391",
+      color: theme.muted,
     },
   ].map((item) => ({
     ...item,
@@ -204,12 +206,109 @@ export function composeChartOption<T extends ChartOptionLike>(value: T): T {
       ? (params: unknown) => defaultTooltipFormatter(params, 1, " мг/кг")
       : defaultTooltipFormatter;
   }
+  const theme = chartTheme();
   let option: ChartOptionLike = {
     animation: false,
-    textStyle: { fontFamily: "Inter, Arial, sans-serif", fontSize: 12 },
-    color: ["#0079c2", "#168160", "#b77b19"],
+    textStyle: { fontFamily: theme.font, fontSize: 12, color: theme.text2 },
+    color: theme.series,
     ...value,
-    tooltip,
+    tooltip: {
+      backgroundColor: theme.surface,
+      borderColor: theme.grid,
+      textStyle: { color: theme.text },
+      ...tooltip,
+    },
+  };
+
+  const themeAxis = (axis: unknown): unknown => {
+    if (Array.isArray(axis)) return axis.map(themeAxis);
+    const base = (axis && typeof axis === "object" ? axis : {}) as Record<
+      string,
+      unknown
+    >;
+    const part = (key: string) =>
+      (base[key] && typeof base[key] === "object" ? base[key] : {}) as Record<
+        string,
+        unknown
+      >;
+    const styled = (key: string, color: string) => ({
+      ...part(key),
+      lineStyle: { color, ...((part(key).lineStyle as object) || {}) },
+    });
+    return {
+      ...base,
+      axisLabel: { color: theme.text3, ...part("axisLabel") },
+      nameTextStyle: { color: theme.text3, ...part("nameTextStyle") },
+      axisLine: styled("axisLine", theme.axis),
+      axisTick: styled("axisTick", theme.axis),
+      splitLine: styled("splitLine", theme.grid),
+    };
+  };
+  const themeSeries = (item: ChartSeries): ChartSeries => {
+    const markLine = item.markLine as Record<string, unknown> | undefined;
+    if (!markLine) return item;
+    const label = (markLine.label || {}) as Record<string, unknown>;
+    return {
+      ...item,
+      markLine: {
+        ...markLine,
+        lineStyle: { color: theme.text3, ...((markLine.lineStyle as object) || {}) },
+        label: {
+          color: theme.text3,
+          textBorderWidth: 0,
+          backgroundColor: theme.surface,
+          padding: [1, 4],
+          ...label,
+        },
+      },
+    };
+  };
+  const themeZoom = (zoom: unknown): unknown => {
+    if (Array.isArray(zoom)) return zoom.map(themeZoom);
+    if (!zoom || typeof zoom !== "object") return zoom;
+    const base = zoom as Record<string, unknown>;
+    if (base.type !== "slider") return base;
+    return {
+      height: 22,
+      borderColor: theme.grid,
+      backgroundColor: "transparent",
+      fillerColor: `${theme.accent}22`,
+      dataBackground: {
+        lineStyle: { color: theme.axis, width: 1 },
+        areaStyle: { color: theme.band, opacity: 0.6 },
+      },
+      selectedDataBackground: {
+        lineStyle: { color: theme.accent, width: 1 },
+        areaStyle: { color: theme.accent, opacity: 0.15 },
+      },
+      handleStyle: { color: theme.surface, borderColor: theme.axis },
+      moveHandleStyle: { color: theme.axis, opacity: 0.7 },
+      emphasis: {
+        handleStyle: { borderColor: theme.accent },
+        moveHandleStyle: { color: theme.accent },
+      },
+      textStyle: { color: theme.text3 },
+      brushSelect: false,
+      ...base,
+    };
+  };
+  option = {
+    ...option,
+    dataZoom: themeZoom(option.dataZoom),
+    series: Array.isArray(option.series)
+      ? option.series.map(themeSeries)
+      : option.series
+        ? themeSeries(option.series)
+        : option.series,
+    xAxis: themeAxis(option.xAxis) as Record<string, unknown>,
+    yAxis: themeAxis(option.yAxis) as Record<string, unknown>,
+    legend: option.legend
+      ? {
+          textStyle: { color: theme.text2 },
+          inactiveColor: theme.muted,
+          ...option.legend,
+        }
+      : option.legend,
   };
 
   if (overviewSulfur) {
@@ -238,14 +337,14 @@ export function composeChartOption<T extends ChartOptionLike>(value: T): T {
         : option.dataZoom,
       xAxis: {
         ...(option.xAxis || {}),
-        axisLine: { lineStyle: { color: "#d8e0e8" } },
+        axisLine: { lineStyle: { color: theme.axis } },
         axisTick: { show: false },
         splitLine: { show: false },
       },
       yAxis: {
         ...(option.yAxis || {}),
         name: "",
-        splitLine: { lineStyle: { color: "#edf2f7" } },
+        splitLine: { lineStyle: { color: theme.grid } },
         axisLine: { show: false },
         axisTick: { show: false },
       },
