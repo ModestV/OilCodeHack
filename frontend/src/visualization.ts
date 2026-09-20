@@ -58,7 +58,12 @@ export function sulfurComposition(summary: Summary) {
       minutes: trusted - above,
       color: theme.accent,
     },
-    { key: "above", label: "Выше 10 мг/кг", minutes: above, color: theme.danger },
+    {
+      key: "above",
+      label: "Выше 10 мг/кг",
+      minutes: above,
+      color: theme.danger,
+    },
     {
       key: "suspect",
       label: "Подозрительный сигнал",
@@ -252,7 +257,10 @@ export function composeChartOption<T extends ChartOptionLike>(value: T): T {
       ...item,
       markLine: {
         ...markLine,
-        lineStyle: { color: theme.text3, ...((markLine.lineStyle as object) || {}) },
+        lineStyle: {
+          color: theme.text3,
+          ...((markLine.lineStyle as object) || {}),
+        },
         label: {
           color: theme.text3,
           textBorderWidth: 0,

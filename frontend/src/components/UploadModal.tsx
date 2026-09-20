@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState, type DragEvent } from "react";
 import {
   Upload,
   X,
@@ -8,6 +8,13 @@ import {
 } from "lucide-react";
 import { api } from "../api";
 import type { Manifest } from "../types";
+import { Dialog } from "../ui/Dialog";
+import { TextField } from "../ui/Controls";
+
+const ACCEPT = /\.(csv|xlsx)$/i;
+const MAX_FILES = 8;
+const MAX_TOTAL = 800 * 1024 * 1024;
+
 export function UploadModal({
   open,
   onClose,
@@ -18,19 +25,36 @@ export function UploadModal({
   onStarted: (m: Manifest) => void;
 }) {
   const input = useRef<HTMLInputElement>(null);
-  const dialog = useRef<HTMLElement>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  useEffect(() => {
-    if (!open) return;
-    const previous = document.activeElement as HTMLElement;
-    setError("");
-    dialog.current?.querySelector("input")?.focus();
-    return () => previous?.focus();
-  }, [open]);
-  if (!open) return null;
+  const [dragging, setDragging] = useState(false);
+
+  const add = (incoming: File[]) => {
+    const accepted = incoming.filter(
+      (f) => ACCEPT.test(f.name) && !f.name.startsWith("~$"),
+    );
+    const rejected = incoming.length - accepted.length;
+    const next = [...files, ...accepted].slice(0, MAX_FILES);
+    const total = next.reduce((sum, f) => sum + f.size, 0);
+    setError(
+      rejected
+        ? "Принимаются только CSV и XLSX; временные файлы ~$… пропущены."
+        : total > MAX_TOTAL
+          ? "Суммарный размер файлов превышает 800 МБ."
+          : files.length + accepted.length > MAX_FILES
+            ? `Не более ${MAX_FILES} файлов на один набор.`
+            : "",
+    );
+    setFiles(next);
+  };
+  const onDrop = (event: DragEvent) => {
+    event.preventDefault();
+    setDragging(false);
+    add(Array.from(event.dataTransfer.files));
+  };
+
   async function submit() {
     if (!files.length) return;
     setBusy(true);
@@ -49,99 +73,30 @@ export function UploadModal({
       setBusy(false);
     }
   }
+
+  const close = () => {
+    if (!busy) onClose();
+  };
+
   return (
-    <div className="modal-backdrop" role="presentation">
-      <section
-        ref={dialog}
-        className="modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="upload-title"
-        onKeyDown={(e) => {
-          if (e.key === "Escape" && !busy) onClose();
-          if (e.key === "Tab") {
-            const items = dialog.current?.querySelectorAll<HTMLElement>(
-              "button:not(:disabled),input:not([hidden])",
-            );
-            if (!items?.length) return;
-            const first = items[0],
-              last = items[items.length - 1];
-            if (e.shiftKey && document.activeElement === first) {
-              e.preventDefault();
-              last.focus();
-            } else if (!e.shiftKey && document.activeElement === last) {
-              e.preventDefault();
-              first.focus();
-            }
-          }
-        }}
-      >
-        <header>
-          <div>
-            <h2 id="upload-title">Загрузить исторические данные</h2>
-            <p>
-              Добавьте доступные файлы КИП, ЛИМС или ПАК. Неполный комплект
-              допустим.
-            </p>
-          </div>
-          <button className="icon-btn" onClick={onClose} aria-label="Закрыть">
-            <X />
-          </button>
-        </header>
-        <label className="field">
-          <span>Название набора</span>
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Например, июльская выгрузка"
-          />
-        </label>
-        <button className="dropzone" onClick={() => input.current?.click()}>
-          <Upload />
-          <strong>Выберите файлы</strong>
-          <span>CSV, XLSX — можно несколько</span>
-        </button>
-        <input
-          ref={input}
-          hidden
-          multiple
-          type="file"
-          accept=".csv,.xlsx"
-          onChange={(e) => setFiles(Array.from(e.target.files || []))}
-        />
-        <div className="file-list">
-          {files.map((f, i) => (
-            <div key={`${f.name}-${i}`}>
-              <FileSpreadsheet />
-              <span>
-                {f.name}
-                <small>{(f.size / 1024 / 1024).toFixed(1)} МБ</small>
-              </span>
-              <button
-                className="icon-btn"
-                onClick={() => setFiles((v) => v.filter((_, j) => j !== i))}
-              >
-                <X />
-              </button>
-            </div>
-          ))}
-        </div>
-        {error ? (
-          <p className="error">
-            <AlertCircle /> {error}
-          </p>
-        ) : null}
-        {busy ? (
-          <div className="progress">
-            <span />
-            <p>Файлы загружены, начинается обработка…</p>
-          </div>
-        ) : null}
-        <footer>
-          <button className="secondary" onClick={onClose}>
+    <Dialog
+      open={open}
+      onClose={close}
+      title="Загрузить исторические данные"
+      description="Добавьте доступные файлы КИП, ЛИМС или ПАК. Неполный комплект допустим."
+      width={560}
+      footer={
+        <>
+          <button
+            type="button"
+            className="secondary"
+            onClick={close}
+            disabled={busy}
+          >
             Отмена
           </button>
           <button
+            type="button"
             className="primary"
             disabled={!files.length || busy}
             onClick={submit}
@@ -150,12 +105,78 @@ export function UploadModal({
               "Загрузка…"
             ) : (
               <>
-                <CheckCircle2 /> Начать импорт
+                <CheckCircle2 aria-hidden="true" /> Начать импорт
               </>
             )}
           </button>
-        </footer>
-      </section>
-    </div>
+        </>
+      }
+    >
+      <TextField
+        label="Название набора"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Например, июльская выгрузка"
+        autoComplete="off"
+      />
+      <button
+        type="button"
+        className={`dropzone${dragging ? " dragging" : ""}`}
+        onClick={() => input.current?.click()}
+        onDragOver={(event) => {
+          event.preventDefault();
+          setDragging(true);
+        }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={onDrop}
+      >
+        <Upload aria-hidden="true" />
+        <strong>Выберите файлы или перетащите сюда</strong>
+        <span>CSV, XLSX — до {MAX_FILES} файлов и 800 МБ</span>
+      </button>
+      <input
+        ref={input}
+        hidden
+        multiple
+        type="file"
+        accept=".csv,.xlsx"
+        onChange={(e) => {
+          add(Array.from(e.target.files || []));
+          e.target.value = "";
+        }}
+      />
+      {files.length > 0 && (
+        <ul className="file-list">
+          {files.map((f, i) => (
+            <li key={`${f.name}-${i}`}>
+              <FileSpreadsheet aria-hidden="true" />
+              <span>
+                {f.name}
+                <small>{(f.size / 1024 / 1024).toFixed(1)} МБ</small>
+              </span>
+              <button
+                type="button"
+                className="icon-button"
+                aria-label={`Убрать ${f.name}`}
+                onClick={() => setFiles((v) => v.filter((_, j) => j !== i))}
+              >
+                <X />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {error ? (
+        <p className="error" role="alert">
+          <AlertCircle aria-hidden="true" /> {error}
+        </p>
+      ) : null}
+      {busy ? (
+        <div className="progress" role="status">
+          <span />
+          <p>Файлы загружены, начинается обработка…</p>
+        </div>
+      ) : null}
+    </Dialog>
   );
 }

@@ -17,6 +17,7 @@ import {
 import { CanvasRenderer } from "echarts/renderers";
 import type { EChartsCoreOption, ECharts } from "echarts/core";
 import { composeChartOption } from "../visualization";
+import { ContextMenu, type ContextMenuItem } from "../ui/ContextMenu";
 
 use([
   LineChart,
@@ -38,6 +39,8 @@ export interface ChartProps {
   onSelectTime?: (time: string) => void;
   group?: string;
   label?: string;
+  /** Right-click / long-press menu; receives the time under the pointer. */
+  contextMenu?: (time: string | null) => ContextMenuItem[] | null;
 }
 
 const configured = (value: EChartsCoreOption) => composeChartOption(value);
@@ -48,6 +51,7 @@ function ChartComponent({
   onSelectTime,
   group,
   label = "График данных",
+  contextMenu,
 }: ChartProps) {
   const ref = useRef<HTMLDivElement>(null);
   const chartRef = useRef<ECharts>();
@@ -90,7 +94,25 @@ function ChartComponent({
       replaceMerge: ["series"],
     });
   }, [option]);
-  return (
+  const menuItems = (event: MouseEvent | PointerEvent) => {
+    const chart = chartRef.current;
+    const box = ref.current?.getBoundingClientRect();
+    if (!chart || !box || !contextMenu) return null;
+    let time: string | null = null;
+    try {
+      const value = chart.convertFromPixel({ gridIndex: 0 }, [
+        event.clientX - box.left,
+        event.clientY - box.top,
+      ]) as unknown;
+      const x = Array.isArray(value) ? Number(value[0]) : NaN;
+      if (Number.isFinite(x) && x > 1e11)
+        time = new Date(x).toISOString().slice(0, 19);
+    } catch {
+      /* non-cartesian chart */
+    }
+    return contextMenu(time);
+  };
+  const canvas = (
     <div
       ref={ref}
       className="chart"
@@ -98,6 +120,13 @@ function ChartComponent({
       role="img"
       aria-label={label}
     />
+  );
+  return contextMenu ? (
+    <ContextMenu items={menuItems} label="Действия с графиком">
+      {canvas}
+    </ContextMenu>
+  ) : (
+    canvas
   );
 }
 

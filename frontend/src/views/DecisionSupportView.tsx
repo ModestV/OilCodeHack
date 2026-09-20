@@ -11,6 +11,10 @@ import { api } from "../api";
 import type { DecisionResult, ScenarioRequest, ScenarioResult } from "../types";
 import { Chart } from "../components/Chart";
 import { formatNumber } from "../visualization";
+import { NumberField } from "../ui/NumberField";
+import { Select } from "../ui/Select";
+import { DateTimeField } from "../ui/DateTimeField";
+import { Disclosure, Segmented } from "../ui/Controls";
 import { pipelineStages } from "../demo/decisionSupportDemo";
 
 const controls = [
@@ -69,7 +73,6 @@ const initial = (at: string, sandbox: boolean): ScenarioRequest => ({
   additive_pct: sandbox ? 0.5 : 0,
 });
 
-const number = (value: string) => Number(value.replace(",", "."));
 const forecastReason = (reason: string) =>
   ({
     no_sulfur_evidence: "нет ни анализатора, ни опубликованной пробы серы",
@@ -228,34 +231,19 @@ export function DecisionSupportView({
       <section className="decision-page recommendation-page">
         <section className="decision-band recommendation-controls">
           <div className="support-toolbar">
-            <div
+            <Segmented
               className="support-switch"
-              role="group"
-              aria-label="Данные для рекомендации"
-            >
-              <button
-                type="button"
-                aria-pressed={sourceMode === "latest"}
-                className={sourceMode === "latest" ? "active" : ""}
-                onClick={() => {
-                  setSourceMode("latest");
-                  setPipelineStarted(false);
-                }}
-              >
-                Последние данные
-              </button>
-              <button
-                type="button"
-                aria-pressed={sourceMode === "period"}
-                className={sourceMode === "period" ? "active" : ""}
-                onClick={() => {
-                  setSourceMode("period");
-                  setPipelineStarted(false);
-                }}
-              >
-                Момент в истории
-              </button>
-            </div>
+              label="Данные для рекомендации"
+              value={sourceMode}
+              onChange={(value) => {
+                setSourceMode(value);
+                setPipelineStarted(false);
+              }}
+              options={[
+                { value: "latest", label: "Последние данные" },
+                { value: "period", label: "Момент в истории" },
+              ]}
+            />
             <button
               className="primary"
               type="button"
@@ -271,17 +259,16 @@ export function DecisionSupportView({
           </div>
           {sourceMode === "period" && (
             <div className="support-dates">
-              <label>
-                Момент расчёта
-                <input
-                  type="datetime-local"
-                  value={periodTo}
-                  onChange={(e) => {
-                    setPeriodTo(e.target.value);
-                    setPipelineStarted(false);
-                  }}
-                />
-              </label>
+              <DateTimeField
+                label="Момент расчёта"
+                value={periodTo}
+                max={latestAt}
+                presets={[{ label: "Последняя запись", value: latestAt }]}
+                onChange={(value) => {
+                  setPeriodTo(value);
+                  setPipelineStarted(false);
+                }}
+              />
               {!validPeriod && (
                 <span className="error" role="status">
                   Выберите момент расчёта.
@@ -348,93 +335,79 @@ export function DecisionSupportView({
           </button>
         </div>
         <div className="scenario-fields">
-          <label>
-            Сера в сырье до изменения, % масс.
-            <input
-              type="number"
-              min="0.01"
-              step="any"
-              value={request.baseline_feed_sulfur}
-              onChange={(e) =>
-                update("baseline_feed_sulfur", number(e.target.value))
-              }
+          <NumberField
+            label="Сера в сырье до изменения"
+            unit="% масс."
+            min={0.01}
+            step={0.01}
+            value={request.baseline_feed_sulfur}
+            onChange={(v) => update("baseline_feed_sulfur", v ?? 0)}
+          />
+          <NumberField
+            label="Сера в сырье после изменения"
+            unit="% масс."
+            min={0.01}
+            step={0.01}
+            value={request.feed_sulfur}
+            onChange={(v) => update("feed_sulfur", v ?? 0)}
+          />
+          <NumberField
+            label="Допустимая вероятность превышения 10 мг/кг"
+            min={0}
+            max={1}
+            step={0.01}
+            value={request.targets.max_exceedance_probability}
+            onChange={(v) =>
+              update("targets.max_exceedance_probability", v ?? 0)
+            }
+          />
+          <NumberField
+            label="Цель по сере"
+            unit="мг/кг"
+            min={0.1}
+            step={0.1}
+            value={request.targets.sulfur_max}
+            onChange={(v) => update("targets.sulfur_max", v ?? 0)}
+          />
+          <div className="field">
+            <label htmlFor="horizon">Горизонт</label>
+            <Select
+              id="horizon"
+              label="Горизонт"
+              block
+              value={String(request.horizon_minutes)}
+              onChange={(v) => update("horizon_minutes", Number(v))}
+              options={[
+                { value: "60", label: "1 час" },
+                { value: "120", label: "2 часа" },
+                { value: "180", label: "3 часа" },
+              ]}
             />
-          </label>
-          <label>
-            Сера в сырье после изменения, % масс.
-            <input
-              type="number"
-              min="0.01"
-              step="any"
-              value={request.feed_sulfur}
-              onChange={(e) => update("feed_sulfur", number(e.target.value))}
+          </div>
+          <div className="field">
+            <label htmlFor="step">Шаг прогноза</label>
+            <Select
+              id="step"
+              label="Шаг прогноза"
+              block
+              value={String(request.step_minutes)}
+              onChange={(v) => update("step_minutes", Number(v))}
+              options={[
+                { value: "15", label: "15 минут" },
+                { value: "30", label: "30 минут" },
+                { value: "60", label: "1 час" },
+              ]}
             />
-          </label>
-          <label>
-            Допустимая вероятность превышения 10 мг/кг
-            <input
-              type="number"
-              min="0"
-              max="1"
-              step="any"
-              value={request.targets.max_exceedance_probability}
-              onChange={(e) =>
-                update(
-                  "targets.max_exceedance_probability",
-                  number(e.target.value),
-                )
-              }
-            />
-          </label>
-          <label>
-            Цель по сере, мг/кг
-            <input
-              type="number"
-              min="0.1"
-              step="0.1"
-              value={request.targets.sulfur_max}
-              onChange={(e) =>
-                update("targets.sulfur_max", number(e.target.value))
-              }
-            />
-          </label>
-          <label>
-            Горизонт
-            <select
-              value={request.horizon_minutes}
-              onChange={(e) =>
-                update("horizon_minutes", number(e.target.value))
-              }
-            >
-              <option value="60">1 час</option>
-              <option value="120">2 часа</option>
-              <option value="180">3 часа</option>
-            </select>
-          </label>
-          <label>
-            Шаг прогноза
-            <select
-              value={request.step_minutes}
-              onChange={(e) => update("step_minutes", number(e.target.value))}
-            >
-              <option value="15">15 минут</option>
-              <option value="30">30 минут</option>
-              <option value="60">1 час</option>
-            </select>
-          </label>
-          <label>
-            Задержка отклика, мин
-            <input
-              type="number"
-              min="0"
-              max="180"
-              step="15"
-              value={request.parameters.lag_minutes}
-              onChange={(e) =>
-                update("parameters.lag_minutes", number(e.target.value))
-              }
-            />
-          </label>
+          </div>
+          <NumberField
+            label="Задержка отклика"
+            unit="мин"
+            min={0}
+            max={180}
+            step={15}
+            value={request.parameters.lag_minutes}
+            onChange={(v) => update("parameters.lag_minutes", v ?? 0)}
+          />
         </div>
       </section>
 
@@ -446,45 +419,31 @@ export function DecisionSupportView({
             </div>
           </div>
           <div className="scenario-fields three">
-            <label>
-              Изменение температуры · T6
-              <input
-                type="number"
-                min="-10"
-                max="10"
-                step="0.5"
-                value={request.changes.temperature}
-                onChange={(e) =>
-                  update("changes.temperature", number(e.target.value))
-                }
-              />
-            </label>
-            <label>
-              Изменение расхода · F9, %
-              <input
-                type="number"
-                min="-10"
-                max="10"
-                step="0.5"
-                value={request.changes.feed_rate_pct}
-                onChange={(e) =>
-                  update("changes.feed_rate_pct", number(e.target.value))
-                }
-              />
-            </label>
-            <label>
-              Изменение давления · P13
-              <input
-                type="number"
-                min="-2"
-                max="2"
-                step="0.1"
-                value={request.changes.pressure}
-                onChange={(e) =>
-                  update("changes.pressure", number(e.target.value))
-                }
-              />
-            </label>
+            <NumberField
+              label="Изменение температуры · T6"
+              min={-10}
+              max={10}
+              step={0.5}
+              value={request.changes.temperature}
+              onChange={(v) => update("changes.temperature", v ?? 0)}
+            />
+            <NumberField
+              label="Изменение расхода · F9"
+              unit="%"
+              min={-10}
+              max={10}
+              step={0.5}
+              value={request.changes.feed_rate_pct}
+              onChange={(v) => update("changes.feed_rate_pct", v ?? 0)}
+            />
+            <NumberField
+              label="Изменение давления · P13"
+              min={-2}
+              max={2}
+              step={0.1}
+              value={request.changes.pressure}
+              onChange={(v) => update("changes.pressure", v ?? 0)}
+            />
           </div>
         </section>
       )}
@@ -515,17 +474,16 @@ export function DecisionSupportView({
                     {(["share", "sulfur", "t95", "cetane"] as const).map(
                       (key) => (
                         <td key={key}>
-                          <input
-                            aria-label={`${tank.name}: ${{ share: "доля", sulfur: "сера", t95: "T95", cetane: "цетановое число" }[key]}`}
-                            type="number"
-                            min="0"
-                            step="0.1"
+                          <NumberField
+                            label={`${tank.name}: ${{ share: "доля", sulfur: "сера", t95: "T95", cetane: "цетановое число" }[key]}`}
+                            hideLabel
+                            size="sm"
+                            stepper={false}
+                            min={0}
+                            step={0.1}
                             value={tank[key]}
-                            onChange={(e) =>
-                              update(
-                                `tanks.${index}.${key}`,
-                                number(e.target.value),
-                              )
+                            onChange={(v) =>
+                              update(`tanks.${index}.${key}`, v ?? 0)
                             }
                           />
                         </td>
@@ -537,121 +495,77 @@ export function DecisionSupportView({
             </table>
           </div>
           <div className="scenario-fields three">
-            <label>
-              Присадка, %
-              <input
-                type="number"
-                min="0"
-                max="3"
-                step="0.1"
-                value={request.additive_pct}
-                onChange={(e) => update("additive_pct", number(e.target.value))}
-              />
-            </label>
-            <label>
-              Цель T95, °C
-              <input
-                type="number"
-                min="1"
-                step="1"
-                value={request.targets.t95_max}
-                onChange={(e) =>
-                  update("targets.t95_max", number(e.target.value))
-                }
-              />
-            </label>
-            <label>
-              Мин. цетановое число
-              <input
-                type="number"
-                min="1"
-                step="0.1"
-                value={request.targets.cetane_min}
-                onChange={(e) =>
-                  update("targets.cetane_min", number(e.target.value))
-                }
-              />
-            </label>
+            <NumberField
+              label="Присадка"
+              unit="%"
+              min={0}
+              max={3}
+              step={0.1}
+              value={request.additive_pct}
+              onChange={(v) => update("additive_pct", v ?? 0)}
+            />
+            <NumberField
+              label="Цель T95"
+              unit="°C"
+              min={1}
+              step={1}
+              value={request.targets.t95_max}
+              onChange={(v) => update("targets.t95_max", v ?? 0)}
+            />
+            <NumberField
+              label="Мин. цетановое число"
+              min={1}
+              step={0.1}
+              value={request.targets.cetane_min}
+              onChange={(v) => update("targets.cetane_min", v ?? 0)}
+            />
           </div>
         </section>
       )}
 
       {sandbox && (
-        <details className="model-parameters">
-          <summary>Параметры модели</summary>
+        <Disclosure className="model-parameters" summary="Параметры модели">
           <div className="scenario-fields">
-            <label>
-              Эластичность по сере сырья (ln S_out / ln S_in)
-              <input
-                type="number"
-                min="0"
-                max="2"
-                step="0.05"
-                value={request.parameters.feed_sulfur_elasticity}
-                onChange={(e) =>
-                  update(
-                    "parameters.feed_sulfur_elasticity",
-                    number(e.target.value),
-                  )
-                }
-              />
-            </label>
-            <label>
-              Эффект температуры, ln(мг/кг) на °C
-              <input
-                type="number"
-                max="-0.0001"
-                step="any"
-                value={request.parameters.temperature_effect}
-                onChange={(e) =>
-                  update(
-                    "parameters.temperature_effect",
-                    number(e.target.value),
-                  )
-                }
-              />
-            </label>
-            <label>
-              Эффект расхода, ln(мг/кг) на % расхода
-              <input
-                type="number"
-                min="0.0001"
-                step="any"
-                value={request.parameters.feed_rate_effect}
-                onChange={(e) =>
-                  update("parameters.feed_rate_effect", number(e.target.value))
-                }
-              />
-            </label>
-            <label>
-              Эффект давления, ln(мг/кг) на МПа
-              <input
-                type="number"
-                max="-0.0001"
-                step="any"
-                value={request.parameters.pressure_effect}
-                onChange={(e) =>
-                  update("parameters.pressure_effect", number(e.target.value))
-                }
-              />
-            </label>
-            <label>
-              Прирост цетанового числа на 1% присадки
-              <input
-                type="number"
-                min="0"
-                step="0.1"
-                value={request.parameters.cetane_gain_per_pct}
-                onChange={(e) =>
-                  update(
-                    "parameters.cetane_gain_per_pct",
-                    number(e.target.value),
-                  )
-                }
-              />
-            </label>
+            <NumberField
+              label="Эластичность по сере сырья (ln S_out / ln S_in)"
+              min={0}
+              max={2}
+              step={0.05}
+              value={request.parameters.feed_sulfur_elasticity}
+              onChange={(v) =>
+                update("parameters.feed_sulfur_elasticity", v ?? 0)
+              }
+            />
+            <NumberField
+              label="Эффект температуры, ln(мг/кг) на °C"
+              max={-0.0001}
+              step={0.01}
+              value={request.parameters.temperature_effect}
+              onChange={(v) => update("parameters.temperature_effect", v ?? 0)}
+            />
+            <NumberField
+              label="Эффект расхода, ln(мг/кг) на % расхода"
+              min={0.0001}
+              step={0.01}
+              value={request.parameters.feed_rate_effect}
+              onChange={(v) => update("parameters.feed_rate_effect", v ?? 0)}
+            />
+            <NumberField
+              label="Эффект давления, ln(мг/кг) на МПа"
+              max={-0.0001}
+              step={0.01}
+              value={request.parameters.pressure_effect}
+              onChange={(v) => update("parameters.pressure_effect", v ?? 0)}
+            />
+            <NumberField
+              label="Прирост цетанового числа на 1% присадки"
+              min={0}
+              step={0.1}
+              value={request.parameters.cetane_gain_per_pct}
+              onChange={(v) => update("parameters.cetane_gain_per_pct", v ?? 0)}
+            />
           </div>
-        </details>
+        </Disclosure>
       )}
 
       {error && (
@@ -762,14 +676,13 @@ export function DecisionSupportView({
               </article>
             </section>
           )}
-          <details className="model-assumptions">
-            <summary>Допущения модели</summary>
+          <Disclosure className="model-assumptions" summary="Допущения модели">
             <ul>
               {result.assumptions.map((item) => (
                 <li key={item}>{item}</li>
               ))}
             </ul>
-          </details>
+          </Disclosure>
         </>
       )}
       <button
@@ -809,17 +722,21 @@ function DatasetRowPicker({
       </div>
       <div className="picker-row">
         {!manualMode ? (
-          <label>
-            Набор значений
-            <select
+          <div className="field">
+            <label htmlFor="dataset-row">Набор значений</label>
+            <Select
+              id="dataset-row"
+              label="Набор значений"
+              block
               value={selectedRow}
-              onChange={(e) => onSelect(e.target.value as typeof selectedRow)}
-            >
-              <option value="base">Базовый режим</option>
-              <option value="feed">Рост серы в сырье</option>
-              <option value="strict">Сниженная цель по сере</option>
-            </select>
-          </label>
+              onChange={onSelect}
+              options={[
+                { value: "base", label: "Базовый режим" },
+                { value: "feed", label: "Рост серы в сырье" },
+                { value: "strict", label: "Сниженная цель по сере" },
+              ]}
+            />
+          </div>
         ) : (
           <span className="muted">Ручной ввод</span>
         )}
@@ -1188,19 +1105,20 @@ function PipelinePreview({
               : " Нарушены временные границы признаков."}
           </p>
           {!!decision.forecast.warnings.length && (
-            <details>
-              <summary>Ограничения прогноза</summary>
+            <Disclosure className="inline" summary="Ограничения прогноза">
               <ul>
                 {decision.forecast.warnings.map((warning) => (
                   <li key={warning}>{warning}</li>
                 ))}
               </ul>
-            </details>
+            </Disclosure>
           )}
         </section>
       )}
-      <details className="support-details">
-        <summary>Как получена рекомендация</summary>
+      <Disclosure
+        className="support-details"
+        summary="Как получена рекомендация"
+      >
         <p>
           Система проверяет качество и доступность данных, рассчитывает прогноз,
           затем сравнивает варианты режима по ограничениям и масштабу изменений.
@@ -1218,7 +1136,7 @@ function PipelinePreview({
         <p>
           Результат модели требует проверки перед изменением режима установки.
         </p>
-      </details>
+      </Disclosure>
     </>
   );
 }

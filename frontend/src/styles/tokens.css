@@ -92,10 +92,10 @@
   /* Layers */
   --z-nav: 5;
   --z-sticky: 10;
-  --z-popover: 40;
+  --z-popover: 70;
   --z-overlay: 50;
   --z-dialog: 60;
-  --z-tooltip: 70;
+  --z-tooltip: 80;
 }
 
 @media (prefers-color-scheme: dark) {

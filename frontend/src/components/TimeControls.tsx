@@ -1,10 +1,10 @@
-import {
-  CalendarDays,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import { HelpTooltip } from "./HelpTooltip";
+import { DateTimeField } from "../ui/DateTimeField";
+import { Menu, MenuItem, MenuLabel, MenuSeparator } from "../ui/Menu";
+import { Segmented } from "../ui/Controls";
+import { Tooltip } from "../ui/Tooltip";
+
 export type Mode = "period" | "moment";
 export const fmt = (d: Date) => d.toISOString().slice(0, 19);
 export const offset = (s: string, minutes: number) =>
@@ -16,6 +16,31 @@ const presets = [
   ["7 д", 168],
   ["30 д", 720],
 ] as const;
+
+export const demoScenarios = [
+  {
+    label: "Стабильный период",
+    date: "01.07.2025",
+    from: "2025-07-01T00:00:00",
+    to: "2025-07-02T00:00:00",
+    moment: "2025-07-01T12:00:00",
+  },
+  {
+    label: "Превышение серы",
+    date: "16–18.03.2025",
+    from: "2025-03-16T00:00:00",
+    to: "2025-03-19T00:00:00",
+    moment: "2025-03-17T12:00:00",
+  },
+  {
+    label: "Зависание ПАК",
+    date: "19.06.2026",
+    from: "2026-06-19T00:00:00",
+    to: "2026-06-20T00:00:00",
+    moment: "2026-06-19T12:00:00",
+  },
+];
+
 export function TimeControls({
   mode,
   setMode,
@@ -41,148 +66,138 @@ export function TimeControls({
       3600000,
   );
   const activePreset = presets.find(([, hours]) => hours === spanHours)?.[0];
+  const isAll = from === allRange[0] && to === allRange[1];
+  const [dataStart, dataEnd] = allRange;
+  const presetsFor = (kind: "from" | "to") => [
+    ...(dataStart ? [{ label: "Начало данных", value: dataStart }] : []),
+    ...(dataEnd
+      ? [
+          {
+            label: "Конец данных",
+            value: kind === "to" ? dataEnd : offset(dataEnd, -1440),
+          },
+        ]
+      : []),
+  ];
   return (
-    <>
-      <section className="timebar" aria-label="Выбор времени">
-        <div className="mode-control">
-          <div className="segment">
-            {(["period", "moment"] as const).map((m) => (
-              <button
-                key={m}
-                aria-pressed={mode === m}
-                className={mode === m ? "active" : ""}
-                onClick={() => setMode(m)}
-              >
-                {m === "period" ? "Период" : "Момент"}
-              </button>
-            ))}
-          </div>
-          <HelpTooltip label="Режим времени">
-            «Период» показывает агрегаты и динамику между двумя датами. «Момент»
-            показывает последние доступные измерения к выбранному времени.
-          </HelpTooltip>
-        </div>
-        <div className="date-control">
-          <CalendarDays />
-          {mode === "period" && (
-            <>
-              <input
-                type="datetime-local"
-                step="60"
-                value={from.slice(0, 16)}
-                onChange={(e) => setRange(e.target.value, to)}
-                aria-label="Начало периода"
-              />
-              <span>→</span>
-            </>
-          )}
-          <input
-            type="datetime-local"
-            step="60"
-            value={to.slice(0, 16)}
-            onChange={(e) => setRange(from, e.target.value)}
-            aria-label={
-              mode === "moment"
-                ? "Момент измерения"
-                : "Конец периода (не включён)"
-            }
-          />
-        </div>
-        <div className="move">
+    <section className="timebar" aria-label="Выбор времени">
+      <div className="mode-control">
+        <Segmented
+          label="Режим времени"
+          value={mode}
+          onChange={setMode}
+          options={[
+            { value: "period", label: "Период" },
+            { value: "moment", label: "Момент" },
+          ]}
+        />
+        <HelpTooltip label="Режим времени">
+          «Период» показывает агрегаты и динамику между двумя датами. «Момент»
+          показывает последние доступные измерения к выбранному времени.
+        </HelpTooltip>
+      </div>
+      <div className="date-control">
+        {mode === "period" && (
+          <>
+            <DateTimeField
+              label="Начало периода"
+              hideLabel
+              value={from}
+              min={dataStart || undefined}
+              max={to}
+              presets={presetsFor("from")}
+              onChange={(value) => setRange(value, to)}
+            />
+            <span className="date-arrow" aria-hidden="true">
+              →
+            </span>
+          </>
+        )}
+        <DateTimeField
+          label={
+            mode === "moment"
+              ? "Момент измерения"
+              : "Конец периода (не включён)"
+          }
+          hideLabel
+          value={to}
+          min={mode === "period" ? from : dataStart || undefined}
+          max={dataEnd || undefined}
+          presets={presetsFor("to")}
+          onChange={(value) => setRange(from, value)}
+        />
+      </div>
+      <div className="move" role="group" aria-label="Сдвиг времени">
+        <Tooltip text="Назад на 10 минут">
           <button
+            type="button"
+            className="btn icon"
             onClick={() => shift(-10)}
-            title="Назад на 10 минут"
             aria-label="Назад на 10 минут"
           >
             <ChevronLeft />
           </button>
+        </Tooltip>
+        <Tooltip text="Вперёд на 10 минут">
           <button
+            type="button"
+            className="btn icon"
             onClick={() => shift(10)}
-            title="Вперёд на 10 минут"
             aria-label="Вперёд на 10 минут"
           >
             <ChevronRight />
           </button>
-        </div>
-        {mode === "period" && (
-          <details className="compact-menu interval-menu">
-            <summary>
-              {activePreset || "Интервал"} <ChevronDown />
-            </summary>
-            <div>
-              {presets.map(([label, hours]) => (
-                <button
-                  key={label}
-                  onClick={(event) => {
-                    setRange(offset(to, -hours * 60), to);
-                    event.currentTarget
-                      .closest("details")
-                      ?.removeAttribute("open");
-                  }}
+        </Tooltip>
+      </div>
+      {mode === "period" && (
+        <Menu
+          label={isAll ? "Всё" : activePreset || "Интервал"}
+          ariaLabel="Интервал периода"
+          icon={<Clock aria-hidden="true" />}
+          sheetTitle="Интервал"
+        >
+          {presets.map(([label, hours]) => (
+            <MenuItem
+              key={label}
+              selected={!isAll && activePreset === label}
+              onSelect={() => setRange(offset(to, -hours * 60), to)}
+            >
+              {label}
+            </MenuItem>
+          ))}
+          <MenuItem selected={isAll} onSelect={() => setRange(...allRange)}>
+            Всё
+          </MenuItem>
+          {scenarios && (
+            <>
+              <MenuSeparator />
+              <MenuLabel>Демо-сценарии</MenuLabel>
+              {demoScenarios.map((s) => (
+                <MenuItem
+                  key={s.label}
+                  description={s.date}
+                  onSelect={() => setRange(s.from, s.to)}
                 >
-                  {label}
-                </button>
+                  {s.label}
+                </MenuItem>
               ))}
-              <button
-                onClick={(event) => {
-                  setRange(...allRange);
-                  event.currentTarget
-                    .closest("details")
-                    ?.removeAttribute("open");
-                }}
-              >
-                Всё
-              </button>
-            </div>
-          </details>
-        )}
-      </section>
-      {scenarios && (
-        <details className="compact-menu scenario-menu">
-          <summary>
-            Демо-сценарии <ChevronDown />
-          </summary>
-          <div>
-            {[
-              [
-                "Стабильный период",
-                "01.07.2025",
-                "2025-07-01T00:00",
-                "2025-07-02T00:00",
-                "2025-07-01T12:00",
-              ],
-              [
-                "Превышение серы",
-                "16–18.03.2025",
-                "2025-03-16T00:00",
-                "2025-03-19T00:00",
-                "2025-03-17T12:00",
-              ],
-              [
-                "Зависание ПАК",
-                "19.06.2026",
-                "2026-06-19T00:00",
-                "2026-06-20T00:00",
-                "2026-06-19T12:00",
-              ],
-            ].map(([label, date, f, t, m]) => (
-              <button
-                key={label}
-                aria-label={`${label}, ${date}`}
-                onClick={(event) => {
-                  setRange(f, mode === "moment" ? m : t);
-                  event.currentTarget
-                    .closest("details")
-                    ?.removeAttribute("open");
-                }}
-              >
-                <span>{label}</span>
-                <small>{date}</small>
-              </button>
-            ))}
-          </div>
-        </details>
+            </>
+          )}
+        </Menu>
       )}
-    </>
+      {scenarios && mode === "moment" && (
+        <Menu label="Демо-сценарии" sheetTitle="Демо-сценарии">
+          {demoScenarios.map((s) => (
+            <MenuItem
+              key={s.label}
+              description={s.date}
+              onSelect={() => setRange(s.from, s.moment)}
+            >
+              {s.label}
+            </MenuItem>
+          ))}
+        </Menu>
+      )}
+    </section>
   );
 }

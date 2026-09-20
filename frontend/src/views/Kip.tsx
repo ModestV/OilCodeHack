@@ -1,52 +1,11 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
-import {
-  AlertTriangle,
-  ArrowRight,
-  CircleHelp,
-  ChevronDown,
-  Database,
-  Download,
-  Info,
-  ShieldCheck,
-  ChartNoAxesCombined,
-  Search,
-} from "lucide-react";
-import { Chart } from "../components/Chart";
-import {
-  SulfurAtMoment,
-  MedianComparison,
-  QualityRanking,
-} from "../components/MonitoringCharts";
+import { useMemo, useState } from "react";
+import { ChartNoAxesCombined } from "lucide-react";
 import { HelpTooltip } from "../components/HelpTooltip";
-import { chartTimeLabel, sourceEpoch } from "../visualization";
-import { useChartTheme } from "../ui/useChartTheme";
-import {
-  buildOperatorAssessment,
-  type AttentionTarget,
-  type OperatorAssessment,
-} from "../operatorStatus";
-import { api, exportUrl } from "../api";
-import type {
-  Distribution,
-  Formula,
-  Issue,
-  Manifest,
-  Metric,
-  Quality,
-  SeriesResponse,
-  Snapshot,
-  Stat,
-  Summary,
-} from "../types";
-import {
-  Empty,
-  FlagLine,
-  epoch,
-  format,
-  freshness,
-  metricMap,
-  stamp,
-} from "./shared";
+import type { Metric, Snapshot, Summary } from "../types";
+import { FlagLine, format, freshness, stamp } from "./shared";
+import { Select } from "../ui/Select";
+import { Disclosure, SearchField, Segmented } from "../ui/Controls";
+import { Tooltip } from "../ui/Tooltip";
 
 export function Kip({
   metrics,
@@ -112,21 +71,22 @@ export function Kip({
           <p>Показателей: {rows.length}</p>
         </div>
         <div className="filters">
-          <input
-            aria-label="Поиск КИП"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
+          <SearchField
+            label="Поиск КИП"
             placeholder="Тег, аппарат или описание"
+            value={q}
+            onChange={setQ}
           />
-          <select
-            aria-label="Установка"
+          <Select
+            label="Установка"
             value={plant}
-            onChange={(e) => setPlant(e.target.value as typeof plant)}
-          >
-            <option value="all">Все установки</option>
-            <option value="avt">АВТ</option>
-            <option value="ht">Гидроочистка</option>
-          </select>
+            onChange={setPlant}
+            options={[
+              { value: "all", label: "Все установки" },
+              { value: "avt", label: "АВТ" },
+              { value: "ht", label: "Гидроочистка" },
+            ]}
+          />
         </div>
       </header>
       <AvtScheme />
@@ -196,14 +156,16 @@ export function Kip({
                     )}
                     <small className="warn">{m.mapping_warning || ""}</small>
                     {mode === "period" && m.available !== false && onTrend && (
-                      <button
-                        className="icon-btn kip-trend"
-                        title={`Тренд ${m.id}`}
-                        aria-label={`Открыть тренд ${m.id}`}
-                        onClick={() => onTrend(m.id)}
-                      >
-                        <ChartNoAxesCombined />
-                      </button>
+                      <Tooltip text={`Открыть тренд ${m.id}`}>
+                        <button
+                          type="button"
+                          className="icon-button kip-trend"
+                          aria-label={`Открыть тренд ${m.id}`}
+                          onClick={() => onTrend(m.id)}
+                        >
+                          <ChartNoAxesCombined />
+                        </button>
+                      </Tooltip>
                     )}
                   </td>
                 </tr>
@@ -218,19 +180,17 @@ export function Kip({
 function AvtScheme() {
   const [page, setPage] = useState(1);
   return (
-    <details>
-      <summary>Схема АВТ</summary>
-      <div className="view-switch">
-        {["К-1", "К-2", "К-10"].map((label, index) => (
-          <button
-            className={page === index + 1 ? "active" : ""}
-            onClick={() => setPage(index + 1)}
-            key={label}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
+    <Disclosure summary="Схема АВТ" className="avt-scheme">
+      <Segmented
+        label="Страница схемы"
+        size="sm"
+        value={String(page)}
+        onChange={(value) => setPage(Number(value))}
+        options={["К-1", "К-2", "К-10"].map((label, index) => ({
+          value: String(index + 1),
+          label,
+        }))}
+      />
       <a href={"/api/reference/avt/" + page} target="_blank" rel="noreferrer">
         <img
           src={"/api/reference/avt/" + page}
@@ -238,6 +198,6 @@ function AvtScheme() {
           style={{ width: "100%", maxHeight: 620, objectFit: "contain" }}
         />
       </a>
-    </details>
+    </Disclosure>
   );
 }

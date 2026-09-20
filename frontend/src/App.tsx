@@ -33,6 +33,8 @@ import type {
 } from "./types";
 import { DataMenu } from "./components/DataMenu";
 import { ThemeSwitch } from "./ui/ThemeSwitch";
+import { Disclosure, Segmented, Tabs } from "./ui/Controls";
+import { stamp } from "./views/shared";
 import { useChartTheme } from "./ui/useChartTheme";
 import { OperatorPanel, type SidePanelMode } from "./components/OperatorPanel";
 import { TimeControls, offset, type Mode } from "./components/TimeControls";
@@ -653,22 +655,13 @@ export function App() {
             )}
             {manifest?.status === "ready" && (
               <>
-                <div className="tabs" role="tablist">
-                  {tabs.map(([id, label]) => (
-                    <button
-                      role="tab"
-                      aria-selected={tab === id}
-                      key={id}
-                      className={tab === id ? "active" : ""}
-                      onClick={() => {
-                        setTab(id);
-                        setStatsView(false);
-                      }}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
+                <Tabs
+                  label="Разделы мониторинга"
+                  className="monitoring-tabs"
+                  value={tab}
+                  onChange={(id) => setTab(id)}
+                  tabs={tabs.map(([value, label]) => ({ value, label }))}
+                />
                 {(tab === "trends" || (mode === "period" && tab === "kip")) && (
                   <div className="analysis-controls">
                     {tab === "trends" && (
@@ -688,20 +681,17 @@ export function App() {
                     {tab === "kip" && <span />}
                     {tab === "trends" && (
                       <div className="view-switch">
-                        <button
-                          className={!statsView ? "active" : ""}
-                          onClick={() => setStatsView(false)}
-                        >
-                          Графики
-                        </button>
-                        {mode === "period" && (
-                          <button
-                            className={statsView ? "active" : ""}
-                            onClick={() => setStatsView(true)}
-                          >
-                            Статистика
-                          </button>
-                        )}
+                        <Segmented
+                          label="Вид анализа"
+                          value={statsView ? "stats" : "charts"}
+                          onChange={(value) => setStatsView(value === "stats")}
+                          options={[
+                            { value: "charts", label: "Графики" },
+                            ...(mode === "period"
+                              ? [{ value: "stats", label: "Статистика" }]
+                              : []),
+                          ]}
+                        />
                         {(statsView
                           ? Boolean(statMetric)
                           : selected.length > 0) && (
@@ -821,11 +811,13 @@ function DistillationView({ data }: { data: Distillation }) {
     [data, theme],
   );
   return (
-    <details className="distillation">
-      <summary>Фракционный состав одной пробы</summary>
+    <Disclosure
+      className="distillation"
+      summary="Фракционный состав одной пробы"
+    >
       {data.timestamp ? (
         <p>
-          Проба: {data.timestamp.replace("T", " ")} · возраст{" "}
+          Проба: {stamp(data.timestamp)} · возраст{" "}
           {Math.round(data.age_minutes || 0)} мин
         </p>
       ) : null}
@@ -839,6 +831,6 @@ function DistillationView({ data }: { data: Distillation }) {
       {data.points.length > 0 && data.reason && (
         <p className="warn">{data.reason}</p>
       )}
-    </details>
+    </Disclosure>
   );
 }

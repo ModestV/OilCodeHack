@@ -1,10 +1,15 @@
-import { useDeferredValue, useEffect, useRef, useState } from "react";
-import { AlertTriangle, Search, Settings2, X } from "lucide-react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import { AlertTriangle, ArrowRight, Settings2 } from "lucide-react";
 import type { OperatorAssessment, AttentionTarget } from "../operatorStatus";
 import type { Metric, Snapshot, Stat, Summary } from "../types";
 import { HelpTooltip } from "./HelpTooltip";
-import { SignalSelector } from "./SignalSelector";
+import { SignalPicker } from "./SignalPicker";
 import { formatNumber } from "../visualization";
+import { Dialog } from "../ui/Dialog";
+import { Select } from "../ui/Select";
+import { Checkbox, Disclosure, SearchField, Switch } from "../ui/Controls";
+import { stamp } from "../views/shared";
+import "./panels.css";
 
 export type SidePanelMode = "metrics" | "filters" | "warnings" | "closed";
 const MAX_PINNED = 6;
@@ -15,6 +20,16 @@ const freshness = (value: string | undefined) =>
     : value === "stale"
       ? "Устарело"
       : "Нет данных";
+
+const statistics = [
+  { value: "median", label: "Медиана" },
+  { value: "mean", label: "Среднее" },
+  { value: "min", label: "Минимум" },
+  { value: "max", label: "Максимум" },
+  { value: "p05", label: "P05" },
+  { value: "p95", label: "P95" },
+  { value: "std", label: "Стандартное отклонение" },
+];
 
 export function OperatorPanel({
   open,
@@ -53,15 +68,22 @@ export function OperatorPanel({
   filterTarget: "trends" | "statistics";
   onNavigate: (target: AttentionTarget, metricId?: string) => void;
 }) {
-  const panel = useRef<HTMLElement>(null);
-  const previousFocus = useRef<HTMLElement | null>(null);
   const [query, setQuery] = useState("");
   const deferredQuery = useDeferredValue(query.toLowerCase());
-  const metricById = new Map(metrics.map((metric) => [metric.id, metric]));
-  const values = new Map(
-    snapshot?.values.map((value) => [value.metric_id, value]),
+  const [draft, setDraft] = useState(selected);
+  useEffect(() => setDraft(selected), [selected, open]);
+  const metricById = useMemo(
+    () => new Map(metrics.map((metric) => [metric.id, metric])),
+    [metrics],
   );
-  const stats = new Map(summary?.metrics.map((stat) => [stat.metric_id, stat]));
+  const values = useMemo(
+    () => new Map(snapshot?.values.map((value) => [value.metric_id, value])),
+    [snapshot],
+  );
+  const stats = useMemo(
+    () => new Map(summary?.metrics.map((stat) => [stat.metric_id, stat])),
+    [summary],
+  );
   const titles = {
     metrics: "Показатели",
     filters:
@@ -70,254 +92,216 @@ export function OperatorPanel({
         : "Сигналы и фильтры",
     warnings: "Все предупреждения",
   };
+  const available = useMemo(() => {
+    const pinnedOrder = new Map(pinned.map((id, index) => [id, index]));
+    return metrics
+      .filter(
+        (metric) =>
+          metric.available !== false &&
+          `${metric.label} ${metric.id}`.toLowerCase().includes(deferredQuery),
+      )
+      .sort((a, b) => {
+        const ao = pinnedOrder.get(a.id);
+        const bo = pinnedOrder.get(b.id);
+        if (ao !== undefined && bo !== undefined) return ao - bo;
+        if (ao !== undefined) return -1;
+        if (bo !== undefined) return 1;
+        return a.label.localeCompare(b.label, "ru");
+      });
+  }, [metrics, pinned, deferredQuery]);
 
-  useEffect(() => {
-    if (!previousFocus.current) {
-      previousFocus.current = document.activeElement as HTMLElement;
-    }
-    panel.current?.querySelector<HTMLElement>("button, input, select")?.focus();
-  }, []);
-
-  function close() {
-    const target = previousFocus.current;
-    onClose();
-    window.setTimeout(() => target?.focus(), 0);
-  }
-
-  function trap(event: React.KeyboardEvent<HTMLElement>) {
-    if (event.key === "Escape") {
-      event.preventDefault();
-      close();
-      return;
-    }
-    if (event.key !== "Tab") return;
-    const nodes = panel.current?.querySelectorAll<HTMLElement>(
-      "button:not(:disabled), input:not(:disabled), select:not(:disabled), summary, [href]",
-    );
-    if (!nodes?.length) return;
-    const first = nodes[0];
-    const last = nodes[nodes.length - 1];
-    if (event.shiftKey && document.activeElement === first) {
-      event.preventDefault();
-      last.focus();
-    } else if (!event.shiftKey && document.activeElement === last) {
-      event.preventDefault();
-      first.focus();
-    }
-  }
-
-  const pinnedOrder = new Map(pinned.map((id, index) => [id, index]));
-  const available = metrics
-    .filter(
-      (metric) =>
-        metric.available !== false &&
-        `${metric.label} ${metric.id}`.toLowerCase().includes(deferredQuery),
-    )
-    .sort((a, b) => {
-      const aOrder = pinnedOrder.get(a.id);
-      const bOrder = pinnedOrder.get(b.id);
-      if (aOrder !== undefined && bOrder !== undefined) return aOrder - bOrder;
-      if (aOrder !== undefined) return -1;
-      if (bOrder !== undefined) return 1;
-      return a.label.localeCompare(b.label, "ru");
-    });
+  const dirty =
+    draft.length !== selected.length ||
+    draft.some((id, i) => selected[i] !== id);
 
   return (
-    <div className="side-panel-backdrop" onPointerDown={close}>
-      <aside
-        ref={panel}
-        className="side-panel"
-        role="dialog"
-        aria-modal="true"
-        aria-label={titles[open]}
-        onPointerDown={(event) => event.stopPropagation()}
-        onKeyDown={trap}
-      >
-        <header>
-          <div>
-            <h2>{titles[open]}</h2>
-            {open === "warnings" && (
-              <p>{assessment.findings.length} событий по важности</p>
-            )}
-          </div>
-          <button
-            className="icon-btn panel-close"
-            onClick={close}
-            aria-label="Закрыть панель"
-          >
-            <X />
-          </button>
-        </header>
-
-        {open === "metrics" && (
+    <Dialog
+      open
+      onClose={onClose}
+      variant="drawer"
+      title={titles[open]}
+      description={
+        open === "warnings"
+          ? `${assessment.findings.length} событий по важности`
+          : undefined
+      }
+      className="operator-panel"
+      footer={
+        open === "filters" && filterTarget === "trends" ? (
           <>
-            {mode === "period" && (
-              <label className="metric-statistic">
-                <span>Значение за период</span>
-                <select
-                  value={statistic}
-                  onChange={(event) => setStatistic(event.target.value)}
-                >
-                  <option value="median">Медиана</option>
-                  <option value="mean">Среднее</option>
-                  <option value="min">Минимум</option>
-                  <option value="max">Максимум</option>
-                  <option value="p05">P05</option>
-                  <option value="p95">P95</option>
-                  <option value="std">Стандартное отклонение</option>
-                </select>
-              </label>
-            )}
-            <div className="side-metric-list">
-              {pinned.slice(0, MAX_PINNED).map((id) => {
-                const metric = metricById.get(id);
-                const value = values.get(id);
-                const stat = stats.get(id);
-                const displayed =
-                  mode === "period"
-                    ? (stat?.[statistic as keyof Stat] as number | null)
-                    : value?.value;
+            <button type="button" className="secondary" onClick={onClose}>
+              Отмена
+            </button>
+            <button
+              type="button"
+              className="primary"
+              disabled={!dirty}
+              onClick={() => {
+                setSelected(draft);
+                onClose();
+              }}
+            >
+              Применить
+            </button>
+          </>
+        ) : undefined
+      }
+    >
+      {open === "metrics" && (
+        <>
+          {mode === "period" && (
+            <div className="metric-statistic">
+              <span id="statistic-label">Значение за период</span>
+              <Select
+                label="Значение за период"
+                value={statistic}
+                onChange={setStatistic}
+                options={statistics}
+              />
+            </div>
+          )}
+          <div className="side-metric-list">
+            {pinned.slice(0, MAX_PINNED).map((id) => {
+              const metric = metricById.get(id);
+              const value = values.get(id);
+              const stat = stats.get(id);
+              const displayed =
+                mode === "period"
+                  ? (stat?.[statistic as keyof Stat] as number | null)
+                  : value?.value;
+              const flagged = !!(mode === "period"
+                ? stat?.suspect_count
+                : value?.flags.length);
+              return (
+                <article key={id}>
+                  <div>
+                    <b>{metric?.label || id}</b>
+                    <small>
+                      {[metric?.source.toUpperCase(), metric?.unit]
+                        .filter(Boolean)
+                        .join(" · ") || "Источник не указан"}
+                    </small>
+                  </div>
+                  <strong className="num">{formatNumber(displayed)}</strong>
+                  <Disclosure summary="Подробнее" className="inline">
+                    {mode === "period" ? (
+                      <p>
+                        {stat?.count ?? 0} измерений · мин.{" "}
+                        {formatNumber(stat?.min, 2)} · макс.{" "}
+                        {formatNumber(stat?.max, 2)} · изменение медианы{" "}
+                        {formatNumber(stat?.median_change, 2)}
+                      </p>
+                    ) : (
+                      <p>
+                        {stamp(value?.timestamp)} ·{" "}
+                        {freshness(value?.freshness)} ·{" "}
+                        {formatNumber(value?.age_minutes, 0)} мин · изменение{" "}
+                        {formatNumber(value?.delta, 2)}
+                      </p>
+                    )}
+                    {flagged && (
+                      <p className="warn">Измерение требует проверки</p>
+                    )}
+                  </Disclosure>
+                </article>
+              );
+            })}
+          </div>
+          <Disclosure
+            summary="Настроить набор"
+            icon={<Settings2 />}
+            className="panel-settings"
+          >
+            <div className="panel-selection-status" role="status">
+              <span>
+                Выбрано <b>{pinned.length}</b> из {MAX_PINNED}
+              </span>
+              <small>
+                {pinned.length >= MAX_PINNED
+                  ? "Снимите один из выбранных показателей, чтобы добавить другой."
+                  : "Отмеченные показатели отображаются в панели выше."}
+              </small>
+            </div>
+            <SearchField
+              label="Поиск показателя"
+              placeholder="Название или тег"
+              value={query}
+              onChange={setQuery}
+            />
+            <div className="panel-check-list">
+              {available.map((metric) => {
+                const checked = pinned.includes(metric.id);
                 return (
-                  <article key={id}>
-                    <div>
-                      <b>{metric?.label || id}</b>
-                      <small>
-                        {[metric?.source.toUpperCase(), metric?.unit]
-                          .filter(Boolean)
-                          .join(" · ") || "Источник не указан"}
-                      </small>
-                    </div>
-                    <strong>{formatNumber(displayed)}</strong>
-                    <details>
-                      <summary>Подробнее</summary>
-                      {mode === "period" ? (
-                        <p>
-                          {stat?.count ?? 0} измерений · мин.{" "}
-                          {formatNumber(stat?.min, 2)} · макс.{" "}
-                          {formatNumber(stat?.max, 2)} · изменение медианы{" "}
-                          {formatNumber(stat?.median_change, 2)}
-                        </p>
-                      ) : (
-                        <p>
-                          {value?.timestamp?.replace("T", " ") ||
-                            "Нет измерения"}{" "}
-                          · {freshness(value?.freshness)} ·{" "}
-                          {formatNumber(value?.age_minutes, 0)} мин · изменение{" "}
-                          {formatNumber(value?.delta, 2)}
-                        </p>
-                      )}
-                      {!!(mode === "period"
-                        ? stat?.suspect_count
-                        : value?.flags.length) && (
-                        <p className="warn">Измерение требует проверки</p>
-                      )}
-                    </details>
-                  </article>
+                  <Checkbox
+                    key={metric.id}
+                    checked={checked}
+                    disabled={!checked && pinned.length >= MAX_PINNED}
+                    onChange={() =>
+                      setPinned(
+                        checked
+                          ? pinned.filter((id) => id !== metric.id)
+                          : [...pinned, metric.id],
+                      )
+                    }
+                    label={metric.label}
+                    description={metric.id}
+                  />
                 );
               })}
             </div>
-            <details className="panel-settings">
-              <summary>
-                <Settings2 /> Настроить набор
-              </summary>
-              <div className="panel-selection-status" role="status">
-                <span>
-                  Выбрано <b>{pinned.length}</b> из {MAX_PINNED}
-                </span>
-                <small>
-                  {pinned.length >= MAX_PINNED
-                    ? "Снимите один из выбранных показателей, чтобы добавить другой."
-                    : "Отмеченные показатели отображаются в панели выше."}
-                </small>
-              </div>
-              <label className="search">
-                <Search />
-                <input
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Название или тег"
-                  aria-label="Поиск показателя"
-                />
-              </label>
-              <div className="panel-check-list">
-                {available.map((metric) => {
-                  const checked = pinned.includes(metric.id);
-                  return (
-                    <label key={metric.id}>
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        disabled={!checked && pinned.length >= MAX_PINNED}
-                        onChange={() =>
-                          setPinned(
-                            checked
-                              ? pinned.filter((id) => id !== metric.id)
-                              : [...pinned, metric.id],
-                          )
-                        }
-                      />
-                      <span>
-                        {metric.label}
-                        <small>{metric.id}</small>
-                      </span>
-                    </label>
-                  );
-                })}
-              </div>
-            </details>
-          </>
-        )}
+          </Disclosure>
+        </>
+      )}
 
-        {open === "filters" && (
-          <div className="panel-filter-list">
-            {mode === "period" && (
-              <label>
-                <input
-                  type="checkbox"
-                  checked={exclude}
-                  onChange={(event) => setExclude(event.target.checked)}
-                />
-                <span>Исключить подозрительные измерения</span>
-                <HelpTooltip label="Подозрительные измерения">
-                  Диагностическое правило пометило измерение для проверки. Это
-                  не доказывает неисправность прибора.
-                </HelpTooltip>
-              </label>
-            )}
-            {filterTarget === "trends" && (
-              <div className="panel-signal-picker">
-                <SignalSelector
-                  metrics={metrics}
-                  selected={selected}
-                  onChange={setSelected}
-                />
-              </div>
-            )}
-          </div>
-        )}
+      {open === "filters" && (
+        <div className="panel-filter-list">
+          {mode === "period" && (
+            <div className="panel-switch-row">
+              <Switch
+                checked={exclude}
+                onChange={(event) => setExclude(event.target.checked)}
+                label="Исключить подозрительные измерения"
+              />
+              <HelpTooltip label="Подозрительные измерения">
+                Диагностическое правило пометило измерение для проверки. Это не
+                доказывает неисправность прибора.
+              </HelpTooltip>
+            </div>
+          )}
+          {filterTarget === "trends" && (
+            <SignalPicker
+              metrics={metrics}
+              selected={draft}
+              onChange={setDraft}
+            />
+          )}
+        </div>
+      )}
 
-        {open === "warnings" && (
-          <div className="panel-warning-list">
-            {assessment.findings.map((finding) => (
-              <button
-                key={finding.code}
-                className={finding.level}
-                onClick={() => {
-                  close();
-                  onNavigate(finding.target, finding.metricId);
-                }}
-              >
-                <AlertTriangle />
-                <span>
-                  <b>{finding.title}</b>
-                  <small>{finding.description}</small>
-                </span>
-                <em>{finding.action}</em>
-              </button>
-            ))}
-          </div>
-        )}
-      </aside>
-    </div>
+      {open === "warnings" && (
+        <div className="panel-warning-list">
+          {assessment.findings.map((finding) => (
+            <button
+              key={finding.code}
+              type="button"
+              className={finding.level}
+              onClick={() => {
+                onClose();
+                onNavigate(finding.target, finding.metricId);
+              }}
+            >
+              <AlertTriangle aria-hidden="true" />
+              <span>
+                <b>{finding.title}</b>
+                <small>{finding.description}</small>
+              </span>
+              <em>
+                {finding.action} <ArrowRight aria-hidden="true" />
+              </em>
+            </button>
+          ))}
+        </div>
+      )}
+    </Dialog>
   );
 }

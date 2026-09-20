@@ -1,52 +1,12 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
-import {
-  AlertTriangle,
-  ArrowRight,
-  CircleHelp,
-  ChevronDown,
-  Database,
-  Download,
-  Info,
-  ShieldCheck,
-  ChartNoAxesCombined,
-  Search,
-} from "lucide-react";
-import { Chart } from "../components/Chart";
-import {
-  SulfurAtMoment,
-  MedianComparison,
-  QualityRanking,
-} from "../components/MonitoringCharts";
+import { useEffect, useState } from "react";
+import { AlertTriangle, Database, Info, ShieldCheck } from "lucide-react";
+import { QualityRanking } from "../components/MonitoringCharts";
 import { HelpTooltip } from "../components/HelpTooltip";
-import { chartTimeLabel, sourceEpoch } from "../visualization";
-import { useChartTheme } from "../ui/useChartTheme";
-import {
-  buildOperatorAssessment,
-  type AttentionTarget,
-  type OperatorAssessment,
-} from "../operatorStatus";
-import { api, exportUrl } from "../api";
-import type {
-  Distribution,
-  Formula,
-  Issue,
-  Manifest,
-  Metric,
-  Quality,
-  SeriesResponse,
-  Snapshot,
-  Stat,
-  Summary,
-} from "../types";
-import {
-  Empty,
-  FlagLine,
-  epoch,
-  format,
-  freshness,
-  metricMap,
-  stamp,
-} from "./shared";
+import { api } from "../api";
+import type { Formula, Issue, Metric, Quality } from "../types";
+import { format, stamp } from "./shared";
+import { Disclosure } from "../ui/Controls";
+import { NumberField } from "../ui/NumberField";
 
 export function Formulas({ formulas }: { formulas: Formula[] }) {
   return (
@@ -60,24 +20,24 @@ export function Formulas({ formulas }: { formulas: Formula[] }) {
       </h2>
       <div className="formula-list">
         {formulas.map((f) => (
-          <details key={f.id}>
-            <summary>
-              <span>
-                <b>{f.label}</b>
-                <small>
-                  {f.expression} · версия {f.version}
-                </small>
+          <Disclosure
+            key={f.id}
+            className="formula"
+            summary={
+              <span className="formula-title">
+                {f.label}
+                <span className={`status ${f.status}`}>
+                  {{
+                    experimental: "Экспериментальный",
+                    invalid: "Некорректная формула",
+                    unresolved: "Требует уточнения",
+                    verified: "Проверен",
+                  }[f.status] || f.status}
+                </span>
               </span>
-              <span className={`status ${f.status}`} title={f.status}>
-                {{
-                  experimental: "Экспериментальный",
-                  invalid: "Некорректная формула",
-                  unresolved: "Требует уточнения",
-                  verified: "Проверен",
-                }[f.status] || f.status}
-              </span>
-              <ChevronDown />
-            </summary>
+            }
+            meta={`${f.expression} · версия ${f.version}`}
+          >
             <div>
               <p>
                 <strong>Подстановка:</strong> {f.substitution || "недоступна"}
@@ -102,14 +62,14 @@ export function Formulas({ formulas }: { formulas: Formula[] }) {
                     <tr key={i.tag}>
                       <td>{i.tag}</td>
                       <td>{format(i.value)}</td>
-                      <td>{i.timestamp?.replace("T", " ") || "—"}</td>
+                      <td>{i.timestamp ? stamp(i.timestamp) : "—"}</td>
                       <td>{i.flags.join(", ") || "—"}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-          </details>
+          </Disclosure>
         ))}
       </div>
     </section>
@@ -213,31 +173,29 @@ export function DataQuality({
         </div>
       </section>
 
-      <details className="panel diagnostic-section">
-        <summary>
-          <span>
-            <b>Выявленные проблемы</b>
-            <small>
-              {issueGroups.length
-                ? `${issueGroups.length} групп · весь набор`
-                : "Зарегистрированных проблем нет"}
-            </small>
-          </span>
-          <ChevronDown />
-        </summary>
+      <section className="panel diagnostic-block" id="diag-issues">
+        <header className="diagnostic-block-head">
+          <h2>Выявленные проблемы</h2>
+          <p>
+            {issueGroups.length
+              ? `${issueGroups.length} групп · весь набор`
+              : "Зарегистрированных проблем нет"}
+          </p>
+        </header>
         {issueGroups.length ? (
           <div className="issue-groups">
             {issueGroups.map((group) => (
-              <details key={group.code}>
-                <summary>
-                  <AlertTriangle />
-                  <span>
-                    <b>{issueNames[group.code] || group.message}</b>
-                    <small>{group.message}</small>
+              <Disclosure
+                key={group.code}
+                icon={<AlertTriangle className="warn-icon" />}
+                summary={
+                  <span className="issue-title">
+                    {issueNames[group.code] || group.message}
+                    <strong className="num">{format(group.count, 0)}</strong>
                   </span>
-                  <strong>{format(group.count, 0)}</strong>
-                  <ChevronDown />
-                </summary>
+                }
+                meta={group.message}
+              >
                 <ul>
                   {group.items.map((issue, index) => (
                     <li key={`${issue.metric_id || issue.code}-${index}`}>
@@ -246,7 +204,7 @@ export function DataQuality({
                     </li>
                   ))}
                 </ul>
-              </details>
+              </Disclosure>
             ))}
           </div>
         ) : (
@@ -255,24 +213,23 @@ export function DataQuality({
             прохождение всех возможных проверок.
           </p>
         )}
-        <details className="assumptions-detail">
-          <summary>Особенности расчёта</summary>
+        <Disclosure
+          className="assumptions-detail inline"
+          summary="Особенности расчёта"
+        >
           {quality?.assumptions.map((assumption, index) => (
             <div className="assumption" key={index}>
               <Info /> {assumption}
             </div>
           ))}
-        </details>
-      </details>
+        </Disclosure>
+      </section>
 
-      <details className="panel diagnostic-section">
-        <summary>
-          <span>
-            <b>Источники данных</b>
-            <small>Файлы и количество измерений</small>
-          </span>
-          <ChevronDown />
-        </summary>
+      <section className="panel diagnostic-block" id="diag-sources">
+        <header className="diagnostic-block-head">
+          <h2>Источники данных</h2>
+          <p>Файлы и количество измерений</p>
+        </header>
         <div className="quality-grid">
           {quality?.sources.map((source) => (
             <article key={`${source.kind}-${source.filename}`}>
@@ -311,20 +268,20 @@ export function DataQuality({
             </article>
           ))}
         </div>
-      </details>
+      </section>
 
-      <details className="panel diagnostic-section">
-        <summary>
-          <span>
-            <b>Качество сигналов</b>
-          </span>
-          <ChevronDown />
-        </summary>
+      <section className="panel diagnostic-block" id="diag-signals">
+        <header className="diagnostic-block-head">
+          <h2>Качество сигналов</h2>
+          <p>Ранжирование по доле подозрительных отметок</p>
+        </header>
         {quality ? (
           <QualityRanking quality={quality} metrics={metrics} />
         ) : null}
-        <details className="quality-detail">
-          <summary>Покрытие и качество по всем показателям</summary>
+        <Disclosure
+          className="quality-detail"
+          summary="Покрытие и качество по всем показателям"
+        >
           <div className="table-scroll">
             <table>
               <thead>
@@ -354,44 +311,38 @@ export function DataQuality({
               </tbody>
             </table>
           </div>
-        </details>
-      </details>
+        </Disclosure>
+      </section>
 
-      <details className="panel diagnostic-section">
-        <summary>
-          <span>
-            <b>Расчёты ВАК</b>
-            <small>
-              {mode === "moment"
-                ? "Диагностические формулы для выбранного момента"
-                : "Доступны для конкретного момента"}
-            </small>
-          </span>
-          <ChevronDown />
-        </summary>
+      <section className="panel diagnostic-block" id="diag-vak">
+        <header className="diagnostic-block-head">
+          <h2>Расчёты ВАК</h2>
+          <p>
+            {mode === "moment"
+              ? "Диагностические формулы для выбранного момента"
+              : "Доступны для конкретного момента"}
+          </p>
+        </header>
         {mode === "moment" ? (
           <Formulas formulas={formulas} />
         ) : (
           <div className="diagnostic-prompt">
             <p>Выберите конкретный момент, чтобы подставить значения КИП.</p>
-            <button className="secondary" onClick={onOpenMoment}>
+            <button type="button" className="secondary" onClick={onOpenMoment}>
               Открыть момент
             </button>
           </div>
         )}
-      </details>
+      </section>
 
       {datasetId ? (
-        <details className="panel diagnostic-section">
-          <summary>
-            <span>
-              <b>Настройки диагностики</b>
-              <small>Когда считать данные устаревшими</small>
-            </span>
-            <ChevronDown />
-          </summary>
+        <section className="panel diagnostic-block" id="diag-settings">
+          <header className="diagnostic-block-head">
+            <h2>Настройки диагностики</h2>
+            <p>Когда считать данные устаревшими</p>
+          </header>
           <FreshnessSettings datasetId={datasetId} onSaved={onSettingsSaved} />
-        </details>
+        </section>
       ) : null}
     </>
   );
@@ -427,33 +378,35 @@ function FreshnessSettings({
     }
   }
   return (
-    <section className="panel">
-      <h2>Срок актуальности данных</h2>
+    <div className="freshness-settings">
       <p className="lead">
         Экспериментальные пороги давности, не производственный регламент.
       </p>
-      <div className="filters">
+      <div className="freshness-fields">
         {(["kip", "pak", "lims"] as const).map((source) => (
-          <label className="field" key={source}>
-            <span>{source.toUpperCase()}, минут</span>
-            <input
-              type="number"
-              min="1"
-              value={values[source]}
-              onChange={(e) =>
-                setValues((current) => ({
-                  ...current,
-                  [source]: Math.max(1, Number(e.target.value) || 1),
-                }))
-              }
-            />
-          </label>
+          <NumberField
+            key={source}
+            label={source.toUpperCase()}
+            unit="мин"
+            min={1}
+            step={source === "lims" ? 60 : 5}
+            decimals={0}
+            value={values[source]}
+            onChange={(value) =>
+              setValues((current) => ({
+                ...current,
+                [source]: Math.max(1, value ?? 1),
+              }))
+            }
+          />
         ))}
       </div>
-      <button className="primary" onClick={save}>
-        Сохранить
-      </button>
-      {message ? <p>{message}</p> : null}
-    </section>
+      <div className="freshness-actions">
+        <button type="button" className="primary" onClick={save}>
+          Сохранить
+        </button>
+        {message ? <span role="status">{message}</span> : null}
+      </div>
+    </div>
   );
 }

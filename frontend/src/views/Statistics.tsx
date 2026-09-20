@@ -1,52 +1,12 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
-import {
-  AlertTriangle,
-  ArrowRight,
-  CircleHelp,
-  ChevronDown,
-  Database,
-  Download,
-  Info,
-  ShieldCheck,
-  ChartNoAxesCombined,
-  Search,
-} from "lucide-react";
+import { useMemo, useState } from "react";
 import { Chart } from "../components/Chart";
-import {
-  SulfurAtMoment,
-  MedianComparison,
-  QualityRanking,
-} from "../components/MonitoringCharts";
+import { MedianComparison } from "../components/MonitoringCharts";
 import { HelpTooltip } from "../components/HelpTooltip";
-import { chartTimeLabel, sourceEpoch } from "../visualization";
 import { useChartTheme } from "../ui/useChartTheme";
-import {
-  buildOperatorAssessment,
-  type AttentionTarget,
-  type OperatorAssessment,
-} from "../operatorStatus";
-import { api, exportUrl } from "../api";
-import type {
-  Distribution,
-  Formula,
-  Issue,
-  Manifest,
-  Metric,
-  Quality,
-  SeriesResponse,
-  Snapshot,
-  Stat,
-  Summary,
-} from "../types";
-import {
-  Empty,
-  FlagLine,
-  epoch,
-  format,
-  freshness,
-  metricMap,
-  stamp,
-} from "./shared";
+import type { Distribution, Metric, Snapshot, Summary } from "../types";
+import { Empty, FlagLine, format, freshness, metricMap, stamp } from "./shared";
+import { Select } from "../ui/Select";
+import { Disclosure, SearchField } from "../ui/Controls";
 
 export function Statistics({
   metrics,
@@ -78,6 +38,15 @@ export function Statistics({
             Number(b.metric_id === selected) - Number(a.metric_id === selected),
         ) || [],
     [summary, map, query, selected],
+  );
+  const metricOptions = useMemo(
+    () =>
+      metrics.map((m) => ({
+        value: m.id,
+        label: m.label,
+        description: `${m.source.toUpperCase()} · ${m.id}`,
+      })),
+    [metrics],
   );
   const option = useMemo(() => {
     const bins = distribution?.bins || [];
@@ -123,17 +92,14 @@ export function Statistics({
             <h2>Статистика периода</h2>
             <p>Конец периода не включён в расчёт</p>
           </div>
-          <select
-            aria-label="Показатель распределения"
+          <Select
+            label="Показатель распределения"
             value={selected}
-            onChange={(e) => setSelected(e.target.value)}
-          >
-            {metrics.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.label} · {m.source.toUpperCase()} · {m.id}
-              </option>
-            ))}
-          </select>
+            onChange={setSelected}
+            searchable
+            className="statistics-metric"
+            options={metricOptions}
+          />
         </header>
         <h3 className="selected-stat-title">
           {map.get(selected)?.label}
@@ -199,15 +165,12 @@ export function Statistics({
           {stamp(summary?.comparison_to)}. Лабораторные n — отдельные пробы.
         </p>
         <div className="statistics-toolbar">
-          <label className="search">
-            <Search />
-            <input
-              aria-label="Поиск в статистике"
-              placeholder="Показатель или тег"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-          </label>
+          <SearchField
+            label="Поиск в статистике"
+            placeholder="Показатель или тег"
+            value={query}
+            onChange={setQuery}
+          />
           <small>Показателей: {tableRows.length}</small>
         </div>
         <div className="table-scroll statistics-table">
@@ -286,15 +249,11 @@ export function Statistics({
             </tbody>
           </table>
         </div>
-        <details className="agreement analysis-detail">
-          <summary>
-            Согласованность ЛИМС и ПАК
-            <HelpTooltip label="Согласованность ЛИМС и ПАК">
-              Смещение показывает систематическую разницу ПАК и ЛИМС. Средняя
-              абсолютная ошибка показывает типичный размер расхождения без учёта
-              его направления.
-            </HelpTooltip>
-          </summary>
+        <Disclosure
+          className="agreement analysis-detail"
+          summary="Согласованность ЛИМС и ПАК"
+          meta="Смещение — систематическая разница ПАК и ЛИМС; средняя абсолютная ошибка — типичный размер расхождения без учёта направления"
+        >
           <div className="table-scroll">
             <table>
               <thead>
@@ -317,16 +276,18 @@ export function Statistics({
               </tbody>
             </table>
           </div>
-        </details>
-        <details className="analysis-detail">
-          <summary>Лабораторный паспорт за период</summary>
+        </Disclosure>
+        <Disclosure
+          className="analysis-detail"
+          summary="Лабораторный паспорт за период"
+        >
           <Passport
             metrics={metrics}
             snapshot={null}
             mode="period"
             summary={summary}
           />
-        </details>
+        </Disclosure>
       </section>
     </>
   );

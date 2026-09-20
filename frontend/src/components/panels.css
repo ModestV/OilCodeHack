@@ -1,0 +1,221 @@
+/* Operator panel (drawer) and signal picker */
+.operator-panel .layer-body {
+  display: grid;
+  align-content: start;
+  gap: var(--sp-3);
+}
+.metric-statistic {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--sp-3);
+  color: var(--text-3);
+  font-size: var(--fs-sm);
+}
+.side-metric-list article {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px var(--sp-4);
+  padding: var(--sp-3) 0;
+  border-bottom: 1px solid var(--border);
+}
+.side-metric-list article > div,
+.side-metric-list article > div small {
+  display: grid;
+}
+.side-metric-list article > div small {
+  color: var(--text-3);
+  font-size: var(--fs-xs);
+}
+.side-metric-list article > strong {
+  font-size: var(--fs-xl);
+  font-weight: 600;
+}
+.side-metric-list .disclosure {
+  grid-column: 1 / -1;
+  border-top: 0;
+}
+.side-metric-list .disclosure p {
+  margin: 0 0 var(--sp-1);
+  color: var(--text-2);
+  font-size: var(--fs-sm);
+}
+.panel-settings {
+  border-top: 0;
+}
+.panel-selection-status {
+  display: grid;
+  gap: 2px;
+  margin-bottom: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-1);
+  background: var(--surface-2);
+  font-size: var(--fs-sm);
+}
+.panel-selection-status small {
+  color: var(--text-3);
+}
+.panel-check-list {
+  max-height: 360px;
+  margin-top: var(--sp-2);
+  overflow: auto;
+  border-top: 1px solid var(--border);
+}
+.panel-check-list .checkbox {
+  border-bottom: 1px solid var(--border);
+  padding: var(--sp-2) 2px;
+}
+.panel-filter-list {
+  display: grid;
+  gap: var(--sp-3);
+}
+.panel-switch-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+}
+.panel-warning-list {
+  display: grid;
+}
+.panel-warning-list button {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--sp-3);
+  padding: var(--sp-4) 0;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  transition: background-color var(--dur-1) var(--ease);
+}
+.panel-warning-list button:hover {
+  background: var(--surface-2);
+}
+.panel-warning-list button > span,
+.panel-warning-list button small {
+  display: grid;
+}
+.panel-warning-list button small {
+  margin-top: 2px;
+  color: var(--text-3);
+}
+.panel-warning-list button em {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--accent-text);
+  font-size: var(--fs-xs);
+  font-style: normal;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.panel-warning-list button em svg {
+  width: 14px;
+  height: 14px;
+}
+.panel-warning-list button > svg {
+  width: 18px;
+  height: 18px;
+  color: var(--text-3);
+}
+.panel-warning-list button.danger > svg {
+  color: var(--danger);
+}
+.panel-warning-list button.warning > svg {
+  color: var(--warn);
+}
+
+/* Signal picker */
+.signal-picker {
+  display: grid;
+  gap: var(--sp-3);
+}
+.signal-picker-filters {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-2);
+}
+.signal-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-1);
+}
+.signal-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  min-height: 26px;
+  padding: 0 4px 0 var(--sp-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-1);
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font-size: var(--fs-sm);
+}
+.signal-chip > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.signal-chip button {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  min-height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-1);
+  background: transparent;
+  color: inherit;
+}
+.signal-chip button:hover {
+  background: var(--surface);
+}
+.signal-chip svg {
+  width: 12px;
+  height: 12px;
+}
+.signal-list {
+  max-height: 420px;
+  overflow: auto;
+  border-top: 1px solid var(--border);
+}
+.signal-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  border-bottom: 1px solid var(--border);
+}
+.signal-row .checkbox {
+  flex: 1;
+  min-width: 0;
+  padding: var(--sp-2) 2px;
+}
+.signal-warning {
+  display: grid;
+  place-items: center;
+  color: var(--warn);
+}
+.signal-warning svg {
+  width: 16px;
+  height: 16px;
+}
+.signal-empty,
+.signal-count {
+  color: var(--text-3);
+  font-size: var(--fs-sm);
+}
+.signal-empty {
+  padding: var(--sp-3) 0;
+  margin: 0;
+}
+@media (max-width: 599px) {
+  .signal-list {
+    max-height: none;
+  }
+}

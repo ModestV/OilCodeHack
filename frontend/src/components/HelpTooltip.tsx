@@ -97,7 +97,7 @@ export function HelpTooltip({
           <div
             id={id}
             ref={tooltip}
-            className="help-tooltip__content"
+            className="tooltip help-tooltip__content"
             role="tooltip"
           >
             {children}

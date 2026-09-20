@@ -1,52 +1,10 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
-import {
-  AlertTriangle,
-  ArrowRight,
-  CircleHelp,
-  ChevronDown,
-  Database,
-  Download,
-  Info,
-  ShieldCheck,
-  ChartNoAxesCombined,
-  Search,
-} from "lucide-react";
+import { useMemo } from "react";
 import { Chart } from "../components/Chart";
-import {
-  SulfurAtMoment,
-  MedianComparison,
-  QualityRanking,
-} from "../components/MonitoringCharts";
-import { HelpTooltip } from "../components/HelpTooltip";
-import { chartTimeLabel, sourceEpoch } from "../visualization";
+import { chartTimeLabel } from "../visualization";
 import { useChartTheme } from "../ui/useChartTheme";
-import {
-  buildOperatorAssessment,
-  type AttentionTarget,
-  type OperatorAssessment,
-} from "../operatorStatus";
-import { api, exportUrl } from "../api";
-import type {
-  Distribution,
-  Formula,
-  Issue,
-  Manifest,
-  Metric,
-  Quality,
-  SeriesResponse,
-  Snapshot,
-  Stat,
-  Summary,
-} from "../types";
-import {
-  Empty,
-  FlagLine,
-  epoch,
-  format,
-  freshness,
-  metricMap,
-  stamp,
-} from "./shared";
+import { timeMenu } from "../ui/chartMenu";
+import type { Metric, SeriesResponse } from "../types";
+import { Empty, epoch, metricMap } from "./shared";
 
 export function Trends({
   mode = "period",
@@ -61,6 +19,7 @@ export function Trends({
 }) {
   const theme = useChartTheme();
   const map = useMemo(() => metricMap(metrics), [metrics]);
+  const chartMenu = useMemo(() => timeMenu(onSelectTime), [onSelectTime]);
   // Options are memoised per unit group so re-renders don't rebuild every chart.
   const groups = useMemo(() => {
     const allTimes =
@@ -179,6 +138,7 @@ export function Trends({
               height={280}
               group="monitoring-trends"
               onSelectTime={onSelectTime}
+              contextMenu={chartMenu}
             />
           </div>
         ))

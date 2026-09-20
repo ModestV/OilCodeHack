@@ -1,41 +1,24 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
 import {
   AlertTriangle,
   ArrowRight,
   CircleHelp,
-  ChevronDown,
-  Database,
-  Download,
-  Info,
   ShieldCheck,
-  ChartNoAxesCombined,
-  Search,
 } from "lucide-react";
 import { Chart } from "../components/Chart";
-import {
-  SulfurAtMoment,
-  MedianComparison,
-  QualityRanking,
-} from "../components/MonitoringCharts";
+import { SulfurAtMoment } from "../components/MonitoringCharts";
 import { HelpTooltip } from "../components/HelpTooltip";
-import { chartTimeLabel, sourceEpoch } from "../visualization";
+import { chartTimeLabel } from "../visualization";
 import { useChartTheme } from "../ui/useChartTheme";
 import {
-  buildOperatorAssessment,
   type AttentionTarget,
   type OperatorAssessment,
 } from "../operatorStatus";
-import { api, exportUrl } from "../api";
 import type {
-  Distribution,
-  Formula,
-  Issue,
   Manifest,
   Metric,
-  Quality,
   SeriesResponse,
   Snapshot,
-  Stat,
   Summary,
 } from "../types";
 import {
@@ -47,6 +30,8 @@ import {
   metricMap,
   stamp,
 } from "./shared";
+import { Disclosure } from "../ui/Controls";
+import { timeMenu } from "../ui/chartMenu";
 
 export function Overview({
   mode,
@@ -76,6 +61,7 @@ export function Overview({
     () => new Map(snapshot?.values.map((v) => [v.metric_id, v])),
     [snapshot],
   );
+  const chartMenu = useMemo(() => timeMenu(onSelectTime), [onSelectTime]);
   const primaryFinding = assessment.findings[0];
   const secondaryFindings = assessment.findings.slice(1, 3);
   const sulfurSeries = useMemo(
@@ -159,7 +145,12 @@ export function Overview({
         <h2>Содержание серы, мг/кг</h2>
       </header>
       {sulfurSeries.some((s) => s.points.length) ? (
-        <Chart option={option} height={230} onSelectTime={onSelectTime} />
+        <Chart
+          option={option}
+          height={230}
+          onSelectTime={onSelectTime}
+          contextMenu={chartMenu}
+        />
       ) : (
         <Empty text="Нет измерений серы в выбранном интервале" />
       )}
@@ -299,10 +290,12 @@ export function Overview({
               })}
             </div>
           </section>
-          <details className="history-context">
-            <summary>Предшествующие 24 часа</summary>
+          <Disclosure
+            className="history-context"
+            summary="Предшествующие 24 часа"
+          >
             {history}
-          </details>
+          </Disclosure>
         </>
       )}
     </>

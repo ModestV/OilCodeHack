@@ -3,6 +3,7 @@ import { Chart } from "./Chart";
 import type { Metric, Quality, Snapshot, Stat } from "../types";
 import { formatNumber } from "../visualization";
 import { useChartTheme } from "../ui/useChartTheme";
+import { Disclosure } from "../ui/Controls";
 
 export const SulfurAtMoment = memo(function SulfurAtMoment({
   snapshot,
@@ -231,8 +232,7 @@ export const QualityRanking = memo(function QualityRanking({
           ],
         }}
       />
-      <details>
-        <summary>Показатели в диаграмме</summary>
+      <Disclosure className="inline" summary="Показатели в диаграмме">
         <ul className="rank-key">
           {rows.map((r) => (
             <li key={r.metric_id}>
@@ -244,7 +244,7 @@ export const QualityRanking = memo(function QualityRanking({
             </li>
           ))}
         </ul>
-      </details>
+      </Disclosure>
     </section>
   );
 });

@@ -51,7 +51,10 @@ function watch() {
     attributes: true,
     attributeFilter: ["data-theme"],
   });
-  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", invalidate);
+  matchMedia("(prefers-color-scheme: dark)").addEventListener(
+    "change",
+    invalidate,
+  );
 }
 
 export function chartTheme(): ChartTheme {
