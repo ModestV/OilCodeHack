@@ -1,0 +1,70 @@
+{
+  "pairing_verified": true,
+  "refits_publication_check_passed": 40,
+  "paired_intervals": {
+    "monthly_hgb_all": {
+      "mae_difference_challenger_minus_baseline": -0.08964717893749023,
+      "weekly_block_bootstrap_95pct": [
+        -0.21682455656657537,
+        0.03649244349632658
+      ],
+      "blocks": 29
+    },
+    "monthly_hgb_365": {
+      "mae_difference_challenger_minus_baseline": -0.07726472498954015,
+      "weekly_block_bootstrap_95pct": [
+        -0.18028731864177872,
+        0.006314605965224435
+      ],
+      "blocks": 29
+    },
+    "incumbent_correction_30d_0.5": {
+      "mae_difference_challenger_minus_baseline": -0.04896869445460672,
+      "weekly_block_bootstrap_95pct": [
+        -0.13435582424119638,
+        0.03191141772558908
+      ],
+      "blocks": 29
+    },
+    "incumbent_correction_7d_0.5": {
+      "mae_difference_challenger_minus_baseline": -0.07190504085247806,
+      "weekly_block_bootstrap_95pct": [
+        -0.24494204655888388,
+        0.06283778039283594
+      ],
+      "blocks": 29
+    }
+  },
+  "distributions": {
+    "train": {
+      "count": 792.0,
+      "mean": 11.255934351321423,
+      "std": 75.14489545101381,
+      "min": 1.0,
+      "25%": 7.300000190734863,
+      "50%": 8.5,
+      "75%": 9.5,
+      "max": 2120.0
+    },
+    "validation": {
+      "count": 417.0,
+      "mean": 9.064987997356937,
+      "std": 6.199528676578162,
+      "min": 1.600000023841858,
+      "25%": 7.699999809265137,
+      "50%": 8.800000190734863,
+      "75%": 9.800000190734863,
+      "max": 120.0
+    },
+    "test": {
+      "count": 253.0,
+      "mean": 8.281818173766842,
+      "std": 2.4673071432747617,
+      "min": 0.1000000014901161,
+      "25%": 7.400000095367432,
+      "50%": 8.5,
+      "75%": 9.5,
+      "max": 20.299999237060547
+    }
+  }
+}

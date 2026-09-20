@@ -1,0 +1,101 @@
+{
+  "winner": "hgb_raw_tech_correction_30d_0.5",
+  "candidates": [
+    {
+      "model": "incumbent_correction_7d_0.5",
+      "validation_mae": 1.6786403833751309
+    },
+    {
+      "model": "incumbent_correction_7d_1.0",
+      "validation_mae": 1.7168890430117982
+    },
+    {
+      "model": "incumbent_correction_30d_0.5",
+      "validation_mae": 1.6706888513474576
+    },
+    {
+      "model": "incumbent_correction_30d_1.0",
+      "validation_mae": 1.6906978713321619
+    },
+    {
+      "model": "hgb_raw_tech_correction_7d_0.5",
+      "validation_mae": 1.6370592443078067
+    },
+    {
+      "model": "hgb_raw_tech_correction_7d_1.0",
+      "validation_mae": 1.6919488785248182
+    },
+    {
+      "model": "hgb_raw_tech_correction_30d_0.5",
+      "validation_mae": 1.6217532425504724
+    },
+    {
+      "model": "hgb_raw_tech_correction_30d_1.0",
+      "validation_mae": 1.6333893329281703
+    },
+    {
+      "model": "anchored_kinetic_E0_P0",
+      "validation_mae": 5.77239848988266
+    },
+    {
+      "model": "anchored_kinetic_E0_P0.5",
+      "validation_mae": 5.708015261032035
+    },
+    {
+      "model": "anchored_kinetic_E0_P1.0",
+      "validation_mae": 5.718307064659532
+    },
+    {
+      "model": "anchored_kinetic_E30000_P0",
+      "validation_mae": 6.50908272405812
+    },
+    {
+      "model": "anchored_kinetic_E30000_P0.5",
+      "validation_mae": 6.4325039102224215
+    },
+    {
+      "model": "anchored_kinetic_E30000_P1.0",
+      "validation_mae": 6.426780451111901
+    },
+    {
+      "model": "anchored_kinetic_E60000_P0",
+      "validation_mae": 7.979274085279048
+    },
+    {
+      "model": "anchored_kinetic_E60000_P0.5",
+      "validation_mae": 7.878487499517529
+    },
+    {
+      "model": "anchored_kinetic_E60000_P1.0",
+      "validation_mae": 7.83147075702357
+    },
+    {
+      "model": "anchored_kinetic_E90000_P0",
+      "validation_mae": 9.609816080341812
+    },
+    {
+      "model": "anchored_kinetic_E90000_P0.5",
+      "validation_mae": 9.479857801903643
+    },
+    {
+      "model": "anchored_kinetic_E90000_P1.0",
+      "validation_mae": 9.393159676758605
+    },
+    {
+      "model": "monthly_hgb_all",
+      "validation_mae": 1.6355483132875246
+    },
+    {
+      "model": "monthly_median_all",
+      "validation_mae": 1.793719766796499
+    },
+    {
+      "model": "monthly_hgb_365",
+      "validation_mae": 1.6532381191796097
+    },
+    {
+      "model": "monthly_median_365",
+      "validation_mae": 1.868115882942642
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "base_commit": "d8afb0b9803352ccf0e69808ae5d730a35cc0e27",
+  "python": "3.12.14",
+  "platform": "Windows-11-10.0.26100-SP0",
+  "packages": {
+    "numpy": "2.5.3",
+    "pandas": "2.3.3",
+    "duckdb": "1.5.5",
+    "scipy": "1.18.1",
+    "scikit-learn": "1.9.1",
+    "threadpoolctl": "3.7.0",
+    "joblib": "1.6.0",
+    "pytest": "9.1.1"
+  },
+  "hash_normalization": "UTF-8 text with LF newlines, to survive Git autocrlf",
+  "sha256_text_lf": {
+    "tools/modeling/improve_sulfur.py": "f8ee6dc5e9e6c31a2f0bbaeb7abfd11c91935ea0ed0a940e442c83a9052e3b49",
+    "tools/modeling/adaptive_sulfur.py": "4aaa3f9885667504461f0460425a59857cc04f796e38975236531579266abc9e",
+    "tools/modeling/summarize_sulfur_study.py": "2d7009d0529a2e7387c0331a38d02fead0afa94ce390197955781c1b16e3bfcf",
+    "tools/modeling/sulfur_first_iteration.py": "4d9390da6d18bfa054a19101199e77ed203c36ca525ad5430729e43784a05578",
+    "tools/modeling/sulfur_features.py": "b82c3b29620a9683fad181307996329695e4365ec02140b5d1a428d21fad1c60",
+    "tools/modeling/research_tests/test_improvement.py": "d0136dd129a00469dd25967a5caddb044f58957adb4445172c77128490ca8b69",
+    "reports/modeling/sulfur-first-iteration/model.json": "41f9a6d8a21bb0c90df93b6e98fc98c82efaff24901eabd1025b148f97abee0a",
+    "reports/modeling/sulfur-first-iteration/predictions.csv": "aa94f85d52a1f18d61c78a2cc9885f023c1e82a4c7ab88fb68ae75bb84335ccb",
+    "requirements-modeling.txt": "804f03cc9924dc23c1673610abf4d1fd0499de9d79be9fa91a5dc37d91830911",
+    "reports/modeling/model-improvement/adaptive-predictions.csv": "5a175da8c0e23e91865432f8ab48aeb4307f4017832c5cfdc546a7a497ff115f",
+    "reports/modeling/model-improvement/adaptive-results.json": "c4a86d86068a5a6cd512264760cecd84e0c2f7017425791b596039a0bb31ff74",
+    "reports/modeling/model-improvement/adaptive-selection.json": "84c4ca4aa5a0469c66e44e8920fd4b8c88bcb0d71f6f071c23fbfa0791305eaa",
+    "reports/modeling/model-improvement/additional-diagnostics.json": "611dbb8afdcbb182227f64d3e7cd03b569b46934b7bb4e2587bd7b5846dfb9fb",
+    "reports/modeling/model-improvement/predictions.csv": "6bf7ad676d8c7e1889022ed9324df367450e861d7021fc93d99b2185dfb1def1",
+    "reports/modeling/model-improvement/PROTOCOL.md": "fa382d67a7243ab6b230ff521d104289566f8890ed8d1c05779788528b1d62fd",
+    "reports/modeling/model-improvement/REPORT.md": "071f798a821ffc517b2b6c280b02d236e77921a0ce5da2926c0008126612d36e",
+    "reports/modeling/model-improvement/results.json": "0273000a20dcbbab184d7fdba549e8f708a33d83b545789f8b05b4fd41ef4812",
+    "reports/modeling/model-improvement/selection.json": "16a7806f373716422ad75b64a83db095971bae25399365786ac3ba9de7129216"
+  }
+}

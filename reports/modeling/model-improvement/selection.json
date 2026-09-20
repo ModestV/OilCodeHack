@@ -1,0 +1,384 @@
+{
+  "regression_winner": "hgb_raw_tech",
+  "selection": "validation MAE on unchanged common mask",
+  "candidates": [
+    {
+      "model": "train_median",
+      "validation_mae": 1.7978260626539515,
+      "spec": {
+        "name": "train_median",
+        "family": "baseline",
+        "features": "tech",
+        "parameter": 3000.0,
+        "leaves": 7,
+        "iterations": 100,
+        "loss": "absolute_error",
+        "residual": "none"
+      }
+    },
+    {
+      "model": "previous_lab_available",
+      "validation_mae": 2.0036231394551227,
+      "spec": {
+        "name": "previous_lab_available",
+        "family": "baseline",
+        "features": "tech",
+        "parameter": 3000.0,
+        "leaves": 7,
+        "iterations": 100,
+        "loss": "absolute_error",
+        "residual": "none"
+      }
+    },
+    {
+      "model": "lab_median3",
+      "validation_mae": 1.8628019123261677,
+      "spec": {
+        "name": "lab_median3",
+        "family": "baseline",
+        "features": "tech",
+        "parameter": 3000.0,
+        "leaves": 7,
+        "iterations": 100,
+        "loss": "absolute_error",
+        "residual": "none"
+      }
+    },
+    {
+      "model": "lab_median7d",
+      "validation_mae": 1.716908177315901,
+      "spec": {
+        "name": "lab_median7d",
+        "family": "baseline",
+        "features": "tech",
+        "parameter": 3000.0,
+        "leaves": 7,
+        "iterations": 100,
+        "loss": "absolute_error",
+        "residual": "none"
+      }
+    },
+    {
+      "model": "kinetic_current",
+      "validation_mae": 4.789440396757324,
+      "spec": {
+        "name": "kinetic_current",
+        "family": "kinetic",
+        "features": "tech",
+        "parameter": 3000.0,
+        "leaves": 7,
+        "iterations": 100,
+        "loss": "absolute_error",
+        "residual": "none"
+      }
+    },
+    {
+      "model": "kinetic_mean1h",
+      "validation_mae": 4.783589577522274,
+      "spec": {
+        "name": "kinetic_mean1h",
+        "family": "kinetic",
+        "features": "mean1h",
+        "parameter": 3000.0,
+        "leaves": 7,
+        "iterations": 100,
+        "loss": "absolute_error",
+        "residual": "none"
+      }
+    },
+    {
+      "model": "ridge_tech_300",
+      "validation_mae": 2.492896312902485,
+      "spec": {
+        "name": "ridge_tech_300",
+        "family": "ridge",
+        "features": "tech",
+        "parameter": 300,
+        "leaves": 7,
+        "iterations": 100,
+        "loss": "absolute_error",
+        "residual": "none"
+      }
+    },
+    {
+      "model": "ridge_tech_3000",
+      "validation_mae": 2.156879240452029,
+      "spec": {
+        "name": "ridge_tech_3000",
+        "family": "ridge",
+        "features": "tech",
+        "parameter": 3000,
+        "leaves": 7,
+        "iterations": 100,
+        "loss": "absolute_error",
+        "residual": "none"
+      }
+    },
+    {
+      "model": "ridge_tech_10000",
+      "validation_mae": 2.0069501340920306,
+      "spec": {
+        "name": "ridge_tech_10000",
+        "family": "ridge",
+        "features": "tech",
+        "parameter": 10000,
+        "leaves": 7,
+        "iterations": 100,
+        "loss": "absolute_error",
+        "residual": "none"
+      }
+    },
+    {
+      "model": "huber_tech",
+      "validation_mae": 2.4000091452730112,
+      "spec": {
+        "name": "huber_tech",
+        "family": "huber",
+        "features": "tech",
+        "parameter": 0.1,
+        "leaves": 7,
+        "iterations": 100,
+        "loss": "absolute_error",
+        "residual": "none"
+      }
+    },
+    {
+      "model": "trees_tech",
+      "validation_mae": 1.745045528457012,
+      "spec": {
+        "name": "trees_tech",
+        "family": "trees",
+        "features": "tech",
+        "parameter": 3000.0,
+        "leaves": 7,
+        "iterations": 100,
+        "loss": "absolute_error",
+        "residual": "none"
+      }
+    },
+    {
+      "model": "hgb_tech_7_60_100",
+      "validation_mae": 1.6895670940331642,
+      "spec": {
+        "name": "hgb_tech_7_60_100",
+        "family": "hgb",
+        "features": "tech",
+        "parameter": 60,
+        "leaves": 7,
+        "iterations": 100,
+        "loss": "absolute_error",
+        "residual": "none"
+      }
+    },
+    {
+      "model": "hgb_tech_7_30_200",
+      "validation_mae": 1.6862343596047922,
+      "spec": {
+        "name": "hgb_tech_7_30_200",
+        "family": "hgb",
+        "features": "tech",
+        "parameter": 30,
+        "leaves": 7,
+        "iterations": 200,
+        "loss": "absolute_error",
+        "residual": "none"
+      }
+    },
+    {
+      "model": "hgb_tech_15_30_100",
+      "validation_mae": 1.6931228726278367,
+      "spec": {
+        "name": "hgb_tech_15_30_100",
+        "family": "hgb",
+        "features": "tech",
+        "parameter": 30,
+        "leaves": 15,
+        "iterations": 100,
+        "loss": "absolute_error",
+        "residual": "none"
+      }
+    },
+    {
+      "model": "hgb_raw_tech",
+      "validation_mae": 1.6624513068077529,
+      "spec": {
+        "name": "hgb_raw_tech",
+        "family": "hgb",
+        "features": "tech",
+        "parameter": 60,
+        "leaves": 7,
+        "iterations": 100,
+        "loss": "raw_absolute",
+        "residual": "none"
+      }
+    },
+    {
+      "model": "ridge_all_300",
+      "validation_mae": 2.1773653874313594,
+      "spec": {
+        "name": "ridge_all_300",
+        "family": "ridge",
+        "features": "all",
+        "parameter": 300,
+        "leaves": 7,
+        "iterations": 100,
+        "loss": "absolute_error",
+        "residual": "none"
+      }
+    },
+    {
+      "model": "ridge_all_3000",
+      "validation_mae": 1.8013074493403463,
+      "spec": {
+        "name": "ridge_all_3000",
+        "family": "ridge",
+        "features": "all",
+        "parameter": 3000,
+        "leaves": 7,
+        "iterations": 100,
+        "loss": "absolute_error",
+        "residual": "none"
+      }
+    },
+    {
+      "model": "ridge_all_10000",
+      "validation_mae": 1.8438861807142612,
+      "spec": {
+        "name": "ridge_all_10000",
+        "family": "ridge",
+        "features": "all",
+        "parameter": 10000,
+        "leaves": 7,
+        "iterations": 100,
+        "loss": "absolute_error",
+        "residual": "none"
+      }
+    },
+    {
+      "model": "huber_all",
+      "validation_mae": 5.861709311181628,
+      "spec": {
+        "name": "huber_all",
+        "family": "huber",
+        "features": "all",
+        "parameter": 0.1,
+        "leaves": 7,
+        "iterations": 100,
+        "loss": "absolute_error",
+        "residual": "none"
+      }
+    },
+    {
+      "model": "trees_all",
+      "validation_mae": 1.826973111394715,
+      "spec": {
+        "name": "trees_all",
+        "family": "trees",
+        "features": "all",
+        "parameter": 3000.0,
+        "leaves": 7,
+        "iterations": 100,
+        "loss": "absolute_error",
+        "residual": "none"
+      }
+    },
+    {
+      "model": "hgb_all_7_60_100",
+      "validation_mae": 1.733602465967051,
+      "spec": {
+        "name": "hgb_all_7_60_100",
+        "family": "hgb",
+        "features": "all",
+        "parameter": 60,
+        "leaves": 7,
+        "iterations": 100,
+        "loss": "absolute_error",
+        "residual": "none"
+      }
+    },
+    {
+      "model": "hgb_all_7_30_200",
+      "validation_mae": 1.6745131240816813,
+      "spec": {
+        "name": "hgb_all_7_30_200",
+        "family": "hgb",
+        "features": "all",
+        "parameter": 30,
+        "leaves": 7,
+        "iterations": 200,
+        "loss": "absolute_error",
+        "residual": "none"
+      }
+    },
+    {
+      "model": "hgb_all_15_30_100",
+      "validation_mae": 1.6864877399729006,
+      "spec": {
+        "name": "hgb_all_15_30_100",
+        "family": "hgb",
+        "features": "all",
+        "parameter": 30,
+        "leaves": 15,
+        "iterations": 100,
+        "loss": "absolute_error",
+        "residual": "none"
+      }
+    },
+    {
+      "model": "hgb_raw_all",
+      "validation_mae": 1.7003354641650026,
+      "spec": {
+        "name": "hgb_raw_all",
+        "family": "hgb",
+        "features": "all",
+        "parameter": 60,
+        "leaves": 7,
+        "iterations": 100,
+        "loss": "raw_absolute",
+        "residual": "none"
+      }
+    },
+    {
+      "model": "lab_residual_ridge",
+      "validation_mae": 1.901661611673224,
+      "spec": {
+        "name": "lab_residual_ridge",
+        "family": "ridge",
+        "features": "tech",
+        "parameter": 3000,
+        "leaves": 7,
+        "iterations": 100,
+        "loss": "absolute_error",
+        "residual": "lab"
+      }
+    },
+    {
+      "model": "kinetic_residual_ridge",
+      "validation_mae": 4.030713944741499,
+      "spec": {
+        "name": "kinetic_residual_ridge",
+        "family": "ridge",
+        "features": "tech",
+        "parameter": 3000,
+        "leaves": 7,
+        "iterations": 100,
+        "loss": "absolute_error",
+        "residual": "kinetic"
+      }
+    },
+    {
+      "model": "kinetic_residual_hgb",
+      "validation_mae": 4.046785860808019,
+      "spec": {
+        "name": "kinetic_residual_hgb",
+        "family": "hgb",
+        "features": "tech",
+        "parameter": 60,
+        "leaves": 7,
+        "iterations": 100,
+        "loss": "absolute_error",
+        "residual": "kinetic"
+      }
+    }
+  ]
+}
