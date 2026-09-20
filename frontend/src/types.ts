@@ -286,6 +286,7 @@ export interface SulfurForecast {
   target: { metric_id: string; unit: string };
   hard_limit: number;
   nowcast: ForecastPoint | null;
+  path_supported?: boolean;
   prediction: number | null;
   prediction_lower: number | null;
   prediction_upper: number | null;
@@ -305,7 +306,10 @@ export interface SulfurForecast {
       adjusted: number | null;
     }
   >;
-  horizons: ({ minutes: number } & ForecastPoint)[];
+  horizons: ({ minutes: number; status?: "ok"; reasons?: string[] } & ForecastPoint | {
+    minutes: number; status: "abstain"; reasons: string[];
+    prediction: null; lower: null; upper: null; exceedance_probability: null;
+  })[];
   feature_cutoff: string;
   feature_time: string | null;
   feature_count: number;

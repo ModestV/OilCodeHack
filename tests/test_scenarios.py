@@ -57,6 +57,31 @@ def test_horizon_result_matches_trajectory_not_steady_state(tmp_path, evidence):
     assert result["baseline"]["sulfur_source"] == "request.current_sulfur"
 
 
+@pytest.mark.parametrize("horizon", [0, 30, 180])
+def test_feed_response_point_and_risk_use_same_horizon(tmp_path, evidence, monkeypatch, horizon):
+    from backend.forecast import exceedance_at, _load_artifact
+    model = _load_artifact()
+    result = scenario(tmp_path, current_sulfur=8, baseline_feed_sulfur=1, feed_sulfur=2,
+                      changes={}, horizon_minutes=horizon)
+    expected = exceedance_at(model, horizon, math.log(result["predicted_sulfur"]))
+    assert result["predicted_sulfur_lower"] == pytest.approx(expected["lower"])
+    assert result["predicted_sulfur_upper"] == pytest.approx(expected["upper"])
+    assert result["exceedance_probability"] == pytest.approx(expected["exceedance_probability"])
+
+
+def test_short_horizon_automatic_control_accounts_for_feed_ramp(tmp_path, evidence):
+    result = scenario(tmp_path, current_sulfur=8.5, baseline_feed_sulfur=1, feed_sulfur=1.2,
+                      horizon_minutes=45, step_minutes=15)
+    assert result["predicted_sulfur"] == pytest.approx(9.)
+
+
+def test_unsupported_intermediate_forecast_blocks_observed_decision(tmp_path, evidence, monkeypatch):
+    forecast = {**forecast_with_nowcast(8), "path_supported": False}
+    monkeypatch.setattr(agents, "forecast_sulfur", lambda *args, **kwargs: forecast)
+    result = decide(tmp_path, current_t95=350, current_cetane=52)
+    assert result["status"] == "abstain"
+
+
 @pytest.mark.parametrize("lag", [0, 90])
 def test_zero_horizon_never_credits_future_intervention(tmp_path, evidence, lag):
     result = scenario(tmp_path, current_sulfur=10.5, horizon_minutes=0,
@@ -205,15 +230,16 @@ def test_missing_other_quality_blocks_observed_recommendation(tmp_path, evidence
     assert "Нет обязательного показателя качества" in " ".join(result["safety_gate"]["reasons"])
 
 
-def test_cetane_uses_declared_slow_quality_window(tmp_path, evidence):
+def test_month_old_cetane_does_not_become_valid_via_slow_quality_override(tmp_path, evidence):
     evidence.append({"metric_id": "lims.ht.2.CetaneNumber", "value": 52, "timestamp": "2024-12-01T10:00:00",
                      "available_at": "2024-12-01T14:00:00", "freshness": "stale", "flags": [], "age_minutes": 31 * 24 * 60.0})
     result = decide(tmp_path, current_t95=350)
-    assert result["status"] == "recommendation"
-    checks = {c["name"]: c for c in result["safety_gate"]["checks"]}
-    assert checks["cetane_evidence"]["passed"] is True and checks["cetane_evidence"]["basis"] == "slow_quality_window"
-    evidence[-1]["age_minutes"] = 61 * 24 * 60.0
-    assert decide(tmp_path, current_t95=350)["status"] == "abstain"
+    assert result["status"] == "abstain"
+    assert result["candidates"]
+    for candidate in result["candidates"]:
+        checks = {c["name"]: c for c in candidate["safety_gate"]["checks"]}
+        assert checks["cetane_evidence"]["passed"] is False
+    assert agents.SLOW_QUALITY_MAX_AGE_MINUTES["lims.ht.2.CetaneNumber"] == 48 * 60
 
 
 def test_stale_t95_falls_back_to_vak_virtual_analyser(tmp_path, evidence, monkeypatch):

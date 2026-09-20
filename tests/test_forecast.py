@@ -136,7 +136,7 @@ def test_saturated_analyser_plateau_is_not_evidence(tmp_path):
     result = forecast_sulfur(tmp_path / "data", T0.isoformat(), path, horizon_minutes=0)
     # The last two hours are a 24.87+-0.004 plateau: unusable, so the fresh
     # Q21 feature is missing and the nowcast falls back to PAK/lab evidence.
-    assert result["analysers"]["q21"]["age_minutes"] >= 120
+    assert result["analysers"]["q21"]["age_minutes"] >= 60
     assert result["status"] == "ok"
     assert result["nowcast"]["prediction"] < 10
 
@@ -197,7 +197,51 @@ def test_clean_analyser_drops_exact_and_near_plateaus_but_keeps_moving_values():
     values.iloc[20:30] = 24.87 + np.linspace(0, 0.004, 10)  # saturated
     cleaned = clean_analyser(values)
     assert cleaned.iloc[:10].notna().all()
-    assert cleaned.iloc[10:].isna().all()
+    assert cleaned.iloc[10:20].isna().all()
+    assert cleaned.iloc[20:26].notna().all()  # plateau not yet established
+    assert cleaned.iloc[26:].isna().all()
+
+
+def test_plateau_cleaning_is_prefix_invariant():
+    times = pd.date_range("2026-01-01", periods=8, freq="10min")
+    series = pd.Series([7., 8., 8., 8., 8., 8., 8., 8.], index=times)
+    full = clean_analyser(series)
+    for end in times:
+        pd.testing.assert_series_equal(clean_analyser(series.loc[:end]), full.loc[:end])
+
+
+def test_each_horizon_and_nowcast_has_its_own_support(tmp_path):
+    path, model = artifact(tmp_path)
+    dataset(tmp_path / "data")
+    model["models"]["0"]["support"] = json.loads(json.dumps(model["models"]["0"]["support"]))
+    model["models"]["0"]["support"]["support_upper"][FEATURE_COLUMNS.index("T6")] = 250
+    path.write_text(json.dumps(model), encoding="utf8")
+    now = forecast_sulfur(tmp_path / "data", T0.isoformat(), path, horizon_minutes=0)
+    future = forecast_sulfur(tmp_path / "data", T0.isoformat(), path, horizon_minutes=180)
+    between = forecast_sulfur(tmp_path / "data", T0.isoformat(), path, horizon_minutes=30)
+    assert now["status"] == between["status"] == "abstain"
+    assert future["status"] == "ok" and future["prediction"] is not None
+    assert future["nowcast"] is None and future["path_supported"] is False
+    assert future["horizons"][0]["prediction"] is None
+
+
+def test_last_lab_age_is_measured_from_sampling():
+    from tools.modeling.sulfur_features import available_lab
+    labs = pd.DataFrame({"target_time": [T0], "target": [8.]})
+    result = available_lab(labs, pd.DatetimeIndex([T0 + pd.Timedelta(hours=48), T0 + pd.Timedelta(hours=48, minutes=1)]))
+    assert result.iloc[0].previous_lab_available == 8
+    assert pd.isna(result.iloc[1].previous_lab_available)
+
+
+def test_portable_raw_fusion_respects_convex_hull_and_floors_negative_regression():
+    from tools.modeling.sulfur_features import predict_portable
+    model = {"feature_columns": ["ln_q21", "ln_level"], "medians": [6., 8.],
+             "mean": [0., 0.], "scale": [1., 1.], "coef": [0., .25, .75],
+             "input_transform": "exp", "output_transform": "log"}
+    assert math.exp(predict_portable(model, np.log([4., 8.]))) == pytest.approx(7.)
+    assert math.exp(predict_portable(model, np.array([np.nan, math.log(8.)]))) == pytest.approx(7.5)
+    model["coef"] = [-20., .25, .75]
+    assert math.exp(predict_portable(model, np.log([4., 8.]))) == pytest.approx(.3)
 
 
 def test_lab_anchor_uses_only_published_samples():

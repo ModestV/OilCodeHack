@@ -4,8 +4,8 @@ Reads the imported dataset (``storage/<id>/observations.parquet``) so that the
 offline benchmark and the runtime endpoint share one cleaning path.  For each
 horizon ``h`` in ``HORIZONS_MINUTES`` a lab sample at ``t`` defines an origin
 ``t-h``; features use only data known at the origin (telemetry <= origin,
-LIMS published <= origin).  Model selection uses 2025 labels only; 2026 is an
-untouched temporal test.  The benchmark makes no causal claim: control
+LIMS published <= origin).  Model selection uses 2024-2025 labels; 2026 is a
+retrospective audit (already examined in prior development).  The benchmark makes no causal claim: control
 responses are estimated separately from analyser step events and are
 reported as scenario defaults with their evidence.
 
@@ -197,7 +197,8 @@ def probability_metrics(actual, probability, alarm_probability: float, threshold
             "false_alarm_rate": float(fp / max(1, (~dangerous).sum()))}
 
 
-def estimate_control_response(analyser: pd.Series, controls: dict[str, pd.Series]) -> dict:
+def estimate_control_response(analyser: pd.Series, controls: dict[str, pd.Series],
+                              fit_end_exclusive: str = VALIDATION_END) -> dict:
     """Median log-sulphur response to step changes of each control from analyser data.
 
     Events are 1-hour changes of one control beyond a threshold while the
@@ -207,7 +208,10 @@ def estimate_control_response(analyser: pd.Series, controls: dict[str, pd.Series
     drifts, so this is a lagged observational response, not a proven causal
     gain; the direction for temperature matches the expert statement.
     """
-    frame = pd.DataFrame({"lnS": ln(analyser), **{k: v for k, v in controls.items()}}).sort_index()
+    # Bind log values to their timestamps, even if controls have different indices.
+    frame = pd.DataFrame({"lnS": pd.Series(ln(analyser), index=analyser.index),
+                          **{k: v for k, v in controls.items()}}).sort_index()
+    frame = frame.loc[frame.index < pd.Timestamp(fit_end_exclusive)]
     frame = frame.resample("10min").last()
     normal = (frame["T6"] > 320) & (frame["T6"] < 400) & (frame["F9"] > 100) & (frame["P13"] > 3)
     lnS = frame["lnS"].where(normal)
@@ -256,7 +260,7 @@ def temporal_folds(target_time: pd.Series, origins: pd.Series, publication_delay
     ``2024``: fit on labels published before 2024-01-01, score origins in 2024;
     ``2025``: fit on labels published before 2025-01-01, score origins in 2025.
     ``final`` fits on every label published before ``VALIDATION_END``; origins
-    from ``VALIDATION_END`` are the untouched hold-out.
+    from ``VALIDATION_END`` are the retrospective audit.
     """
     available = pd.to_datetime(target_time) + publication_delay
     origins = pd.to_datetime(origins)
@@ -294,6 +298,7 @@ def run(directory: Path, output: Path, publication_delay_minutes: float = LIMS_P
         selection_scores: dict[str, float] = {}
         oof_residual = np.full(len(frame), np.nan)
         oof_ln_pred = np.full(len(frame), np.nan)
+        oof_accepted = np.zeros(len(frame), dtype=bool)
         for alpha in ALPHA_GRID:
             scores = []
             for year in FOLD_YEARS:
@@ -309,11 +314,17 @@ def run(directory: Path, output: Path, publication_delay_minutes: float = LIMS_P
             pred = candidate.predict(frame.loc[score])
             oof_ln_pred[score.to_numpy()] = pred
             oof_residual[score.to_numpy()] = y_ln[score] - pred
+            fold_support = StandardizedRidge(alpha).fit(frame.loc[fit, FEATURE_COLUMNS], y_ln[fit]).artifact()
+            for i in frame.index[score]:
+                check = applicability(frame.loc[i, FEATURE_COLUMNS].to_numpy(float),
+                                      {**fold_support, "applicability_policy": APPLICABILITY_POLICY},
+                                      int(max(frame.loc[i, "anchor_pairs_q21"], frame.loc[i, "anchor_pairs_pak"])))
+                oof_accepted[i] = check["status"] == "ok"
         model = StandardizedRidge(alpha).fit(frame.loc[fit_mask, MODEL_COLUMNS], y_ln[fit_mask])
         ln_pred = model.predict(frame)
         # Intervals and P(>10) come from out-of-fold residuals (2024-2025),
         # never from in-sample residuals of the final fit.
-        quantile_function = residual_quantile_function(oof_residual)
+        quantile_function = residual_quantile_function(oof_residual[oof_accepted])
         # Applicability is judged on the full feature vector (analysers, lab
         # anchor and control regime), fitted on the same rows.
         support_model = StandardizedRidge(alpha).fit(frame.loc[fit_mask, FEATURE_COLUMNS], y_ln[fit_mask]).artifact()
@@ -336,7 +347,7 @@ def run(directory: Path, output: Path, publication_delay_minutes: float = LIMS_P
         frame["baseline_q21_anchored"] = np.exp(frame["ln_q21"])
         frame["baseline_pak_anchored"] = np.exp(frame["ln_pak"])
         # Alarm threshold: best F1 of out-of-fold P(>10) on the selection folds.
-        selection_rows = np.isfinite(oof_ln_pred) & frame["forecast_status"].eq("ok").to_numpy()
+        selection_rows = np.isfinite(oof_ln_pred) & oof_accepted
         alarm_scores = {}
         for probability in ALARM_PROBABILITY_GRID:
             m = probability_metrics(y[selection_rows], frame.loc[selection_rows, "oof_exceedance_probability"], probability)
@@ -346,19 +357,23 @@ def run(directory: Path, output: Path, publication_delay_minutes: float = LIMS_P
         splits = {"selection_2024": folds["2024"][1], "selection_2025": folds["2025"][1], "test": test_mask}
         metrics = {}
         for split_name, mask in splits.items():
-            accepted = mask & frame["forecast_status"].eq("ok")
+            accepted = mask & (frame["forecast_status"].eq("ok") if split_name == "test" else oof_accepted)
             column, probability_column = ("prediction", "exceedance_probability") if split_name == "test" else ("oof_prediction", "oof_exceedance_probability")
             entry = {
                 "rows": int(mask.sum()), "accepted_rows": int(accepted.sum()), "coverage": float(accepted.sum() / max(1, mask.sum())),
                 "abstained_actual_above_10": int((mask & ~accepted & (frame["target"] > HARD_LIMIT)).sum()),
-                "evaluation": "final model on untouched 2026" if split_name == "test" else "out-of-fold (fitted on earlier years only)",
+                "evaluation": "retrospective audit 2026 (previously examined)" if split_name == "test" else "out-of-fold (fitted on earlier years only)",
                 "model": regression_metrics(y[mask], frame.loc[mask, column]),
                 "accepted_model": regression_metrics(y[accepted], frame.loc[accepted, column]),
                 "accepted_probability": probability_metrics(y[accepted], frame.loc[accepted, probability_column], alarm_probability),
                 "interval_80_coverage": float(((y >= frame["prediction_lower"]) & (y <= frame["prediction_upper"]))[accepted].mean()) if accepted.any() and split_name == "test" else None,
             }
             for name in ("constant", "previous_lab", "level", "q21_anchored", "pak_anchored"):
-                entry[f"baseline_{name}"] = regression_metrics(y[accepted], frame.loc[accepted, f"baseline_{name}"])
+                baseline_values = frame.loc[accepted, f"baseline_{name}"]
+                if name == "constant" and split_name != "test":
+                    fold_fit = folds[split_name.removeprefix("selection_")][0]
+                    baseline_values = np.full(int(accepted.sum()), np.median(y[fold_fit]))
+                entry[f"baseline_{name}"] = regression_metrics(y[accepted], baseline_values)
             metrics[split_name] = entry
         years = pd.to_datetime(frame["target_time"]).dt.year
         by_year = {}
@@ -410,6 +425,10 @@ def run(directory: Path, output: Path, publication_delay_minutes: float = LIMS_P
         "horizons_minutes": list(HORIZONS_MINUTES),
         "lims_publication_delay_minutes": float(publication_delay_minutes),
         "lab_anchor_samples": LAB_ANCHOR_SAMPLES,
+        "lab_level_samples": 5,
+        "feature_contract": "causal_plateau_sample_age_v1",
+        "control_fit_end_exclusive": VALIDATION_END,
+        "calibration_note": "Accepted OOF 2024-2025; support fitted inside each fold. Alpha and alarm tuning reuse these folds; selection metrics are not independent validation.",
         "model_columns": MODEL_COLUMNS, "feature_columns": FEATURE_COLUMNS,
         "analyser_metrics": ANALYSER_METRICS, "control_metrics": CONTROL_METRICS,
         "applicability_policy": APPLICABILITY_POLICY,
@@ -457,7 +476,7 @@ def write_report(path: Path, metadata: dict) -> None:
         "Входы регрессии (только свидетельства о сере продукта): очищенные поточные анализаторы `Q21` (КИП) и ПАК — текущее значение и среднее за час, "
         f"скорректированные на медианное смещение «ЛИМС − анализатор» по последним {LAB_ANCHOR_SAMPLES} опубликованным пробам; "
         "локальный уровень (медиана последних 5 опубликованных проб); предыдущая опубликованная проба. "
-        "Плато анализатора длиннее 60 минут и значения вне (0, 100) не используются. Модель — ridge на ln(серы) с train-only нормировкой.",
+        "Показания плато исключаются начиная с момента достижения 60 минут; ранние показания не удаляются задним числом. Значения вне (0, 100) исключены. Модель — ridge на ln(серы) с train-only нормировкой.",
         "",
         "Абсолютные уровни `T6/F9/P13` и 24-часовые средние анализаторов участвуют только в проверке области применимости (режим установки), "
         "а не в регрессии: они дрейфуют с возрастом катализатора и калибровкой анализатора, а выученные коэффициенты при изменениях `T6` "
@@ -465,7 +484,8 @@ def write_report(path: Path, metadata: dict) -> None:
         "принято после просмотра 2026: для выбора набора признаков 2026 не является полностью слепым тестом. Регуляризация α и порог тревоги "
         f"выбраны только на out-of-fold годах {folds} (расширяющиеся временные фолды, лог-MAE), финальная подгонка — на пробах, "
         f"опубликованных до {metadata['split_boundaries']['fit_end_exclusive']}; пробы 2026 не участвовали ни в подгонке, ни в отборе α. "
-        "Интервалы и вероятность превышения 10 мг/кг — эмпирические квантили out-of-fold остатков ln.",
+        "Интервалы и вероятность превышения 10 мг/кг — эмпирические квантили принятых out-of-fold остатков ln; gate обучен отдельно внутри каждого фолда. "
+        "Выбор α, калибровка и подбор порога переиспользуют 2024–2025: метрики выбора не являются независимой проверкой вероятностей.",
         "",
         "## Точность по горизонтам (удержанный 2026, принятые строки)",
         "",
@@ -515,7 +535,7 @@ def write_report(path: Path, metadata: dict) -> None:
         "",
         "- Суточная лабораторная проба содержит быструю (часовую) составляющую и шум анализа; за 3 часа вперёд предсказуема лишь малая её часть, "
         "поэтому на 180 мин MAE модели близка к MAE константы. Ценность прогноза на длинном горизонте — калиброванная вероятность превышения "
-        "и интервал, а не точечное значение.",
+        "и интервал, однако их полезность также требует проверки: Brier skill около нуля не подтверждает преимущество перед частотой превышений.",
         "- На горизонте 0 (nowcast) калиброванный анализатор существенно точнее последней пробы и константы: именно он служит базой сценариев.",
         "- Строки со статусом abstain (нет анализатора и пробы, режим вне области обучения, мало пар для калибровки) не получают прогноза.",
         "- Метрики относятся к выходу гидроочистки, не к товарной смеси после блендинга.",

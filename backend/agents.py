@@ -20,13 +20,10 @@ from .objectives import candidate_objectives, regime_severity
 
 CONTROL_IDS = ("ht.T6", "ht.F9", "ht.P13")
 UNUSABLE_FLAGS = {"invalid", "conflict", "suspect", "flatline", "gap"}
-# Slowly varying product properties are sampled rarely (cetane: ~monthly in
-# the source LIMS).  Their last laboratory value stays usable as a baseline
-# constraint for a declared window instead of the 48-hour sulphur freshness.
-# This is a prototype assumption: the hydro-treating scenario does not model
-# a cetane response, so the window only affects whether the baseline check
-# can be performed at all.
-SLOW_QUALITY_MAX_AGE_MINUTES = {"lims.ht.2.CetaneNumber": 60 * 24 * 60}
+# Cetane is sampled rarely, but no validated persistence model establishes
+# that a monthly sample describes today's product. Keep the existing 48-hour
+# engineering freshness assumption; do not count a widened window as ML gain.
+SLOW_QUALITY_MAX_AGE_MINUTES = {"lims.ht.2.CetaneNumber": 48 * 60}
 # Virtual analyser used for T95 when the laboratory value is stale.
 T95_VAK_FORMULA = "24-2000:GODT:T95"
 
@@ -227,6 +224,8 @@ class ReliabilityAgent:
         forecast = quality["evidence"].get("model_forecast")
         if not explicit and (not forecast or forecast.get("status") != "ok"):
             reasons.append("Нет допустимого модельного прогноза для решения по наблюдаемым данным")
+        elif not explicit and not forecast.get("path_supported", True):
+            reasons.append("Не все горизонты траектории прошли проверку области применимости")
         # A forecast alarm does not block the contour: it is the trigger for a
         # corrective candidate, which the safety gate then checks per candidate.
         can_recommend = not reasons

@@ -19,11 +19,12 @@ import numpy as np
 import pandas as pd
 
 from tools.modeling.sulfur_features import (ANALYSER_METRICS, CONTROL_METRICS, FEATURE_COLUMNS, LAB_ANCHOR_MAX_AGE_DAYS,
-                                            applicability, build_features, clean_analyser, exceedance_probability, interval)
+                                            applicability, build_features, clean_analyser, exceedance_probability, interval,
+                                            predict_portable)
 from .analytics import parse_time
 from .config import ROOT
 
-ARTIFACT = ROOT / "reports" / "modeling" / "sulfur-forecast" / "model.json"
+ARTIFACT = ROOT / "reports" / "modeling" / "causal-anchored" / "corrected-claude" / "model.json"
 TARGET_METRIC = "lims.ht.2.Mg.Sulfur"
 CONTROL_HISTORY_HOURS = 48
 # Analyser history must cover the lab-anchor window: offsets are estimated at
@@ -54,6 +55,8 @@ def _load_artifact(path: Path = ARTIFACT) -> dict[str, Any]:
         model = artifact["models"].get(str(horizon))
         if not model:
             raise ForecastUnavailable(f"В артефакте нет модели для горизонта {horizon} мин")
+        if model.get("input_transform", "identity") not in {"identity", "exp"} or model.get("output_transform", "identity") not in {"identity", "log"}:
+            raise ForecastUnavailable("Артефакт содержит неизвестное преобразование модели")
         size = len(model["feature_columns"])
         for key in ("medians", "mean", "scale", "coef"):
             expected = size + 1 if key == "coef" else size
@@ -103,9 +106,21 @@ def _runtime_inputs(directory: Path, origin, artifact: dict) -> tuple[dict, dict
 
 def _predict(model: dict, features: pd.Series) -> float:
     raw = features.loc[model["feature_columns"]].to_numpy(dtype=float)
-    filled = np.where(np.isfinite(raw), raw, np.asarray(model["medians"]))
-    standardized = (filled - np.asarray(model["mean"])) / np.asarray(model["scale"])
-    return float(np.array([1.0, *standardized]) @ np.asarray(model["coef"]))
+    return predict_portable(model, raw)
+
+
+def horizon_support(artifact: dict, raw: np.ndarray, anchor_pairs: int, horizon: float) -> dict:
+    """Exact horizon uses its own support; interpolation needs both neighbours."""
+    horizons = artifact["horizons_minutes"]
+    neighbours = sorted({max(h for h in horizons if h <= horizon), min(h for h in horizons if h >= horizon)})
+    checks = {str(h): applicability(raw, {**artifact["models"][str(h)]["support"],
+                       "feature_columns": FEATURE_COLUMNS, "applicability_policy": artifact["applicability_policy"]},
+                       anchor_pairs) for h in neighbours}
+    result = dict(checks[str(neighbours[0])])
+    result["reasons"] = list(dict.fromkeys(r for s in checks.values() for r in s["reasons"]))
+    result["status"] = "abstain" if result["reasons"] else "ok"
+    result["checked_horizons"] = checks
+    return result
 
 
 def _blend_quantiles(artifact: dict, horizon: float) -> dict:
@@ -158,18 +173,20 @@ def forecast_sulfur(directory: Path, at: str, artifact_path: Path = ARTIFACT, ho
     horizon = float(horizon_minutes)
     target_time = origin + timedelta(minutes=horizon)
     analysers, controls, labs = _runtime_inputs(directory, origin, artifact)
-    frame = build_features(analysers, controls, labs, pd.DatetimeIndex([pd.Timestamp(origin)]), artifact["lims_publication_delay_minutes"])
+    frame = build_features(analysers, controls, labs, pd.DatetimeIndex([pd.Timestamp(origin)]), artifact["lims_publication_delay_minutes"],
+                           anchor_samples=int(artifact.get("lab_anchor_samples", 10)),
+                           level_samples=int(artifact.get("lab_level_samples", 5)))
     features = frame.iloc[0]
     raw = features.loc[FEATURE_COLUMNS].to_numpy(dtype=float)
     anchor_pairs = int(max(features.get("anchor_pairs_q21", 0), features.get("anchor_pairs_pak", 0)))
     horizons = [int(h) for h in artifact["horizons_minutes"]]
-    support_model = {**artifact["models"][str(horizons[-1])]["support"], "feature_columns": FEATURE_COLUMNS,
-                     "applicability_policy": artifact["applicability_policy"]}
-    support = applicability(raw, support_model, anchor_pairs)
+    supports = {h: horizon_support(artifact, raw, anchor_pairs, h) for h in horizons}
+    support = horizon_support(artifact, raw, anchor_pairs, horizon)
     model_available_from = artifact.get("model_available_from")
     if model_available_from and origin < parse_time(model_available_from):
-        support["status"] = "abstain"
-        support["reasons"].append("model_not_yet_available_at_origin")
+        for check in [support, *supports.values()]:
+            check["status"] = "abstain"
+            check["reasons"].append("model_not_yet_available_at_origin")
     previous = None
     if pd.notna(features.get("previous_lab_available")):
         previous = {"sample_time": pd.Timestamp(features["previous_lab_sample_time"]).isoformat(),
@@ -190,9 +207,15 @@ def forecast_sulfur(directory: Path, at: str, artifact_path: Path = ARTIFACT, ho
             support["status"] = "abstain"
             support["reasons"].append("nonfinite_model_output")
     if support["status"] == "ok":
-        nowcast = exceedance_at(artifact, 0, ln_by_horizon[0])
+        if supports[0]["status"] == "ok":
+            nowcast = exceedance_at(artifact, 0, ln_by_horizon[0])
         horizon_result = exceedance_at(artifact, horizon, _ln_prediction_at(ln_by_horizon, horizon))
-        horizon_rows = [{"minutes": h, **exceedance_at(artifact, h, ln_by_horizon[h])} for h in horizons]
+        horizon_rows = [{"minutes": h, "status": supports[h]["status"], "reasons": supports[h]["reasons"],
+                         **(exceedance_at(artifact, h, ln_by_horizon[h]) if supports[h]["status"] == "ok"
+                            else {"prediction": None, "lower": None, "upper": None, "exceedance_probability": None})}
+                        for h in horizons]
+    path_end = min(h for h in horizons if h >= horizon)
+    path_supported = support["status"] == "ok" and all(supports[h]["status"] == "ok" for h in horizons if h <= path_end)
     alarm_probability = _alarm_probability(artifact, horizon)
 
     def analyser_evidence(name: str) -> dict:
@@ -222,6 +245,7 @@ def forecast_sulfur(directory: Path, at: str, artifact_path: Path = ARTIFACT, ho
         "target": {"metric_id": TARGET_METRIC, "unit": artifact.get("target", {}).get("unit", "мг/кг")},
         "hard_limit": float(artifact["hard_limit"]),
         "nowcast": nowcast,
+        "nowcast_applicability": supports[0], "path_supported": path_supported,
         "prediction": horizon_result["prediction"] if horizon_result else None,
         "prediction_lower": horizon_result["lower"] if horizon_result else None,
         "prediction_upper": horizon_result["upper"] if horizon_result else None,

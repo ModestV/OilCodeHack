@@ -1,0 +1,159 @@
+{
+  "corrected_claude": {
+    "origins": 1012,
+    "database_checks": [
+      {
+        "origin": "2026-01-01 10:00:00",
+        "horizon": 0,
+        "status": "ok"
+      },
+      {
+        "origin": "2026-03-16 22:00:00",
+        "horizon": 0,
+        "status": "ok"
+      },
+      {
+        "origin": "2026-05-08 23:50:00",
+        "horizon": 0,
+        "status": "ok"
+      },
+      {
+        "origin": "2026-06-03 20:00:00",
+        "horizon": 0,
+        "status": "ok"
+      },
+      {
+        "origin": "2026-01-16 09:00:00",
+        "horizon": 60,
+        "status": "ok"
+      },
+      {
+        "origin": "2026-04-06 09:00:00",
+        "horizon": 60,
+        "status": "ok"
+      },
+      {
+        "origin": "2026-07-02 11:00:00",
+        "horizon": 60,
+        "status": "abstain"
+      },
+      {
+        "origin": "2026-01-09 19:00:00",
+        "horizon": 120,
+        "status": "ok"
+      },
+      {
+        "origin": "2026-02-03 08:00:00",
+        "horizon": 120,
+        "status": "ok"
+      },
+      {
+        "origin": "2026-05-01 08:00:00",
+        "horizon": 120,
+        "status": "ok"
+      },
+      {
+        "origin": "2026-07-18 08:00:00",
+        "horizon": 120,
+        "status": "ok"
+      },
+      {
+        "origin": "2026-02-26 07:00:00",
+        "horizon": 180,
+        "status": "ok"
+      },
+      {
+        "origin": "2026-05-16 07:00:00",
+        "horizon": 180,
+        "status": "ok"
+      },
+      {
+        "origin": "2026-08-09 07:00:00",
+        "horizon": 180,
+        "status": "abstain"
+      }
+    ],
+    "model_sha256": "deed6ff7941fc4b0460b970371ebf8c1dc8ee5cf272dc1afe9f582726d20efb5"
+  },
+  "frozen_selection": {
+    "origins": 1012,
+    "database_checks": [
+      {
+        "origin": "2026-01-01 10:00:00",
+        "horizon": 0,
+        "status": "ok"
+      },
+      {
+        "origin": "2026-03-16 22:00:00",
+        "horizon": 0,
+        "status": "ok"
+      },
+      {
+        "origin": "2026-05-08 23:50:00",
+        "horizon": 0,
+        "status": "ok"
+      },
+      {
+        "origin": "2026-06-03 20:00:00",
+        "horizon": 0,
+        "status": "ok"
+      },
+      {
+        "origin": "2026-01-16 09:00:00",
+        "horizon": 60,
+        "status": "ok"
+      },
+      {
+        "origin": "2026-04-06 09:00:00",
+        "horizon": 60,
+        "status": "ok"
+      },
+      {
+        "origin": "2026-07-02 11:00:00",
+        "horizon": 60,
+        "status": "abstain"
+      },
+      {
+        "origin": "2026-01-09 19:00:00",
+        "horizon": 120,
+        "status": "ok"
+      },
+      {
+        "origin": "2026-02-03 08:00:00",
+        "horizon": 120,
+        "status": "ok"
+      },
+      {
+        "origin": "2026-05-01 08:00:00",
+        "horizon": 120,
+        "status": "ok"
+      },
+      {
+        "origin": "2026-07-18 08:00:00",
+        "horizon": 120,
+        "status": "ok"
+      },
+      {
+        "origin": "2026-02-26 07:00:00",
+        "horizon": 180,
+        "status": "ok"
+      },
+      {
+        "origin": "2026-05-16 07:00:00",
+        "horizon": 180,
+        "status": "ok"
+      },
+      {
+        "origin": "2026-08-09 07:00:00",
+        "horizon": 180,
+        "status": "abstain"
+      }
+    ],
+    "model_sha256": "582ac4827a554ad789cc87ac563d7e31e9f3789e40e4a32011bdd75fae6c063a"
+  },
+  "passed": true,
+  "max_prediction_delta": 7.105427357601002e-15,
+  "max_feature_delta": 1.4210854715202004e-14,
+  "observations_sha256": "9a6d9b644a2b1ddce0da27e816aad31654ea9aaf306f29865bb14503973db37b",
+  "script_sha256": "792226382b450e8eba05dbf07bb747ddce51b78910838e4389676d3faeeae9d9"
+}

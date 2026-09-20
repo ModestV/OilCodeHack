@@ -11,6 +11,17 @@ from tools.modeling import sulfur_forecast as sf  # noqa: E402
 
 
 class ControlResponseTest(unittest.TestCase):
+    def test_future_controls_and_analyser_cannot_change_fitted_response(self):
+        index = pd.date_range("2025-12-01", "2026-02-01", freq="10min")
+        rng = np.random.default_rng(42)
+        analyser = pd.Series(8 + rng.normal(0, .2, len(index)), index=index)
+        controls = {"T6": pd.Series(360., index=index), "F9": pd.Series(200., index=index), "P13": pd.Series(4., index=index)}
+        controls["T6"].loc["2025-12-10":] += 5
+        original = sf.estimate_control_response(analyser, controls)
+        analyser.loc["2026-01-01":] = 90
+        controls["T6"].loc["2026-01-01":] = 390
+        self.assertEqual(original, sf.estimate_control_response(analyser, controls))
+
     def test_step_response_recovers_sign_and_lag(self):
         index = pd.date_range("2025-01-01", periods=24 * 6 * 20, freq="10min")
         rng = np.random.default_rng(0)

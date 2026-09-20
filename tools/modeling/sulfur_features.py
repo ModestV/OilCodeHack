@@ -71,6 +71,24 @@ def ln(values) -> np.ndarray:
     return out
 
 
+def predict_portable(model: dict, raw: np.ndarray) -> float:
+    """Portable affine fusion inference, returning ln(S) for all model families."""
+    values = np.asarray(raw, dtype=float)
+    if model.get("input_transform", "identity") == "exp":
+        values = np.exp(values)
+    if model.get("fallback_level"):
+        columns = model["feature_columns"]
+        for column in (model["baseline_column"], "ln_level"):
+            value = values[columns.index(column)]
+            if np.isfinite(value):
+                return float(np.log(max(value, LOG_FLOOR)))
+        return float(np.log(max(model["fallback_median"], LOG_FLOOR)))
+    filled = np.where(np.isfinite(values), values, np.asarray(model["medians"]))
+    standardized = (filled - np.asarray(model["mean"])) / np.asarray(model["scale"])
+    result = float(np.r_[1., standardized] @ np.asarray(model["coef"]))
+    return float(np.log(max(result, LOG_FLOOR))) if model.get("output_transform") == "log" else result
+
+
 def clean_analyser(series: pd.Series, flags: pd.Series | None = None) -> pd.Series:
     """Drop implausible analyser readings and frozen plateaus.
 
@@ -92,9 +110,8 @@ def clean_analyser(series: pd.Series, flags: pd.Series | None = None) -> pd.Seri
     run_start = values.index.to_series().groupby(run_id).transform("first")
     plateau_length = (values.index.to_series() - run_start).dt.total_seconds() / 60
     values[(plateau_length >= ANALYSER_PLATEAU_MINUTES).to_numpy() & same.to_numpy()] = np.nan
-    # Also drop the first samples of a plateau that later proves to be stuck.
-    stuck_runs = set(run_id[(plateau_length >= ANALYSER_PLATEAU_MINUTES) & same])
-    values[run_id.isin(stuck_runs).to_numpy()] = np.nan
+    # Earlier readings cannot be retracted using a future plateau completion:
+    # cleaning a prefix must agree with cleaning the full series on that prefix.
     return values
 
 
@@ -154,11 +171,15 @@ def available_lab(target: pd.DataFrame, origins: pd.DatetimeIndex,
         left_on="prediction_origin", right_on="previous_lab_available_at", direction="backward",
         tolerance=pd.Timedelta(minutes=MAX_LAB_AGE_MINUTES),
     ).sort_values("_order").reset_index(drop=True)
+    stale = left.sort_values("_order")["prediction_origin"].reset_index(drop=True) - joined["previous_lab_sample_time"] > pd.Timedelta(minutes=MAX_LAB_AGE_MINUTES)
+    joined.loc[stale, "previous_lab_available"] = np.nan
+    joined.loc[stale, ["previous_lab_sample_time", "previous_lab_available_at"]] = pd.NaT
     return joined.drop(columns=["_order", "prediction_origin"])
 
 
 def lab_anchor(labs: pd.DataFrame, analysers: dict[str, pd.Series], origins: pd.DatetimeIndex,
-               publication_delay_minutes: float = LIMS_PUBLICATION_DELAY_MINUTES) -> pd.DataFrame:
+               publication_delay_minutes: float = LIMS_PUBLICATION_DELAY_MINUTES,
+               anchor_samples: int = LAB_ANCHOR_SAMPLES, level_samples: int = LAB_LEVEL_SAMPLES) -> pd.DataFrame:
     """Per-origin lab level and lab-minus-analyser offsets from published samples.
 
     ``labs`` has ``target_time``/``target``.  For every origin the last
@@ -193,8 +214,8 @@ def lab_anchor(labs: pd.DataFrame, analysers: dict[str, pd.Series], origins: pd.
         if not len(idx):
             continue
         idx = idx[np.argsort(sample_ns[idx], kind="stable")]
-        recent = idx[-LAB_ANCHOR_SAMPLES:]
-        level[i] = np.median(lab_values[idx[-LAB_LEVEL_SAMPLES:]])
+        recent = idx[-anchor_samples:]
+        level[i] = np.median(lab_values[idx[-level_samples:]])
         for name in analysers:
             diff = lab_values[recent] - analyser_at_sample[name][recent]
             diff = diff[np.isfinite(diff)]
@@ -210,7 +231,8 @@ def lab_anchor(labs: pd.DataFrame, analysers: dict[str, pd.Series], origins: pd.
 
 def build_features(analysers: dict[str, pd.Series], controls: dict[str, pd.Series],
                    labs: pd.DataFrame, origins: pd.DatetimeIndex,
-                   publication_delay_minutes: float = LIMS_PUBLICATION_DELAY_MINUTES) -> pd.DataFrame:
+                   publication_delay_minutes: float = LIMS_PUBLICATION_DELAY_MINUTES,
+                   anchor_samples: int = LAB_ANCHOR_SAMPLES, level_samples: int = LAB_LEVEL_SAMPLES) -> pd.DataFrame:
     """Assemble the shared feature frame for a list of origins.
 
     ``analysers`` maps ``q21``/``pak`` to *cleaned* series; ``controls`` maps
@@ -220,7 +242,8 @@ def build_features(analysers: dict[str, pd.Series], controls: dict[str, pd.Serie
     origins = pd.DatetimeIndex(origins)
     origin_ns = origins.as_unit("ns").asi8
     empty = pd.Series(dtype=float, index=pd.DatetimeIndex([]))
-    anchor = lab_anchor(labs, {k: analysers.get(k, empty) for k in ANALYSER_METRICS}, origins, publication_delay_minutes)
+    anchor = lab_anchor(labs, {k: analysers.get(k, empty) for k in ANALYSER_METRICS}, origins, publication_delay_minutes,
+                        anchor_samples, level_samples)
     previous = available_lab(labs, origins, publication_delay_minutes)
     frame = pd.DataFrame(index=np.arange(len(origins)))
     for name in ANALYSER_METRICS:

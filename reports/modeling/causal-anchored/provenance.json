@@ -1,0 +1,24 @@
+{
+  "python": "3.12.14",
+  "packages": {
+    "numpy": "2.5.3",
+    "pandas": "2.3.3",
+    "duckdb": "1.5.5",
+    "scipy": "1.18.1",
+    "scikit-learn": "1.9.1",
+    "threadpoolctl": "3.7.0",
+    "pytest": "9.1.1"
+  },
+  "source_sha256_lf": {
+    "tools/modeling/sulfur_features.py": "0f271456b6f637897c367cbb4c3157ec569ab0d87c4fd6016148e20049b36403",
+    "tools/modeling/sulfur_forecast.py": "721c113e95499607085f918abf3fc9da3c04f36b797b37b03050201f219ddd96",
+    "tools/modeling/anchored_challengers.py": "7c9c4f1950fe6ee12a8d03bec02b7540ecab09ae50fbf4e9b30444a80d4cb246",
+    "tools/modeling/calibration_memory.py": "c4e5c793bc7573f352a46441a8cd1e0021fb78747afbc4bee0f8ec725b125ca2",
+    "tools/modeling/anchored_risk.py": "25d97f57765c50049e74de73da47600f1fee4fa38a9a40fdcb6b5633adc221f8",
+    "tools/modeling/replay_anchored.py": "792226382b450e8eba05dbf07bb747ddce51b78910838e4389676d3faeeae9d9",
+    "backend/forecast.py": "4b437586efb679ad833bdd6d1069978930de9602c9c029c9422a9af6473bb1dc",
+    "backend/scenarios.py": "ba1259b1976234c1b95bdd4847bb7e9001f6324bd57c5995bff74ba9cdf3751c",
+    "backend/agents.py": "4176f452697f8613395be8a0e71ab02bf1426627322465535da5f50d36a115e3"
+  },
+  "note": "Code hashes normalize CRLF to LF; artifact and dataset hashes elsewhere use exact bytes. Runtime defaults to corrected-claude/model.json."
+}

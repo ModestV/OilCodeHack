@@ -237,8 +237,8 @@ def _blend(request: ScenarioRequest, resolved: dict) -> dict | None:
 
 def _baseline_path(forecast: dict | None, sulfur: float, minutes: list[int]) -> tuple[dict[int, float], str]:
     """No-action ln sulphur at each minute: the model forecast when available, else flat."""
-    if forecast and forecast.get("status") == "ok" and forecast.get("horizons"):
-        rows = sorted((int(r["minutes"]), log(max(r["prediction"], 0.3))) for r in forecast["horizons"])
+    if forecast and forecast.get("status") == "ok" and forecast.get("horizons") and forecast.get("path_supported", True):
+        rows = sorted((int(r["minutes"]), log(max(r["prediction"], 0.3))) for r in forecast["horizons"] if r.get("prediction") is not None)
         path = {}
         for minute in minutes:
             lower = max((h, v) for h, v in rows if h <= minute)
@@ -294,7 +294,7 @@ def calculate_scenario(directory: Path, request: ScenarioRequest, *, frame: dict
         response = _response_fraction(request.horizon_minutes, resolved["lag_minutes"])
         # Solve for the requested horizon, not for an unreachable steady state.
         # An editable target cannot relax the confirmed product sulphur limit.
-        required = (baseline_ln[request.horizon_minutes] + feed_effect - log(effective_target)) / response if response else 0.0
+        required = (baseline_ln[request.horizon_minutes] + feed_effect * response - log(effective_target)) / response if response else 0.0
         changes = _automatic_changes(required, resolved)
     control_effect = (
         resolved["temperature_effect"] * changes.temperature
@@ -308,7 +308,7 @@ def calculate_scenario(directory: Path, request: ScenarioRequest, *, frame: dict
         ln_value = baseline_ln[minute] + feed_effect * response + control_effect * response
         trajectory.append({"minute": minute, "timestamp": (target_time + timedelta(minutes=minute)).isoformat(),
                            "sulfur": exp(ln_value), "baseline_sulfur": exp(baseline_ln[minute])})
-    final_ln = baseline_ln[request.horizon_minutes] + feed_effect + control_effect * _response_fraction(request.horizon_minutes, resolved["lag_minutes"])
+    final_ln = log(trajectory[-1]["sulfur"])
     steady_state_sulfur = exp(baseline_ln[request.horizon_minutes] + feed_effect + control_effect)
     risk = None
     if forecast_ok or request.current_sulfur is not None:
