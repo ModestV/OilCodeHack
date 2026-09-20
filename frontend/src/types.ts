@@ -220,7 +220,9 @@ export interface ScenarioResult {
     }
   >;
   predicted_sulfur: number;
+  steady_state_sulfur: number;
   sulfur_target_met: boolean;
+  hard_sulfur_limit_met: boolean;
   trajectory: { minute: number; timestamp: string; sulfur: number }[];
   blend: null | {
     sulfur: number;
@@ -243,11 +245,16 @@ export interface DecisionTraceItem {
 
 export interface SulfurForecast {
   at: string;
+  status: "ok" | "abstain";
+  reasons: string[];
+  target_time: string;
+  forecast_horizon_minutes: number;
+  lims_publication_delay_minutes: number;
   target: { metric_id: string; unit: string };
-  prediction_ridge: number;
+  prediction_ridge: number | null;
   prediction_previous_lab: number | null;
-  prediction_risk_guard: number;
-  alarm_above_10: boolean;
+  prediction_risk_guard: number | null;
+  alarm_above_10: boolean | null;
   feature_cutoff: string;
   feature_time: string | null;
   availability_lag_minutes: number;
@@ -271,6 +278,7 @@ export interface SulfurForecast {
 export interface DecisionResult {
   at: string;
   status: "recommendation" | "abstain";
+  basis: "scenario_only" | "observed_and_forecast";
   recommendation: {
     action: string;
     predicted_sulfur: number;
@@ -289,11 +297,17 @@ export interface DecisionResult {
     predicted_sulfur?: number;
     target_met?: boolean;
     effort?: number;
+    objectives?: {
+      throughput_change_pct: number;
+      energy_cost_index: number;
+      regime_severity: { index: number | null; class?: string };
+      ranking_loss: number | null;
+    };
     controls?: ScenarioResult["controls"];
     safety_gate?: { passed: boolean; reasons: string[] };
     scenario?: ScenarioResult | null;
   }[];
-  selected_candidate?: string;
+  selected_candidate?: string | null;
   safety_gate?: { passed: boolean; reasons: string[] };
   abstain: { reason: string; missing: string[] } | null;
   forecast: SulfurForecast | null;

@@ -88,26 +88,23 @@ def test_decision_runs_deterministic_agents_and_returns_trace(tmp_path, monkeypa
 
     assert result.status_code == 200
     body = result.json()
-    assert body["status"] == "recommendation"
+    assert body["status"] == "abstain"
     assert [item["role"] for item in body["trace"]] == [
         "quality",
         "reliability",
         "optimization",
     ]
     assert all("summary" in item and "status" in item for item in body["trace"])
-    # The deterministic model still returns a reviewable recommendation when
-    # its editable bounds cannot reach the target; the action is then escalate.
-    assert body["recommendation"]["target_met"] is False
-    assert body["recommendation"]["action"] == "escalate"
-    assert body["scenario"]["baseline"]["sulfur"] == 12
-    assert body["forecast"]["model"]["name"].startswith("standardized Ridge")
-    assert body["forecast"]["leakage_check"]["passed"] is True
+    # An unreachable target is diagnostic evidence, never an action suggestion.
+    assert body["recommendation"] is None
+    assert body["scenario"] is None
+    assert body["candidates"][0]["scenario"]["baseline"]["sulfur"] == 12
     assert [candidate["id"] for candidate in body["candidates"]] == [
         "automatic",
         "conservative",
         "hold",
     ]
-    assert body["selected_candidate"] == "automatic"
+    assert body["selected_candidate"] is None
     assert body["safety_gate"]["passed"] is False
     assert "внешний LLM" in body["assumptions"][0]
 

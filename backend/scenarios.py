@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import timedelta
 from pathlib import Path
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .analytics import parse_time, snapshot
 
@@ -27,15 +27,22 @@ SULFUR_PRIORITY_IDS = (
     # quality baseline.
     "ht.Q21",
 )
+HARD_SULFUR_MAX = 10.0
+HARD_T95_MAX = 360.0
+HARD_CETANE_MIN = 51.0
 
 
-class QualityTargets(BaseModel):
+class FiniteModel(BaseModel):
+    model_config = ConfigDict(allow_inf_nan=False)
+
+
+class QualityTargets(FiniteModel):
     sulfur_max: float = Field(default=10, gt=0)
     t95_max: float = Field(default=360, gt=0)
     cetane_min: float = Field(default=51, gt=0)
 
 
-class ModelParameters(BaseModel):
+class ModelParameters(FiniteModel):
     lag_minutes: int = Field(default=90, ge=0, le=180)
     feed_sulfur_transfer: float = Field(default=0.20, gt=0)
     temperature_effect: float = Field(default=-0.08, lt=0)
@@ -44,13 +51,13 @@ class ModelParameters(BaseModel):
     cetane_gain_per_pct: float = Field(default=4.0, ge=0)
 
 
-class ControlChanges(BaseModel):
+class ControlChanges(FiniteModel):
     temperature: float = Field(default=0, ge=-10, le=10)
     feed_rate_pct: float = Field(default=0, ge=-10, le=10)
     pressure: float = Field(default=0, ge=-2, le=2)
 
 
-class BlendTank(BaseModel):
+class BlendTank(FiniteModel):
     name: str = Field(min_length=1, max_length=80)
     share: float = Field(ge=0, le=100)
     sulfur: float = Field(ge=0)
@@ -59,7 +66,7 @@ class BlendTank(BaseModel):
     cost_index: float = Field(default=1, gt=0)
 
 
-class ScenarioRequest(BaseModel):
+class ScenarioRequest(FiniteModel):
     at: str
     horizon_minutes: int = Field(default=180, ge=0, le=180)
     step_minutes: int = Field(default=30, ge=15, le=60)
@@ -114,6 +121,13 @@ def _automatic_changes(required_reduction: float, model: ModelParameters) -> Con
     return ControlChanges(temperature=temperature, pressure=pressure, feed_rate_pct=feed_rate)
 
 
+def _response_fraction(minute: int, lag_minutes: int) -> float:
+    """Editable ramp assumption, with no intervention effect at the origin."""
+    if minute == 0:
+        return 0.0
+    return 1.0 if lag_minutes == 0 else min(1.0, minute / lag_minutes)
+
+
 def _blend(request: ScenarioRequest) -> dict | None:
     if not request.tanks:
         return None
@@ -143,16 +157,16 @@ def _blend(request: ScenarioRequest) -> dict | None:
         ],
     }
     result["meets_targets"] = {
-        "sulfur": result["sulfur"] <= request.targets.sulfur_max,
-        "t95": result["t95"] <= request.targets.t95_max,
-        "cetane": result["cetane"] >= request.targets.cetane_min,
+        "sulfur": result["sulfur"] <= min(HARD_SULFUR_MAX, request.targets.sulfur_max),
+        "t95": result["t95"] <= min(HARD_T95_MAX, request.targets.t95_max),
+        "cetane": result["cetane"] >= max(HARD_CETANE_MIN, request.targets.cetane_min),
     }
     result["all_targets_met"] = all(result["meets_targets"].values())
     return result
 
 
-def calculate_scenario(directory: Path, request: ScenarioRequest) -> dict:
-    frame = snapshot(directory, request.at)
+def calculate_scenario(directory: Path, request: ScenarioRequest, *, frame: dict | None = None) -> dict:
+    frame = snapshot(directory, request.at) if frame is None else frame
     values = {item["metric_id"]: item for item in frame["values"]}
     sulfur = request.current_sulfur
     if sulfur is None:
@@ -167,8 +181,12 @@ def calculate_scenario(directory: Path, request: ScenarioRequest) -> dict:
     )
     changes = request.changes
     if changes is None:
+        response = _response_fraction(request.horizon_minutes, request.parameters.lag_minutes)
+        # Solve for the requested horizon, not for an unreachable steady state.
+        # An editable target cannot relax the confirmed product sulphur limit.
+        effective_target = min(request.targets.sulfur_max, HARD_SULFUR_MAX)
         changes = _automatic_changes(
-            sulfur + feed_effect - request.targets.sulfur_max,
+            (sulfur - effective_target) / response + feed_effect if response else 0,
             request.parameters,
         )
     full_effect = (
@@ -177,18 +195,14 @@ def calculate_scenario(directory: Path, request: ScenarioRequest) -> dict:
         + request.parameters.feed_rate_effect * changes.feed_rate_pct
         + request.parameters.pressure_effect * changes.pressure
     )
-    final_sulfur = max(0.0, sulfur + full_effect)
+    steady_state_sulfur = max(0.0, sulfur + full_effect)
     target_time = parse_time(request.at)
     minutes = list(range(0, request.horizon_minutes + 1, request.step_minutes))
     if request.horizon_minutes not in minutes:
         minutes.append(request.horizon_minutes)
     trajectory = []
     for minute in minutes:
-        response = (
-            1.0
-            if request.parameters.lag_minutes == 0
-            else min(1.0, minute / request.parameters.lag_minutes)
-        )
+        response = _response_fraction(minute, request.parameters.lag_minutes)
         trajectory.append(
             {
                 "minute": minute,
@@ -217,6 +231,7 @@ def calculate_scenario(directory: Path, request: ScenarioRequest) -> dict:
             "relative": relative,
         }
 
+    final_sulfur = trajectory[-1]["sulfur"]
     return {
         "at": request.at,
         "horizon_minutes": request.horizon_minutes,
@@ -224,13 +239,19 @@ def calculate_scenario(directory: Path, request: ScenarioRequest) -> dict:
         "baseline": {"sulfur": sulfur, "t95": t95, "cetane": cetane},
         "controls": controls,
         "predicted_sulfur": final_sulfur,
+        "steady_state_sulfur": steady_state_sulfur,
         "sulfur_target_met": final_sulfur <= request.targets.sulfur_max,
+        "hard_sulfur_limit_met": final_sulfur <= HARD_SULFUR_MAX,
+        "hard_sulfur_max": HARD_SULFUR_MAX,
+        "prediction_scope": "horizon_endpoint_surrogate",
         "trajectory": trajectory,
         "blend": _blend(request),
         "assumptions": [
             "Простая линейная сценарная модель, не промышленный оптимизатор.",
             "Коэффициенты чувствительности и пределы изменения являются редактируемыми модельными допущениями.",
-            "Лаг отклика задаётся в диапазоне 0–180 минут; значения ЛИМС доступны через 4 часа после отбора пробы.",
+            "Параметр lag задаёт время линейного нарастания эффекта (0–180 минут), а не подтверждённое время прохождения продукта; значения ЛИМС доступны через 4 часа после отбора пробы.",
+            "predicted_sulfur соответствует концу выбранного горизонта; steady_state_sulfur — полному условному эффекту. Проверка конечной точки не гарантирует качество на всём переходе.",
+            "T95 и цетановое число гидроочистки не прогнозируются: известные базовые значения служат отдельными ограничениями; неизвестные показатели не считаются прошедшими проверку.",
             "Присадка стоит в 100 раз дороже ДТ; её влияние на цетановое число задаётся параметром эффективности.",
         ],
     }

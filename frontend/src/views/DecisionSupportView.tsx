@@ -14,16 +14,15 @@ import type {
   ScenarioResult,
 } from "../types";
 import { Chart } from "../components/Chart";
-import { offset } from "../components/TimeControls";
 import { formatNumber } from "../visualization";
 import {
   pipelineStages,
 } from "../demo/decisionSupportDemo";
 
 const controls = [
-  ["ht.T6", "Температура на входе Р-202", "ед."],
+  ["ht.T6", "Температура на входе Р-202", "°C"],
   ["ht.F9", "Массовый расход сырья", "%"],
-  ["ht.P13", "Давление на входе Р-202", "ед."],
+  ["ht.P13", "Давление на входе Р-202", "МПа"],
 ] as const;
 
 const initial = (at: string, sandbox: boolean): ScenarioRequest => ({
@@ -68,6 +67,13 @@ const initial = (at: string, sandbox: boolean): ScenarioRequest => ({
 });
 
 const number = (value: string) => Number(value.replace(",", "."));
+const forecastReason = (reason: string) => ({
+  no_telemetry_evidence: "нет свежей телеметрии",
+  too_many_missing_features: "слишком много пропусков",
+  outside_training_support: "данные за пределами области обучения",
+  model_not_yet_available_at_origin: "момент предшествует завершению обучения и выбора модели (01.01.2026)",
+  nonfinite_model_output: "некорректный численный результат",
+}[reason] || reason);
 
 export function DecisionSupportView({
   datasetId,
@@ -93,9 +99,6 @@ export function DecisionSupportView({
   const [pipelineStarted, setPipelineStarted] = useState(false);
   const [selectedRow, setSelectedRow] = useState<"base" | "feed" | "strict">(
     "base",
-  );
-  const [periodFrom, setPeriodFrom] = useState(
-    offset(latestAt, -1440).slice(0, 16),
   );
   const [periodTo, setPeriodTo] = useState(latestAt.slice(0, 16));
   const [recommendationPeriod, setRecommendationPeriod] = useState("");
@@ -145,7 +148,7 @@ export function DecisionSupportView({
     setError("");
     try {
       const recommendationAt =
-        sourceMode === "period" && periodTo ? periodTo : at;
+        sourceMode === "period" && periodTo ? periodTo : latestAt;
       const next = {
         ...initial(recommendationAt, false),
         at: recommendationAt,
@@ -156,7 +159,7 @@ export function DecisionSupportView({
       setRecommendationPeriod(
         sourceMode === "latest"
           ? `На ${displayTime(latestAt)}`
-          : `${displayTime(periodFrom)} — ${displayTime(periodTo)}`,
+          : `На ${displayTime(periodTo)}`,
       );
       setPipelineStarted(true);
     } catch (caught) {
@@ -198,7 +201,7 @@ export function DecisionSupportView({
   if (!sandbox) {
     const validPeriod =
       sourceMode === "latest" ||
-      Boolean(periodFrom && periodTo && periodFrom < periodTo);
+      Boolean(periodTo);
     return (
       <section className="decision-page recommendation-page">
         <section className="decision-band recommendation-controls">
@@ -228,13 +231,13 @@ export function DecisionSupportView({
                   setPipelineStarted(false);
                 }}
               >
-                За период
+                Момент в истории
               </button>
             </div>
             <button
               className="primary"
               type="button"
-              disabled={!validPeriod}
+              disabled={!validPeriod || loading}
               onClick={runRecommendation}
             >
               {loading
@@ -247,18 +250,7 @@ export function DecisionSupportView({
           {sourceMode === "period" && (
             <div className="support-dates">
               <label>
-                С
-                <input
-                  type="datetime-local"
-                  value={periodFrom}
-                  onChange={(e) => {
-                    setPeriodFrom(e.target.value);
-                    setPipelineStarted(false);
-                  }}
-                />
-              </label>
-              <label>
-                По
+                Момент расчёта
                 <input
                   type="datetime-local"
                   value={periodTo}
@@ -270,7 +262,7 @@ export function DecisionSupportView({
               </label>
               {!validPeriod && (
                 <span className="error" role="status">
-                  Конец периода должен быть позже начала.
+                  Выберите момент расчёта.
                 </span>
               )}
             </div>
@@ -282,7 +274,7 @@ export function DecisionSupportView({
         </section>
         {error && <p className="error" role="alert">{error}</p>}
         <p className="support-notice">
-          Локальная сценарная модель · коэффициенты и ограничения являются допущениями
+          Прогноз на 3 часа и сравнение сценариев. Коэффициенты изменения режима — допущения для проверки технологом.
         </p>
         {pipelineStarted ? (
           <PipelinePreview
@@ -627,17 +619,17 @@ export function DecisionSupportView({
               <strong>{formatNumber(result.baseline.sulfur, 2)}</strong>
               <span>мг/кг</span>
             </article>
-            <article className={result.sulfur_target_met ? "ok" : "danger"}>
+            <article className={result.sulfur_target_met && result.hard_sulfur_limit_met ? "ok" : "danger"}>
               <small>Через {result.horizon_minutes} мин</small>
               <strong>{formatNumber(result.predicted_sulfur, 2)}</strong>
               <span>
-                {result.sulfur_target_met ? (
+                {result.sulfur_target_met && result.hard_sulfur_limit_met ? (
                   <>
                     <CheckCircle2 /> цель достигнута
                   </>
                 ) : (
                   <>
-                    <AlertTriangle /> выше цели
+                    <AlertTriangle /> превышение цели или 10 мг/кг
                   </>
                 )}
               </span>
@@ -667,7 +659,7 @@ export function DecisionSupportView({
           {result.blend && (
             <section className="decision-results blend-results">
               <article
-                className={result.blend.meets_targets.sulfur ? "ok" : "danger"}
+                className={result.blend.meets_targets.sulfur && result.blend.sulfur <= 10 ? "ok" : "danger"}
               >
                 <small>Сера смеси</small>
                 <strong>{formatNumber(result.blend.sulfur, 2)}</strong>
@@ -783,9 +775,11 @@ function PipelinePreview({
   const baseline = result?.baseline.sulfur;
   const reduction =
     baseline != null && predicted != null ? baseline - predicted : null;
-  const summary = result
-    ? `Сценарный расчёт: сера ${formatNumber(predicted)} мг/кг после ${result.horizon_minutes} минут; исходное значение ${formatNumber(baseline)} мг/кг.`
-    : "Расчёт не вернул результат.";
+  const summary = decision?.status === "abstain"
+    ? `Рекомендация не сформирована: ${decision.abstain?.reason || "Недостаточно подтверждений."}`
+    : result
+      ? `Сценарный расчёт: сера ${formatNumber(predicted)} мг/кг после ${result.horizon_minutes} минут; исходное значение ${formatNumber(baseline)} мг/кг. Изменение режима требует проверки технологом; причинные эффекты заданы допущениями.`
+      : "Нет данных для расчёта.";
   async function copy() {
     try {
       await navigator.clipboard.writeText(`${period}\n${summary}`);
@@ -802,7 +796,7 @@ function PipelinePreview({
           {decision?.status === "abstain"
             ? "Надёжной рекомендации нет"
             : result?.sulfur_target_met
-            ? "Текущий сценарий укладывается в цель"
+            ? "Выбран сценарий для рассмотрения"
             : "Цель по сере не достигается текущими изменениями"}
         </h2>
         <p className="recommendation-copy">
@@ -820,22 +814,28 @@ function PipelinePreview({
             </dd>
           </div>
           <div>
-            <dt>Риск</dt>
+            <dt>Проверка ограничений</dt>
             <dd>
               {decision?.status === "abstain"
                 ? "Отказ"
-                : result?.sulfur_target_met
-                  ? "Допустимый"
+                : decision?.safety_gate?.passed
+                  ? "Пройдена в модели"
                   : "Требует проверки"}
             </dd>
           </div>
           <div>
-            <dt>Стоимость к исходной</dt>
+            <dt>Экономия в деньгах</dt>
             <dd>
-              {result ? "Модельная оценка" : "—"}
+              Не оценивалась
             </dd>
           </div>
         </dl>
+        <p className="support-notice">
+          {decision?.basis === "scenario_only"
+            ? "Расчёт по заданным вручную условиям; прогноз по наблюдениям не подтверждает этот сценарий. "
+            : "Прогноз по наблюдениям и сценарный эффект рассчитаны разными моделями. "}
+          Проверка относится к концу горизонта. Без расчёта смеси влияние режима на T95 и цетановое число не оценено; производственная безопасность не подтверждена.
+        </p>
         <div className="recommendation-actions">
           <button type="button" className="primary" onClick={onOpenSandbox}>
             Проверить в песочнице <ArrowRight />
@@ -851,7 +851,7 @@ function PipelinePreview({
       <section className="decision-band">
         <div className="section-heading">
           <h2>Сравнение сценариев</h2>
-          <span className="support-notice">Результат одного сценария</span>
+          <span className="support-notice">Проверенные варианты: {decision?.candidates?.length || 0}</span>
         </div>
         <div
           className="scenario-table-scroll"
@@ -863,26 +863,16 @@ function PipelinePreview({
             <thead>
               <tr>
                 <th scope="col">Сценарий</th>
-                <th scope="col">Ожидаемый эффект</th>
-                <th scope="col">Риск</th>
-                <th scope="col">Стоимость</th>
+                <th scope="col">Сера в конце горизонта</th>
+                <th scope="col">Проверка ограничений</th>
+                <th scope="col">Масштаб изменения</th>
+                <th scope="col">Выпуск, Δ%</th>
+                <th scope="col">Энергозатраты, индекс</th>
+                <th scope="col">Нагрузка, индекс</th>
               </tr>
             </thead>
             <tbody>
-              {(decision?.candidates?.length
-                ? decision.candidates
-                : [
-                    {
-                      id: "scenario",
-                      label: "Линейный сценарий изменения режима",
-                      status: "ok",
-                      feasible: Boolean(result?.sulfur_target_met),
-                      predicted_sulfur: predicted,
-                      target_met: result?.sulfur_target_met,
-                      effort: null,
-                    },
-                  ]
-              ).map((candidate) => (
+              {(decision?.candidates || []).map((candidate) => (
                 <tr
                   key={candidate.id}
                   className={candidate.id === decision?.selected_candidate ? "is-preferred" : ""}
@@ -901,39 +891,52 @@ function PipelinePreview({
                   <td>
                     {candidate.status === "error"
                       ? "Ошибка"
-                      : candidate.target_met
-                        ? "Допустимый"
-                        : "Требует проверки"}
+                      : candidate.feasible
+                        ? "Пройдена в модели"
+                        : "Не пройдена"}
+                    {!!candidate.safety_gate?.reasons.length && (
+                      <ul>{candidate.safety_gate.reasons.map((reason) => <li key={reason}>{reason}</li>)}</ul>
+                    )}
                   </td>
                   <td>
                     {candidate.effort == null ? "—" : formatNumber(candidate.effort, 2)}
                   </td>
+                  <td>{formatNumber(candidate.objectives?.throughput_change_pct, 1)}</td>
+                  <td>{formatNumber(candidate.objectives?.energy_cost_index, 3)}</td>
+                  <td>{formatNumber(candidate.objectives?.regime_severity.index, 3)}</td>
                 </tr>
               ))}
+              {!decision?.candidates?.length && (
+                <tr><td colSpan={7}>Сравнение не выполнено: сначала нужны достоверные исходные данные.</td></tr>
+              )}
             </tbody>
           </table>
         </div>
+        <p className="support-notice">Выпуск предполагает неизменный выход продукта; энергия — условные затраты относительно текущего режима (=1). Нагрузка оценивает высокие T6/P13/F9 относительно обучающей истории, не вероятность отказа. Выбор учитывает все три критерия и масштаб изменений после проверки ограничений.</p>
       </section>
       {decision?.forecast && (
         <section className="decision-band model-forecast" aria-label="Модельный прогноз серы">
           <div className="section-heading">
             <h2>Отдельный прогноз качества</h2>
             <span className="support-notice">
-              Ridge · доступность признаков −{decision.forecast.availability_lag_minutes / 60} ч
+              Ridge · горизонт {decision.forecast.forecast_horizon_minutes / 60} ч
             </span>
           </div>
           <p className="recommendation-copy">
-            Математическая модель оценивает серу по исторической телеметрии до
-            контрольного времени. Сценарная траектория выше остаётся отдельным
-            расчётом эффекта изменения режима.
+            Расчёт на {displayTime(decision.forecast.target_time)} по данным, доступным на {displayTime(decision.forecast.at)}.
+            Результат ЛИМС доступен через {decision.forecast.lims_publication_delay_minutes / 60} ч после отбора пробы.
+            Прогноз не оценивает эффект предложенного изменения режима.
           </p>
+          {decision.forecast.status === "abstain" && (
+            <p className="error" role="status">Прогноз не выдан: {decision.forecast.reasons.map(forecastReason).join("; ")}</p>
+          )}
           <dl className="recommendation-metrics">
             <div>
               <dt>Ridge прогноз</dt>
               <dd>{formatNumber(decision.forecast.prediction_ridge, 2)} <span>мг/кг</span></dd>
             </div>
             <div>
-              <dt>Risk guard</dt>
+              <dt>Консервативная оценка</dt>
               <dd>{formatNumber(decision.forecast.prediction_risk_guard, 2)} <span>мг/кг</span></dd>
             </div>
             <div>
@@ -942,19 +945,23 @@ function PipelinePreview({
             </div>
           </dl>
           <p className="support-notice">
-            {decision.forecast.alarm_above_10
-              ? "Risk guard выше порога 10 мг/кг: требуется проверка технологом."
-              : "Risk guard ниже порога 10 мг/кг; recall превышений в benchmark ограничен."}
-            {decision.forecast.leakage_check.passed ? " Утечка по времени не обнаружена." : " Обнаружена временная утечка."}
+            {decision.forecast.status === "abstain"
+              ? "Числовой прогноз скрыт, поскольку проверка входных данных не пройдена."
+              : decision.forecast.alarm_above_10
+                ? "Консервативная оценка выше 10 мг/кг: нужна проверка технологом."
+                : "Оценка ниже 10 мг/кг не исключает превышение: модель пропускает часть опасных проб."}
+            {decision.forecast.leakage_check.passed ? " Временные границы признаков соблюдены." : " Нарушены временные границы признаков."}
           </p>
+          {!!decision.forecast.warnings.length && (
+            <details><summary>Ограничения прогноза</summary><ul>{decision.forecast.warnings.map((warning) => <li key={warning}>{warning}</li>)}</ul></details>
+          )}
         </section>
       )}
       <details className="support-details">
         <summary>Как получена рекомендация</summary>
         <p>
-          Решение выполнено локально. Роли качества, надёжности и оптимизации
-          передают результаты оркестратору; внешний LLM в этом закрытом smoke-контуре
-          не вызывается.
+          Система проверяет качество и доступность данных, рассчитывает прогноз,
+          затем сравнивает варианты режима по ограничениям и масштабу изменений.
         </p>
         <ol>
           {(decision?.trace?.length

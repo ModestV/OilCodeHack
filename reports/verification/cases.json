@@ -1,0 +1,12 @@
+{
+  "cases": [
+    {"id":"normal","purpose":"Observed stable period: hold with no unnecessary changes; all quality evidence fresh","at":"2026-01-08T07:00:00","decision_status":"recommendation","forecast_status":"ok","min_candidates":3},
+    {"id":"quality_exceedance","purpose":"Published LIMS exceeds 10: independent alarm prevents automatic advice","at":"2026-01-14T07:00:00","decision_status":"abstain","forecast_status":"ok","observed_sulfur_above_10":true,"all_candidates_infeasible":true,"min_candidates":3},
+    {"id":"missing_history","purpose":"No source data before coverage: no imputed-only forecast or recommendation","at":"2022-12-31T00:00:00","decision_status":"abstain","forecast_status":"abstain","controls_state":"missing"},
+    {"id":"stale_controls","purpose":"After telemetry coverage: stale control vector blocks recommendation","at":"2026-08-08T12:00:00","decision_status":"abstain","forecast_status":"abstain","controls_state":"stale"},
+    {"id":"unsupported_forecast","purpose":"Real episode outside model applicability; forecast refuses numerical output","at":"2026-06-19T12:00:00","decision_status":"abstain","forecast_status":"abstain"},
+    {"id":"unreachable_target","purpose":"Explicit hypothetical sulfur 20: diagnostic candidates retained, none recommended","at":"2026-01-08T07:00:00","request":{"current_sulfur":20},"decision_status":"abstain","min_candidates":3,"all_candidates_infeasible":true},
+    {"id":"relaxed_target","purpose":"User target 100 cannot relax mandatory sulfur cap 10","at":"2026-01-08T07:00:00","request":{"current_sulfur":20,"targets":{"sulfur_max":100}},"decision_status":"abstain","min_candidates":3,"all_candidates_infeasible":true},
+    {"id":"blend_quality_failure","purpose":"Good sulfur cannot compensate for T95 violation in supplied blend","at":"2026-01-08T07:00:00","request":{"current_sulfur":8,"tanks":[{"name":"off-spec T95","share":100,"sulfur":8,"t95":370,"cetane":52}]},"decision_status":"abstain","min_candidates":3,"all_candidates_infeasible":true}
+  ]
+}

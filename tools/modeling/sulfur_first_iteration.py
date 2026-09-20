@@ -1,9 +1,10 @@
 """Reproducible first iteration for forecasting hydro-treatment sulphur.
 
 The script reads the source package outside the repository and writes only small
-derived artefacts.  It deliberately models the availability boundary: for a
-laboratory sample at ``t`` only process values at or before ``t - lag`` are
-used.  This is an offline benchmark, not a causal claim about changing setpoints.
+derived artefacts. For a target sample at t the origin is t minus the forecast
+horizon. Telemetry is available through the origin; a previous lab sample is
+usable only after its independent publication delay. This benchmark makes no
+causal claim about changing setpoints.
 
 Example (PowerShell)::
 
@@ -22,10 +23,19 @@ from typing import Iterable
 import numpy as np
 import pandas as pd
 
+try:
+    from .sulfur_features import (APPLICABILITY_POLICY, FORECAST_HORIZON_MINUTES,
+                                 LIMS_PUBLICATION_DELAY_MINUTES, MAX_LAB_AGE_MINUTES,
+                                 applicability, available_lab, telemetry_features)
+except ImportError:  # Direct execution: python tools/modeling/sulfur_first_iteration.py
+    from sulfur_features import (APPLICABILITY_POLICY, FORECAST_HORIZON_MINUTES,
+                                 LIMS_PUBLICATION_DELAY_MINUTES, MAX_LAB_AGE_MINUTES,
+                                 applicability, available_lab, telemetry_features)
+
 
 TARGET_POINT = "Гидроочистка"
 TARGET_PARAMETER = "Mg.Sulfur"
-DEFAULT_LAG = pd.Timedelta(hours=4)
+DEFAULT_HORIZON = pd.Timedelta(minutes=FORECAST_HORIZON_MINUTES)
 ALPHA_GRID = (30.0, 100.0, 300.0, 1000.0, 3000.0)
 
 
@@ -42,12 +52,18 @@ class StandardizedRidge:
     def fit(self, frame: pd.DataFrame, target: pd.Series) -> "StandardizedRidge":
         self.feature_columns_ = list(frame.columns)
         values = frame.to_numpy(dtype=float)
+        self.support_lower_ = np.nanquantile(values, APPLICABILITY_POLICY["support_quantiles"][0], axis=0)
+        self.support_upper_ = np.nanquantile(values, APPLICABILITY_POLICY["support_quantiles"][1], axis=0)
         self.medians_ = np.nanmedian(values, axis=0)
         self.medians_[~np.isfinite(self.medians_)] = 0.0
         values = np.where(np.isfinite(values), values, self.medians_)
         self.mean_ = values.mean(axis=0)
         self.scale_ = values.std(axis=0)
         self.scale_[~np.isfinite(self.scale_) | (self.scale_ == 0)] = 1.0
+        margin = APPLICABILITY_POLICY["support_margin_fraction"] * np.maximum(
+            self.support_upper_ - self.support_lower_, self.scale_)
+        self.support_lower_ = np.nan_to_num(self.support_lower_ - margin)
+        self.support_upper_ = np.nan_to_num(self.support_upper_ + margin)
         standardized = (values - self.mean_) / self.scale_
         design = np.column_stack([np.ones(len(standardized)), standardized])
         regularizer = np.eye(design.shape[1]) * self.alpha
@@ -78,7 +94,7 @@ class StandardizedRidge:
         if not hasattr(self, "feature_columns_"):
             raise ValueError("fit the model before exporting an artifact")
         return {
-            "version": 1,
+            "version": 2,
             "model": "standardized_ridge_log1p",
             "alpha": self.alpha,
             "feature_columns": self.feature_columns_,
@@ -86,6 +102,9 @@ class StandardizedRidge:
             "mean": self.mean_.tolist(),
             "scale": self.scale_.tolist(),
             "coef": self.coef_.tolist(),
+            "support_lower": self.support_lower_.tolist(),
+            "support_upper": self.support_upper_.tolist(),
+            "applicability_policy": APPLICABILITY_POLICY,
         }
 
 
@@ -124,8 +143,11 @@ def load_telemetry(source: Path) -> pd.DataFrame:
             raise ValueError(f"{path} does not contain date")
         frame["date"] = pd.to_datetime(frame["date"], errors="coerce", format="mixed")
         frame = frame.dropna(subset=["date"]).set_index("date").sort_index()
-        frame = frame.loc[~frame.index.duplicated(keep="last")]
-        frame = frame.apply(pd.to_numeric, errors="coerce").astype("float32")
+        frame = frame.apply(pd.to_numeric, errors="coerce").astype("float64")
+        if frame.index.has_duplicates:
+            # Match importer conflict handling instead of choosing an arbitrary duplicate.
+            conflict = frame.groupby(level=0).nunique(dropna=False) > 1
+            frame = frame.groupby(level=0).last().mask(conflict)
         frame.columns = [f"{stage}__{column}" for column in frame.columns]
         frames.append(frame)
     if not frames:
@@ -179,30 +201,30 @@ def add_past_features(telemetry: pd.DataFrame) -> pd.DataFrame:
 
 
 def align_target_features(target: pd.DataFrame, telemetry: pd.DataFrame,
-                           availability_lag: pd.Timedelta) -> pd.DataFrame:
-    """As-of join target rows to the last available process row before the lag."""
+                           forecast_horizon: pd.Timedelta) -> pd.DataFrame:
+    """Build windows at each exact prediction origin, including off-grid times."""
     left = target.copy()
-    left["feature_cutoff"] = left["target_time"] - availability_lag
-    right = telemetry.reset_index(names="feature_time").sort_values("feature_time")
-    aligned = pd.merge_asof(
-        left.sort_values("feature_cutoff"), right,
-        left_on="feature_cutoff", right_on="feature_time", direction="backward",
-        tolerance=pd.Timedelta("30min"),
-    )
-    aligned = aligned.dropna(subset=["feature_time"]).sort_values("target_time").reset_index(drop=True)
+    left["prediction_origin"] = left["target_time"] - forecast_horizon
+    left["feature_cutoff"] = left["prediction_origin"]
+    features, latest = telemetry_features(telemetry, pd.DatetimeIndex(left["prediction_origin"]))
+    aligned = pd.concat([left.reset_index(drop=True), features], axis=1)
+    aligned["feature_time"] = latest
     return aligned
 
 
 def time_split(frame: pd.DataFrame, train_end: str = "2025-01-01",
-               validation_end: str = "2026-01-01") -> dict[str, pd.Series]:
-    """Return mutually exclusive chronological masks."""
+               validation_end: str = "2026-01-01",
+               publication_delay: pd.Timedelta = pd.Timedelta(minutes=LIMS_PUBLICATION_DELAY_MINUTES)) -> dict[str, pd.Series]:
+    """Purge boundary rows until training/selection labels are actually published."""
     times = pd.to_datetime(frame["target_time"])
+    origins = pd.to_datetime(frame.get("prediction_origin", times - DEFAULT_HORIZON))
+    label_available = times + publication_delay
     train_boundary = pd.Timestamp(train_end)
     validation_boundary = pd.Timestamp(validation_end)
     masks = {
-        "train": times < train_boundary,
-        "validation": (times >= train_boundary) & (times < validation_boundary),
-        "test": times >= validation_boundary,
+        "train": label_available < train_boundary,
+        "validation": (origins >= train_boundary) & (label_available < validation_boundary),
+        "test": origins >= validation_boundary,
     }
     if any(int(mask.sum()) == 0 for mask in masks.values()):
         raise ValueError({name: int(mask.sum()) for name, mask in masks.items()})
@@ -216,6 +238,10 @@ def time_split(frame: pd.DataFrame, train_end: str = "2025-01-01",
 def regression_metrics(y_true: Iterable[float], y_pred: Iterable[float], threshold: float = 10.0) -> dict:
     actual = np.asarray(list(y_true), dtype=float)
     predicted = np.asarray(list(y_pred), dtype=float)
+    if not len(actual):
+        return {"n": 0, "mae": None, "rmse": None, "median_absolute_error": None,
+                "bias_pred_minus_actual": None, "actual_above_10": 0, "predicted_above_10": 0,
+                "precision_above_10": None, "recall_above_10": None, "false_alarm_rate": None}
     error = predicted - actual
     dangerous = actual > threshold
     alarm = predicted > threshold
@@ -236,28 +262,22 @@ def regression_metrics(y_true: Iterable[float], y_pred: Iterable[float], thresho
     }
 
 
-def run(source: Path, output: Path, availability_lag: pd.Timedelta) -> dict:
+def run(source: Path, output: Path, forecast_horizon: pd.Timedelta = DEFAULT_HORIZON,
+        publication_delay: pd.Timedelta = pd.Timedelta(minutes=LIMS_PUBLICATION_DELAY_MINUTES)) -> dict:
     output.mkdir(parents=True, exist_ok=True)
     telemetry = load_telemetry(source)
-    features = add_past_features(telemetry)
     target = load_lab_target(source)
-    aligned = align_target_features(target, features, availability_lag)
-    masks = time_split(aligned)
+    aligned = align_target_features(target, telemetry, forecast_horizon)
+    lab = available_lab(target, pd.DatetimeIndex(aligned["prediction_origin"]), publication_delay.total_seconds() / 60)
+    aligned = pd.concat([aligned, lab], axis=1)
+    masks = time_split(aligned, publication_delay=publication_delay)
 
     y = aligned["target"].astype(float)
     train_mask = masks["train"]
-    # A previous lab result is available only after the same cutoff.  A plain
-    # row shift would leak a result from a sample taken less than four hours
-    # before the prediction origin.
-    target_times = target["target_time"].to_numpy(dtype="datetime64[ns]")
-    prior_index = np.searchsorted(
-        target_times, aligned["feature_cutoff"].to_numpy(dtype="datetime64[ns]"), side="right"
-    ) - 1
-    target_values = target["target"].to_numpy(dtype=float)
-    aligned["previous_lab_available"] = np.where(
-        prior_index >= 0, target_values[np.maximum(prior_index, 0)], np.nan
-    )
-    feature_columns = [c for c in features.columns if c in aligned.columns] + ["previous_lab_available"]
+    feature_columns = list(telemetry.columns)
+    feature_columns += [f"{c}__mean_1h" for c in telemetry.columns]
+    feature_columns += [f"{c}__mean_6h" for c in telemetry.columns]
+    feature_columns += ["previous_lab_available"]
     X = aligned[feature_columns]
     # Sulphur has a highly skewed contamination/error tail (one 2120 mg/kg
     # value).  Log1p training keeps the first-pass model numerically stable;
@@ -273,6 +293,12 @@ def run(source: Path, output: Path, availability_lag: pd.Timedelta) -> dict:
     selected_alpha = min(ALPHA_GRID, key=lambda alpha: alpha_scores[str(alpha)])
     model = StandardizedRidge(alpha=selected_alpha)
     model.fit(X.loc[train_mask], np.log1p(y.loc[train_mask]))
+    artifact = model.artifact()
+    support = [applicability(row, artifact) for row in X.to_numpy(dtype=float)]
+    aligned["forecast_status"] = [s["status"] for s in support]
+    aligned["abstain_reasons"] = ["|".join(s["reasons"]) for s in support]
+    aligned["missing_fraction"] = [s["missing_fraction"] for s in support]
+    aligned["ood_fraction"] = [s["ood_fraction"] for s in support]
     aligned["prediction_ridge"] = np.maximum(0.0, np.expm1(model.predict(X)))
     aligned["prediction_previous_lab"] = aligned["previous_lab_available"]
     # A numerical regressor is too conservative around the hard 10 mg/kg
@@ -287,11 +313,21 @@ def run(source: Path, output: Path, availability_lag: pd.Timedelta) -> dict:
     metrics: dict[str, dict] = {}
     for split_name, mask in masks.items():
         valid_baseline = mask & aligned["prediction_previous_lab"].notna()
+        accepted = mask & aligned["forecast_status"].eq("ok")
+        comparable = accepted & aligned["prediction_previous_lab"].notna()
         metrics[split_name] = {
             "ridge": regression_metrics(y.loc[mask], aligned.loc[mask, "prediction_ridge"]),
             "previous_lab": regression_metrics(y.loc[valid_baseline], aligned.loc[valid_baseline, "prediction_previous_lab"]),
             "risk_guard": regression_metrics(y.loc[mask], aligned.loc[mask, "prediction_risk_guard"]),
             "rows_without_previous_lab": int((mask & ~aligned["prediction_previous_lab"].notna()).sum()),
+            "coverage": float(accepted.sum() / mask.sum()),
+            "accepted_rows": int(accepted.sum()),
+            "abstained_rows": int((mask & ~accepted).sum()),
+            "abstained_actual_above_10": int((mask & ~accepted & y.gt(10)).sum()),
+            "accepted_ridge": regression_metrics(y.loc[accepted], aligned.loc[accepted, "prediction_ridge"]),
+            "accepted_risk_guard": regression_metrics(y.loc[accepted], aligned.loc[accepted, "prediction_risk_guard"]),
+            "comparable_ridge": regression_metrics(y.loc[comparable], aligned.loc[comparable, "prediction_ridge"]),
+            "comparable_previous_lab": regression_metrics(y.loc[comparable], aligned.loc[comparable, "prediction_previous_lab"]),
         }
     year_metrics: dict[str, dict] = {}
     years = pd.to_datetime(aligned["target_time"]).dt.year
@@ -306,26 +342,49 @@ def run(source: Path, output: Path, availability_lag: pd.Timedelta) -> dict:
 
     # Explicit availability/leakage checks become part of the report, not just
     # an informal assumption in the notebook.
+    telemetry_violations = int((aligned["feature_time"] > aligned["prediction_origin"]).sum())
+    lab_violations = int((aligned["previous_lab_available_at"] > aligned["prediction_origin"]).sum())
+    train_labels_latest = (aligned.loc[masks["train"], "target_time"] + publication_delay).max()
+    validation_origin_earliest = aligned.loc[masks["validation"], "prediction_origin"].min()
+    selection_labels_latest = (aligned.loc[masks["validation"], "target_time"] + publication_delay).max()
+    test_origin_earliest = aligned.loc[masks["test"], "prediction_origin"].min()
+    split_violations = int(train_labels_latest >= validation_origin_earliest) + int(selection_labels_latest >= test_origin_earliest)
     leakage = {
         "rows": int(len(aligned)),
-        "violating_rows": int((aligned["feature_time"] > aligned["feature_cutoff"]).sum()),
+        "violating_rows": telemetry_violations + lab_violations,
+        "telemetry_violations": telemetry_violations,
+        "lab_publication_violations": lab_violations,
+        "split_availability_violations": split_violations,
+        "train_label_latest_available_at": train_labels_latest,
+        "validation_earliest_origin": validation_origin_earliest,
+        "validation_label_latest_available_at": selection_labels_latest,
+        "test_earliest_origin": test_origin_earliest,
         "minimum_lag_minutes": float((aligned["target_time"] - aligned["feature_time"]).dt.total_seconds().min() / 60),
-        "required_lag_minutes": float(availability_lag.total_seconds() / 60),
-        "passed": bool((aligned["feature_time"] <= aligned["feature_cutoff"]).all()),
+        "required_lag_minutes": float(forecast_horizon.total_seconds() / 60),
+        "passed": telemetry_violations + lab_violations + split_violations == 0,
     }
     if not leakage["passed"]:
         raise AssertionError(f"feature availability violation: {leakage}")
 
-    predictions = aligned[["target_time", "feature_time", "target", "previous_lab_available", "prediction_previous_lab", "prediction_ridge", "prediction_risk_guard"]].copy()
+    predictions = aligned[["prediction_origin", "target_time", "feature_cutoff", "feature_time", "target",
+                           "previous_lab_sample_time", "previous_lab_available_at", "previous_lab_available",
+                           "prediction_previous_lab", "prediction_ridge", "prediction_risk_guard",
+                           "forecast_status", "abstain_reasons", "missing_fraction", "ood_fraction"]].copy()
+    predictions["split"] = "purged_boundary"
+    for split_name, mask in masks.items():
+        predictions.loc[mask, "split"] = split_name
     predictions.to_csv(output / "predictions.csv", index=False, encoding="utf-8-sig")
     artifact = model.artifact()
     artifact.update(
         {
             "target": {"point": TARGET_POINT, "parameter": TARGET_PARAMETER, "unit": "мг/кг"},
-            "availability_lag_minutes": float(availability_lag.total_seconds() / 60),
-            "feature_engineering": "current value + past-only 1h/6h rolling means + previous lab available at cutoff",
+            "forecast_horizon_minutes": float(forecast_horizon.total_seconds() / 60),
+            "lims_publication_delay_minutes": float(publication_delay.total_seconds() / 60),
+            "max_lab_age_minutes": MAX_LAB_AGE_MINUTES,
+            "feature_engineering": "current valid value + means over (origin-1h/6h,origin] + lab sample whose publication <=origin",
             "risk_guard": "max(prediction_ridge, previous_lab_available)",
             "selected_alpha": selected_alpha,
+            "model_available_from": "2026-01-01T00:00:00",
         }
     )
     (output / "model.json").write_text(
@@ -338,23 +397,28 @@ def run(source: Path, output: Path, availability_lag: pd.Timedelta) -> dict:
                          for p in sorted(source.rglob("*"))
                          if p.is_file() and not p.name.startswith("~$")},
         "target": {"point": TARGET_POINT, "parameter": TARGET_PARAMETER, "unit": "мг/кг"},
-        "availability_lag": str(availability_lag),
+        "forecast_horizon_minutes": float(forecast_horizon.total_seconds() / 60),
+        "lims_publication_delay_minutes": float(publication_delay.total_seconds() / 60),
+        "max_lab_age_minutes": MAX_LAB_AGE_MINUTES,
         "telemetry_rows": int(len(telemetry)),
         "telemetry_signals": int(len(telemetry.columns)),
         "target_rows": int(len(target)),
         "aligned_rows": int(len(aligned)),
         "feature_count": int(len(feature_columns)),
-        "feature_engineering": "current value + past-only 1h/6h rolling means + previous lab available at cutoff; train-only median imputation",
+        "feature_engineering": artifact["feature_engineering"] + "; train-only median imputation; shared exact-origin runtime implementation",
         "model": "standardized Ridge on log1p(target), inverse transformed for metrics; risk_guard=max(Ridge, available previous lab)",
         "alpha_grid": list(ALPHA_GRID),
         "selected_alpha": selected_alpha,
         "alpha_selection": {"split": "validation", "metric": "MAE", "scores": alpha_scores},
         "split_boundaries": {"train_end_exclusive": "2025-01-01", "validation_end_exclusive": "2026-01-01"},
         "split_rows": {name: int(mask.sum()) for name, mask in masks.items()},
+        "purged_boundary_rows": int(len(aligned) - sum(mask.sum() for mask in masks.values())),
+        "applicability_policy": APPLICABILITY_POLICY,
         "metrics_by_year": year_metrics,
         "leakage_check": leakage,
         "metrics": metrics,
         "model_artifact": "model.json",
+        "model_artifact_sha256": sha256(output / "model.json"),
     }
     (output / "metrics.json").write_text(json.dumps(metadata, ensure_ascii=False, indent=2, default=_json_default), encoding="utf-8")
     write_report(output / "REPORT.md", metadata)
@@ -370,12 +434,13 @@ def write_report(path: Path, metadata: dict) -> None:
         "",
         f"Цель: `{TARGET_POINT}`, `{TARGET_PARAMETER}`, мг/кг. Использованы {metadata['aligned_rows']} лабораторных наблюдений, сопоставленных с {metadata['feature_count']} признаками (291 телеметрический признак и доступный предыдущий лабораторный результат).",
         "",
-        f"Признак доступен только не позднее чем за **{metadata['leakage_check']['required_lag_minutes']:.0f} минут** до времени отбора. В признаки вошли текущие значения, средние за 1 и 6 часов (только прошлые строки) и предыдущий лабораторный результат, если он уже доступен к этому cutoff.",
+        f"Контракт: прогноз выпускается в `prediction_origin` на **{metadata['forecast_horizon_minutes']:.0f} минут** вперёд (`target_time`). Телеметрия доступна до origin включительно. ЛИМС доступен только при `sample_time + {metadata['lims_publication_delay_minutes']:.0f} минут <= origin`. Давность опубликованного ЛИМС ограничена 48 часами. Задержка публикации не является горизонтом прогноза.",
+        "Окна средних `(origin−1h, origin]` и `(origin−6h, origin]` считаются на точном времени origin, даже между десятиминутными отсчётами. Последнее валидное значение каждого канала должно быть не старше 30 минут. Offline и runtime используют одну реализацию признаков.",
         "",
-        "Разбиение по времени: train до 2025-01-01, validation — 2025 год, test — с 2026-01-01. Лабораторная цель не протягивалась вперёд и не интерполировалась.",
+        f"Разбиение по времени учитывает публикацию обучающих ответов: train labels должны быть опубликованы до 2025-01-01; validation origin начинается 2025-01-01, а ответы опубликованы до 2026-01-01; test origin начинается 2026-01-01. Исключено {metadata['purged_boundary_rows']} пограничных строк. Лабораторная цель не интерполировалась.",
         f"Гиперпараметр Ridge выбран только по MAE на validation из сетки {metadata['alpha_grid']}; выбранное значение: **{metadata['selected_alpha']}**. Test не использовался при выборе.",
         "",
-        "## Метрики",
+        "## Метрики всех строк (диагностика сырого регрессора до abstain)",
         "",
         "| split | модель | n | MAE | RMSE | median AE | bias | recall >10 | false alarm |",
         "|---|---|---:|---:|---:|---:|---:|---:|---:|",
@@ -384,6 +449,15 @@ def write_report(path: Path, metadata: dict) -> None:
         for name, label in (("ridge", "Ridge"), ("previous_lab", "предыдущая проба"), ("risk_guard", "risk guard")):
             m = metrics[split][name]
             rows.append(f"| {split} | {label} | {m['n']} | {m['mae']:.3f} | {m['rmse']:.3f} | {m['median_absolute_error']:.3f} | {m['bias_pred_minus_actual']:.3f} | {m['recall_above_10'] if m['recall_above_10'] is not None else '—'} | {m['false_alarm_rate']:.3f} |")
+    rows += [
+        "", "## Область применимости и честное покрытие", "",
+        "Правила abstain зафиксированы до оценки: более 20% пропущенных признаков, отсутствие телеметрии, более 10% доступных признаков за train-only областью либо |z|>12. Область: train-квантили 0.5–99.5%, расширенные на 10% размаха. Это инженерные эвристики, не калиброванная уверенность и не допустимые границы управления.",
+        "", "| split | покрытие | abstain | >10 среди abstain | n сравнения | Ridge MAE | baseline MAE | recall принятого Ridge >10 |", "|---|---:|---:|---:|---:|---:|---:|---:|",
+    ]
+    for split, m in metrics.items():
+        ridge = m["comparable_ridge"]
+        baseline = m["comparable_previous_lab"]
+        rows.append(f"| {split} | {m['coverage']:.1%} | {m['abstained_rows']} | {m['abstained_actual_above_10']} | {ridge['n']} | {ridge['mae']} | {baseline['mae']} | {m['accepted_ridge']['recall_above_10']} |")
     rows += [
         "",
         "## Стабильность по годам",
@@ -399,11 +473,12 @@ def write_report(path: Path, metadata: dict) -> None:
         "",
         "## Проверка утечки",
         "",
-        f"Нарушений доступности: **{metadata['leakage_check']['violating_rows']}** из {metadata['leakage_check']['rows']}; минимальный фактический лаг: {metadata['leakage_check']['minimum_lag_minutes']:.1f} минут; проверка: **{'пройдена' if metadata['leakage_check']['passed'] else 'не пройдена'}**.",
+        f"Телеметрия: {metadata['leakage_check']['telemetry_violations']} нарушений; публикация ЛИМС: {metadata['leakage_check']['lab_publication_violations']}; границы обучения/выбора alpha: {metadata['leakage_check']['split_availability_violations']}. Проверка: **{'пройдена' if metadata['leakage_check']['passed'] else 'не пройдена'}**.",
         "",
         "## Интерпретация и ограничения",
         "",
-        "Ridge на log1p-цели сопоставим с сильным baseline по MAE, но не заменяет его без дополнительной проверки по режимам. `risk_guard` намеренно сохраняет доступный высокий лабораторный результат для порогового предупреждения; его метрики нельзя читать как независимый прогноз. Это benchmark предсказательной ценности, а не доказательство причинного эффекта изменения режима. Вне области исторических признаков и при плохом качестве датчиков система должна переходить в abstain. Экстремумы не удалялись автоматически.",
+        "Предыдущая версия метрик использовала неверную доступность ЛИМС и заменена этим отчётом. Численное качество и полнота тревог оцениваются отдельно: малый MAE не доказывает обнаружение превышений. `risk_guard=max(Ridge, доступный ЛИМС)` сохраняет высокий лабораторный результат; это эвристический сигнал, не вероятность превышения. В runtime при abstain численный прогноз не публикуется; predictions.csv сохраняет сырой регрессор для аудита вместе со статусом. Сравнение после abstain проводится на одинаковых строках с доступным baseline. После выбора alpha по 2025 году артефакт доступен только с 2026-01-01; runtime отказывается от исторического прогноза до этой даты. Train/validation — диагностические метрики, независимая оценка только test. Эффект изменения управляющих воздействий и промышленная безопасность этим benchmark не доказываются.",
+        f"SHA-256 артефакта: `{metadata['model_artifact_sha256']}`.",
         "",
         "Артефакты: `model.json` (параметры для runtime-инференса), `metrics.json` (параметры, хэши источников, метрики), `predictions.csv` (малый файл результатов). Исходные CSV/XLSX в репозиторий не копируются.",
     ]
@@ -414,9 +489,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--availability-lag-hours", type=float, default=4.0)
+    parser.add_argument("--forecast-horizon-hours", type=float, default=3.0)
+    parser.add_argument("--lims-publication-delay-hours", type=float, default=4.0)
     args = parser.parse_args()
-    metadata = run(args.source.resolve(), args.output.resolve(), pd.Timedelta(hours=args.availability_lag_hours))
+    if not 0 < args.forecast_horizon_hours <= 3 or args.lims_publication_delay_hours <= 0:
+        parser.error("forecast horizon must be in (0, 3] hours; LIMS delay must be positive")
+    metadata = run(args.source.resolve(), args.output.resolve(), pd.Timedelta(hours=args.forecast_horizon_hours),
+                   pd.Timedelta(hours=args.lims_publication_delay_hours))
     print(json.dumps({"output": str(args.output.resolve()), "metrics": metadata["metrics"], "leakage_check": metadata["leakage_check"]}, ensure_ascii=False, indent=2, default=_json_default))
 
 
