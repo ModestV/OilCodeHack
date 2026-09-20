@@ -19,6 +19,7 @@ import type {
   Manifest,
   Metric,
   Quality,
+  ScenarioRequest,
   SeriesResponse,
   Snapshot,
   Summary,
@@ -80,6 +81,7 @@ function preferences() {
   }
 }
 export function App() {
+  const [sandboxSeed, setSandboxSeed] = useState<{ datasetId: string; request: ScenarioRequest } | null>(null);
   const [datasets, setDatasets] = useState<Manifest[]>([]),
     [datasetId, setDatasetId] = useState(""),
     [manifest, setManifest] = useState<Manifest | null>(null),
@@ -570,7 +572,12 @@ export function App() {
               latestAt={manifest.telemetry_end || manifest.end || to}
               at={to}
               sandbox={page === "sandbox"}
-              onOpenSandbox={() => setPage("sandbox")}
+              initialRequest={page === "sandbox" && sandboxSeed?.datasetId === datasetId ? sandboxSeed.request : undefined}
+              onOpenSandbox={(request) => {
+                setSandboxSeed({ datasetId, request });
+                setTo(request.at);
+                setPage("sandbox");
+              }}
             />
           ) : (
             <section className="empty-state compact">

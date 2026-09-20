@@ -279,6 +279,10 @@ export interface DecisionResult {
   at: string;
   status: "recommendation" | "abstain";
   basis: "scenario_only" | "observed_and_forecast";
+  agents?: { quality: { evidence: { sulfur: {
+    source: string | null; value: number | null; timestamp: string | null;
+    available_at: string | null; freshness: string;
+  } } } };
   recommendation: {
     action: string;
     predicted_sulfur: number;

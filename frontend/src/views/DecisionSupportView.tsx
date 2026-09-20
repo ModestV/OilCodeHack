@@ -82,15 +82,17 @@ export function DecisionSupportView({
   onOpenSandbox,
   datasetName,
   latestAt,
+  initialRequest,
 }: {
   datasetId: string;
   at: string;
   sandbox: boolean;
   datasetName: string;
   latestAt: string;
-  onOpenSandbox?: () => void;
+  onOpenSandbox?: (request: ScenarioRequest) => void;
+  initialRequest?: ScenarioRequest;
 }) {
-  const [request, setRequest] = useState(() => initial(at, sandbox));
+  const [request, setRequest] = useState(() => initialRequest ? structuredClone(initialRequest) : initial(at, sandbox));
   const [result, setResult] = useState<ScenarioResult | null>(null);
   const [decision, setDecision] = useState<DecisionResult | null>(null);
   const [error, setError] = useState("");
@@ -134,7 +136,7 @@ export function DecisionSupportView({
     setLoading(true);
     setError("");
     try {
-      setResult(await api.scenario(datasetId, { ...request, at }));
+      setResult(await api.scenario(datasetId, request));
     } catch (caught) {
       setError(
         caught instanceof Error ? caught.message : "Ошибка сценарного расчёта",
@@ -311,6 +313,7 @@ export function DecisionSupportView({
         <div className="section-heading">
           <div>
             <h2>Условия расчёта</h2>
+            <p className="support-notice">На {displayTime(request.at)}{initialRequest ? " · условия из рекомендации" : ""}</p>
           </div>
           <button className="primary" type="submit" disabled={loading}>
             <Play /> {loading ? "Расчёт…" : "Рассчитать сценарий"}
@@ -765,12 +768,13 @@ function PipelinePreview({
   result,
   decision,
 }: {
-  onOpenSandbox?: () => void;
+  onOpenSandbox?: (request: ScenarioRequest) => void;
   period: string;
   result: ScenarioResult | null;
   decision: DecisionResult | null;
 }) {
   const [copyStatus, setCopyStatus] = useState("");
+  const sulfurEvidence = decision?.agents?.quality.evidence.sulfur;
   const predicted = result?.predicted_sulfur;
   const baseline = result?.baseline.sulfur;
   const reduction =
@@ -806,6 +810,13 @@ function PipelinePreview({
             ? `Прогноз: ${formatNumber(predicted)} мг/кг после ${result.horizon_minutes} минут.`
             : "Нет данных для сценарного расчёта."}
         </p>
+        {sulfurEvidence && (
+          <p className="support-notice">
+            Исходная сера: {formatNumber(sulfurEvidence.value)} мг/кг · {sulfurEvidence.source || "источник отсутствует"}
+            {sulfurEvidence.timestamp && ` · проба ${displayTime(sulfurEvidence.timestamp)}`}
+            {sulfurEvidence.available_at && ` · доступна ${displayTime(sulfurEvidence.available_at)}`}
+          </p>
+        )}
         <dl className="recommendation-metrics">
           <div>
             <dt>Снижение серы</dt>
@@ -830,6 +841,17 @@ function PipelinePreview({
             </dd>
           </div>
         </dl>
+        {result && (
+          <div className="scenario-table-scroll">
+            <table className="scenario-comparison" aria-label="Параметры выбранного сценария">
+              <thead><tr><th>Параметр</th><th>Сейчас</th><th>Предлагается</th><th>Изменение</th></tr></thead>
+              <tbody>{controls.map(([id, label, unit]) => {
+                const item = result.controls[id];
+                return <tr key={id}><td>{label} · {id}</td><td>{formatNumber(item.current, 2)}</td><td>{formatNumber(item.recommended, 2)}</td><td>{formatNumber(item.change, 2)} {unit}</td></tr>;
+              })}</tbody>
+            </table>
+          </div>
+        )}
         <p className="support-notice">
           {decision?.basis === "scenario_only"
             ? "Расчёт по заданным вручную условиям; прогноз по наблюдениям не подтверждает этот сценарий. "
@@ -837,7 +859,20 @@ function PipelinePreview({
           Проверка относится к концу горизонта. Без расчёта смеси влияние режима на T95 и цетановое число не оценено; производственная безопасность не подтверждена.
         </p>
         <div className="recommendation-actions">
-          <button type="button" className="primary" onClick={onOpenSandbox}>
+          <button type="button" className="primary" onClick={() => {
+            if (!decision) return;
+            const seed = initial(decision.at, true);
+            seed.tanks = [];
+            seed.additive_pct = 0;
+            if (result) {
+              seed.current_sulfur = result.baseline.sulfur;
+              seed.horizon_minutes = result.horizon_minutes;
+              seed.step_minutes = result.step_minutes;
+              seed.changes = { temperature: result.controls["ht.T6"].change,
+                feed_rate_pct: result.controls["ht.F9"].change, pressure: result.controls["ht.P13"].change };
+            }
+            onOpenSandbox?.(seed);
+          }}>
             Проверить в песочнице <ArrowRight />
           </button>
           <button type="button" className="ghost-button" onClick={copy}>

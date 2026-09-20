@@ -1,0 +1,85 @@
+{
+  "id": 35484733521,
+  "head_sha": "63e69cbd437006f58fc45582dc4f85e019013965",
+  "status": "completed",
+  "conclusion": "success",
+  "html_url": "https://github.com/ModestV/OilCodeHack/actions/runs/35484733521",
+  "jobs": [
+    {
+      "id": 106008914392,
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install and run backend checks",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Build frontend",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Configure SSH",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Copy release",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install and restart service",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify public health endpoint",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    }
+  ]
+}
