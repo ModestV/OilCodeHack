@@ -8,8 +8,10 @@ def regime_severity(controls: dict) -> dict:
     """High-side temperature, pressure and feed loading relative to training.
 
     No failure labels exist. Positive standardized levels are a reproducible
-    loading proxy, not a validated relation to equipment life. The 12-sigma
-    experimental cap matches the forecast's extreme-support guard.
+    loading proxy, not a validated relation to equipment life. The cap is the
+    forecast's own applicability z-threshold (``max_absolute_z`` in
+    ``APPLICABILITY_POLICY``), so a proposed control vector cannot pass this
+    gate at a regime the forecast itself would already refuse to score.
     """
     try:
         artifact = _load_artifact()
@@ -18,6 +20,7 @@ def regime_severity(controls: dict) -> dict:
     # Train-only normalisation of the control regime from the applicability
     # (support) model of the longest horizon.
     support = artifact["models"][str(max(int(h) for h in artifact["horizons_minutes"]))]["support"]
+    z_cap = float(artifact["applicability_policy"]["max_absolute_z"])
     factors = []
     for metric in ("ht.T6", "ht.P13", "ht.F9"):
         value = controls.get(metric)
@@ -29,12 +32,12 @@ def regime_severity(controls: dict) -> dict:
         high_z = max(0., (value - mean) / scale)
         factors.append({"metric_id": metric, "value": value, "train_mean": mean,
                         "train_std": scale, "positive_z": high_z})
-    index = max(f["positive_z"] for f in factors) / 12.
+    index = max(f["positive_z"] for f in factors) / z_cap
     return {"status": "ok", "index": index, "class": "high" if index > 2/3 else "elevated" if index > 1/3 else "normal",
             "within_model_limit": index <= 1, "model_limit": 1., "factors": factors,
-            "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
+            "basis": f"max positive z(T6,P13,F9) / {z_cap:g}; train-only normalization, same threshold as forecast applicability",
             "artifact_sha256": artifact["sha256"], "failure_probability": None,
-            "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."}
+            "assumption": f"Большие T6/P13/F9 условно повышают нагрузку. Порог {z_cap:g}σ — экспериментальный, не промышленный предел."}
 
 
 def candidate_objectives(scenario: dict, effort: float, max_exceedance_probability: float = 0.3) -> dict:

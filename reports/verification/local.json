@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-09-20T18:38:44.028051+00:00",
+  "generated_at": "2026-09-20T19:00:57.922102+00:00",
   "transport": "local_testclient",
   "base_url": null,
   "dataset": "hackathon",
@@ -323,7 +323,7 @@
           "confidence_kind": "binary_data_gate_not_probability",
           "regime_severity": {
             "status": "ok",
-            "index": 0.012310542738593583,
+            "index": 0.018465814107890374,
             "class": "normal",
             "within_model_limit": true,
             "model_limit": 1.0,
@@ -350,10 +350,10 @@
                 "positive_z": 0.0
               }
             ],
-            "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
+            "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
             "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
             "failure_probability": null,
-            "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+            "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
           },
           "can_recommend": true,
           "basis": "observed_and_forecast",
@@ -375,7 +375,7 @@
               "energy_cost_index": 1.0,
               "regime_severity": {
                 "status": "ok",
-                "index": 0.012310542738593583,
+                "index": 0.018465814107890374,
                 "class": "normal",
                 "within_model_limit": true,
                 "model_limit": 1.0,
@@ -402,14 +402,14 @@
                     "positive_z": 0.0
                   }
                 ],
-                "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
                 "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
                 "failure_probability": null,
-                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
               },
               "exceedance_probability": 0.11742580589286578,
               "quality_risk_index": 0.39141935297621927,
-              "ranking_loss": 0.19878731217275802,
+              "ranking_loss": 0.20032613001508223,
               "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
               "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
               "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
@@ -478,7 +478,7 @@
               "energy_cost_index": 1.0,
               "regime_severity": {
                 "status": "ok",
-                "index": 0.012310542738593583,
+                "index": 0.018465814107890374,
                 "class": "normal",
                 "within_model_limit": true,
                 "model_limit": 1.0,
@@ -505,14 +505,14 @@
                     "positive_z": 0.0
                   }
                 ],
-                "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
                 "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
                 "failure_probability": null,
-                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
               },
               "exceedance_probability": 0.11742580589286578,
               "quality_risk_index": 0.39141935297621927,
-              "ranking_loss": 0.19878731217275802,
+              "ranking_loss": 0.20032613001508223,
               "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
               "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
               "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
@@ -581,7 +581,7 @@
               "energy_cost_index": 1.0,
               "regime_severity": {
                 "status": "ok",
-                "index": 0.012310542738593583,
+                "index": 0.018465814107890374,
                 "class": "normal",
                 "within_model_limit": true,
                 "model_limit": 1.0,
@@ -608,14 +608,14 @@
                     "positive_z": 0.0
                   }
                 ],
-                "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
                 "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
                 "failure_probability": null,
-                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
               },
               "exceedance_probability": 0.11742580589286578,
               "quality_risk_index": 0.39141935297621927,
-              "ranking_loss": 0.19878731217275802,
+              "ranking_loss": 0.20032613001508223,
               "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
               "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
               "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
@@ -713,7 +713,7 @@
             "energy_cost_index": 1.0,
             "regime_severity": {
               "status": "ok",
-              "index": 0.012310542738593583,
+              "index": 0.018465814107890374,
               "class": "normal",
               "within_model_limit": true,
               "model_limit": 1.0,
@@ -740,14 +740,14 @@
                   "positive_z": 0.0
                 }
               ],
-              "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
+              "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
               "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
               "failure_probability": null,
-              "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+              "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
             },
             "exceedance_probability": 0.11742580589286578,
             "quality_risk_index": 0.39141935297621927,
-            "ranking_loss": 0.19878731217275802,
+            "ranking_loss": 0.20032613001508223,
             "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
             "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
             "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
@@ -1070,7 +1070,7 @@
           "confidence_kind": "binary_data_gate_not_probability",
           "regime_severity": {
             "status": "ok",
-            "index": 0.05967212173681249,
+            "index": 0.08950818260521873,
             "class": "normal",
             "within_model_limit": true,
             "model_limit": 1.0,
@@ -1097,10 +1097,10 @@
                 "positive_z": 0.7160654608417498
               }
             ],
-            "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
+            "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
             "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
             "failure_probability": null,
-            "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+            "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
           },
           "can_recommend": true,
           "basis": "observed_and_forecast",
@@ -1124,7 +1124,7 @@
               "energy_cost_index": 1.0263881679844342,
               "regime_severity": {
                 "status": "ok",
-                "index": 0.06742697944152662,
+                "index": 0.10114046916228993,
                 "class": "normal",
                 "within_model_limit": true,
                 "model_limit": 1.0,
@@ -1151,14 +1151,14 @@
                     "positive_z": 0.7160654608417498
                   }
                 ],
-                "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
                 "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
                 "failure_probability": null,
-                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
               },
               "exceedance_probability": 0.24190134518626472,
               "quality_risk_index": 0.806337817287549,
-              "ranking_loss": 0.4596088214885904,
+              "ranking_loss": 0.46803719391878124,
               "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
               "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
               "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
@@ -1227,7 +1227,7 @@
               "energy_cost_index": 1.013194083992217,
               "regime_severity": {
                 "status": "ok",
-                "index": 0.05967212173681249,
+                "index": 0.08950818260521873,
                 "class": "normal",
                 "within_model_limit": true,
                 "model_limit": 1.0,
@@ -1254,14 +1254,14 @@
                     "positive_z": 0.7160654608417498
                   }
                 ],
-                "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
                 "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
                 "failure_probability": null,
-                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
               },
               "exceedance_probability": 0.3408017078609513,
               "quality_risk_index": 1.1360056928698379,
-              "ranking_loss": 0.6027099608613392,
+              "ranking_loss": 0.6101689760784408,
               "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
               "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
               "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
@@ -1333,7 +1333,7 @@
               "energy_cost_index": 1.0,
               "regime_severity": {
                 "status": "ok",
-                "index": 0.05967212173681249,
+                "index": 0.08950818260521873,
                 "class": "normal",
                 "within_model_limit": true,
                 "model_limit": 1.0,
@@ -1360,14 +1360,14 @@
                     "positive_z": 0.7160654608417498
                   }
                 ],
-                "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
                 "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
                 "failure_probability": null,
-                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
               },
               "exceedance_probability": 0.4361313787261598,
               "quality_risk_index": 1.4537712624205328,
-              "ranking_loss": 0.7418036616444695,
+              "ranking_loss": 0.7492626768615711,
               "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
               "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
               "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
@@ -1468,7 +1468,7 @@
             "energy_cost_index": 1.0263881679844342,
             "regime_severity": {
               "status": "ok",
-              "index": 0.06742697944152662,
+              "index": 0.10114046916228993,
               "class": "normal",
               "within_model_limit": true,
               "model_limit": 1.0,
@@ -1495,14 +1495,14 @@
                   "positive_z": 0.7160654608417498
                 }
               ],
-              "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
+              "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
               "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
               "failure_probability": null,
-              "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+              "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
             },
             "exceedance_probability": 0.24190134518626472,
             "quality_risk_index": 0.806337817287549,
-            "ranking_loss": 0.4596088214885904,
+            "ranking_loss": 0.46803719391878124,
             "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
             "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
             "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
@@ -2039,7 +2039,7 @@
           "confidence_kind": "binary_data_gate_not_probability",
           "regime_severity": {
             "status": "ok",
-            "index": 0.10679877997104431,
+            "index": 0.16019816995656647,
             "class": "normal",
             "within_model_limit": true,
             "model_limit": 1.0,
@@ -2066,10 +2066,10 @@
                 "positive_z": 1.2815853596525317
               }
             ],
-            "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
+            "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
             "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
             "failure_probability": null,
-            "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+            "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
           },
           "can_recommend": false,
           "basis": "observed_and_forecast",
@@ -2099,7 +2099,7 @@
               "energy_cost_index": 1.0,
               "regime_severity": {
                 "status": "ok",
-                "index": 0.10679877997104431,
+                "index": 0.16019816995656647,
                 "class": "normal",
                 "within_model_limit": true,
                 "model_limit": 1.0,
@@ -2126,14 +2126,14 @@
                     "positive_z": 1.2815853596525317
                   }
                 ],
-                "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
                 "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
                 "failure_probability": null,
-                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
               },
               "exceedance_probability": null,
               "quality_risk_index": 0.0,
-              "ranking_loss": 0.026699694992761078,
+              "ranking_loss": 0.04004954248914162,
               "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
               "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
               "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
@@ -2211,7 +2211,7 @@
               "energy_cost_index": 1.0,
               "regime_severity": {
                 "status": "ok",
-                "index": 0.10679877997104431,
+                "index": 0.16019816995656647,
                 "class": "normal",
                 "within_model_limit": true,
                 "model_limit": 1.0,
@@ -2238,14 +2238,14 @@
                     "positive_z": 1.2815853596525317
                   }
                 ],
-                "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
                 "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
                 "failure_probability": null,
-                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
               },
               "exceedance_probability": null,
               "quality_risk_index": 0.0,
-              "ranking_loss": 0.026699694992761078,
+              "ranking_loss": 0.04004954248914162,
               "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
               "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
               "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
@@ -2323,7 +2323,7 @@
               "energy_cost_index": 1.0,
               "regime_severity": {
                 "status": "ok",
-                "index": 0.10679877997104431,
+                "index": 0.16019816995656647,
                 "class": "normal",
                 "within_model_limit": true,
                 "model_limit": 1.0,
@@ -2350,14 +2350,14 @@
                     "positive_z": 1.2815853596525317
                   }
                 ],
-                "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
                 "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
                 "failure_probability": null,
-                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
               },
               "exceedance_probability": null,
               "quality_risk_index": 0.0,
-              "ranking_loss": 0.026699694992761078,
+              "ranking_loss": 0.04004954248914162,
               "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
               "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
               "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
@@ -2693,10 +2693,10 @@
                 "positive_z": 0.0
               }
             ],
-            "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
+            "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
             "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
             "failure_probability": null,
-            "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+            "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
           },
           "can_recommend": false,
           "basis": "observed_and_forecast",
@@ -2750,10 +2750,10 @@
                     "positive_z": 0.0
                   }
                 ],
-                "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
                 "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
                 "failure_probability": null,
-                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
               },
               "exceedance_probability": null,
               "quality_risk_index": 0.0,
@@ -2857,10 +2857,10 @@
                     "positive_z": 0.0
                   }
                 ],
-                "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
                 "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
                 "failure_probability": null,
-                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
               },
               "exceedance_probability": null,
               "quality_risk_index": 0.0,
@@ -2964,10 +2964,10 @@
                     "positive_z": 0.0
                   }
                 ],
-                "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
                 "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
                 "failure_probability": null,
-                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
               },
               "exceedance_probability": null,
               "quality_risk_index": 0.0,
@@ -3314,7 +3314,7 @@
           "confidence_kind": "binary_data_gate_not_probability",
           "regime_severity": {
             "status": "ok",
-            "index": 0.012310542738593583,
+            "index": 0.018465814107890374,
             "class": "normal",
             "within_model_limit": true,
             "model_limit": 1.0,
@@ -3341,10 +3341,10 @@
                 "positive_z": 0.0
               }
             ],
-            "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
+            "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
             "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
             "failure_probability": null,
-            "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+            "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
           },
           "can_recommend": true,
           "basis": "scenario_only",
@@ -3368,8 +3368,8 @@
               "energy_cost_index": 1.0125,
               "regime_severity": {
                 "status": "ok",
-                "index": 0.2602797485235762,
-                "class": "normal",
+                "index": 0.39041962278536435,
+                "class": "elevated",
                 "within_model_limit": true,
                 "model_limit": 1.0,
                 "factors": [
@@ -3395,14 +3395,14 @@
                     "positive_z": 0.0
                   }
                 ],
-                "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
                 "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
                 "failure_probability": null,
-                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
               },
               "exceedance_probability": 0.5589759111353647,
               "quality_risk_index": 1.8632530371178824,
-              "ranking_loss": 1.6216964556898352,
+              "ranking_loss": 1.6542314242552822,
               "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
               "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
               "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
@@ -3475,7 +3475,7 @@
               "energy_cost_index": 1.00625,
               "regime_severity": {
                 "status": "ok",
-                "index": 0.1362951456310849,
+                "index": 0.20444271844662737,
                 "class": "normal",
                 "within_model_limit": true,
                 "model_limit": 1.0,
@@ -3502,14 +3502,14 @@
                     "positive_z": 0.0
                   }
                 ],
-                "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
                 "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
                 "failure_probability": null,
-                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
               },
               "exceedance_probability": 0.9060974311946224,
               "quality_risk_index": 3.0203247706487413,
-              "ranking_loss": 1.8567361717321422,
+              "ranking_loss": 1.8737730649360278,
               "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
               "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
               "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
@@ -3582,7 +3582,7 @@
               "energy_cost_index": 1.0,
               "regime_severity": {
                 "status": "ok",
-                "index": 0.012310542738593583,
+                "index": 0.018465814107890374,
                 "class": "normal",
                 "within_model_limit": true,
                 "model_limit": 1.0,
@@ -3609,14 +3609,14 @@
                     "positive_z": 0.0
                   }
                 ],
-                "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
                 "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
                 "failure_probability": null,
-                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
               },
               "exceedance_probability": 0.9639313851668053,
               "quality_risk_index": 3.2131046172226845,
-              "ranking_loss": 1.6096299442959907,
+              "ranking_loss": 1.6111687621383148,
               "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
               "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
               "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
@@ -3961,7 +3961,7 @@
           "confidence_kind": "binary_data_gate_not_probability",
           "regime_severity": {
             "status": "ok",
-            "index": 0.012310542738593583,
+            "index": 0.018465814107890374,
             "class": "normal",
             "within_model_limit": true,
             "model_limit": 1.0,
@@ -3988,10 +3988,10 @@
                 "positive_z": 0.0
               }
             ],
-            "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
+            "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
             "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
             "failure_probability": null,
-            "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+            "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
           },
           "can_recommend": true,
           "basis": "scenario_only",
@@ -4015,8 +4015,8 @@
               "energy_cost_index": 1.0125,
               "regime_severity": {
                 "status": "ok",
-                "index": 0.2602797485235762,
-                "class": "normal",
+                "index": 0.39041962278536435,
+                "class": "elevated",
                 "within_model_limit": true,
                 "model_limit": 1.0,
                 "factors": [
@@ -4042,14 +4042,14 @@
                     "positive_z": 0.0
                   }
                 ],
-                "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
                 "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
                 "failure_probability": null,
-                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
               },
               "exceedance_probability": 0.5589759111353647,
               "quality_risk_index": 1.8632530371178824,
-              "ranking_loss": 1.6216964556898352,
+              "ranking_loss": 1.6542314242552822,
               "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
               "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
               "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
@@ -4121,7 +4121,7 @@
               "energy_cost_index": 1.00625,
               "regime_severity": {
                 "status": "ok",
-                "index": 0.1362951456310849,
+                "index": 0.20444271844662737,
                 "class": "normal",
                 "within_model_limit": true,
                 "model_limit": 1.0,
@@ -4148,14 +4148,14 @@
                     "positive_z": 0.0
                   }
                 ],
-                "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
                 "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
                 "failure_probability": null,
-                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
               },
               "exceedance_probability": 0.9060974311946224,
               "quality_risk_index": 3.0203247706487413,
-              "ranking_loss": 1.8567361717321422,
+              "ranking_loss": 1.8737730649360278,
               "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
               "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
               "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
@@ -4227,7 +4227,7 @@
               "energy_cost_index": 1.0,
               "regime_severity": {
                 "status": "ok",
-                "index": 0.012310542738593583,
+                "index": 0.018465814107890374,
                 "class": "normal",
                 "within_model_limit": true,
                 "model_limit": 1.0,
@@ -4254,14 +4254,14 @@
                     "positive_z": 0.0
                   }
                 ],
-                "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
                 "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
                 "failure_probability": null,
-                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
               },
               "exceedance_probability": 0.9639313851668053,
               "quality_risk_index": 3.2131046172226845,
-              "ranking_loss": 1.6096299442959907,
+              "ranking_loss": 1.6111687621383148,
               "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
               "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
               "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
@@ -4608,7 +4608,7 @@
           "confidence_kind": "binary_data_gate_not_probability",
           "regime_severity": {
             "status": "ok",
-            "index": 0.012310542738593583,
+            "index": 0.018465814107890374,
             "class": "normal",
             "within_model_limit": true,
             "model_limit": 1.0,
@@ -4635,10 +4635,10 @@
                 "positive_z": 0.0
               }
             ],
-            "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
+            "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
             "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
             "failure_probability": null,
-            "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+            "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
           },
           "can_recommend": true,
           "basis": "scenario_only",
@@ -4662,7 +4662,7 @@
               "energy_cost_index": 1.0,
               "regime_severity": {
                 "status": "ok",
-                "index": 0.012310542738593583,
+                "index": 0.018465814107890374,
                 "class": "normal",
                 "within_model_limit": true,
                 "model_limit": 1.0,
@@ -4689,14 +4689,14 @@
                     "positive_z": 0.0
                   }
                 ],
-                "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
                 "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
                 "failure_probability": null,
-                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
               },
               "exceedance_probability": 0.0831752658944187,
               "quality_risk_index": 0.27725088631472905,
-              "ranking_loss": 0.14170307884201291,
+              "ranking_loss": 0.14324189668433712,
               "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
               "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
               "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
@@ -4767,7 +4767,7 @@
               "energy_cost_index": 1.0,
               "regime_severity": {
                 "status": "ok",
-                "index": 0.012310542738593583,
+                "index": 0.018465814107890374,
                 "class": "normal",
                 "within_model_limit": true,
                 "model_limit": 1.0,
@@ -4794,14 +4794,14 @@
                     "positive_z": 0.0
                   }
                 ],
-                "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
                 "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
                 "failure_probability": null,
-                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
               },
               "exceedance_probability": 0.0831752658944187,
               "quality_risk_index": 0.27725088631472905,
-              "ranking_loss": 0.14170307884201291,
+              "ranking_loss": 0.14324189668433712,
               "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
               "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
               "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
@@ -4872,7 +4872,7 @@
               "energy_cost_index": 1.0,
               "regime_severity": {
                 "status": "ok",
-                "index": 0.012310542738593583,
+                "index": 0.018465814107890374,
                 "class": "normal",
                 "within_model_limit": true,
                 "model_limit": 1.0,
@@ -4899,14 +4899,14 @@
                     "positive_z": 0.0
                   }
                 ],
-                "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
                 "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
                 "failure_probability": null,
-                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
               },
               "exceedance_probability": 0.0831752658944187,
               "quality_risk_index": 0.27725088631472905,
-              "ranking_loss": 0.14170307884201291,
+              "ranking_loss": 0.14324189668433712,
               "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
               "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
               "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
@@ -4974,7 +4974,7 @@
       "method": "GET",
       "path": "/api/health",
       "status": 200,
-      "elapsed_seconds": 0.015
+      "elapsed_seconds": 0.049
     },
     {
       "method": "GET",
@@ -4986,31 +4986,31 @@
       "method": "GET",
       "path": "/api/datasets/hackathon/snapshot?at=2026-01-08T07%3A00%3A00",
       "status": 200,
-      "elapsed_seconds": 1.124
+      "elapsed_seconds": 1.123
     },
     {
       "method": "GET",
       "path": "/api/datasets/hackathon/forecast?at=2026-01-08T07%3A00%3A00",
       "status": 200,
-      "elapsed_seconds": 0.163
+      "elapsed_seconds": 0.173
     },
     {
       "method": "POST",
       "path": "/api/datasets/hackathon/decision",
       "status": 200,
-      "elapsed_seconds": 1.003
+      "elapsed_seconds": 0.972
     },
     {
       "method": "GET",
       "path": "/api/datasets/hackathon/snapshot?at=2026-01-14T07%3A00%3A00",
       "status": 200,
-      "elapsed_seconds": 0.827
+      "elapsed_seconds": 0.847
     },
     {
       "method": "GET",
       "path": "/api/datasets/hackathon/forecast?at=2026-01-14T07%3A00%3A00",
       "status": 200,
-      "elapsed_seconds": 0.165
+      "elapsed_seconds": 0.159
     },
     {
       "method": "POST",
@@ -5022,7 +5022,7 @@
       "method": "GET",
       "path": "/api/datasets/hackathon/snapshot?at=2022-12-31T00%3A00%3A00",
       "status": 200,
-      "elapsed_seconds": 0.035
+      "elapsed_seconds": 0.033
     },
     {
       "method": "GET",
@@ -5034,35 +5034,71 @@
       "method": "POST",
       "path": "/api/datasets/hackathon/decision",
       "status": 200,
-      "elapsed_seconds": 0.074
+      "elapsed_seconds": 0.076
     },
     {
       "method": "GET",
       "path": "/api/datasets/hackathon/snapshot?at=2026-08-08T12%3A00%3A00",
       "status": 200,
-      "elapsed_seconds": 0.92
+      "elapsed_seconds": 0.934
     },
     {
       "method": "GET",
       "path": "/api/datasets/hackathon/forecast?at=2026-08-08T12%3A00%3A00",
       "status": 200,
-      "elapsed_seconds": 0.153
+      "elapsed_seconds": 0.155
     },
     {
       "method": "POST",
       "path": "/api/datasets/hackathon/decision",
       "status": 200,
-      "elapsed_seconds": 1.05
+      "elapsed_seconds": 1.18
     },
     {
       "method": "GET",
       "path": "/api/datasets/hackathon/snapshot?at=2026-06-19T12%3A00%3A00",
       "status": 200,
-      "elapsed_seconds": 0.882
+      "elapsed_seconds": 1.095
     },
     {
       "method": "GET",
       "path": "/api/datasets/hackathon/forecast?at=2026-06-19T12%3A00%3A00",
+      "status": 200,
+      "elapsed_seconds": 0.156
+    },
+    {
+      "method": "POST",
+      "path": "/api/datasets/hackathon/decision",
+      "status": 200,
+      "elapsed_seconds": 1.087
+    },
+    {
+      "method": "GET",
+      "path": "/api/datasets/hackathon/snapshot?at=2026-01-08T07%3A00%3A00",
+      "status": 200,
+      "elapsed_seconds": 0.862
+    },
+    {
+      "method": "GET",
+      "path": "/api/datasets/hackathon/forecast?at=2026-01-08T07%3A00%3A00",
+      "status": 200,
+      "elapsed_seconds": 0.15
+    },
+    {
+      "method": "POST",
+      "path": "/api/datasets/hackathon/decision",
+      "status": 200,
+      "elapsed_seconds": 1.018
+    },
+    {
+      "method": "GET",
+      "path": "/api/datasets/hackathon/snapshot?at=2026-01-08T07%3A00%3A00",
+      "status": 200,
+      "elapsed_seconds": 0.937
+    },
+    {
+      "method": "GET",
+      "path": "/api/datasets/hackathon/forecast?at=2026-01-08T07%3A00%3A00",
       "status": 200,
       "elapsed_seconds": 0.149
     },
@@ -5070,67 +5106,31 @@
       "method": "POST",
       "path": "/api/datasets/hackathon/decision",
       "status": 200,
-      "elapsed_seconds": 1.025
+      "elapsed_seconds": 0.994
     },
     {
       "method": "GET",
       "path": "/api/datasets/hackathon/snapshot?at=2026-01-08T07%3A00%3A00",
       "status": 200,
-      "elapsed_seconds": 0.828
+      "elapsed_seconds": 0.875
     },
     {
       "method": "GET",
       "path": "/api/datasets/hackathon/forecast?at=2026-01-08T07%3A00%3A00",
       "status": 200,
-      "elapsed_seconds": 0.157
+      "elapsed_seconds": 0.15
     },
     {
       "method": "POST",
       "path": "/api/datasets/hackathon/decision",
       "status": 200,
-      "elapsed_seconds": 0.96
-    },
-    {
-      "method": "GET",
-      "path": "/api/datasets/hackathon/snapshot?at=2026-01-08T07%3A00%3A00",
-      "status": 200,
-      "elapsed_seconds": 0.804
-    },
-    {
-      "method": "GET",
-      "path": "/api/datasets/hackathon/forecast?at=2026-01-08T07%3A00%3A00",
-      "status": 200,
-      "elapsed_seconds": 0.139
-    },
-    {
-      "method": "POST",
-      "path": "/api/datasets/hackathon/decision",
-      "status": 200,
-      "elapsed_seconds": 0.95
-    },
-    {
-      "method": "GET",
-      "path": "/api/datasets/hackathon/snapshot?at=2026-01-08T07%3A00%3A00",
-      "status": 200,
-      "elapsed_seconds": 0.8
-    },
-    {
-      "method": "GET",
-      "path": "/api/datasets/hackathon/forecast?at=2026-01-08T07%3A00%3A00",
-      "status": 200,
-      "elapsed_seconds": 0.143
-    },
-    {
-      "method": "POST",
-      "path": "/api/datasets/hackathon/decision",
-      "status": 200,
-      "elapsed_seconds": 0.976
+      "elapsed_seconds": 0.97
     },
     {
       "method": "POST",
       "path": "/api/datasets/hackathon/scenario",
       "status": 422,
-      "elapsed_seconds": 0.973
+      "elapsed_seconds": 0.944
     }
   ],
   "failures": [],
