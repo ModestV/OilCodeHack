@@ -11,8 +11,19 @@ from pathlib import Path
 from .analytics import snapshot
 from .config import REGISTRY
 
+# Laboratory inputs of the corrected 24-2000 formulas.  The organisers' file
+# writes them as ``LIMS.D15`` / ``LIMS.95%.T`` without naming the sampling
+# point; the registry stores them as identifiers and this table fixes the
+# series (hydro-treating point 2 = product) as an explicit working assumption.
+# Legacy spellings from the original workbook are accepted for imported
+# manifests.
 LIMS_ALIASES = {
     "LIMS:24-2000.Pipeline.95%.T": ("LIMS_95_T", "lims.ht.2.95%.T"),
+    "LIMS:24-2000.Pipeline.D15": ("LIMS_D15", "lims.ht.2.D15"),
+    "LIMS.95%.T": ("LIMS_95_T", "lims.ht.2.95%.T"),
+    "LIMS.D15": ("LIMS_D15", "lims.ht.2.D15"),
+    "LIMS_95_T": ("LIMS_95_T", "lims.ht.2.95%.T"),
+    "LIMS_D15": ("LIMS_D15", "lims.ht.2.D15"),
 }
 
 
@@ -68,7 +79,8 @@ def formula_results(directory: Path, at: str) -> dict:
         for alias, (variable, metric_id) in LIMS_ALIASES.items():
             if alias in expression:
                 expression = expression.replace(alias, variable)
-                dependencies.append((variable, metric_id))
+                if (variable, metric_id) not in dependencies:
+                    dependencies.append((variable, metric_id))
         plant = f.get("plant", "ht" if f["id"].startswith("24") else "avt")
         tags = list(dict.fromkeys(re.findall(r"\b[A-Z]\d+\b", expression)))
         data = [

@@ -179,15 +179,22 @@ export interface ScenarioRequest {
   at: string;
   horizon_minutes: number;
   step_minutes: number;
+  /** Feed sulphur, % mass (LIMS hydro-treating point 1). */
   baseline_feed_sulfur: number;
   feed_sulfur: number;
   current_sulfur?: number;
   current_t95?: number;
   current_cetane?: number;
-  targets: { sulfur_max: number; t95_max: number; cetane_min: number };
+  targets: {
+    sulfur_max: number;
+    t95_max: number;
+    cetane_min: number;
+    max_exceedance_probability: number;
+  };
+  /** Log-domain surrogate coefficients: ln(mg/kg) per °C, per % feed, per MPa. */
   parameters: {
     lag_minutes: number;
-    feed_sulfur_transfer: number;
+    feed_sulfur_elasticity: number;
     temperature_effect: number;
     feed_rate_effect: number;
     pressure_effect: number;
@@ -209,7 +216,15 @@ export interface ScenarioResult {
   at: string;
   horizon_minutes: number;
   step_minutes: number;
-  baseline: { sulfur: number; t95: number | null; cetane: number | null };
+  baseline: {
+    sulfur: number;
+    sulfur_source: string;
+    t95: number | null;
+    cetane: number | null;
+    feed_sulfur: number;
+    feed_sulfur_source: string;
+    baseline_kind: "model_forecast" | "flat_baseline";
+  };
   controls: Record<
     "ht.T6" | "ht.F9" | "ht.P13",
     {
@@ -217,13 +232,24 @@ export interface ScenarioResult {
       change: number;
       recommended: number | null;
       relative: boolean;
+      model_change_limit: number;
     }
   >;
   predicted_sulfur: number;
+  predicted_sulfur_lower: number | null;
+  predicted_sulfur_upper: number | null;
+  exceedance_probability: number | null;
+  exceedance_target_met: boolean | null;
   steady_state_sulfur: number;
   sulfur_target_met: boolean;
   hard_sulfur_limit_met: boolean;
-  trajectory: { minute: number; timestamp: string; sulfur: number }[];
+  parameters: ScenarioRequest["parameters"];
+  trajectory: {
+    minute: number;
+    timestamp: string;
+    sulfur: number;
+    baseline_sulfur: number;
+  }[];
   blend: null | {
     sulfur: number;
     t95: number;
@@ -243,28 +269,52 @@ export interface DecisionTraceItem {
   summary: string;
 }
 
+export interface ForecastPoint {
+  prediction: number;
+  lower: number;
+  upper: number;
+  exceedance_probability: number;
+}
+
 export interface SulfurForecast {
   at: string;
   status: "ok" | "abstain";
   reasons: string[];
   target_time: string;
-  forecast_horizon_minutes: number;
+  horizon_minutes: number;
   lims_publication_delay_minutes: number;
   target: { metric_id: string; unit: string };
-  prediction_ridge: number | null;
-  prediction_previous_lab: number | null;
-  prediction_risk_guard: number | null;
+  hard_limit: number;
+  nowcast: ForecastPoint | null;
+  prediction: number | null;
+  prediction_lower: number | null;
+  prediction_upper: number | null;
+  exceedance_probability: number | null;
+  alarm_probability: number;
   alarm_above_10: boolean | null;
+  prediction_previous_lab: number | null;
+  lab_anchor: { level: number | null; samples: number; pairs: number };
+  analysers: Record<
+    "q21" | "pak",
+    {
+      metric_id: string;
+      value: number | null;
+      timestamp: string | null;
+      age_minutes?: number;
+      offset: number | null;
+      adjusted: number | null;
+    }
+  >;
+  horizons: ({ minutes: number } & ForecastPoint)[];
   feature_cutoff: string;
   feature_time: string | null;
-  availability_lag_minutes: number;
   feature_count: number;
   imputed_feature_count: number;
   model: {
     name: string;
-    alpha: number;
     artifact: string;
-    risk_guard: string;
+    artifact_sha256: string;
+    model_columns: string[];
   };
   leakage_check: {
     passed: boolean;
@@ -286,6 +336,9 @@ export interface DecisionResult {
   recommendation: {
     action: string;
     predicted_sulfur: number;
+    predicted_sulfur_lower?: number | null;
+    predicted_sulfur_upper?: number | null;
+    exceedance_probability?: number | null;
     target_sulfur: number;
     target_met: boolean;
     controls: ScenarioResult["controls"];
@@ -299,6 +352,7 @@ export interface DecisionResult {
     feasible: boolean;
     reason?: string | null;
     predicted_sulfur?: number;
+    exceedance_probability?: number | null;
     target_met?: boolean;
     effort?: number;
     objectives?: {

@@ -13,12 +13,22 @@ from pathlib import Path
 from typing import Any
 
 from .analytics import parse_time, snapshot
+from .formulas import formula_results
 from .scenarios import HARD_SULFUR_MAX, HARD_T95_MAX, HARD_CETANE_MIN, ControlChanges, ScenarioRequest, calculate_scenario, select_sulfur
 from .forecast import ForecastUnavailable, forecast_sulfur
 from .objectives import candidate_objectives, regime_severity
 
 CONTROL_IDS = ("ht.T6", "ht.F9", "ht.P13")
 UNUSABLE_FLAGS = {"invalid", "conflict", "suspect", "flatline", "gap"}
+# Slowly varying product properties are sampled rarely (cetane: ~monthly in
+# the source LIMS).  Their last laboratory value stays usable as a baseline
+# constraint for a declared window instead of the 48-hour sulphur freshness.
+# This is a prototype assumption: the hydro-treating scenario does not model
+# a cetane response, so the window only affects whether the baseline check
+# can be performed at all.
+SLOW_QUALITY_MAX_AGE_MINUTES = {"lims.ht.2.CetaneNumber": 60 * 24 * 60}
+# Virtual analyser used for T95 when the laboratory value is stale.
+T95_VAK_FORMULA = "24-2000:GODT:T95"
 
 
 @dataclass(frozen=True)
@@ -39,19 +49,27 @@ def _evidence(item: dict[str, Any] | None) -> dict[str, Any]:
         "value": item.get("value"),
         "timestamp": item.get("timestamp"),
         "freshness": item.get("freshness"),
+        "age_minutes": item.get("age_minutes"),
         "flags": item.get("flags", []),
         "available_at": item.get("available_at"),
     }
 
 
-def _evidence_failures(label: str, item: dict[str, Any], at: str) -> list[str]:
-    """Hard gates; a confidence score cannot compensate for a bad signal."""
+def _evidence_failures(label: str, item: dict[str, Any], at: str, max_age_minutes: float | None = None) -> list[str]:
+    """Hard gates; a confidence score cannot compensate for a bad signal.
+
+    ``max_age_minutes`` widens the freshness window for declared slow
+    properties; the age must still be known and the value published.
+    """
     reasons = []
     value = item.get("value")
     if value is None or not isfinite(value):
         reasons.append(f"{label}: отсутствует конечное численное значение")
     if item.get("freshness") != "fresh":
-        reasons.append(f"{label}: измерение не свежее ({item.get('freshness') or 'unknown'})")
+        age = item.get("age_minutes")
+        within_window = max_age_minutes is not None and age is not None and age <= max_age_minutes
+        if not within_window:
+            reasons.append(f"{label}: измерение не свежее ({item.get('freshness') or 'unknown'})")
     bad_flags = UNUSABLE_FLAGS.intersection(item.get("flags") or [])
     if bad_flags:
         reasons.append(f"{label}: недостоверные данные ({', '.join(sorted(bad_flags))})")
@@ -69,20 +87,57 @@ def _evidence_failures(label: str, item: dict[str, Any], at: str) -> list[str]:
 
 
 class QualityAgent:
-    """Checks that the snapshot contains a usable quality baseline."""
+    """Estimates current and forecast product quality and the data behind it."""
 
     role = "quality"
+
+    @staticmethod
+    def _vak_t95(context: AgentContext) -> dict[str, Any] | None:
+        try:
+            formulas = formula_results(context.directory, context.request.at)["formulas"]
+        except (OSError, ValueError):
+            return None
+        for formula in formulas:
+            if formula.get("id") != T95_VAK_FORMULA:
+                continue
+            result = formula.get("result")
+            if result is None or not isfinite(result) or formula.get("status") == "invalid":
+                return None
+            if any(item.get("freshness") != "fresh" for item in formula.get("inputs", [])):
+                return None
+            return {"source": f"vak.{T95_VAK_FORMULA}", "value": float(result), "timestamp": context.request.at,
+                    "available_at": context.request.at, "freshness": "fresh", "age_minutes": 0.0,
+                    "flags": sorted({flag for item in formula.get("inputs", []) for flag in (item.get("flags") or [])}),
+                    "basis": "virtual_analyser_expert_formula", "reason": formula.get("reason")}
+        return None
 
     def run(self, context: AgentContext) -> dict[str, Any]:
         values = _values(context.frame)
         request = context.request
+        warnings = []
+        model_forecast = None
+        try:
+            model_forecast = forecast_sulfur(context.directory, request.at, horizon_minutes=request.horizon_minutes)
+        except ForecastUnavailable as exc:
+            warnings.append(f"Прогноз серы недоступен: {exc}")
+        forecast_ok = bool(model_forecast and model_forecast.get("status") == "ok" and model_forecast.get("nowcast"))
+
+        raw_sulfur, raw_source = select_sulfur(values)
+        raw_item = values.get(raw_source) if raw_source else None
         if request.current_sulfur is not None:
-            sulfur = request.current_sulfur
-            sulfur_source = "request.current_sulfur"
-            sulfur_item = None
+            sulfur, sulfur_source, sulfur_item = request.current_sulfur, "request.current_sulfur", None
+        elif forecast_ok:
+            # Lab-anchored analyser nowcast: the best estimate of sulphur now.
+            # The last laboratory sample may be up to 48 hours old and is
+            # kept as separate evidence below.
+            nowcast = model_forecast["nowcast"]
+            sulfur, sulfur_source = float(nowcast["prediction"]), "model.nowcast"
+            sulfur_item = {"value": sulfur, "timestamp": model_forecast.get("feature_time"),
+                           "available_at": model_forecast.get("feature_time"), "freshness": "fresh", "flags": [],
+                           "lower": nowcast["lower"], "upper": nowcast["upper"],
+                           "exceedance_probability": nowcast["exceedance_probability"]}
         else:
-            sulfur, sulfur_source = select_sulfur(values)
-            sulfur_item = values.get(sulfur_source) if sulfur_source else None
+            sulfur, sulfur_source, sulfur_item = raw_sulfur, raw_source, raw_item
 
         controls = {metric_id: _evidence(values.get(metric_id)) for metric_id in CONTROL_IDS}
         available_controls = [
@@ -90,24 +145,20 @@ class QualityAgent:
         ]
         missing = [] if sulfur is not None else ["sulfur_baseline"]
         status = "ok" if not missing else "insufficient"
-        warnings = []
         if sulfur_item and sulfur_item.get("freshness") == "stale":
             warnings.append("Базовое измерение серы устарело")
         if not available_controls:
             warnings.append("Нет текущих значений управляющих тегов T6/F9/P13")
-
-        model_forecast = None
-        try:
-            model_forecast = forecast_sulfur(context.directory, request.at)
-        except ForecastUnavailable as exc:
-            warnings.append(f"Прогноз серы недоступен: {exc}")
 
         if request.current_sulfur is not None:
             warnings.append("Базовая сера введена вручную: это условный сценарий, а не подтверждение качества продукта")
         if model_forecast and model_forecast.get("status") == "abstain":
             warnings.extend(model_forecast.get("reasons", []))
         if model_forecast and model_forecast.get("alarm_above_10"):
-            warnings.append("Независимый прогноз/risk_guard превышает 10 мг/кг; сценарные коэффициенты не доказывают устранение этого риска")
+            warnings.append(
+                f"Прогноз без воздействия: вероятность превышения 10 мг/кг {model_forecast['exceedance_probability']:.0%} "
+                f"(порог тревоги {model_forecast['alarm_probability']:.0%}); требуется корректирующее действие или ручная проверка"
+            )
 
         other_quality = {}
         for name, supplied, metric_id in (
@@ -119,6 +170,16 @@ class QualityAgent:
                 if supplied is not None
                 else {"source": metric_id, **_evidence(values.get(metric_id))}
             )
+            if name == "cetane" and supplied is None:
+                other_quality[name]["max_age_minutes"] = SLOW_QUALITY_MAX_AGE_MINUTES[metric_id]
+        if request.current_t95 is None and other_quality["t95"].get("freshness") != "fresh":
+            # Source priority LIMS -> VAK: the corrected 24-2000 T95 soft sensor
+            # (MAE ~6 °C vs LIMS, see reports/verification/agent-backtest).
+            vak = self._vak_t95(context)
+            if vak is not None:
+                other_quality["t95_lims"] = other_quality["t95"]
+                other_quality["t95"] = vak
+                warnings.append("T95: лабораторное значение устарело, используется ВАК 24-2000:GODT:T95 (виртуальный анализатор)")
 
         return {
             "role": self.role,
@@ -132,6 +193,7 @@ class QualityAgent:
                 # Put the explicit request value after evidence so a missing
                 # telemetry item cannot overwrite it with ``None``.
                 "sulfur": {"source": sulfur_source, **_evidence(sulfur_item), "value": sulfur},
+                "last_lab_sulfur": {"source": raw_source, **_evidence(raw_item)},
                 "controls": controls,
                 "available_control_count": len(available_controls),
                 "model_forecast": model_forecast,
@@ -153,18 +215,20 @@ class ReliabilityAgent:
         missing = list(quality.get("missing", []))
         warnings = list(quality.get("warnings", []))
         reasons = ["Недостаточно данных: отсутствует базовое значение серы"] if missing else []
-        if not explicit:
+        # A nowcast baseline is governed by the forecast applicability gate
+        # (fresh analysers, lab anchor, regime support); raw sources use the
+        # snapshot freshness/flag gates.
+        if not explicit and sulfur["source"] != "model.nowcast":
             reasons.extend(_evidence_failures("Базовая сера", sulfur, context.request.at))
         # All three controls define the intervention vector.  Missing, stale or
         # flagged inputs block it even when another input has high confidence.
         for metric_id, evidence in quality["evidence"]["controls"].items():
             reasons.extend(_evidence_failures(metric_id, evidence, context.request.at))
         forecast = quality["evidence"].get("model_forecast")
-        if not explicit:
-            if not forecast or forecast.get("status") != "ok":
-                reasons.append("Нет допустимого модельного прогноза для решения по наблюдаемым данным")
-            elif forecast.get("alarm_above_10"):
-                reasons.append("Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки")
+        if not explicit and (not forecast or forecast.get("status") != "ok"):
+            reasons.append("Нет допустимого модельного прогноза для решения по наблюдаемым данным")
+        # A forecast alarm does not block the contour: it is the trigger for a
+        # corrective candidate, which the safety gate then checks per candidate.
         can_recommend = not reasons
         severity = regime_severity({key: item.get("value") for key, item in quality["evidence"]["controls"].items()})
         # Compatibility field only: this is a gate score, not a calibrated
@@ -222,10 +286,16 @@ class OptimizationAgent:
             if not passed:
                 reasons.append(reason)
 
-        check("sulfur_hard_limit", scenario["predicted_sulfur"] <= HARD_SULFUR_MAX,
+        check("sulfur_hard_limit", scenario["hard_sulfur_limit_met"],
               "Сера в конце горизонта превышает обязательный предел 10 мг/кг", "confirmed_10_mg_kg")
         check("sulfur_editable_target", scenario["sulfur_target_met"],
               "Цель по сере не достигнута в выбранном горизонте", "editable_target")
+        if scenario.get("exceedance_probability") is not None:
+            check("sulfur_exceedance_probability", scenario["exceedance_target_met"],
+                  f"Вероятность превышения 10 мг/кг в конце горизонта {scenario['exceedance_probability']:.0%} выше допустимой "
+                  f"{request.targets.max_exceedance_probability:.0%}", "editable_probability_target_from_forecast_residuals")
+        elif reliability.get("basis") != "scenario_only":
+            checks.append({"name": "sulfur_exceedance_probability", "passed": None, "basis": "not_assessed_no_forecast"})
         blend = scenario.get("blend")
         if blend is not None:
             check("blend_sulfur_hard_limit", blend["sulfur"] <= HARD_SULFUR_MAX,
@@ -245,9 +315,11 @@ class OptimizationAgent:
                         reasons.append(f"Нет обязательного показателя качества {name}; допустимость наблюдаемого режима не подтверждена")
                     continue
                 if not item.get("source", "").startswith("request."):
-                    failures = _evidence_failures(name, item, request.at)
+                    failures = _evidence_failures(name, item, request.at, item.get("max_age_minutes"))
                     reasons.extend(failures)
-                    checks.append({"name": f"{name}_evidence", "passed": not failures, "basis": "observed_baseline"})
+                    checks.append({"name": f"{name}_evidence", "passed": not failures,
+                                   "basis": "virtual_analyser" if item.get("source", "").startswith("vak.") else
+                                   "slow_quality_window" if item.get("max_age_minutes") else "observed_baseline"})
                 check(name, value <= maximum if name == "t95" else value >= maximum,
                       f"Базовый показатель {name} не выполняет ограничение; его отклик не моделируется",
                       "editable_target_baseline_only")
@@ -270,10 +342,11 @@ class OptimizationAgent:
         # First calculate the editable automatic action.  The other candidates
         # are derived from this same transparent model, so their comparison is
         # deterministic and does not claim an independently validated policy.
+        forecast = quality.get("evidence", {}).get("model_forecast")
         automatic_request = request.model_copy(deep=True)
         automatic_request.changes = None
         try:
-            automatic = calculate_scenario(context.directory, automatic_request, frame=context.frame)
+            automatic = calculate_scenario(context.directory, automatic_request, frame=context.frame, forecast=forecast)
         except ValueError:
             automatic = None
         # Controls in the scenario result use metric ids; map them explicitly
@@ -304,7 +377,7 @@ class OptimizationAgent:
             candidate_request = request.model_copy(deep=True)
             candidate_request.changes = changes
             try:
-                scenario = calculate_scenario(context.directory, candidate_request, frame=context.frame)
+                scenario = calculate_scenario(context.directory, candidate_request, frame=context.frame, forecast=forecast)
             except ValueError as exc:
                 candidates.append(
                     {
@@ -321,7 +394,7 @@ class OptimizationAgent:
             target_met = bool(scenario["sulfur_target_met"])
             effort = self._effort(changes)
             gate = self._gate(scenario, context, reliability, quality)
-            objectives = candidate_objectives(scenario, effort)
+            objectives = candidate_objectives(scenario, effort, request.targets.max_exceedance_probability)
             severity = objectives["regime_severity"]
             severity_passed = severity.get("status") == "ok" and severity.get("within_model_limit") is True
             gate["checks"].append({"name": "regime_severity_model_limit", "passed": severity_passed,
@@ -337,6 +410,9 @@ class OptimizationAgent:
                     "feasible": gate["passed"],
                     "reason": None if gate["passed"] else "; ".join(gate["reasons"]),
                     "predicted_sulfur": scenario["predicted_sulfur"],
+                    "predicted_sulfur_lower": scenario.get("predicted_sulfur_lower"),
+                    "predicted_sulfur_upper": scenario.get("predicted_sulfur_upper"),
+                    "exceedance_probability": scenario.get("exceedance_probability"),
                     "steady_state_sulfur": scenario["steady_state_sulfur"],
                     "target_met": target_met,
                     "effort": effort,
@@ -439,6 +515,9 @@ class OptimizationAgent:
                 "requires_operator_review": True,
                 "operational_safety_validated": False,
                 "predicted_sulfur": predicted,
+                "predicted_sulfur_lower": result.get("predicted_sulfur_lower"),
+                "predicted_sulfur_upper": result.get("predicted_sulfur_upper"),
+                "exceedance_probability": result.get("exceedance_probability"),
                 "target_sulfur": context.request.targets.sulfur_max,
                 "target_met": target,
                 "controls": result["controls"],
@@ -514,9 +593,10 @@ class Orchestrator:
                     "на линейной сценарной модели."
                 ),
                 (
-                    "Ridge-прогноз серы показывается как отдельный контрольный "
-                    "сигнал; он не доказывает причинный эффект изменения режима "
-                    "и не заменяет проверку технологом."
+                    "База качества — калиброванный по ЛИМС nowcast анализатора; прогноз без воздействия, "
+                    "интервал и вероятность превышения получены из эмпирических остатков модели. "
+                    "Эффект изменения режима — сценарная модель с наблюдательными коэффициентами; "
+                    "он не заменяет проверку технологом."
                 ),
                 (
                     "Результат предназначен для рассмотрения оператором. Проверяются "

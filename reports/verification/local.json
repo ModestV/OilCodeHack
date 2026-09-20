@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-09-20T02:39:56.629050+00:00",
+  "generated_at": "2026-09-20T19:00:57.922102+00:00",
   "transport": "local_testclient",
   "base_url": null,
   "dataset": "hackathon",
@@ -33,6 +33,11 @@
               "basis": "editable_target"
             },
             {
+              "name": "sulfur_exceedance_probability",
+              "passed": true,
+              "basis": "editable_probability_target_from_forecast_residuals"
+            },
+            {
               "name": "t95_evidence",
               "passed": true,
               "basis": "observed_baseline"
@@ -45,7 +50,7 @@
             {
               "name": "cetane_evidence",
               "passed": true,
-              "basis": "observed_baseline"
+              "basis": "slow_quality_window"
             },
             {
               "name": "cetane",
@@ -88,27 +93,102 @@
           "at": "2026-01-08T07:00:00",
           "prediction_origin": "2026-01-08T07:00:00",
           "target_time": "2026-01-08T10:00:00",
+          "horizon_minutes": 180.0,
           "status": "ok",
           "reasons": [],
           "target": {
             "metric_id": "lims.ht.2.Mg.Sulfur",
             "unit": "мг/кг"
           },
-          "prediction_ridge": 8.465247237877417,
-          "prediction_previous_lab": 7.099999904632568,
-          "prediction_risk_guard": 8.465247237877417,
+          "hard_limit": 10.0,
+          "nowcast": {
+            "prediction": 8.605817642557211,
+            "lower": 6.940930925283815,
+            "upper": 10.246444948997807,
+            "exceedance_probability": 0.12247206222297047,
+            "limit": 10.0,
+            "interval": "80% (10-90% квантили out-of-fold остатков)"
+          },
+          "prediction": 8.398450357274562,
+          "prediction_lower": 5.879171720131051,
+          "prediction_upper": 10.226625378638367,
+          "exceedance_probability": 0.11742580589286578,
+          "alarm_probability": 0.2,
           "alarm_above_10": false,
+          "prediction_previous_lab": 7.099999904632568,
           "previous_lab": {
             "sample_time": "2026-01-07T10:00:00",
             "available_at": "2026-01-07T14:00:00",
             "value": 7.099999904632568
           },
+          "lab_anchor": {
+            "level": 8.600000381469728,
+            "samples": 10,
+            "pairs": 10
+          },
+          "analysers": {
+            "q21": {
+              "metric_id": "ht.Q21",
+              "value": 8.303833961486816,
+              "timestamp": "2026-01-08T07:00:00",
+              "age_minutes": 0.0,
+              "offset": 1.1920975844065347,
+              "adjusted": 9.49593154589335,
+              "anchor_pairs": 10
+            },
+            "pak": {
+              "metric_id": "pak.ht.Mg.Sulfur",
+              "value": 7.498627185821533,
+              "timestamp": "2026-01-08T07:00:00",
+              "age_minutes": 0.0,
+              "offset": 2.5310130914052325,
+              "adjusted": 10.029640277226765,
+              "anchor_pairs": 10
+            }
+          },
+          "horizons": [
+            {
+              "minutes": 0,
+              "prediction": 8.605817642557211,
+              "lower": 6.940930925283815,
+              "upper": 10.246444948997807,
+              "exceedance_probability": 0.12247206222297047,
+              "limit": 10.0,
+              "interval": "80% (10-90% квантили out-of-fold остатков)"
+            },
+            {
+              "minutes": 60,
+              "prediction": 8.890575300924125,
+              "lower": 6.787707875206186,
+              "upper": 10.903686541659475,
+              "exceedance_probability": 0.20347578322006477,
+              "limit": 10.0,
+              "interval": "80% (10-90% квантили out-of-fold остатков)"
+            },
+            {
+              "minutes": 120,
+              "prediction": 8.931183112140411,
+              "lower": 6.382859237250652,
+              "upper": 10.835850115363531,
+              "exceedance_probability": 0.210618524116723,
+              "limit": 10.0,
+              "interval": "80% (10-90% квантили out-of-fold остатков)"
+            },
+            {
+              "minutes": 180,
+              "prediction": 8.398450357274562,
+              "lower": 5.879171720131051,
+              "upper": 10.226625378638367,
+              "exceedance_probability": 0.11742580589286578,
+              "limit": 10.0,
+              "interval": "80% (10-90% квантили out-of-fold остатков)"
+            }
+          ],
           "feature_cutoff": "2026-01-08T07:00:00",
           "feature_time": "2026-01-08T07:00:00",
-          "forecast_horizon_minutes": 180.0,
           "model_available_from": "2026-01-01T00:00:00",
           "lims_publication_delay_minutes": 240.0,
-          "feature_count": 292,
+          "feature_count": 15,
           "imputed_feature_count": 0,
           "applicability": {
             "status": "ok",
@@ -116,25 +196,44 @@
             "missing_fraction": 0.0,
             "ood_fraction": 0.0,
             "ood_feature_count": 0,
-            "max_absolute_z": 2.3380169213718145,
+            "max_absolute_z": 0.6386878128052633,
             "policy": {
-              "max_missing_fraction": 0.2,
-              "max_ood_fraction": 0.1,
-              "max_absolute_z": 12.0,
+              "max_missing_fraction": 0.34,
+              "max_ood_fraction": 0.2,
+              "max_absolute_z": 8.0,
               "support_quantiles": [
                 0.005,
                 0.995
               ],
               "support_margin_fraction": 0.1,
+              "min_anchor_pairs": 3,
               "description": "Engineering abstention heuristics, not calibrated confidence or safe control limits"
             }
           },
           "model": {
-            "name": "standardized Ridge on log1p(target)",
-            "alpha": 3000.0,
+            "name": "lab-anchored standardized ridge on ln(sulfur) per horizon; empirical out-of-fold residual quantiles",
+            "horizons_minutes": [
+              0,
+              60,
+              120,
+              180
+            ],
             "artifact": "model.json",
-            "artifact_sha256": "93c2f3875d224d59ea9b6c0ecd63cac8150f49725d30fdc84c8ccbbfcff972ee",
-            "risk_guard": "max(ridge, lab result published by origin)"
+            "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
+            "model_columns": [
+              "ln_q21",
+              "ln_q21_1h",
+              "ln_pak",
+              "ln_pak_1h",
+              "ln_level",
+              "ln_previous_lab"
+            ],
+            "alpha": {
+              "0": 30.0,
+              "60": 100.0,
+              "120": 30.0,
+              "180": 100.0
+            }
           },
           "leakage_check": {
             "passed": true,
@@ -144,15 +243,26 @@
             "violations": 0
           },
           "warnings": [
-            "Пороговый risk_guard — эвристика; точность обнаружения превышений ограничена. Прогноз не доказывает эффект управления."
+            "На горизонте 2–3 часа точечный прогноз близок к локальному уровню; используйте интервал и вероятность превышения.",
+            "Прогноз — статистическая оценка серы на выходе гидроочистки, не сертификация товарного топлива и не доказательство эффекта управления."
           ]
         },
         "quality_evidence": {
           "sulfur": {
+            "source": "model.nowcast",
+            "value": 8.605817642557211,
+            "timestamp": "2026-01-08T07:00:00",
+            "freshness": "fresh",
+            "age_minutes": null,
+            "flags": [],
+            "available_at": "2026-01-08T07:00:00"
+          },
+          "last_lab_sulfur": {
             "source": "lims.ht.2.Mg.Sulfur",
             "value": 7.099999904632568,
             "timestamp": "2026-01-07T10:00:00",
             "freshness": "fresh",
+            "age_minutes": 1260.0,
             "flags": [],
             "available_at": "2026-01-07T14:00:00"
           },
@@ -161,6 +271,7 @@
               "value": 364.5626525878906,
               "timestamp": "2026-01-08T07:00:00",
               "freshness": "fresh",
+              "age_minutes": 0.0,
               "flags": [],
               "available_at": "2026-01-08T07:00:00"
             },
@@ -168,6 +279,7 @@
               "value": 203.38870239257807,
               "timestamp": "2026-01-08T07:00:00",
               "freshness": "fresh",
+              "age_minutes": 0.0,
               "flags": [],
               "available_at": "2026-01-08T07:00:00"
             },
@@ -175,6 +287,7 @@
               "value": 3.918800115585327,
               "timestamp": "2026-01-08T07:00:00",
               "freshness": "fresh",
+              "age_minutes": 0.0,
               "flags": [],
               "available_at": "2026-01-08T07:00:00"
             }
@@ -186,6 +299,7 @@
               "value": 350.0,
               "timestamp": "2026-01-07T10:00:00",
               "freshness": "fresh",
+              "age_minutes": 1260.0,
               "flags": [],
               "available_at": "2026-01-07T14:00:00"
             },
@@ -194,8 +308,10 @@
               "value": 52.900001525878906,
               "timestamp": "2026-01-07T10:00:00",
               "freshness": "fresh",
+              "age_minutes": 1260.0,
               "flags": [],
-              "available_at": "2026-01-07T14:00:00"
+              "available_at": "2026-01-07T14:00:00",
+              "max_age_minutes": 86400
             }
           }
         },
@@ -207,7 +323,7 @@
           "confidence_kind": "binary_data_gate_not_probability",
           "regime_severity": {
             "status": "ok",
-            "index": 0.014101707953121842,
+            "index": 0.018465814107890374,
             "class": "normal",
             "within_model_limit": true,
             "model_limit": 1.0,
@@ -215,29 +331,29 @@
               {
                 "metric_id": "ht.T6",
                 "value": 364.5626525878906,
-                "train_mean": 363.89922026431924,
-                "train_std": 13.897660925931655,
-                "positive_z": 0.04773697725877642
+                "train_mean": 362.8890198864554,
+                "train_std": 12.715825316681757,
+                "positive_z": 0.13161809475627217
               },
               {
                 "metric_id": "ht.P13",
                 "value": 3.918800115585327,
-                "train_mean": 3.888229464792242,
-                "train_std": 0.1806557220746527,
-                "positive_z": 0.1692204954374621
+                "train_mean": 3.893977390723942,
+                "train_std": 0.168031617211358,
+                "positive_z": 0.147726512863123
               },
               {
                 "metric_id": "ht.F9",
                 "value": 203.38870239257807,
-                "train_mean": 211.74176771953853,
-                "train_std": 31.03368649571466,
+                "train_mean": 213.44224885991036,
+                "train_std": 31.516209881777463,
                 "positive_z": 0.0
               }
             ],
-            "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
-            "artifact_sha256": "93c2f3875d224d59ea9b6c0ecd63cac8150f49725d30fdc84c8ccbbfcff972ee",
+            "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
+            "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
             "failure_probability": null,
-            "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+            "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
           },
           "can_recommend": true,
           "basis": "observed_and_forecast",
@@ -250,8 +366,54 @@
             "id": "hold",
             "status": "ok",
             "feasible": true,
-            "predicted_sulfur": 7.099999904632568,
+            "predicted_sulfur": 8.398450357274562,
+            "exceedance_probability": 0.11742580589286578,
             "effort": 0.0,
+            "objectives": {
+              "throughput_index": 1.0,
+              "throughput_change_pct": 0,
+              "energy_cost_index": 1.0,
+              "regime_severity": {
+                "status": "ok",
+                "index": 0.018465814107890374,
+                "class": "normal",
+                "within_model_limit": true,
+                "model_limit": 1.0,
+                "factors": [
+                  {
+                    "metric_id": "ht.T6",
+                    "value": 364.5626525878906,
+                    "train_mean": 362.8890198864554,
+                    "train_std": 12.715825316681757,
+                    "positive_z": 0.13161809475627217
+                  },
+                  {
+                    "metric_id": "ht.P13",
+                    "value": 3.918800115585327,
+                    "train_mean": 3.893977390723942,
+                    "train_std": 0.168031617211358,
+                    "positive_z": 0.147726512863123
+                  },
+                  {
+                    "metric_id": "ht.F9",
+                    "value": 203.38870239257807,
+                    "train_mean": 213.44224885991036,
+                    "train_std": 31.516209881777463,
+                    "positive_z": 0.0
+                  }
+                ],
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
+                "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
+                "failure_probability": null,
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
+              },
+              "exceedance_probability": 0.11742580589286578,
+              "quality_risk_index": 0.39141935297621927,
+              "ranking_loss": 0.20032613001508223,
+              "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
+              "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
+              "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
+            },
             "safety_gate": {
               "passed": true,
               "reasons": [],
@@ -267,6 +429,11 @@
                   "basis": "editable_target"
                 },
                 {
+                  "name": "sulfur_exceedance_probability",
+                  "passed": true,
+                  "basis": "editable_probability_target_from_forecast_residuals"
+                },
+                {
                   "name": "t95_evidence",
                   "passed": true,
                   "basis": "observed_baseline"
@@ -279,7 +446,7 @@
                 {
                   "name": "cetane_evidence",
                   "passed": true,
-                  "basis": "observed_baseline"
+                  "basis": "slow_quality_window"
                 },
                 {
                   "name": "cetane",
@@ -302,8 +469,54 @@
             "id": "conservative",
             "status": "ok",
             "feasible": true,
-            "predicted_sulfur": 7.099999904632568,
+            "predicted_sulfur": 8.398450357274562,
+            "exceedance_probability": 0.11742580589286578,
             "effort": 0.0,
+            "objectives": {
+              "throughput_index": 1.0,
+              "throughput_change_pct": 0.0,
+              "energy_cost_index": 1.0,
+              "regime_severity": {
+                "status": "ok",
+                "index": 0.018465814107890374,
+                "class": "normal",
+                "within_model_limit": true,
+                "model_limit": 1.0,
+                "factors": [
+                  {
+                    "metric_id": "ht.T6",
+                    "value": 364.5626525878906,
+                    "train_mean": 362.8890198864554,
+                    "train_std": 12.715825316681757,
+                    "positive_z": 0.13161809475627217
+                  },
+                  {
+                    "metric_id": "ht.P13",
+                    "value": 3.918800115585327,
+                    "train_mean": 3.893977390723942,
+                    "train_std": 0.168031617211358,
+                    "positive_z": 0.147726512863123
+                  },
+                  {
+                    "metric_id": "ht.F9",
+                    "value": 203.38870239257807,
+                    "train_mean": 213.44224885991036,
+                    "train_std": 31.516209881777463,
+                    "positive_z": 0.0
+                  }
+                ],
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
+                "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
+                "failure_probability": null,
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
+              },
+              "exceedance_probability": 0.11742580589286578,
+              "quality_risk_index": 0.39141935297621927,
+              "ranking_loss": 0.20032613001508223,
+              "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
+              "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
+              "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
+            },
             "safety_gate": {
               "passed": true,
               "reasons": [],
@@ -319,6 +532,11 @@
                   "basis": "editable_target"
                 },
                 {
+                  "name": "sulfur_exceedance_probability",
+                  "passed": true,
+                  "basis": "editable_probability_target_from_forecast_residuals"
+                },
+                {
                   "name": "t95_evidence",
                   "passed": true,
                   "basis": "observed_baseline"
@@ -331,7 +549,7 @@
                 {
                   "name": "cetane_evidence",
                   "passed": true,
-                  "basis": "observed_baseline"
+                  "basis": "slow_quality_window"
                 },
                 {
                   "name": "cetane",
@@ -354,8 +572,54 @@
             "id": "automatic",
             "status": "ok",
             "feasible": true,
-            "predicted_sulfur": 7.099999904632568,
+            "predicted_sulfur": 8.398450357274562,
+            "exceedance_probability": 0.11742580589286578,
             "effort": 0.0,
+            "objectives": {
+              "throughput_index": 1.0,
+              "throughput_change_pct": 0.0,
+              "energy_cost_index": 1.0,
+              "regime_severity": {
+                "status": "ok",
+                "index": 0.018465814107890374,
+                "class": "normal",
+                "within_model_limit": true,
+                "model_limit": 1.0,
+                "factors": [
+                  {
+                    "metric_id": "ht.T6",
+                    "value": 364.5626525878906,
+                    "train_mean": 362.8890198864554,
+                    "train_std": 12.715825316681757,
+                    "positive_z": 0.13161809475627217
+                  },
+                  {
+                    "metric_id": "ht.P13",
+                    "value": 3.918800115585327,
+                    "train_mean": 3.893977390723942,
+                    "train_std": 0.168031617211358,
+                    "positive_z": 0.147726512863123
+                  },
+                  {
+                    "metric_id": "ht.F9",
+                    "value": 203.38870239257807,
+                    "train_mean": 213.44224885991036,
+                    "train_std": 31.516209881777463,
+                    "positive_z": 0.0
+                  }
+                ],
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
+                "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
+                "failure_probability": null,
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
+              },
+              "exceedance_probability": 0.11742580589286578,
+              "quality_risk_index": 0.39141935297621927,
+              "ranking_loss": 0.20032613001508223,
+              "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
+              "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
+              "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
+            },
             "safety_gate": {
               "passed": true,
               "reasons": [],
@@ -371,6 +635,11 @@
                   "basis": "editable_target"
                 },
                 {
+                  "name": "sulfur_exceedance_probability",
+                  "passed": true,
+                  "basis": "editable_probability_target_from_forecast_residuals"
+                },
+                {
                   "name": "t95_evidence",
                   "passed": true,
                   "basis": "observed_baseline"
@@ -383,7 +652,7 @@
                 {
                   "name": "cetane_evidence",
                   "passed": true,
-                  "basis": "observed_baseline"
+                  "basis": "slow_quality_window"
                 },
                 {
                   "name": "cetane",
@@ -408,27 +677,33 @@
           "basis": "observed_and_forecast",
           "requires_operator_review": true,
           "operational_safety_validated": false,
-          "predicted_sulfur": 7.099999904632568,
-          "target_sulfur": 10,
+          "predicted_sulfur": 8.398450357274562,
+          "predicted_sulfur_lower": 5.879171720131051,
+          "predicted_sulfur_upper": 10.226625378638367,
+          "exceedance_probability": 0.11742580589286578,
+          "target_sulfur": 9.0,
           "target_met": true,
           "controls": {
             "ht.T6": {
               "current": 364.5626525878906,
               "change": 0,
               "recommended": 364.5626525878906,
-              "relative": false
+              "relative": false,
+              "model_change_limit": 10.0
             },
             "ht.F9": {
               "current": 203.38870239257807,
               "change": 0,
               "recommended": 203.38870239257807,
-              "relative": true
+              "relative": true,
+              "model_change_limit": 10.0
             },
             "ht.P13": {
               "current": 3.918800115585327,
               "change": 0,
               "recommended": 3.918800115585327,
-              "relative": false
+              "relative": false,
+              "model_change_limit": 0.5
             }
           },
           "candidate_id": "hold",
@@ -438,7 +713,7 @@
             "energy_cost_index": 1.0,
             "regime_severity": {
               "status": "ok",
-              "index": 0.014101707953121842,
+              "index": 0.018465814107890374,
               "class": "normal",
               "within_model_limit": true,
               "model_limit": 1.0,
@@ -446,33 +721,35 @@
                 {
                   "metric_id": "ht.T6",
                   "value": 364.5626525878906,
-                  "train_mean": 363.89922026431924,
-                  "train_std": 13.897660925931655,
-                  "positive_z": 0.04773697725877642
+                  "train_mean": 362.8890198864554,
+                  "train_std": 12.715825316681757,
+                  "positive_z": 0.13161809475627217
                 },
                 {
                   "metric_id": "ht.P13",
                   "value": 3.918800115585327,
-                  "train_mean": 3.888229464792242,
-                  "train_std": 0.1806557220746527,
-                  "positive_z": 0.1692204954374621
+                  "train_mean": 3.893977390723942,
+                  "train_std": 0.168031617211358,
+                  "positive_z": 0.147726512863123
                 },
                 {
                   "metric_id": "ht.F9",
                   "value": 203.38870239257807,
-                  "train_mean": 211.74176771953853,
-                  "train_std": 31.03368649571466,
+                  "train_mean": 213.44224885991036,
+                  "train_std": 31.516209881777463,
                   "positive_z": 0.0
                 }
               ],
-              "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
-              "artifact_sha256": "93c2f3875d224d59ea9b6c0ecd63cac8150f49725d30fdc84c8ccbbfcff972ee",
+              "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
+              "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
               "failure_probability": null,
-              "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+              "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
             },
-            "ranking_loss": 0.0035254269882804604,
-            "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort",
-            "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units",
+            "exceedance_probability": 0.11742580589286578,
+            "quality_risk_index": 0.39141935297621927,
+            "ranking_loss": 0.20032613001508223,
+            "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
+            "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
             "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
           }
         }
@@ -481,28 +758,64 @@
     {
       "id": "quality_exceedance",
       "passed": true,
-      "purpose": "Published LIMS exceeds 10: independent alarm prevents automatic advice",
+      "purpose": "Nowcast above target with published LIMS > 10: forecast alarm triggers a corrective (temperature increase) recommendation instead of hold",
       "request": {
         "at": "2026-01-14T07:00:00"
       },
       "observed": {
-        "status": "abstain",
-        "selected_candidate": null,
+        "status": "recommendation",
+        "selected_candidate": "automatic",
         "safety_gate": {
-          "passed": false,
-          "reasons": [
-            "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки",
-            "cetane: измерение не свежее (stale)",
-            "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
-            "Цель по сере не достигнута в выбранном горизонте"
+          "passed": true,
+          "reasons": [],
+          "checks": [
+            {
+              "name": "sulfur_hard_limit",
+              "passed": true,
+              "basis": "confirmed_10_mg_kg"
+            },
+            {
+              "name": "sulfur_editable_target",
+              "passed": true,
+              "basis": "editable_target"
+            },
+            {
+              "name": "sulfur_exceedance_probability",
+              "passed": true,
+              "basis": "editable_probability_target_from_forecast_residuals"
+            },
+            {
+              "name": "t95_evidence",
+              "passed": true,
+              "basis": "observed_baseline"
+            },
+            {
+              "name": "t95",
+              "passed": true,
+              "basis": "editable_target_baseline_only"
+            },
+            {
+              "name": "cetane_evidence",
+              "passed": true,
+              "basis": "slow_quality_window"
+            },
+            {
+              "name": "cetane",
+              "passed": true,
+              "basis": "editable_target_baseline_only"
+            },
+            {
+              "name": "regime_severity_model_limit",
+              "passed": true,
+              "basis": "experimental_high_side_12sigma_not_industrial_limit"
+            }
           ],
-          "checks": [],
-          "operational_safety_validated": false
+          "scope": "horizon_endpoint_surrogate_and_supplied_blend",
+          "unassessed": [],
+          "operational_safety_validated": false,
+          "forecast_alarm": true
         },
-        "abstain": {
-          "reason": "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки",
-          "missing": []
-        },
+        "abstain": null,
         "trace": [
           {
             "step": 1,
@@ -513,67 +826,161 @@
           {
             "step": 2,
             "role": "reliability",
-            "status": "insufficient",
-            "summary": "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки"
+            "status": "ok",
+            "summary": "Временная доступность и свежесть прошли контроль"
           },
           {
             "step": 3,
             "role": "optimization",
-            "status": "insufficient",
-            "summary": "Ни один кандидат не прошёл все применимые проверки; требуется ручной разбор"
+            "status": "ok",
+            "summary": "Расчётный кандидат проходит применимые проверки для рассмотрения оператором; кандидатов: 3, выбрано: automatic, safety gate: passed"
           }
         ],
         "forecast": {
           "at": "2026-01-14T07:00:00",
           "prediction_origin": "2026-01-14T07:00:00",
           "target_time": "2026-01-14T10:00:00",
+          "horizon_minutes": 180.0,
           "status": "ok",
           "reasons": [],
           "target": {
             "metric_id": "lims.ht.2.Mg.Sulfur",
             "unit": "мг/кг"
           },
-          "prediction_ridge": 8.747037114156376,
-          "prediction_previous_lab": 11.100000381469727,
-          "prediction_risk_guard": 11.100000381469727,
+          "hard_limit": 10.0,
+          "nowcast": {
+            "prediction": 10.777295089234386,
+            "lower": 8.692313023907891,
+            "upper": 12.831896446986608,
+            "exceedance_probability": 0.7244590637386775,
+            "limit": 10.0,
+            "interval": "80% (10-90% квантили out-of-fold остатков)"
+          },
+          "prediction": 9.902709624191113,
+          "prediction_lower": 6.932199143712894,
+          "prediction_upper": 12.058331865035095,
+          "exceedance_probability": 0.4361313787261598,
+          "alarm_probability": 0.2,
           "alarm_above_10": true,
+          "prediction_previous_lab": 11.100000381469727,
           "previous_lab": {
             "sample_time": "2026-01-13T22:00:00",
             "available_at": "2026-01-14T02:00:00",
             "value": 11.100000381469727
           },
+          "lab_anchor": {
+            "level": 9.800000190734863,
+            "samples": 10,
+            "pairs": 10
+          },
+          "analysers": {
+            "q21": {
+              "metric_id": "ht.Q21",
+              "value": 8.80585765838623,
+              "timestamp": "2026-01-14T07:00:00",
+              "age_minutes": 0.0,
+              "offset": 0.9531062841415405,
+              "adjusted": 9.758963942527771,
+              "anchor_pairs": 10
+            },
+            "pak": {
+              "metric_id": "pak.ht.Mg.Sulfur",
+              "value": 7.383343696594238,
+              "timestamp": "2026-01-14T07:00:00",
+              "age_minutes": 0.0,
+              "offset": 2.9866758187611895,
+              "adjusted": 10.370019515355427,
+              "anchor_pairs": 9
+            }
+          },
+          "horizons": [
+            {
+              "minutes": 0,
+              "prediction": 10.777295089234386,
+              "lower": 8.692313023907891,
+              "upper": 12.831896446986608,
+              "exceedance_probability": 0.7244590637386775,
+              "limit": 10.0,
+              "interval": "80% (10-90% квантили out-of-fold остатков)"
+            },
+            {
+              "minutes": 60,
+              "prediction": 9.36391838283024,
+              "lower": 7.149092201414473,
+              "upper": 11.48420967059927,
+              "exceedance_probability": 0.33833271704035384,
+              "limit": 10.0,
+              "interval": "80% (10-90% квантили out-of-fold остатков)"
+            },
+            {
+              "minutes": 120,
+              "prediction": 9.842987787553719,
+              "lower": 7.034499767061196,
+              "upper": 11.942106551180633,
+              "exceedance_probability": 0.44227111046558576,
+              "limit": 10.0,
+              "interval": "80% (10-90% квантили out-of-fold остатков)"
+            },
+            {
+              "minutes": 180,
+              "prediction": 9.902709624191113,
+              "lower": 6.932199143712894,
+              "upper": 12.058331865035095,
+              "exceedance_probability": 0.4361313787261598,
+              "limit": 10.0,
+              "interval": "80% (10-90% квантили out-of-fold остатков)"
+            }
+          ],
           "feature_cutoff": "2026-01-14T07:00:00",
           "feature_time": "2026-01-14T07:00:00",
-          "forecast_horizon_minutes": 180.0,
           "model_available_from": "2026-01-01T00:00:00",
           "lims_publication_delay_minutes": 240.0,
-          "feature_count": 292,
+          "feature_count": 15,
           "imputed_feature_count": 0,
           "applicability": {
             "status": "ok",
             "reasons": [],
             "missing_fraction": 0.0,
-            "ood_fraction": 0.003424657534246575,
-            "ood_feature_count": 1,
-            "max_absolute_z": 2.6464848392308533,
+            "ood_fraction": 0.0,
+            "ood_feature_count": 0,
+            "max_absolute_z": 1.9922869286061848,
             "policy": {
-              "max_missing_fraction": 0.2,
-              "max_ood_fraction": 0.1,
-              "max_absolute_z": 12.0,
+              "max_missing_fraction": 0.34,
+              "max_ood_fraction": 0.2,
+              "max_absolute_z": 8.0,
               "support_quantiles": [
                 0.005,
                 0.995
               ],
               "support_margin_fraction": 0.1,
+              "min_anchor_pairs": 3,
               "description": "Engineering abstention heuristics, not calibrated confidence or safe control limits"
             }
           },
           "model": {
-            "name": "standardized Ridge on log1p(target)",
-            "alpha": 3000.0,
+            "name": "lab-anchored standardized ridge on ln(sulfur) per horizon; empirical out-of-fold residual quantiles",
+            "horizons_minutes": [
+              0,
+              60,
+              120,
+              180
+            ],
             "artifact": "model.json",
-            "artifact_sha256": "93c2f3875d224d59ea9b6c0ecd63cac8150f49725d30fdc84c8ccbbfcff972ee",
-            "risk_guard": "max(ridge, lab result published by origin)"
+            "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
+            "model_columns": [
+              "ln_q21",
+              "ln_q21_1h",
+              "ln_pak",
+              "ln_pak_1h",
+              "ln_level",
+              "ln_previous_lab"
+            ],
+            "alpha": {
+              "0": 30.0,
+              "60": 100.0,
+              "120": 30.0,
+              "180": 100.0
+            }
           },
           "leakage_check": {
             "passed": true,
@@ -583,15 +990,26 @@
             "violations": 0
           },
           "warnings": [
-            "Пороговый risk_guard — эвристика; точность обнаружения превышений ограничена. Прогноз не доказывает эффект управления."
+            "На горизонте 2–3 часа точечный прогноз близок к локальному уровню; используйте интервал и вероятность превышения.",
+            "Прогноз — статистическая оценка серы на выходе гидроочистки, не сертификация товарного топлива и не доказательство эффекта управления."
           ]
         },
         "quality_evidence": {
           "sulfur": {
+            "source": "model.nowcast",
+            "value": 10.777295089234386,
+            "timestamp": "2026-01-14T07:00:00",
+            "freshness": "fresh",
+            "age_minutes": null,
+            "flags": [],
+            "available_at": "2026-01-14T07:00:00"
+          },
+          "last_lab_sulfur": {
             "source": "lims.ht.2.Mg.Sulfur",
             "value": 11.100000381469727,
             "timestamp": "2026-01-13T22:00:00",
             "freshness": "fresh",
+            "age_minutes": 540.0,
             "flags": [],
             "available_at": "2026-01-14T02:00:00"
           },
@@ -600,6 +1018,7 @@
               "value": 370.5388793945313,
               "timestamp": "2026-01-14T07:00:00",
               "freshness": "fresh",
+              "age_minutes": 0.0,
               "flags": [],
               "available_at": "2026-01-14T07:00:00"
             },
@@ -607,6 +1026,7 @@
               "value": 236.00991821289065,
               "timestamp": "2026-01-14T07:00:00",
               "freshness": "fresh",
+              "age_minutes": 0.0,
               "flags": [],
               "available_at": "2026-01-14T07:00:00"
             },
@@ -614,6 +1034,7 @@
               "value": 3.7593469619750977,
               "timestamp": "2026-01-14T07:00:00",
               "freshness": "fresh",
+              "age_minutes": 0.0,
               "flags": [],
               "available_at": "2026-01-14T07:00:00"
             }
@@ -625,6 +1046,7 @@
               "value": 350.0,
               "timestamp": "2026-01-13T10:00:00",
               "freshness": "fresh",
+              "age_minutes": 1260.0,
               "flags": [],
               "available_at": "2026-01-13T14:00:00"
             },
@@ -633,20 +1055,22 @@
               "value": 52.900001525878906,
               "timestamp": "2026-01-07T10:00:00",
               "freshness": "stale",
+              "age_minutes": 9900.0,
               "flags": [],
-              "available_at": "2026-01-07T14:00:00"
+              "available_at": "2026-01-07T14:00:00",
+              "max_age_minutes": 86400
             }
           }
         },
         "reliability": {
           "role": "reliability",
-          "status": "insufficient",
-          "summary": "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки",
-          "confidence": 0.0,
+          "status": "ok",
+          "summary": "Временная доступность и свежесть прошли контроль",
+          "confidence": 1.0,
           "confidence_kind": "binary_data_gate_not_probability",
           "regime_severity": {
             "status": "ok",
-            "index": 0.06516615016798824,
+            "index": 0.08950818260521873,
             "class": "normal",
             "within_model_limit": true,
             "model_limit": 1.0,
@@ -654,53 +1078,94 @@
               {
                 "metric_id": "ht.T6",
                 "value": 370.5388793945313,
-                "train_mean": 363.89922026431924,
-                "train_std": 13.897660925931655,
-                "positive_z": 0.4777537144990437
+                "train_mean": 362.8890198864554,
+                "train_std": 12.715825316681757,
+                "positive_z": 0.6016014940092119
               },
               {
                 "metric_id": "ht.P13",
                 "value": 3.7593469619750977,
-                "train_mean": 3.888229464792242,
-                "train_std": 0.1806557220746527,
+                "train_mean": 3.893977390723942,
+                "train_std": 0.168031617211358,
                 "positive_z": 0.0
               },
               {
                 "metric_id": "ht.F9",
                 "value": 236.00991821289065,
-                "train_mean": 211.74176771953853,
-                "train_std": 31.03368649571466,
-                "positive_z": 0.7819938020158589
+                "train_mean": 213.44224885991036,
+                "train_std": 31.516209881777463,
+                "positive_z": 0.7160654608417498
               }
             ],
-            "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
-            "artifact_sha256": "93c2f3875d224d59ea9b6c0ecd63cac8150f49725d30fdc84c8ccbbfcff972ee",
+            "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
+            "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
             "failure_probability": null,
-            "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+            "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
           },
-          "can_recommend": false,
+          "can_recommend": true,
           "basis": "observed_and_forecast",
-          "reasons": [
-            "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки"
-          ],
+          "reasons": [],
           "warnings": [
-            "Независимый прогноз/risk_guard превышает 10 мг/кг; сценарные коэффициенты не доказывают устранение этого риска"
+            "Прогноз без воздействия: вероятность превышения 10 мг/кг 44% (порог тревоги 20%); требуется корректирующее действие или ручная проверка"
           ],
-          "abstain_reason": "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки"
+          "abstain_reason": null
         },
         "candidates": [
           {
             "id": "automatic",
             "status": "ok",
-            "feasible": false,
-            "predicted_sulfur": 10.0,
-            "effort": 2.0,
+            "feasible": true,
+            "predicted_sulfur": 9.000000000000002,
+            "exceedance_probability": 0.24190134518626472,
+            "effort": 0.2639,
+            "objectives": {
+              "throughput_index": 1.0,
+              "throughput_change_pct": -0.0,
+              "energy_cost_index": 1.0263881679844342,
+              "regime_severity": {
+                "status": "ok",
+                "index": 0.10114046916228993,
+                "class": "normal",
+                "within_model_limit": true,
+                "model_limit": 1.0,
+                "factors": [
+                  {
+                    "metric_id": "ht.T6",
+                    "value": 373.17769619297474,
+                    "train_mean": 362.8890198864554,
+                    "train_std": 12.715825316681757,
+                    "positive_z": 0.8091237532983194
+                  },
+                  {
+                    "metric_id": "ht.P13",
+                    "value": 3.7593469619750977,
+                    "train_mean": 3.893977390723942,
+                    "train_std": 0.168031617211358,
+                    "positive_z": 0.0
+                  },
+                  {
+                    "metric_id": "ht.F9",
+                    "value": 236.00991821289065,
+                    "train_mean": 213.44224885991036,
+                    "train_std": 31.516209881777463,
+                    "positive_z": 0.7160654608417498
+                  }
+                ],
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
+                "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
+                "failure_probability": null,
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
+              },
+              "exceedance_probability": 0.24190134518626472,
+              "quality_risk_index": 0.806337817287549,
+              "ranking_loss": 0.46803719391878124,
+              "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
+              "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
+              "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
+            },
             "safety_gate": {
-              "passed": false,
-              "reasons": [
-                "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки",
-                "cetane: измерение не свежее (stale)"
-              ],
+              "passed": true,
+              "reasons": [],
               "checks": [
                 {
                   "name": "sulfur_hard_limit",
@@ -711,6 +1176,11 @@
                   "name": "sulfur_editable_target",
                   "passed": true,
                   "basis": "editable_target"
+                },
+                {
+                  "name": "sulfur_exceedance_probability",
+                  "passed": true,
+                  "basis": "editable_probability_target_from_forecast_residuals"
                 },
                 {
                   "name": "t95_evidence",
@@ -724,8 +1194,8 @@
                 },
                 {
                   "name": "cetane_evidence",
-                  "passed": false,
-                  "basis": "observed_baseline"
+                  "passed": true,
+                  "basis": "slow_quality_window"
                 },
                 {
                   "name": "cetane",
@@ -748,26 +1218,75 @@
             "id": "conservative",
             "status": "ok",
             "feasible": false,
-            "predicted_sulfur": 10.550000190734863,
-            "effort": 1.0,
+            "predicted_sulfur": 9.440571307803362,
+            "exceedance_probability": 0.3408017078609513,
+            "effort": 0.1319,
+            "objectives": {
+              "throughput_index": 1.0,
+              "throughput_change_pct": -0.0,
+              "energy_cost_index": 1.013194083992217,
+              "regime_severity": {
+                "status": "ok",
+                "index": 0.08950818260521873,
+                "class": "normal",
+                "within_model_limit": true,
+                "model_limit": 1.0,
+                "factors": [
+                  {
+                    "metric_id": "ht.T6",
+                    "value": 371.858287793753,
+                    "train_mean": 362.8890198864554,
+                    "train_std": 12.715825316681757,
+                    "positive_z": 0.7053626236537635
+                  },
+                  {
+                    "metric_id": "ht.P13",
+                    "value": 3.7593469619750977,
+                    "train_mean": 3.893977390723942,
+                    "train_std": 0.168031617211358,
+                    "positive_z": 0.0
+                  },
+                  {
+                    "metric_id": "ht.F9",
+                    "value": 236.00991821289065,
+                    "train_mean": 213.44224885991036,
+                    "train_std": 31.516209881777463,
+                    "positive_z": 0.7160654608417498
+                  }
+                ],
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
+                "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
+                "failure_probability": null,
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
+              },
+              "exceedance_probability": 0.3408017078609513,
+              "quality_risk_index": 1.1360056928698379,
+              "ranking_loss": 0.6101689760784408,
+              "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
+              "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
+              "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
+            },
             "safety_gate": {
               "passed": false,
               "reasons": [
-                "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки",
-                "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
                 "Цель по сере не достигнута в выбранном горизонте",
-                "cetane: измерение не свежее (stale)"
+                "Вероятность превышения 10 мг/кг в конце горизонта 34% выше допустимой 30%"
               ],
               "checks": [
                 {
                   "name": "sulfur_hard_limit",
-                  "passed": false,
+                  "passed": true,
                   "basis": "confirmed_10_mg_kg"
                 },
                 {
                   "name": "sulfur_editable_target",
                   "passed": false,
                   "basis": "editable_target"
+                },
+                {
+                  "name": "sulfur_exceedance_probability",
+                  "passed": false,
+                  "basis": "editable_probability_target_from_forecast_residuals"
                 },
                 {
                   "name": "t95_evidence",
@@ -781,8 +1300,8 @@
                 },
                 {
                   "name": "cetane_evidence",
-                  "passed": false,
-                  "basis": "observed_baseline"
+                  "passed": true,
+                  "basis": "slow_quality_window"
                 },
                 {
                   "name": "cetane",
@@ -805,26 +1324,75 @@
             "id": "hold",
             "status": "ok",
             "feasible": false,
-            "predicted_sulfur": 11.100000381469727,
+            "predicted_sulfur": 9.902709624191113,
+            "exceedance_probability": 0.4361313787261598,
             "effort": 0.0,
+            "objectives": {
+              "throughput_index": 1.0,
+              "throughput_change_pct": 0,
+              "energy_cost_index": 1.0,
+              "regime_severity": {
+                "status": "ok",
+                "index": 0.08950818260521873,
+                "class": "normal",
+                "within_model_limit": true,
+                "model_limit": 1.0,
+                "factors": [
+                  {
+                    "metric_id": "ht.T6",
+                    "value": 370.5388793945313,
+                    "train_mean": 362.8890198864554,
+                    "train_std": 12.715825316681757,
+                    "positive_z": 0.6016014940092119
+                  },
+                  {
+                    "metric_id": "ht.P13",
+                    "value": 3.7593469619750977,
+                    "train_mean": 3.893977390723942,
+                    "train_std": 0.168031617211358,
+                    "positive_z": 0.0
+                  },
+                  {
+                    "metric_id": "ht.F9",
+                    "value": 236.00991821289065,
+                    "train_mean": 213.44224885991036,
+                    "train_std": 31.516209881777463,
+                    "positive_z": 0.7160654608417498
+                  }
+                ],
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
+                "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
+                "failure_probability": null,
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
+              },
+              "exceedance_probability": 0.4361313787261598,
+              "quality_risk_index": 1.4537712624205328,
+              "ranking_loss": 0.7492626768615711,
+              "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
+              "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
+              "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
+            },
             "safety_gate": {
               "passed": false,
               "reasons": [
-                "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки",
-                "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
                 "Цель по сере не достигнута в выбранном горизонте",
-                "cetane: измерение не свежее (stale)"
+                "Вероятность превышения 10 мг/кг в конце горизонта 44% выше допустимой 30%"
               ],
               "checks": [
                 {
                   "name": "sulfur_hard_limit",
-                  "passed": false,
+                  "passed": true,
                   "basis": "confirmed_10_mg_kg"
                 },
                 {
                   "name": "sulfur_editable_target",
                   "passed": false,
                   "basis": "editable_target"
+                },
+                {
+                  "name": "sulfur_exceedance_probability",
+                  "passed": false,
+                  "basis": "editable_probability_target_from_forecast_residuals"
                 },
                 {
                   "name": "t95_evidence",
@@ -838,8 +1406,8 @@
                 },
                 {
                   "name": "cetane_evidence",
-                  "passed": false,
-                  "basis": "observed_baseline"
+                  "passed": true,
+                  "basis": "slow_quality_window"
                 },
                 {
                   "name": "cetane",
@@ -859,7 +1427,87 @@
             }
           }
         ],
-        "recommendation": null
+        "recommendation": {
+          "action": "review_controls",
+          "basis": "observed_and_forecast",
+          "requires_operator_review": true,
+          "operational_safety_validated": false,
+          "predicted_sulfur": 9.000000000000002,
+          "predicted_sulfur_lower": 6.300274840030188,
+          "predicted_sulfur_upper": 10.959120372489016,
+          "exceedance_probability": 0.24190134518626472,
+          "target_sulfur": 9.0,
+          "target_met": true,
+          "controls": {
+            "ht.T6": {
+              "current": 370.5388793945313,
+              "change": 2.6388167984434228,
+              "recommended": 373.17769619297474,
+              "relative": false,
+              "model_change_limit": 10.0
+            },
+            "ht.F9": {
+              "current": 236.00991821289065,
+              "change": -0.0,
+              "recommended": 236.00991821289065,
+              "relative": true,
+              "model_change_limit": 10.0
+            },
+            "ht.P13": {
+              "current": 3.7593469619750977,
+              "change": 0.0,
+              "recommended": 3.7593469619750977,
+              "relative": false,
+              "model_change_limit": 0.5
+            }
+          },
+          "candidate_id": "automatic",
+          "objectives": {
+            "throughput_index": 1.0,
+            "throughput_change_pct": -0.0,
+            "energy_cost_index": 1.0263881679844342,
+            "regime_severity": {
+              "status": "ok",
+              "index": 0.10114046916228993,
+              "class": "normal",
+              "within_model_limit": true,
+              "model_limit": 1.0,
+              "factors": [
+                {
+                  "metric_id": "ht.T6",
+                  "value": 373.17769619297474,
+                  "train_mean": 362.8890198864554,
+                  "train_std": 12.715825316681757,
+                  "positive_z": 0.8091237532983194
+                },
+                {
+                  "metric_id": "ht.P13",
+                  "value": 3.7593469619750977,
+                  "train_mean": 3.893977390723942,
+                  "train_std": 0.168031617211358,
+                  "positive_z": 0.0
+                },
+                {
+                  "metric_id": "ht.F9",
+                  "value": 236.00991821289065,
+                  "train_mean": 213.44224885991036,
+                  "train_std": 31.516209881777463,
+                  "positive_z": 0.7160654608417498
+                }
+              ],
+              "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
+              "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
+              "failure_probability": null,
+              "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
+            },
+            "exceedance_probability": 0.24190134518626472,
+            "quality_risk_index": 0.806337817287549,
+            "ranking_loss": 0.46803719391878124,
+            "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
+            "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
+            "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
+          }
+        }
       }
     },
     {
@@ -922,33 +1570,64 @@
           "at": "2022-12-31T00:00:00",
           "prediction_origin": "2022-12-31T00:00:00",
           "target_time": "2022-12-31T03:00:00",
+          "horizon_minutes": 180.0,
           "status": "abstain",
           "reasons": [
-            "no_telemetry_evidence",
+            "no_sulfur_evidence",
+            "no_control_telemetry",
             "too_many_missing_features",
+            "insufficient_lab_anchor",
             "model_not_yet_available_at_origin"
           ],
           "target": {
             "metric_id": "lims.ht.2.Mg.Sulfur",
             "unit": "мг/кг"
           },
-          "prediction_ridge": null,
-          "prediction_previous_lab": null,
-          "prediction_risk_guard": null,
+          "hard_limit": 10.0,
+          "nowcast": null,
+          "prediction": null,
+          "prediction_lower": null,
+          "prediction_upper": null,
+          "exceedance_probability": null,
+          "alarm_probability": 0.2,
           "alarm_above_10": null,
+          "prediction_previous_lab": null,
           "previous_lab": null,
+          "lab_anchor": {
+            "level": null,
+            "samples": 10,
+            "pairs": 0
+          },
+          "analysers": {
+            "q21": {
+              "metric_id": "ht.Q21",
+              "value": null,
+              "timestamp": null,
+              "adjusted": null,
+              "offset": null
+            },
+            "pak": {
+              "metric_id": "pak.ht.Mg.Sulfur",
+              "value": null,
+              "timestamp": null,
+              "adjusted": null,
+              "offset": null
+            }
+          },
+          "horizons": [],
           "feature_cutoff": "2022-12-31T00:00:00",
           "feature_time": null,
-          "forecast_horizon_minutes": 180.0,
           "model_available_from": "2026-01-01T00:00:00",
           "lims_publication_delay_minutes": 240.0,
-          "feature_count": 292,
-          "imputed_feature_count": 292,
+          "feature_count": 15,
+          "imputed_feature_count": 15,
           "applicability": {
             "status": "abstain",
             "reasons": [
-              "no_telemetry_evidence",
+              "no_sulfur_evidence",
+              "no_control_telemetry",
               "too_many_missing_features",
+              "insufficient_lab_anchor",
               "model_not_yet_available_at_origin"
             ],
             "missing_fraction": 1.0,
@@ -956,23 +1635,42 @@
             "ood_feature_count": 0,
             "max_absolute_z": null,
             "policy": {
-              "max_missing_fraction": 0.2,
-              "max_ood_fraction": 0.1,
-              "max_absolute_z": 12.0,
+              "max_missing_fraction": 0.34,
+              "max_ood_fraction": 0.2,
+              "max_absolute_z": 8.0,
               "support_quantiles": [
                 0.005,
                 0.995
               ],
               "support_margin_fraction": 0.1,
+              "min_anchor_pairs": 3,
               "description": "Engineering abstention heuristics, not calibrated confidence or safe control limits"
             }
           },
           "model": {
-            "name": "standardized Ridge on log1p(target)",
-            "alpha": 3000.0,
+            "name": "lab-anchored standardized ridge on ln(sulfur) per horizon; empirical out-of-fold residual quantiles",
+            "horizons_minutes": [
+              0,
+              60,
+              120,
+              180
+            ],
             "artifact": "model.json",
-            "artifact_sha256": "93c2f3875d224d59ea9b6c0ecd63cac8150f49725d30fdc84c8ccbbfcff972ee",
-            "risk_guard": "max(ridge, lab result published by origin)"
+            "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
+            "model_columns": [
+              "ln_q21",
+              "ln_q21_1h",
+              "ln_pak",
+              "ln_pak_1h",
+              "ln_level",
+              "ln_previous_lab"
+            ],
+            "alpha": {
+              "0": 30.0,
+              "60": 100.0,
+              "120": 30.0,
+              "180": 100.0
+            }
           },
           "leakage_check": {
             "passed": true,
@@ -984,11 +1682,19 @@
           "warnings": [
             "Пропущенные признаки заменяются train-only медианами только в пределах допустимого покрытия.",
             "Модель воздержалась от численного прогноза: недостаточно данных или признаки вне области обучения.",
-            "Пороговый risk_guard — эвристика; точность обнаружения превышений ограничена. Прогноз не доказывает эффект управления."
+            "На горизонте 2–3 часа точечный прогноз близок к локальному уровню; используйте интервал и вероятность превышения.",
+            "Прогноз — статистическая оценка серы на выходе гидроочистки, не сертификация товарного топлива и не доказательство эффекта управления."
           ]
         },
         "quality_evidence": {
           "sulfur": {
+            "source": null,
+            "value": null,
+            "timestamp": null,
+            "freshness": "missing",
+            "flags": []
+          },
+          "last_lab_sulfur": {
             "source": null,
             "value": null,
             "timestamp": null,
@@ -1000,6 +1706,7 @@
               "value": null,
               "timestamp": null,
               "freshness": "missing",
+              "age_minutes": null,
               "flags": [],
               "available_at": null
             },
@@ -1007,6 +1714,7 @@
               "value": null,
               "timestamp": null,
               "freshness": "missing",
+              "age_minutes": null,
               "flags": [],
               "available_at": null
             },
@@ -1014,6 +1722,7 @@
               "value": null,
               "timestamp": null,
               "freshness": "missing",
+              "age_minutes": null,
               "flags": [],
               "available_at": null
             }
@@ -1025,6 +1734,7 @@
               "value": null,
               "timestamp": null,
               "freshness": "missing",
+              "age_minutes": null,
               "flags": [],
               "available_at": null
             },
@@ -1033,8 +1743,10 @@
               "value": null,
               "timestamp": null,
               "freshness": "missing",
+              "age_minutes": null,
               "flags": [],
-              "available_at": null
+              "available_at": null,
+              "max_age_minutes": 86400
             }
           }
         },
@@ -1070,8 +1782,10 @@
           ],
           "warnings": [
             "Нет текущих значений управляющих тегов T6/F9/P13",
-            "no_telemetry_evidence",
+            "no_sulfur_evidence",
+            "no_control_telemetry",
             "too_many_missing_features",
+            "insufficient_lab_anchor",
             "model_not_yet_available_at_origin"
           ],
           "abstain_reason": "Недостаточно данных: отсутствует базовое значение серы; Базовая сера: отсутствует конечное численное значение; Базовая сера: измерение не свежее (missing); Базовая сера: неизвестно время измерения/доступности; ht.T6: отсутствует конечное численное значение; ht.T6: измерение не свежее (missing); ht.T6: неизвестно время измерения/доступности; ht.F9: отсутствует конечное численное значение; ht.F9: измерение не свежее (missing); ht.F9: неизвестно время измерения/доступности; ht.P13: отсутствует конечное численное значение; ht.P13: измерение не свежее (missing); ht.P13: неизвестно время измерения/доступности; Нет допустимого модельного прогноза для решения по наблюдаемым данным"
@@ -1098,7 +1812,6 @@
             "ht.P13: измерение не свежее (stale)",
             "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
             "Базовый показатель t95 не выполняет ограничение; его отклик не моделируется",
-            "cetane: измерение не свежее (stale)",
             "Базовый показатель cetane не выполняет ограничение; его отклик не моделируется"
           ],
           "checks": [],
@@ -1132,63 +1845,113 @@
           "at": "2026-08-08T12:00:00",
           "prediction_origin": "2026-08-08T12:00:00",
           "target_time": "2026-08-08T15:00:00",
+          "horizon_minutes": 180.0,
           "status": "abstain",
           "reasons": [
-            "no_telemetry_evidence",
+            "no_control_telemetry",
             "too_many_missing_features"
           ],
           "target": {
             "metric_id": "lims.ht.2.Mg.Sulfur",
             "unit": "мг/кг"
           },
-          "prediction_ridge": null,
-          "prediction_previous_lab": 8.800000190734863,
-          "prediction_risk_guard": null,
+          "hard_limit": 10.0,
+          "nowcast": null,
+          "prediction": null,
+          "prediction_lower": null,
+          "prediction_upper": null,
+          "exceedance_probability": null,
+          "alarm_probability": 0.2,
           "alarm_above_10": null,
+          "prediction_previous_lab": 8.800000190734863,
           "previous_lab": {
             "sample_time": "2026-08-07T13:00:00",
             "available_at": "2026-08-07T17:00:00",
             "value": 8.800000190734863
           },
+          "lab_anchor": {
+            "level": 8.800000190734865,
+            "samples": 10,
+            "pairs": 10
+          },
+          "analysers": {
+            "q21": {
+              "metric_id": "ht.Q21",
+              "value": 8.088680267333984,
+              "timestamp": "2026-08-07T00:00:00",
+              "age_minutes": 2160.0,
+              "offset": 0.47278356552124023,
+              "adjusted": 8.561463832855225,
+              "anchor_pairs": 8
+            },
+            "pak": {
+              "metric_id": "pak.ht.Mg.Sulfur",
+              "value": 8.298018455505371,
+              "timestamp": "2026-08-08T12:00:00",
+              "age_minutes": 0.0,
+              "offset": 0.454495906829834,
+              "adjusted": 8.752514362335205,
+              "anchor_pairs": 10
+            }
+          },
+          "horizons": [],
           "feature_cutoff": "2026-08-08T12:00:00",
-          "feature_time": null,
-          "forecast_horizon_minutes": 180.0,
+          "feature_time": "2026-08-08T12:00:00",
           "model_available_from": "2026-01-01T00:00:00",
           "lims_publication_delay_minutes": 240.0,
-          "feature_count": 292,
-          "imputed_feature_count": 291,
+          "feature_count": 15,
+          "imputed_feature_count": 10,
           "applicability": {
             "status": "abstain",
             "reasons": [
-              "no_telemetry_evidence",
+              "no_control_telemetry",
               "too_many_missing_features"
             ],
-            "missing_fraction": 0.9965753424657534,
+            "missing_fraction": 0.6666666666666666,
             "ood_fraction": 0.0,
             "ood_feature_count": 0,
-            "max_absolute_z": 0.21042608551141656,
+            "max_absolute_z": 0.31033226436802686,
             "policy": {
-              "max_missing_fraction": 0.2,
-              "max_ood_fraction": 0.1,
-              "max_absolute_z": 12.0,
+              "max_missing_fraction": 0.34,
+              "max_ood_fraction": 0.2,
+              "max_absolute_z": 8.0,
               "support_quantiles": [
                 0.005,
                 0.995
               ],
               "support_margin_fraction": 0.1,
+              "min_anchor_pairs": 3,
               "description": "Engineering abstention heuristics, not calibrated confidence or safe control limits"
             }
           },
           "model": {
-            "name": "standardized Ridge on log1p(target)",
-            "alpha": 3000.0,
+            "name": "lab-anchored standardized ridge on ln(sulfur) per horizon; empirical out-of-fold residual quantiles",
+            "horizons_minutes": [
+              0,
+              60,
+              120,
+              180
+            ],
             "artifact": "model.json",
-            "artifact_sha256": "93c2f3875d224d59ea9b6c0ecd63cac8150f49725d30fdc84c8ccbbfcff972ee",
-            "risk_guard": "max(ridge, lab result published by origin)"
+            "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
+            "model_columns": [
+              "ln_q21",
+              "ln_q21_1h",
+              "ln_pak",
+              "ln_pak_1h",
+              "ln_level",
+              "ln_previous_lab"
+            ],
+            "alpha": {
+              "0": 30.0,
+              "60": 100.0,
+              "120": 30.0,
+              "180": 100.0
+            }
           },
           "leakage_check": {
             "passed": true,
-            "feature_time": null,
+            "feature_time": "2026-08-08T12:00:00",
             "cutoff": "2026-08-08T12:00:00",
             "previous_lab_available_at": "2026-08-07T17:00:00",
             "violations": 0
@@ -1196,7 +1959,8 @@
           "warnings": [
             "Пропущенные признаки заменяются train-only медианами только в пределах допустимого покрытия.",
             "Модель воздержалась от численного прогноза: недостаточно данных или признаки вне области обучения.",
-            "Пороговый risk_guard — эвристика; точность обнаружения превышений ограничена. Прогноз не доказывает эффект управления."
+            "На горизонте 2–3 часа точечный прогноз близок к локальному уровню; используйте интервал и вероятность превышения.",
+            "Прогноз — статистическая оценка серы на выходе гидроочистки, не сертификация товарного топлива и не доказательство эффекта управления."
           ]
         },
         "quality_evidence": {
@@ -1205,6 +1969,16 @@
             "value": 8.800000190734863,
             "timestamp": "2026-08-07T13:00:00",
             "freshness": "fresh",
+            "age_minutes": 1380.0,
+            "flags": [],
+            "available_at": "2026-08-07T17:00:00"
+          },
+          "last_lab_sulfur": {
+            "source": "lims.ht.2.Mg.Sulfur",
+            "value": 8.800000190734863,
+            "timestamp": "2026-08-07T13:00:00",
+            "freshness": "fresh",
+            "age_minutes": 1380.0,
             "flags": [],
             "available_at": "2026-08-07T17:00:00"
           },
@@ -1213,6 +1987,7 @@
               "value": 363.1390686035156,
               "timestamp": "2026-08-07T00:00:00",
               "freshness": "stale",
+              "age_minutes": 2160.0,
               "flags": [],
               "available_at": "2026-08-07T00:00:00"
             },
@@ -1220,6 +1995,7 @@
               "value": 253.8329620361328,
               "timestamp": "2026-08-07T00:00:00",
               "freshness": "stale",
+              "age_minutes": 2160.0,
               "flags": [],
               "available_at": "2026-08-07T00:00:00"
             },
@@ -1227,6 +2003,7 @@
               "value": 3.974820375442505,
               "timestamp": "2026-08-07T00:00:00",
               "freshness": "stale",
+              "age_minutes": 2160.0,
               "flags": [],
               "available_at": "2026-08-07T00:00:00"
             }
@@ -1238,6 +2015,7 @@
               "value": 365.0,
               "timestamp": "2026-08-07T10:00:00",
               "freshness": "fresh",
+              "age_minutes": 1560.0,
               "flags": [],
               "available_at": "2026-08-07T14:00:00"
             },
@@ -1246,8 +2024,10 @@
               "value": 50.0,
               "timestamp": "2026-07-21T10:00:00",
               "freshness": "stale",
+              "age_minutes": 26040.0,
               "flags": [],
-              "available_at": "2026-07-21T14:00:00"
+              "available_at": "2026-07-21T14:00:00",
+              "max_age_minutes": 86400
             }
           }
         },
@@ -1259,7 +2039,7 @@
           "confidence_kind": "binary_data_gate_not_probability",
           "regime_severity": {
             "status": "ok",
-            "index": 0.11302555134296434,
+            "index": 0.16019816995656647,
             "class": "normal",
             "within_model_limit": true,
             "model_limit": 1.0,
@@ -1267,29 +2047,29 @@
               {
                 "metric_id": "ht.T6",
                 "value": 363.1390686035156,
-                "train_mean": 363.89922026431924,
-                "train_std": 13.897660925931655,
-                "positive_z": 0.0
+                "train_mean": 362.8890198864554,
+                "train_std": 12.715825316681757,
+                "positive_z": 0.0196643718227387
               },
               {
                 "metric_id": "ht.P13",
                 "value": 3.974820375442505,
-                "train_mean": 3.888229464792242,
-                "train_std": 0.1806557220746527,
-                "positive_z": 0.47931451966121946
+                "train_mean": 3.893977390723942,
+                "train_std": 0.168031617211358,
+                "positive_z": 0.48111769713478797
               },
               {
                 "metric_id": "ht.F9",
                 "value": 253.8329620361328,
-                "train_mean": 211.74176771953853,
-                "train_std": 31.03368649571466,
-                "positive_z": 1.3563066161155721
+                "train_mean": 213.44224885991036,
+                "train_std": 31.516209881777463,
+                "positive_z": 1.2815853596525317
               }
             ],
-            "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
-            "artifact_sha256": "93c2f3875d224d59ea9b6c0ecd63cac8150f49725d30fdc84c8ccbbfcff972ee",
+            "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
+            "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
             "failure_probability": null,
-            "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+            "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
           },
           "can_recommend": false,
           "basis": "observed_and_forecast",
@@ -1300,7 +2080,7 @@
             "Нет допустимого модельного прогноза для решения по наблюдаемым данным"
           ],
           "warnings": [
-            "no_telemetry_evidence",
+            "no_control_telemetry",
             "too_many_missing_features"
           ],
           "abstain_reason": "ht.T6: измерение не свежее (stale); ht.F9: измерение не свежее (stale); ht.P13: измерение не свежее (stale); Нет допустимого модельного прогноза для решения по наблюдаемым данным"
@@ -1310,8 +2090,54 @@
             "id": "hold",
             "status": "ok",
             "feasible": false,
-            "predicted_sulfur": 8.800000190734863,
+            "predicted_sulfur": 8.800000190734865,
+            "exceedance_probability": null,
             "effort": 0.0,
+            "objectives": {
+              "throughput_index": 1.0,
+              "throughput_change_pct": 0,
+              "energy_cost_index": 1.0,
+              "regime_severity": {
+                "status": "ok",
+                "index": 0.16019816995656647,
+                "class": "normal",
+                "within_model_limit": true,
+                "model_limit": 1.0,
+                "factors": [
+                  {
+                    "metric_id": "ht.T6",
+                    "value": 363.1390686035156,
+                    "train_mean": 362.8890198864554,
+                    "train_std": 12.715825316681757,
+                    "positive_z": 0.0196643718227387
+                  },
+                  {
+                    "metric_id": "ht.P13",
+                    "value": 3.974820375442505,
+                    "train_mean": 3.893977390723942,
+                    "train_std": 0.168031617211358,
+                    "positive_z": 0.48111769713478797
+                  },
+                  {
+                    "metric_id": "ht.F9",
+                    "value": 253.8329620361328,
+                    "train_mean": 213.44224885991036,
+                    "train_std": 31.516209881777463,
+                    "positive_z": 1.2815853596525317
+                  }
+                ],
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
+                "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
+                "failure_probability": null,
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
+              },
+              "exceedance_probability": null,
+              "quality_risk_index": 0.0,
+              "ranking_loss": 0.04004954248914162,
+              "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
+              "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
+              "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
+            },
             "safety_gate": {
               "passed": false,
               "reasons": [
@@ -1320,7 +2146,6 @@
                 "ht.P13: измерение не свежее (stale)",
                 "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
                 "Базовый показатель t95 не выполняет ограничение; его отклик не моделируется",
-                "cetane: измерение не свежее (stale)",
                 "Базовый показатель cetane не выполняет ограничение; его отклик не моделируется"
               ],
               "checks": [
@@ -1335,6 +2160,11 @@
                   "basis": "editable_target"
                 },
                 {
+                  "name": "sulfur_exceedance_probability",
+                  "passed": null,
+                  "basis": "not_assessed_no_forecast"
+                },
+                {
                   "name": "t95_evidence",
                   "passed": true,
                   "basis": "observed_baseline"
@@ -1346,8 +2176,8 @@
                 },
                 {
                   "name": "cetane_evidence",
-                  "passed": false,
-                  "basis": "observed_baseline"
+                  "passed": true,
+                  "basis": "slow_quality_window"
                 },
                 {
                   "name": "cetane",
@@ -1361,7 +2191,9 @@
                 }
               ],
               "scope": "horizon_endpoint_surrogate_and_supplied_blend",
-              "unassessed": [],
+              "unassessed": [
+                "sulfur_exceedance_probability"
+              ],
               "operational_safety_validated": false,
               "forecast_alarm": false
             }
@@ -1370,8 +2202,54 @@
             "id": "conservative",
             "status": "ok",
             "feasible": false,
-            "predicted_sulfur": 8.800000190734863,
+            "predicted_sulfur": 8.800000190734865,
+            "exceedance_probability": null,
             "effort": 0.0,
+            "objectives": {
+              "throughput_index": 1.0,
+              "throughput_change_pct": 0.0,
+              "energy_cost_index": 1.0,
+              "regime_severity": {
+                "status": "ok",
+                "index": 0.16019816995656647,
+                "class": "normal",
+                "within_model_limit": true,
+                "model_limit": 1.0,
+                "factors": [
+                  {
+                    "metric_id": "ht.T6",
+                    "value": 363.1390686035156,
+                    "train_mean": 362.8890198864554,
+                    "train_std": 12.715825316681757,
+                    "positive_z": 0.0196643718227387
+                  },
+                  {
+                    "metric_id": "ht.P13",
+                    "value": 3.974820375442505,
+                    "train_mean": 3.893977390723942,
+                    "train_std": 0.168031617211358,
+                    "positive_z": 0.48111769713478797
+                  },
+                  {
+                    "metric_id": "ht.F9",
+                    "value": 253.8329620361328,
+                    "train_mean": 213.44224885991036,
+                    "train_std": 31.516209881777463,
+                    "positive_z": 1.2815853596525317
+                  }
+                ],
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
+                "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
+                "failure_probability": null,
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
+              },
+              "exceedance_probability": null,
+              "quality_risk_index": 0.0,
+              "ranking_loss": 0.04004954248914162,
+              "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
+              "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
+              "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
+            },
             "safety_gate": {
               "passed": false,
               "reasons": [
@@ -1380,7 +2258,6 @@
                 "ht.P13: измерение не свежее (stale)",
                 "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
                 "Базовый показатель t95 не выполняет ограничение; его отклик не моделируется",
-                "cetane: измерение не свежее (stale)",
                 "Базовый показатель cetane не выполняет ограничение; его отклик не моделируется"
               ],
               "checks": [
@@ -1395,6 +2272,11 @@
                   "basis": "editable_target"
                 },
                 {
+                  "name": "sulfur_exceedance_probability",
+                  "passed": null,
+                  "basis": "not_assessed_no_forecast"
+                },
+                {
                   "name": "t95_evidence",
                   "passed": true,
                   "basis": "observed_baseline"
@@ -1406,8 +2288,8 @@
                 },
                 {
                   "name": "cetane_evidence",
-                  "passed": false,
-                  "basis": "observed_baseline"
+                  "passed": true,
+                  "basis": "slow_quality_window"
                 },
                 {
                   "name": "cetane",
@@ -1421,7 +2303,9 @@
                 }
               ],
               "scope": "horizon_endpoint_surrogate_and_supplied_blend",
-              "unassessed": [],
+              "unassessed": [
+                "sulfur_exceedance_probability"
+              ],
               "operational_safety_validated": false,
               "forecast_alarm": false
             }
@@ -1430,8 +2314,54 @@
             "id": "automatic",
             "status": "ok",
             "feasible": false,
-            "predicted_sulfur": 8.800000190734863,
+            "predicted_sulfur": 8.800000190734865,
+            "exceedance_probability": null,
             "effort": 0.0,
+            "objectives": {
+              "throughput_index": 1.0,
+              "throughput_change_pct": 0.0,
+              "energy_cost_index": 1.0,
+              "regime_severity": {
+                "status": "ok",
+                "index": 0.16019816995656647,
+                "class": "normal",
+                "within_model_limit": true,
+                "model_limit": 1.0,
+                "factors": [
+                  {
+                    "metric_id": "ht.T6",
+                    "value": 363.1390686035156,
+                    "train_mean": 362.8890198864554,
+                    "train_std": 12.715825316681757,
+                    "positive_z": 0.0196643718227387
+                  },
+                  {
+                    "metric_id": "ht.P13",
+                    "value": 3.974820375442505,
+                    "train_mean": 3.893977390723942,
+                    "train_std": 0.168031617211358,
+                    "positive_z": 0.48111769713478797
+                  },
+                  {
+                    "metric_id": "ht.F9",
+                    "value": 253.8329620361328,
+                    "train_mean": 213.44224885991036,
+                    "train_std": 31.516209881777463,
+                    "positive_z": 1.2815853596525317
+                  }
+                ],
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
+                "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
+                "failure_probability": null,
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
+              },
+              "exceedance_probability": null,
+              "quality_risk_index": 0.0,
+              "ranking_loss": 0.04004954248914162,
+              "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
+              "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
+              "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
+            },
             "safety_gate": {
               "passed": false,
               "reasons": [
@@ -1440,7 +2370,6 @@
                 "ht.P13: измерение не свежее (stale)",
                 "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
                 "Базовый показатель t95 не выполняет ограничение; его отклик не моделируется",
-                "cetane: измерение не свежее (stale)",
                 "Базовый показатель cetane не выполняет ограничение; его отклик не моделируется"
               ],
               "checks": [
@@ -1455,6 +2384,11 @@
                   "basis": "editable_target"
                 },
                 {
+                  "name": "sulfur_exceedance_probability",
+                  "passed": null,
+                  "basis": "not_assessed_no_forecast"
+                },
+                {
                   "name": "t95_evidence",
                   "passed": true,
                   "basis": "observed_baseline"
@@ -1466,8 +2400,8 @@
                 },
                 {
                   "name": "cetane_evidence",
-                  "passed": false,
-                  "basis": "observed_baseline"
+                  "passed": true,
+                  "basis": "slow_quality_window"
                 },
                 {
                   "name": "cetane",
@@ -1481,7 +2415,9 @@
                 }
               ],
               "scope": "horizon_endpoint_surrogate_and_supplied_blend",
-              "unassessed": [],
+              "unassessed": [
+                "sulfur_exceedance_probability"
+              ],
               "operational_safety_validated": false,
               "forecast_alarm": false
             }
@@ -1503,8 +2439,7 @@
         "safety_gate": {
           "passed": false,
           "reasons": [
-            "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
-            "cetane: измерение не свежее (stale)"
+            "Нет допустимого модельного прогноза для решения по наблюдаемым данным"
           ],
           "checks": [],
           "operational_safety_validated": false
@@ -1537,57 +2472,109 @@
           "at": "2026-06-19T12:00:00",
           "prediction_origin": "2026-06-19T12:00:00",
           "target_time": "2026-06-19T15:00:00",
+          "horizon_minutes": 180.0,
           "status": "abstain",
           "reasons": [
+            "too_many_missing_features",
             "outside_training_support"
           ],
           "target": {
             "metric_id": "lims.ht.2.Mg.Sulfur",
             "unit": "мг/кг"
           },
-          "prediction_ridge": null,
-          "prediction_previous_lab": 2.700000047683716,
-          "prediction_risk_guard": null,
+          "hard_limit": 10.0,
+          "nowcast": null,
+          "prediction": null,
+          "prediction_lower": null,
+          "prediction_upper": null,
+          "exceedance_probability": null,
+          "alarm_probability": 0.2,
           "alarm_above_10": null,
+          "prediction_previous_lab": 2.700000047683716,
           "previous_lab": {
             "sample_time": "2026-06-17T22:00:00",
             "available_at": "2026-06-18T02:00:00",
             "value": 2.700000047683716
           },
+          "lab_anchor": {
+            "level": 2.0999999046325684,
+            "samples": 10,
+            "pairs": 10
+          },
+          "analysers": {
+            "q21": {
+              "metric_id": "ht.Q21",
+              "value": 12.552678108215332,
+              "timestamp": "2026-06-18T14:30:00",
+              "age_minutes": 1290.0,
+              "offset": 0.6544082562128701,
+              "adjusted": 13.207086364428202,
+              "anchor_pairs": 10
+            },
+            "pak": {
+              "metric_id": "pak.ht.Mg.Sulfur",
+              "value": 7.863856792449951,
+              "timestamp": "2026-06-18T05:50:00",
+              "age_minutes": 1810.0,
+              "offset": 0.6198870340983071,
+              "adjusted": 8.483743826548258,
+              "anchor_pairs": 10
+            }
+          },
+          "horizons": [],
           "feature_cutoff": "2026-06-19T12:00:00",
           "feature_time": "2026-06-19T12:00:00",
-          "forecast_horizon_minutes": 180.0,
           "model_available_from": "2026-01-01T00:00:00",
           "lims_publication_delay_minutes": 240.0,
-          "feature_count": 292,
-          "imputed_feature_count": 0,
+          "feature_count": 15,
+          "imputed_feature_count": 6,
           "applicability": {
             "status": "abstain",
             "reasons": [
+              "too_many_missing_features",
               "outside_training_support"
             ],
-            "missing_fraction": 0.0,
-            "ood_fraction": 0.726027397260274,
-            "ood_feature_count": 212,
-            "max_absolute_z": 6880.2191648562875,
+            "missing_fraction": 0.4,
+            "ood_fraction": 0.5555555555555556,
+            "ood_feature_count": 5,
+            "max_absolute_z": 21.045112709095736,
             "policy": {
-              "max_missing_fraction": 0.2,
-              "max_ood_fraction": 0.1,
-              "max_absolute_z": 12.0,
+              "max_missing_fraction": 0.34,
+              "max_ood_fraction": 0.2,
+              "max_absolute_z": 8.0,
               "support_quantiles": [
                 0.005,
                 0.995
               ],
               "support_margin_fraction": 0.1,
+              "min_anchor_pairs": 3,
               "description": "Engineering abstention heuristics, not calibrated confidence or safe control limits"
             }
           },
           "model": {
-            "name": "standardized Ridge on log1p(target)",
-            "alpha": 3000.0,
+            "name": "lab-anchored standardized ridge on ln(sulfur) per horizon; empirical out-of-fold residual quantiles",
+            "horizons_minutes": [
+              0,
+              60,
+              120,
+              180
+            ],
             "artifact": "model.json",
-            "artifact_sha256": "93c2f3875d224d59ea9b6c0ecd63cac8150f49725d30fdc84c8ccbbfcff972ee",
-            "risk_guard": "max(ridge, lab result published by origin)"
+            "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
+            "model_columns": [
+              "ln_q21",
+              "ln_q21_1h",
+              "ln_pak",
+              "ln_pak_1h",
+              "ln_level",
+              "ln_previous_lab"
+            ],
+            "alpha": {
+              "0": 30.0,
+              "60": 100.0,
+              "120": 30.0,
+              "180": 100.0
+            }
           },
           "leakage_check": {
             "passed": true,
@@ -1597,8 +2584,10 @@
             "violations": 0
           },
           "warnings": [
+            "Пропущенные признаки заменяются train-only медианами только в пределах допустимого покрытия.",
             "Модель воздержалась от численного прогноза: недостаточно данных или признаки вне области обучения.",
-            "Пороговый risk_guard — эвристика; точность обнаружения превышений ограничена. Прогноз не доказывает эффект управления."
+            "На горизонте 2–3 часа точечный прогноз близок к локальному уровню; используйте интервал и вероятность превышения.",
+            "Прогноз — статистическая оценка серы на выходе гидроочистки, не сертификация товарного топлива и не доказательство эффекта управления."
           ]
         },
         "quality_evidence": {
@@ -1607,6 +2596,16 @@
             "value": 2.700000047683716,
             "timestamp": "2026-06-17T22:00:00",
             "freshness": "fresh",
+            "age_minutes": 2280.0,
+            "flags": [],
+            "available_at": "2026-06-18T02:00:00"
+          },
+          "last_lab_sulfur": {
+            "source": "lims.ht.2.Mg.Sulfur",
+            "value": 2.700000047683716,
+            "timestamp": "2026-06-17T22:00:00",
+            "freshness": "fresh",
+            "age_minutes": 2280.0,
             "flags": [],
             "available_at": "2026-06-18T02:00:00"
           },
@@ -1615,6 +2614,7 @@
               "value": 95.28304290771484,
               "timestamp": "2026-06-19T12:00:00",
               "freshness": "fresh",
+              "age_minutes": 0.0,
               "flags": [],
               "available_at": "2026-06-19T12:00:00"
             },
@@ -1622,6 +2622,7 @@
               "value": -0.1650347113609314,
               "timestamp": "2026-06-19T12:00:00",
               "freshness": "fresh",
+              "age_minutes": 0.0,
               "flags": [],
               "available_at": "2026-06-19T12:00:00"
             },
@@ -1629,6 +2630,7 @@
               "value": 1.251154541969299,
               "timestamp": "2026-06-19T12:00:00",
               "freshness": "fresh",
+              "age_minutes": 0.0,
               "flags": [],
               "available_at": "2026-06-19T12:00:00"
             }
@@ -1640,6 +2642,7 @@
               "value": 350.0,
               "timestamp": "2026-06-17T22:00:00",
               "freshness": "fresh",
+              "age_minutes": 2280.0,
               "flags": [],
               "available_at": "2026-06-18T02:00:00"
             },
@@ -1648,8 +2651,10 @@
               "value": 52.5,
               "timestamp": "2026-06-04T10:00:00",
               "freshness": "stale",
+              "age_minutes": 21720.0,
               "flags": [],
-              "available_at": "2026-06-04T14:00:00"
+              "available_at": "2026-06-04T14:00:00",
+              "max_age_minutes": 86400
             }
           }
         },
@@ -1669,29 +2674,29 @@
               {
                 "metric_id": "ht.T6",
                 "value": 95.28304290771484,
-                "train_mean": 363.89922026431924,
-                "train_std": 13.897660925931655,
+                "train_mean": 362.8890198864554,
+                "train_std": 12.715825316681757,
                 "positive_z": 0.0
               },
               {
                 "metric_id": "ht.P13",
                 "value": 1.251154541969299,
-                "train_mean": 3.888229464792242,
-                "train_std": 0.1806557220746527,
+                "train_mean": 3.893977390723942,
+                "train_std": 0.168031617211358,
                 "positive_z": 0.0
               },
               {
                 "metric_id": "ht.F9",
                 "value": -0.1650347113609314,
-                "train_mean": 211.74176771953853,
-                "train_std": 31.03368649571466,
+                "train_mean": 213.44224885991036,
+                "train_std": 31.516209881777463,
                 "positive_z": 0.0
               }
             ],
-            "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
-            "artifact_sha256": "93c2f3875d224d59ea9b6c0ecd63cac8150f49725d30fdc84c8ccbbfcff972ee",
+            "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
+            "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
             "failure_probability": null,
-            "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+            "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
           },
           "can_recommend": false,
           "basis": "observed_and_forecast",
@@ -1699,6 +2704,7 @@
             "Нет допустимого модельного прогноза для решения по наблюдаемым данным"
           ],
           "warnings": [
+            "too_many_missing_features",
             "outside_training_support"
           ],
           "abstain_reason": "Нет допустимого модельного прогноза для решения по наблюдаемым данным"
@@ -1709,12 +2715,57 @@
             "status": "ok",
             "feasible": false,
             "predicted_sulfur": 2.700000047683716,
+            "exceedance_probability": null,
             "effort": 0.0,
+            "objectives": {
+              "throughput_index": 1.0,
+              "throughput_change_pct": 0,
+              "energy_cost_index": 1.0,
+              "regime_severity": {
+                "status": "ok",
+                "index": 0.0,
+                "class": "normal",
+                "within_model_limit": true,
+                "model_limit": 1.0,
+                "factors": [
+                  {
+                    "metric_id": "ht.T6",
+                    "value": 95.28304290771484,
+                    "train_mean": 362.8890198864554,
+                    "train_std": 12.715825316681757,
+                    "positive_z": 0.0
+                  },
+                  {
+                    "metric_id": "ht.P13",
+                    "value": 1.251154541969299,
+                    "train_mean": 3.893977390723942,
+                    "train_std": 0.168031617211358,
+                    "positive_z": 0.0
+                  },
+                  {
+                    "metric_id": "ht.F9",
+                    "value": -0.1650347113609314,
+                    "train_mean": 213.44224885991036,
+                    "train_std": 31.516209881777463,
+                    "positive_z": 0.0
+                  }
+                ],
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
+                "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
+                "failure_probability": null,
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
+              },
+              "exceedance_probability": null,
+              "quality_risk_index": 0.0,
+              "ranking_loss": 0.0,
+              "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
+              "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
+              "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
+            },
             "safety_gate": {
               "passed": false,
               "reasons": [
-                "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
-                "cetane: измерение не свежее (stale)"
+                "Нет допустимого модельного прогноза для решения по наблюдаемым данным"
               ],
               "checks": [
                 {
@@ -1728,6 +2779,11 @@
                   "basis": "editable_target"
                 },
                 {
+                  "name": "sulfur_exceedance_probability",
+                  "passed": null,
+                  "basis": "not_assessed_no_forecast"
+                },
+                {
                   "name": "t95_evidence",
                   "passed": true,
                   "basis": "observed_baseline"
@@ -1739,8 +2795,8 @@
                 },
                 {
                   "name": "cetane_evidence",
-                  "passed": false,
-                  "basis": "observed_baseline"
+                  "passed": true,
+                  "basis": "slow_quality_window"
                 },
                 {
                   "name": "cetane",
@@ -1754,7 +2810,9 @@
                 }
               ],
               "scope": "horizon_endpoint_surrogate_and_supplied_blend",
-              "unassessed": [],
+              "unassessed": [
+                "sulfur_exceedance_probability"
+              ],
               "operational_safety_validated": false,
               "forecast_alarm": false
             }
@@ -1764,12 +2822,57 @@
             "status": "ok",
             "feasible": false,
             "predicted_sulfur": 2.700000047683716,
+            "exceedance_probability": null,
             "effort": 0.0,
+            "objectives": {
+              "throughput_index": 1.0,
+              "throughput_change_pct": 0.0,
+              "energy_cost_index": 1.0,
+              "regime_severity": {
+                "status": "ok",
+                "index": 0.0,
+                "class": "normal",
+                "within_model_limit": true,
+                "model_limit": 1.0,
+                "factors": [
+                  {
+                    "metric_id": "ht.T6",
+                    "value": 95.28304290771484,
+                    "train_mean": 362.8890198864554,
+                    "train_std": 12.715825316681757,
+                    "positive_z": 0.0
+                  },
+                  {
+                    "metric_id": "ht.P13",
+                    "value": 1.251154541969299,
+                    "train_mean": 3.893977390723942,
+                    "train_std": 0.168031617211358,
+                    "positive_z": 0.0
+                  },
+                  {
+                    "metric_id": "ht.F9",
+                    "value": -0.1650347113609314,
+                    "train_mean": 213.44224885991036,
+                    "train_std": 31.516209881777463,
+                    "positive_z": 0.0
+                  }
+                ],
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
+                "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
+                "failure_probability": null,
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
+              },
+              "exceedance_probability": null,
+              "quality_risk_index": 0.0,
+              "ranking_loss": 0.0,
+              "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
+              "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
+              "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
+            },
             "safety_gate": {
               "passed": false,
               "reasons": [
-                "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
-                "cetane: измерение не свежее (stale)"
+                "Нет допустимого модельного прогноза для решения по наблюдаемым данным"
               ],
               "checks": [
                 {
@@ -1783,6 +2886,11 @@
                   "basis": "editable_target"
                 },
                 {
+                  "name": "sulfur_exceedance_probability",
+                  "passed": null,
+                  "basis": "not_assessed_no_forecast"
+                },
+                {
                   "name": "t95_evidence",
                   "passed": true,
                   "basis": "observed_baseline"
@@ -1794,8 +2902,8 @@
                 },
                 {
                   "name": "cetane_evidence",
-                  "passed": false,
-                  "basis": "observed_baseline"
+                  "passed": true,
+                  "basis": "slow_quality_window"
                 },
                 {
                   "name": "cetane",
@@ -1809,7 +2917,9 @@
                 }
               ],
               "scope": "horizon_endpoint_surrogate_and_supplied_blend",
-              "unassessed": [],
+              "unassessed": [
+                "sulfur_exceedance_probability"
+              ],
               "operational_safety_validated": false,
               "forecast_alarm": false
             }
@@ -1819,12 +2929,57 @@
             "status": "ok",
             "feasible": false,
             "predicted_sulfur": 2.700000047683716,
+            "exceedance_probability": null,
             "effort": 0.0,
+            "objectives": {
+              "throughput_index": 1.0,
+              "throughput_change_pct": 0.0,
+              "energy_cost_index": 1.0,
+              "regime_severity": {
+                "status": "ok",
+                "index": 0.0,
+                "class": "normal",
+                "within_model_limit": true,
+                "model_limit": 1.0,
+                "factors": [
+                  {
+                    "metric_id": "ht.T6",
+                    "value": 95.28304290771484,
+                    "train_mean": 362.8890198864554,
+                    "train_std": 12.715825316681757,
+                    "positive_z": 0.0
+                  },
+                  {
+                    "metric_id": "ht.P13",
+                    "value": 1.251154541969299,
+                    "train_mean": 3.893977390723942,
+                    "train_std": 0.168031617211358,
+                    "positive_z": 0.0
+                  },
+                  {
+                    "metric_id": "ht.F9",
+                    "value": -0.1650347113609314,
+                    "train_mean": 213.44224885991036,
+                    "train_std": 31.516209881777463,
+                    "positive_z": 0.0
+                  }
+                ],
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
+                "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
+                "failure_probability": null,
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
+              },
+              "exceedance_probability": null,
+              "quality_risk_index": 0.0,
+              "ranking_loss": 0.0,
+              "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
+              "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
+              "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
+            },
             "safety_gate": {
               "passed": false,
               "reasons": [
-                "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
-                "cetane: измерение не свежее (stale)"
+                "Нет допустимого модельного прогноза для решения по наблюдаемым данным"
               ],
               "checks": [
                 {
@@ -1838,6 +2993,11 @@
                   "basis": "editable_target"
                 },
                 {
+                  "name": "sulfur_exceedance_probability",
+                  "passed": null,
+                  "basis": "not_assessed_no_forecast"
+                },
+                {
                   "name": "t95_evidence",
                   "passed": true,
                   "basis": "observed_baseline"
@@ -1849,8 +3009,8 @@
                 },
                 {
                   "name": "cetane_evidence",
-                  "passed": false,
-                  "basis": "observed_baseline"
+                  "passed": true,
+                  "basis": "slow_quality_window"
                 },
                 {
                   "name": "cetane",
@@ -1864,7 +3024,9 @@
                 }
               ],
               "scope": "horizon_endpoint_surrogate_and_supplied_blend",
-              "unassessed": [],
+              "unassessed": [
+                "sulfur_exceedance_probability"
+              ],
               "operational_safety_validated": false,
               "forecast_alarm": false
             }
@@ -1888,7 +3050,10 @@
           "passed": false,
           "reasons": [
             "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
-            "Цель по сере не достигнута в выбранном горизонте"
+            "Цель по сере не достигнута в выбранном горизонте",
+            "Вероятность превышения 10 мг/кг в конце горизонта 56% выше допустимой 30%",
+            "Вероятность превышения 10 мг/кг в конце горизонта 91% выше допустимой 30%",
+            "Вероятность превышения 10 мг/кг в конце горизонта 96% выше допустимой 30%"
           ],
           "checks": [],
           "operational_safety_validated": false
@@ -1921,27 +3086,102 @@
           "at": "2026-01-08T07:00:00",
           "prediction_origin": "2026-01-08T07:00:00",
           "target_time": "2026-01-08T10:00:00",
+          "horizon_minutes": 180.0,
           "status": "ok",
           "reasons": [],
           "target": {
             "metric_id": "lims.ht.2.Mg.Sulfur",
             "unit": "мг/кг"
           },
-          "prediction_ridge": 8.465247237877417,
-          "prediction_previous_lab": 7.099999904632568,
-          "prediction_risk_guard": 8.465247237877417,
+          "hard_limit": 10.0,
+          "nowcast": {
+            "prediction": 8.605817642557211,
+            "lower": 6.940930925283815,
+            "upper": 10.246444948997807,
+            "exceedance_probability": 0.12247206222297047,
+            "limit": 10.0,
+            "interval": "80% (10-90% квантили out-of-fold остатков)"
+          },
+          "prediction": 8.398450357274562,
+          "prediction_lower": 5.879171720131051,
+          "prediction_upper": 10.226625378638367,
+          "exceedance_probability": 0.11742580589286578,
+          "alarm_probability": 0.2,
           "alarm_above_10": false,
+          "prediction_previous_lab": 7.099999904632568,
           "previous_lab": {
             "sample_time": "2026-01-07T10:00:00",
             "available_at": "2026-01-07T14:00:00",
             "value": 7.099999904632568
           },
+          "lab_anchor": {
+            "level": 8.600000381469728,
+            "samples": 10,
+            "pairs": 10
+          },
+          "analysers": {
+            "q21": {
+              "metric_id": "ht.Q21",
+              "value": 8.303833961486816,
+              "timestamp": "2026-01-08T07:00:00",
+              "age_minutes": 0.0,
+              "offset": 1.1920975844065347,
+              "adjusted": 9.49593154589335,
+              "anchor_pairs": 10
+            },
+            "pak": {
+              "metric_id": "pak.ht.Mg.Sulfur",
+              "value": 7.498627185821533,
+              "timestamp": "2026-01-08T07:00:00",
+              "age_minutes": 0.0,
+              "offset": 2.5310130914052325,
+              "adjusted": 10.029640277226765,
+              "anchor_pairs": 10
+            }
+          },
+          "horizons": [
+            {
+              "minutes": 0,
+              "prediction": 8.605817642557211,
+              "lower": 6.940930925283815,
+              "upper": 10.246444948997807,
+              "exceedance_probability": 0.12247206222297047,
+              "limit": 10.0,
+              "interval": "80% (10-90% квантили out-of-fold остатков)"
+            },
+            {
+              "minutes": 60,
+              "prediction": 8.890575300924125,
+              "lower": 6.787707875206186,
+              "upper": 10.903686541659475,
+              "exceedance_probability": 0.20347578322006477,
+              "limit": 10.0,
+              "interval": "80% (10-90% квантили out-of-fold остатков)"
+            },
+            {
+              "minutes": 120,
+              "prediction": 8.931183112140411,
+              "lower": 6.382859237250652,
+              "upper": 10.835850115363531,
+              "exceedance_probability": 0.210618524116723,
+              "limit": 10.0,
+              "interval": "80% (10-90% квантили out-of-fold остатков)"
+            },
+            {
+              "minutes": 180,
+              "prediction": 8.398450357274562,
+              "lower": 5.879171720131051,
+              "upper": 10.226625378638367,
+              "exceedance_probability": 0.11742580589286578,
+              "limit": 10.0,
+              "interval": "80% (10-90% квантили out-of-fold остатков)"
+            }
+          ],
           "feature_cutoff": "2026-01-08T07:00:00",
           "feature_time": "2026-01-08T07:00:00",
-          "forecast_horizon_minutes": 180.0,
           "model_available_from": "2026-01-01T00:00:00",
           "lims_publication_delay_minutes": 240.0,
-          "feature_count": 292,
+          "feature_count": 15,
           "imputed_feature_count": 0,
           "applicability": {
             "status": "ok",
@@ -1949,25 +3189,44 @@
             "missing_fraction": 0.0,
             "ood_fraction": 0.0,
             "ood_feature_count": 0,
-            "max_absolute_z": 2.3380169213718145,
+            "max_absolute_z": 0.6386878128052633,
             "policy": {
-              "max_missing_fraction": 0.2,
-              "max_ood_fraction": 0.1,
-              "max_absolute_z": 12.0,
+              "max_missing_fraction": 0.34,
+              "max_ood_fraction": 0.2,
+              "max_absolute_z": 8.0,
               "support_quantiles": [
                 0.005,
                 0.995
               ],
               "support_margin_fraction": 0.1,
+              "min_anchor_pairs": 3,
               "description": "Engineering abstention heuristics, not calibrated confidence or safe control limits"
             }
           },
           "model": {
-            "name": "standardized Ridge on log1p(target)",
-            "alpha": 3000.0,
+            "name": "lab-anchored standardized ridge on ln(sulfur) per horizon; empirical out-of-fold residual quantiles",
+            "horizons_minutes": [
+              0,
+              60,
+              120,
+              180
+            ],
             "artifact": "model.json",
-            "artifact_sha256": "93c2f3875d224d59ea9b6c0ecd63cac8150f49725d30fdc84c8ccbbfcff972ee",
-            "risk_guard": "max(ridge, lab result published by origin)"
+            "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
+            "model_columns": [
+              "ln_q21",
+              "ln_q21_1h",
+              "ln_pak",
+              "ln_pak_1h",
+              "ln_level",
+              "ln_previous_lab"
+            ],
+            "alpha": {
+              "0": 30.0,
+              "60": 100.0,
+              "120": 30.0,
+              "180": 100.0
+            }
           },
           "leakage_check": {
             "passed": true,
@@ -1977,7 +3236,8 @@
             "violations": 0
           },
           "warnings": [
-            "Пороговый risk_guard — эвристика; точность обнаружения превышений ограничена. Прогноз не доказывает эффект управления."
+            "На горизонте 2–3 часа точечный прогноз близок к локальному уровню; используйте интервал и вероятность превышения.",
+            "Прогноз — статистическая оценка серы на выходе гидроочистки, не сертификация товарного топлива и не доказательство эффекта управления."
           ]
         },
         "quality_evidence": {
@@ -1988,11 +3248,21 @@
             "freshness": "missing",
             "flags": []
           },
+          "last_lab_sulfur": {
+            "source": "lims.ht.2.Mg.Sulfur",
+            "value": 7.099999904632568,
+            "timestamp": "2026-01-07T10:00:00",
+            "freshness": "fresh",
+            "age_minutes": 1260.0,
+            "flags": [],
+            "available_at": "2026-01-07T14:00:00"
+          },
           "controls": {
             "ht.T6": {
               "value": 364.5626525878906,
               "timestamp": "2026-01-08T07:00:00",
               "freshness": "fresh",
+              "age_minutes": 0.0,
               "flags": [],
               "available_at": "2026-01-08T07:00:00"
             },
@@ -2000,6 +3270,7 @@
               "value": 203.38870239257807,
               "timestamp": "2026-01-08T07:00:00",
               "freshness": "fresh",
+              "age_minutes": 0.0,
               "flags": [],
               "available_at": "2026-01-08T07:00:00"
             },
@@ -2007,6 +3278,7 @@
               "value": 3.918800115585327,
               "timestamp": "2026-01-08T07:00:00",
               "freshness": "fresh",
+              "age_minutes": 0.0,
               "flags": [],
               "available_at": "2026-01-08T07:00:00"
             }
@@ -2018,6 +3290,7 @@
               "value": 350.0,
               "timestamp": "2026-01-07T10:00:00",
               "freshness": "fresh",
+              "age_minutes": 1260.0,
               "flags": [],
               "available_at": "2026-01-07T14:00:00"
             },
@@ -2026,8 +3299,10 @@
               "value": 52.900001525878906,
               "timestamp": "2026-01-07T10:00:00",
               "freshness": "fresh",
+              "age_minutes": 1260.0,
               "flags": [],
-              "available_at": "2026-01-07T14:00:00"
+              "available_at": "2026-01-07T14:00:00",
+              "max_age_minutes": 86400
             }
           }
         },
@@ -2039,7 +3314,7 @@
           "confidence_kind": "binary_data_gate_not_probability",
           "regime_severity": {
             "status": "ok",
-            "index": 0.014101707953121842,
+            "index": 0.018465814107890374,
             "class": "normal",
             "within_model_limit": true,
             "model_limit": 1.0,
@@ -2047,29 +3322,29 @@
               {
                 "metric_id": "ht.T6",
                 "value": 364.5626525878906,
-                "train_mean": 363.89922026431924,
-                "train_std": 13.897660925931655,
-                "positive_z": 0.04773697725877642
+                "train_mean": 362.8890198864554,
+                "train_std": 12.715825316681757,
+                "positive_z": 0.13161809475627217
               },
               {
                 "metric_id": "ht.P13",
                 "value": 3.918800115585327,
-                "train_mean": 3.888229464792242,
-                "train_std": 0.1806557220746527,
-                "positive_z": 0.1692204954374621
+                "train_mean": 3.893977390723942,
+                "train_std": 0.168031617211358,
+                "positive_z": 0.147726512863123
               },
               {
                 "metric_id": "ht.F9",
                 "value": 203.38870239257807,
-                "train_mean": 211.74176771953853,
-                "train_std": 31.03368649571466,
+                "train_mean": 213.44224885991036,
+                "train_std": 31.516209881777463,
                 "positive_z": 0.0
               }
             ],
-            "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
-            "artifact_sha256": "93c2f3875d224d59ea9b6c0ecd63cac8150f49725d30fdc84c8ccbbfcff972ee",
+            "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
+            "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
             "failure_probability": null,
-            "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+            "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
           },
           "can_recommend": true,
           "basis": "scenario_only",
@@ -2084,13 +3359,60 @@
             "id": "automatic",
             "status": "ok",
             "feasible": false,
-            "predicted_sulfur": 18.4,
-            "effort": 3.0,
+            "predicted_sulfur": 10.525017024394222,
+            "exceedance_probability": 0.5589759111353647,
+            "effort": 2.25,
+            "objectives": {
+              "throughput_index": 0.9,
+              "throughput_change_pct": -10.0,
+              "energy_cost_index": 1.0125,
+              "regime_severity": {
+                "status": "ok",
+                "index": 0.39041962278536435,
+                "class": "elevated",
+                "within_model_limit": true,
+                "model_limit": 1.0,
+                "factors": [
+                  {
+                    "metric_id": "ht.T6",
+                    "value": 374.5626525878906,
+                    "train_mean": 362.8890198864554,
+                    "train_std": 12.715825316681757,
+                    "positive_z": 0.9180397190672877
+                  },
+                  {
+                    "metric_id": "ht.P13",
+                    "value": 4.418800115585327,
+                    "train_mean": 3.893977390723942,
+                    "train_std": 0.168031617211358,
+                    "positive_z": 3.123356982282915
+                  },
+                  {
+                    "metric_id": "ht.F9",
+                    "value": 183.04983215332027,
+                    "train_mean": 213.44224885991036,
+                    "train_std": 31.516209881777463,
+                    "positive_z": 0.0
+                  }
+                ],
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
+                "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
+                "failure_probability": null,
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
+              },
+              "exceedance_probability": 0.5589759111353647,
+              "quality_risk_index": 1.8632530371178824,
+              "ranking_loss": 1.6542314242552822,
+              "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
+              "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
+              "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
+            },
             "safety_gate": {
               "passed": false,
               "reasons": [
                 "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
-                "Цель по сере не достигнута в выбранном горизонте"
+                "Цель по сере не достигнута в выбранном горизонте",
+                "Вероятность превышения 10 мг/кг в конце горизонта 56% выше допустимой 30%"
               ],
               "checks": [
                 {
@@ -2102,6 +3424,11 @@
                   "name": "sulfur_editable_target",
                   "passed": false,
                   "basis": "editable_target"
+                },
+                {
+                  "name": "sulfur_exceedance_probability",
+                  "passed": false,
+                  "basis": "editable_probability_target_from_forecast_residuals"
                 },
                 {
                   "name": "t95_evidence",
@@ -2116,7 +3443,7 @@
                 {
                   "name": "cetane_evidence",
                   "passed": true,
-                  "basis": "observed_baseline"
+                  "basis": "slow_quality_window"
                 },
                 {
                   "name": "cetane",
@@ -2139,13 +3466,60 @@
             "id": "conservative",
             "status": "ok",
             "feasible": false,
-            "predicted_sulfur": 19.2,
-            "effort": 1.5,
+            "predicted_sulfur": 14.508629862529553,
+            "exceedance_probability": 0.9060974311946224,
+            "effort": 1.125,
+            "objectives": {
+              "throughput_index": 0.95,
+              "throughput_change_pct": -5.0,
+              "energy_cost_index": 1.00625,
+              "regime_severity": {
+                "status": "ok",
+                "index": 0.20444271844662737,
+                "class": "normal",
+                "within_model_limit": true,
+                "model_limit": 1.0,
+                "factors": [
+                  {
+                    "metric_id": "ht.T6",
+                    "value": 369.5626525878906,
+                    "train_mean": 362.8890198864554,
+                    "train_std": 12.715825316681757,
+                    "positive_z": 0.5248289069117799
+                  },
+                  {
+                    "metric_id": "ht.P13",
+                    "value": 4.168800115585327,
+                    "train_mean": 3.893977390723942,
+                    "train_std": 0.168031617211358,
+                    "positive_z": 1.635541747573019
+                  },
+                  {
+                    "metric_id": "ht.F9",
+                    "value": 193.21926727294917,
+                    "train_mean": 213.44224885991036,
+                    "train_std": 31.516209881777463,
+                    "positive_z": 0.0
+                  }
+                ],
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
+                "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
+                "failure_probability": null,
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
+              },
+              "exceedance_probability": 0.9060974311946224,
+              "quality_risk_index": 3.0203247706487413,
+              "ranking_loss": 1.8737730649360278,
+              "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
+              "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
+              "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
+            },
             "safety_gate": {
               "passed": false,
               "reasons": [
                 "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
-                "Цель по сере не достигнута в выбранном горизонте"
+                "Цель по сере не достигнута в выбранном горизонте",
+                "Вероятность превышения 10 мг/кг в конце горизонта 91% выше допустимой 30%"
               ],
               "checks": [
                 {
@@ -2157,6 +3531,11 @@
                   "name": "sulfur_editable_target",
                   "passed": false,
                   "basis": "editable_target"
+                },
+                {
+                  "name": "sulfur_exceedance_probability",
+                  "passed": false,
+                  "basis": "editable_probability_target_from_forecast_residuals"
                 },
                 {
                   "name": "t95_evidence",
@@ -2171,7 +3550,7 @@
                 {
                   "name": "cetane_evidence",
                   "passed": true,
-                  "basis": "observed_baseline"
+                  "basis": "slow_quality_window"
                 },
                 {
                   "name": "cetane",
@@ -2194,13 +3573,60 @@
             "id": "hold",
             "status": "ok",
             "feasible": false,
-            "predicted_sulfur": 20.0,
+            "predicted_sulfur": 19.999999999999996,
+            "exceedance_probability": 0.9639313851668053,
             "effort": 0.0,
+            "objectives": {
+              "throughput_index": 1.0,
+              "throughput_change_pct": 0,
+              "energy_cost_index": 1.0,
+              "regime_severity": {
+                "status": "ok",
+                "index": 0.018465814107890374,
+                "class": "normal",
+                "within_model_limit": true,
+                "model_limit": 1.0,
+                "factors": [
+                  {
+                    "metric_id": "ht.T6",
+                    "value": 364.5626525878906,
+                    "train_mean": 362.8890198864554,
+                    "train_std": 12.715825316681757,
+                    "positive_z": 0.13161809475627217
+                  },
+                  {
+                    "metric_id": "ht.P13",
+                    "value": 3.918800115585327,
+                    "train_mean": 3.893977390723942,
+                    "train_std": 0.168031617211358,
+                    "positive_z": 0.147726512863123
+                  },
+                  {
+                    "metric_id": "ht.F9",
+                    "value": 203.38870239257807,
+                    "train_mean": 213.44224885991036,
+                    "train_std": 31.516209881777463,
+                    "positive_z": 0.0
+                  }
+                ],
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
+                "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
+                "failure_probability": null,
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
+              },
+              "exceedance_probability": 0.9639313851668053,
+              "quality_risk_index": 3.2131046172226845,
+              "ranking_loss": 1.6111687621383148,
+              "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
+              "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
+              "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
+            },
             "safety_gate": {
               "passed": false,
               "reasons": [
                 "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
-                "Цель по сере не достигнута в выбранном горизонте"
+                "Цель по сере не достигнута в выбранном горизонте",
+                "Вероятность превышения 10 мг/кг в конце горизонта 96% выше допустимой 30%"
               ],
               "checks": [
                 {
@@ -2212,6 +3638,11 @@
                   "name": "sulfur_editable_target",
                   "passed": false,
                   "basis": "editable_target"
+                },
+                {
+                  "name": "sulfur_exceedance_probability",
+                  "passed": false,
+                  "basis": "editable_probability_target_from_forecast_residuals"
                 },
                 {
                   "name": "t95_evidence",
@@ -2226,7 +3657,7 @@
                 {
                   "name": "cetane_evidence",
                   "passed": true,
-                  "basis": "observed_baseline"
+                  "basis": "slow_quality_window"
                 },
                 {
                   "name": "cetane",
@@ -2266,7 +3697,10 @@
         "safety_gate": {
           "passed": false,
           "reasons": [
-            "Сера в конце горизонта превышает обязательный предел 10 мг/кг"
+            "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+            "Вероятность превышения 10 мг/кг в конце горизонта 56% выше допустимой 30%",
+            "Вероятность превышения 10 мг/кг в конце горизонта 91% выше допустимой 30%",
+            "Вероятность превышения 10 мг/кг в конце горизонта 96% выше допустимой 30%"
           ],
           "checks": [],
           "operational_safety_validated": false
@@ -2299,27 +3733,102 @@
           "at": "2026-01-08T07:00:00",
           "prediction_origin": "2026-01-08T07:00:00",
           "target_time": "2026-01-08T10:00:00",
+          "horizon_minutes": 180.0,
           "status": "ok",
           "reasons": [],
           "target": {
             "metric_id": "lims.ht.2.Mg.Sulfur",
             "unit": "мг/кг"
           },
-          "prediction_ridge": 8.465247237877417,
-          "prediction_previous_lab": 7.099999904632568,
-          "prediction_risk_guard": 8.465247237877417,
+          "hard_limit": 10.0,
+          "nowcast": {
+            "prediction": 8.605817642557211,
+            "lower": 6.940930925283815,
+            "upper": 10.246444948997807,
+            "exceedance_probability": 0.12247206222297047,
+            "limit": 10.0,
+            "interval": "80% (10-90% квантили out-of-fold остатков)"
+          },
+          "prediction": 8.398450357274562,
+          "prediction_lower": 5.879171720131051,
+          "prediction_upper": 10.226625378638367,
+          "exceedance_probability": 0.11742580589286578,
+          "alarm_probability": 0.2,
           "alarm_above_10": false,
+          "prediction_previous_lab": 7.099999904632568,
           "previous_lab": {
             "sample_time": "2026-01-07T10:00:00",
             "available_at": "2026-01-07T14:00:00",
             "value": 7.099999904632568
           },
+          "lab_anchor": {
+            "level": 8.600000381469728,
+            "samples": 10,
+            "pairs": 10
+          },
+          "analysers": {
+            "q21": {
+              "metric_id": "ht.Q21",
+              "value": 8.303833961486816,
+              "timestamp": "2026-01-08T07:00:00",
+              "age_minutes": 0.0,
+              "offset": 1.1920975844065347,
+              "adjusted": 9.49593154589335,
+              "anchor_pairs": 10
+            },
+            "pak": {
+              "metric_id": "pak.ht.Mg.Sulfur",
+              "value": 7.498627185821533,
+              "timestamp": "2026-01-08T07:00:00",
+              "age_minutes": 0.0,
+              "offset": 2.5310130914052325,
+              "adjusted": 10.029640277226765,
+              "anchor_pairs": 10
+            }
+          },
+          "horizons": [
+            {
+              "minutes": 0,
+              "prediction": 8.605817642557211,
+              "lower": 6.940930925283815,
+              "upper": 10.246444948997807,
+              "exceedance_probability": 0.12247206222297047,
+              "limit": 10.0,
+              "interval": "80% (10-90% квантили out-of-fold остатков)"
+            },
+            {
+              "minutes": 60,
+              "prediction": 8.890575300924125,
+              "lower": 6.787707875206186,
+              "upper": 10.903686541659475,
+              "exceedance_probability": 0.20347578322006477,
+              "limit": 10.0,
+              "interval": "80% (10-90% квантили out-of-fold остатков)"
+            },
+            {
+              "minutes": 120,
+              "prediction": 8.931183112140411,
+              "lower": 6.382859237250652,
+              "upper": 10.835850115363531,
+              "exceedance_probability": 0.210618524116723,
+              "limit": 10.0,
+              "interval": "80% (10-90% квантили out-of-fold остатков)"
+            },
+            {
+              "minutes": 180,
+              "prediction": 8.398450357274562,
+              "lower": 5.879171720131051,
+              "upper": 10.226625378638367,
+              "exceedance_probability": 0.11742580589286578,
+              "limit": 10.0,
+              "interval": "80% (10-90% квантили out-of-fold остатков)"
+            }
+          ],
           "feature_cutoff": "2026-01-08T07:00:00",
           "feature_time": "2026-01-08T07:00:00",
-          "forecast_horizon_minutes": 180.0,
           "model_available_from": "2026-01-01T00:00:00",
           "lims_publication_delay_minutes": 240.0,
-          "feature_count": 292,
+          "feature_count": 15,
           "imputed_feature_count": 0,
           "applicability": {
             "status": "ok",
@@ -2327,25 +3836,44 @@
             "missing_fraction": 0.0,
             "ood_fraction": 0.0,
             "ood_feature_count": 0,
-            "max_absolute_z": 2.3380169213718145,
+            "max_absolute_z": 0.6386878128052633,
             "policy": {
-              "max_missing_fraction": 0.2,
-              "max_ood_fraction": 0.1,
-              "max_absolute_z": 12.0,
+              "max_missing_fraction": 0.34,
+              "max_ood_fraction": 0.2,
+              "max_absolute_z": 8.0,
               "support_quantiles": [
                 0.005,
                 0.995
               ],
               "support_margin_fraction": 0.1,
+              "min_anchor_pairs": 3,
               "description": "Engineering abstention heuristics, not calibrated confidence or safe control limits"
             }
           },
           "model": {
-            "name": "standardized Ridge on log1p(target)",
-            "alpha": 3000.0,
+            "name": "lab-anchored standardized ridge on ln(sulfur) per horizon; empirical out-of-fold residual quantiles",
+            "horizons_minutes": [
+              0,
+              60,
+              120,
+              180
+            ],
             "artifact": "model.json",
-            "artifact_sha256": "93c2f3875d224d59ea9b6c0ecd63cac8150f49725d30fdc84c8ccbbfcff972ee",
-            "risk_guard": "max(ridge, lab result published by origin)"
+            "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
+            "model_columns": [
+              "ln_q21",
+              "ln_q21_1h",
+              "ln_pak",
+              "ln_pak_1h",
+              "ln_level",
+              "ln_previous_lab"
+            ],
+            "alpha": {
+              "0": 30.0,
+              "60": 100.0,
+              "120": 30.0,
+              "180": 100.0
+            }
           },
           "leakage_check": {
             "passed": true,
@@ -2355,7 +3883,8 @@
             "violations": 0
           },
           "warnings": [
-            "Пороговый risk_guard — эвристика; точность обнаружения превышений ограничена. Прогноз не доказывает эффект управления."
+            "На горизонте 2–3 часа точечный прогноз близок к локальному уровню; используйте интервал и вероятность превышения.",
+            "Прогноз — статистическая оценка серы на выходе гидроочистки, не сертификация товарного топлива и не доказательство эффекта управления."
           ]
         },
         "quality_evidence": {
@@ -2366,11 +3895,21 @@
             "freshness": "missing",
             "flags": []
           },
+          "last_lab_sulfur": {
+            "source": "lims.ht.2.Mg.Sulfur",
+            "value": 7.099999904632568,
+            "timestamp": "2026-01-07T10:00:00",
+            "freshness": "fresh",
+            "age_minutes": 1260.0,
+            "flags": [],
+            "available_at": "2026-01-07T14:00:00"
+          },
           "controls": {
             "ht.T6": {
               "value": 364.5626525878906,
               "timestamp": "2026-01-08T07:00:00",
               "freshness": "fresh",
+              "age_minutes": 0.0,
               "flags": [],
               "available_at": "2026-01-08T07:00:00"
             },
@@ -2378,6 +3917,7 @@
               "value": 203.38870239257807,
               "timestamp": "2026-01-08T07:00:00",
               "freshness": "fresh",
+              "age_minutes": 0.0,
               "flags": [],
               "available_at": "2026-01-08T07:00:00"
             },
@@ -2385,6 +3925,7 @@
               "value": 3.918800115585327,
               "timestamp": "2026-01-08T07:00:00",
               "freshness": "fresh",
+              "age_minutes": 0.0,
               "flags": [],
               "available_at": "2026-01-08T07:00:00"
             }
@@ -2396,6 +3937,7 @@
               "value": 350.0,
               "timestamp": "2026-01-07T10:00:00",
               "freshness": "fresh",
+              "age_minutes": 1260.0,
               "flags": [],
               "available_at": "2026-01-07T14:00:00"
             },
@@ -2404,8 +3946,10 @@
               "value": 52.900001525878906,
               "timestamp": "2026-01-07T10:00:00",
               "freshness": "fresh",
+              "age_minutes": 1260.0,
               "flags": [],
-              "available_at": "2026-01-07T14:00:00"
+              "available_at": "2026-01-07T14:00:00",
+              "max_age_minutes": 86400
             }
           }
         },
@@ -2417,7 +3961,7 @@
           "confidence_kind": "binary_data_gate_not_probability",
           "regime_severity": {
             "status": "ok",
-            "index": 0.014101707953121842,
+            "index": 0.018465814107890374,
             "class": "normal",
             "within_model_limit": true,
             "model_limit": 1.0,
@@ -2425,29 +3969,29 @@
               {
                 "metric_id": "ht.T6",
                 "value": 364.5626525878906,
-                "train_mean": 363.89922026431924,
-                "train_std": 13.897660925931655,
-                "positive_z": 0.04773697725877642
+                "train_mean": 362.8890198864554,
+                "train_std": 12.715825316681757,
+                "positive_z": 0.13161809475627217
               },
               {
                 "metric_id": "ht.P13",
                 "value": 3.918800115585327,
-                "train_mean": 3.888229464792242,
-                "train_std": 0.1806557220746527,
-                "positive_z": 0.1692204954374621
+                "train_mean": 3.893977390723942,
+                "train_std": 0.168031617211358,
+                "positive_z": 0.147726512863123
               },
               {
                 "metric_id": "ht.F9",
                 "value": 203.38870239257807,
-                "train_mean": 211.74176771953853,
-                "train_std": 31.03368649571466,
+                "train_mean": 213.44224885991036,
+                "train_std": 31.516209881777463,
                 "positive_z": 0.0
               }
             ],
-            "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
-            "artifact_sha256": "93c2f3875d224d59ea9b6c0ecd63cac8150f49725d30fdc84c8ccbbfcff972ee",
+            "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
+            "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
             "failure_probability": null,
-            "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+            "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
           },
           "can_recommend": true,
           "basis": "scenario_only",
@@ -2462,12 +4006,59 @@
             "id": "automatic",
             "status": "ok",
             "feasible": false,
-            "predicted_sulfur": 18.4,
-            "effort": 3.0,
+            "predicted_sulfur": 10.525017024394222,
+            "exceedance_probability": 0.5589759111353647,
+            "effort": 2.25,
+            "objectives": {
+              "throughput_index": 0.9,
+              "throughput_change_pct": -10.0,
+              "energy_cost_index": 1.0125,
+              "regime_severity": {
+                "status": "ok",
+                "index": 0.39041962278536435,
+                "class": "elevated",
+                "within_model_limit": true,
+                "model_limit": 1.0,
+                "factors": [
+                  {
+                    "metric_id": "ht.T6",
+                    "value": 374.5626525878906,
+                    "train_mean": 362.8890198864554,
+                    "train_std": 12.715825316681757,
+                    "positive_z": 0.9180397190672877
+                  },
+                  {
+                    "metric_id": "ht.P13",
+                    "value": 4.418800115585327,
+                    "train_mean": 3.893977390723942,
+                    "train_std": 0.168031617211358,
+                    "positive_z": 3.123356982282915
+                  },
+                  {
+                    "metric_id": "ht.F9",
+                    "value": 183.04983215332027,
+                    "train_mean": 213.44224885991036,
+                    "train_std": 31.516209881777463,
+                    "positive_z": 0.0
+                  }
+                ],
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
+                "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
+                "failure_probability": null,
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
+              },
+              "exceedance_probability": 0.5589759111353647,
+              "quality_risk_index": 1.8632530371178824,
+              "ranking_loss": 1.6542314242552822,
+              "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
+              "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
+              "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
+            },
             "safety_gate": {
               "passed": false,
               "reasons": [
-                "Сера в конце горизонта превышает обязательный предел 10 мг/кг"
+                "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+                "Вероятность превышения 10 мг/кг в конце горизонта 56% выше допустимой 30%"
               ],
               "checks": [
                 {
@@ -2479,6 +4070,11 @@
                   "name": "sulfur_editable_target",
                   "passed": true,
                   "basis": "editable_target"
+                },
+                {
+                  "name": "sulfur_exceedance_probability",
+                  "passed": false,
+                  "basis": "editable_probability_target_from_forecast_residuals"
                 },
                 {
                   "name": "t95_evidence",
@@ -2493,7 +4089,7 @@
                 {
                   "name": "cetane_evidence",
                   "passed": true,
-                  "basis": "observed_baseline"
+                  "basis": "slow_quality_window"
                 },
                 {
                   "name": "cetane",
@@ -2516,12 +4112,59 @@
             "id": "conservative",
             "status": "ok",
             "feasible": false,
-            "predicted_sulfur": 19.2,
-            "effort": 1.5,
+            "predicted_sulfur": 14.508629862529553,
+            "exceedance_probability": 0.9060974311946224,
+            "effort": 1.125,
+            "objectives": {
+              "throughput_index": 0.95,
+              "throughput_change_pct": -5.0,
+              "energy_cost_index": 1.00625,
+              "regime_severity": {
+                "status": "ok",
+                "index": 0.20444271844662737,
+                "class": "normal",
+                "within_model_limit": true,
+                "model_limit": 1.0,
+                "factors": [
+                  {
+                    "metric_id": "ht.T6",
+                    "value": 369.5626525878906,
+                    "train_mean": 362.8890198864554,
+                    "train_std": 12.715825316681757,
+                    "positive_z": 0.5248289069117799
+                  },
+                  {
+                    "metric_id": "ht.P13",
+                    "value": 4.168800115585327,
+                    "train_mean": 3.893977390723942,
+                    "train_std": 0.168031617211358,
+                    "positive_z": 1.635541747573019
+                  },
+                  {
+                    "metric_id": "ht.F9",
+                    "value": 193.21926727294917,
+                    "train_mean": 213.44224885991036,
+                    "train_std": 31.516209881777463,
+                    "positive_z": 0.0
+                  }
+                ],
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
+                "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
+                "failure_probability": null,
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
+              },
+              "exceedance_probability": 0.9060974311946224,
+              "quality_risk_index": 3.0203247706487413,
+              "ranking_loss": 1.8737730649360278,
+              "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
+              "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
+              "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
+            },
             "safety_gate": {
               "passed": false,
               "reasons": [
-                "Сера в конце горизонта превышает обязательный предел 10 мг/кг"
+                "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+                "Вероятность превышения 10 мг/кг в конце горизонта 91% выше допустимой 30%"
               ],
               "checks": [
                 {
@@ -2533,6 +4176,11 @@
                   "name": "sulfur_editable_target",
                   "passed": true,
                   "basis": "editable_target"
+                },
+                {
+                  "name": "sulfur_exceedance_probability",
+                  "passed": false,
+                  "basis": "editable_probability_target_from_forecast_residuals"
                 },
                 {
                   "name": "t95_evidence",
@@ -2547,7 +4195,7 @@
                 {
                   "name": "cetane_evidence",
                   "passed": true,
-                  "basis": "observed_baseline"
+                  "basis": "slow_quality_window"
                 },
                 {
                   "name": "cetane",
@@ -2570,12 +4218,59 @@
             "id": "hold",
             "status": "ok",
             "feasible": false,
-            "predicted_sulfur": 20.0,
+            "predicted_sulfur": 19.999999999999996,
+            "exceedance_probability": 0.9639313851668053,
             "effort": 0.0,
+            "objectives": {
+              "throughput_index": 1.0,
+              "throughput_change_pct": 0,
+              "energy_cost_index": 1.0,
+              "regime_severity": {
+                "status": "ok",
+                "index": 0.018465814107890374,
+                "class": "normal",
+                "within_model_limit": true,
+                "model_limit": 1.0,
+                "factors": [
+                  {
+                    "metric_id": "ht.T6",
+                    "value": 364.5626525878906,
+                    "train_mean": 362.8890198864554,
+                    "train_std": 12.715825316681757,
+                    "positive_z": 0.13161809475627217
+                  },
+                  {
+                    "metric_id": "ht.P13",
+                    "value": 3.918800115585327,
+                    "train_mean": 3.893977390723942,
+                    "train_std": 0.168031617211358,
+                    "positive_z": 0.147726512863123
+                  },
+                  {
+                    "metric_id": "ht.F9",
+                    "value": 203.38870239257807,
+                    "train_mean": 213.44224885991036,
+                    "train_std": 31.516209881777463,
+                    "positive_z": 0.0
+                  }
+                ],
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
+                "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
+                "failure_probability": null,
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
+              },
+              "exceedance_probability": 0.9639313851668053,
+              "quality_risk_index": 3.2131046172226845,
+              "ranking_loss": 1.6111687621383148,
+              "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
+              "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
+              "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
+            },
             "safety_gate": {
               "passed": false,
               "reasons": [
-                "Сера в конце горизонта превышает обязательный предел 10 мг/кг"
+                "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+                "Вероятность превышения 10 мг/кг в конце горизонта 96% выше допустимой 30%"
               ],
               "checks": [
                 {
@@ -2587,6 +4282,11 @@
                   "name": "sulfur_editable_target",
                   "passed": true,
                   "basis": "editable_target"
+                },
+                {
+                  "name": "sulfur_exceedance_probability",
+                  "passed": false,
+                  "basis": "editable_probability_target_from_forecast_residuals"
                 },
                 {
                   "name": "t95_evidence",
@@ -2601,7 +4301,7 @@
                 {
                   "name": "cetane_evidence",
                   "passed": true,
-                  "basis": "observed_baseline"
+                  "basis": "slow_quality_window"
                 },
                 {
                   "name": "cetane",
@@ -2680,27 +4380,102 @@
           "at": "2026-01-08T07:00:00",
           "prediction_origin": "2026-01-08T07:00:00",
           "target_time": "2026-01-08T10:00:00",
+          "horizon_minutes": 180.0,
           "status": "ok",
           "reasons": [],
           "target": {
             "metric_id": "lims.ht.2.Mg.Sulfur",
             "unit": "мг/кг"
           },
-          "prediction_ridge": 8.465247237877417,
-          "prediction_previous_lab": 7.099999904632568,
-          "prediction_risk_guard": 8.465247237877417,
+          "hard_limit": 10.0,
+          "nowcast": {
+            "prediction": 8.605817642557211,
+            "lower": 6.940930925283815,
+            "upper": 10.246444948997807,
+            "exceedance_probability": 0.12247206222297047,
+            "limit": 10.0,
+            "interval": "80% (10-90% квантили out-of-fold остатков)"
+          },
+          "prediction": 8.398450357274562,
+          "prediction_lower": 5.879171720131051,
+          "prediction_upper": 10.226625378638367,
+          "exceedance_probability": 0.11742580589286578,
+          "alarm_probability": 0.2,
           "alarm_above_10": false,
+          "prediction_previous_lab": 7.099999904632568,
           "previous_lab": {
             "sample_time": "2026-01-07T10:00:00",
             "available_at": "2026-01-07T14:00:00",
             "value": 7.099999904632568
           },
+          "lab_anchor": {
+            "level": 8.600000381469728,
+            "samples": 10,
+            "pairs": 10
+          },
+          "analysers": {
+            "q21": {
+              "metric_id": "ht.Q21",
+              "value": 8.303833961486816,
+              "timestamp": "2026-01-08T07:00:00",
+              "age_minutes": 0.0,
+              "offset": 1.1920975844065347,
+              "adjusted": 9.49593154589335,
+              "anchor_pairs": 10
+            },
+            "pak": {
+              "metric_id": "pak.ht.Mg.Sulfur",
+              "value": 7.498627185821533,
+              "timestamp": "2026-01-08T07:00:00",
+              "age_minutes": 0.0,
+              "offset": 2.5310130914052325,
+              "adjusted": 10.029640277226765,
+              "anchor_pairs": 10
+            }
+          },
+          "horizons": [
+            {
+              "minutes": 0,
+              "prediction": 8.605817642557211,
+              "lower": 6.940930925283815,
+              "upper": 10.246444948997807,
+              "exceedance_probability": 0.12247206222297047,
+              "limit": 10.0,
+              "interval": "80% (10-90% квантили out-of-fold остатков)"
+            },
+            {
+              "minutes": 60,
+              "prediction": 8.890575300924125,
+              "lower": 6.787707875206186,
+              "upper": 10.903686541659475,
+              "exceedance_probability": 0.20347578322006477,
+              "limit": 10.0,
+              "interval": "80% (10-90% квантили out-of-fold остатков)"
+            },
+            {
+              "minutes": 120,
+              "prediction": 8.931183112140411,
+              "lower": 6.382859237250652,
+              "upper": 10.835850115363531,
+              "exceedance_probability": 0.210618524116723,
+              "limit": 10.0,
+              "interval": "80% (10-90% квантили out-of-fold остатков)"
+            },
+            {
+              "minutes": 180,
+              "prediction": 8.398450357274562,
+              "lower": 5.879171720131051,
+              "upper": 10.226625378638367,
+              "exceedance_probability": 0.11742580589286578,
+              "limit": 10.0,
+              "interval": "80% (10-90% квантили out-of-fold остатков)"
+            }
+          ],
           "feature_cutoff": "2026-01-08T07:00:00",
           "feature_time": "2026-01-08T07:00:00",
-          "forecast_horizon_minutes": 180.0,
           "model_available_from": "2026-01-01T00:00:00",
           "lims_publication_delay_minutes": 240.0,
-          "feature_count": 292,
+          "feature_count": 15,
           "imputed_feature_count": 0,
           "applicability": {
             "status": "ok",
@@ -2708,25 +4483,44 @@
             "missing_fraction": 0.0,
             "ood_fraction": 0.0,
             "ood_feature_count": 0,
-            "max_absolute_z": 2.3380169213718145,
+            "max_absolute_z": 0.6386878128052633,
             "policy": {
-              "max_missing_fraction": 0.2,
-              "max_ood_fraction": 0.1,
-              "max_absolute_z": 12.0,
+              "max_missing_fraction": 0.34,
+              "max_ood_fraction": 0.2,
+              "max_absolute_z": 8.0,
               "support_quantiles": [
                 0.005,
                 0.995
               ],
               "support_margin_fraction": 0.1,
+              "min_anchor_pairs": 3,
               "description": "Engineering abstention heuristics, not calibrated confidence or safe control limits"
             }
           },
           "model": {
-            "name": "standardized Ridge on log1p(target)",
-            "alpha": 3000.0,
+            "name": "lab-anchored standardized ridge on ln(sulfur) per horizon; empirical out-of-fold residual quantiles",
+            "horizons_minutes": [
+              0,
+              60,
+              120,
+              180
+            ],
             "artifact": "model.json",
-            "artifact_sha256": "93c2f3875d224d59ea9b6c0ecd63cac8150f49725d30fdc84c8ccbbfcff972ee",
-            "risk_guard": "max(ridge, lab result published by origin)"
+            "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
+            "model_columns": [
+              "ln_q21",
+              "ln_q21_1h",
+              "ln_pak",
+              "ln_pak_1h",
+              "ln_level",
+              "ln_previous_lab"
+            ],
+            "alpha": {
+              "0": 30.0,
+              "60": 100.0,
+              "120": 30.0,
+              "180": 100.0
+            }
           },
           "leakage_check": {
             "passed": true,
@@ -2736,7 +4530,8 @@
             "violations": 0
           },
           "warnings": [
-            "Пороговый risk_guard — эвристика; точность обнаружения превышений ограничена. Прогноз не доказывает эффект управления."
+            "На горизонте 2–3 часа точечный прогноз близок к локальному уровню; используйте интервал и вероятность превышения.",
+            "Прогноз — статистическая оценка серы на выходе гидроочистки, не сертификация товарного топлива и не доказательство эффекта управления."
           ]
         },
         "quality_evidence": {
@@ -2747,11 +4542,21 @@
             "freshness": "missing",
             "flags": []
           },
+          "last_lab_sulfur": {
+            "source": "lims.ht.2.Mg.Sulfur",
+            "value": 7.099999904632568,
+            "timestamp": "2026-01-07T10:00:00",
+            "freshness": "fresh",
+            "age_minutes": 1260.0,
+            "flags": [],
+            "available_at": "2026-01-07T14:00:00"
+          },
           "controls": {
             "ht.T6": {
               "value": 364.5626525878906,
               "timestamp": "2026-01-08T07:00:00",
               "freshness": "fresh",
+              "age_minutes": 0.0,
               "flags": [],
               "available_at": "2026-01-08T07:00:00"
             },
@@ -2759,6 +4564,7 @@
               "value": 203.38870239257807,
               "timestamp": "2026-01-08T07:00:00",
               "freshness": "fresh",
+              "age_minutes": 0.0,
               "flags": [],
               "available_at": "2026-01-08T07:00:00"
             },
@@ -2766,6 +4572,7 @@
               "value": 3.918800115585327,
               "timestamp": "2026-01-08T07:00:00",
               "freshness": "fresh",
+              "age_minutes": 0.0,
               "flags": [],
               "available_at": "2026-01-08T07:00:00"
             }
@@ -2777,6 +4584,7 @@
               "value": 350.0,
               "timestamp": "2026-01-07T10:00:00",
               "freshness": "fresh",
+              "age_minutes": 1260.0,
               "flags": [],
               "available_at": "2026-01-07T14:00:00"
             },
@@ -2785,8 +4593,10 @@
               "value": 52.900001525878906,
               "timestamp": "2026-01-07T10:00:00",
               "freshness": "fresh",
+              "age_minutes": 1260.0,
               "flags": [],
-              "available_at": "2026-01-07T14:00:00"
+              "available_at": "2026-01-07T14:00:00",
+              "max_age_minutes": 86400
             }
           }
         },
@@ -2798,7 +4608,7 @@
           "confidence_kind": "binary_data_gate_not_probability",
           "regime_severity": {
             "status": "ok",
-            "index": 0.014101707953121842,
+            "index": 0.018465814107890374,
             "class": "normal",
             "within_model_limit": true,
             "model_limit": 1.0,
@@ -2806,29 +4616,29 @@
               {
                 "metric_id": "ht.T6",
                 "value": 364.5626525878906,
-                "train_mean": 363.89922026431924,
-                "train_std": 13.897660925931655,
-                "positive_z": 0.04773697725877642
+                "train_mean": 362.8890198864554,
+                "train_std": 12.715825316681757,
+                "positive_z": 0.13161809475627217
               },
               {
                 "metric_id": "ht.P13",
                 "value": 3.918800115585327,
-                "train_mean": 3.888229464792242,
-                "train_std": 0.1806557220746527,
-                "positive_z": 0.1692204954374621
+                "train_mean": 3.893977390723942,
+                "train_std": 0.168031617211358,
+                "positive_z": 0.147726512863123
               },
               {
                 "metric_id": "ht.F9",
                 "value": 203.38870239257807,
-                "train_mean": 211.74176771953853,
-                "train_std": 31.03368649571466,
+                "train_mean": 213.44224885991036,
+                "train_std": 31.516209881777463,
                 "positive_z": 0.0
               }
             ],
-            "basis": "max positive z(T6,P13,F9) / 12; train-only normalization",
-            "artifact_sha256": "93c2f3875d224d59ea9b6c0ecd63cac8150f49725d30fdc84c8ccbbfcff972ee",
+            "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
+            "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
             "failure_probability": null,
-            "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."
+            "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
           },
           "can_recommend": true,
           "basis": "scenario_only",
@@ -2843,8 +4653,54 @@
             "id": "hold",
             "status": "ok",
             "feasible": false,
-            "predicted_sulfur": 8.0,
+            "predicted_sulfur": 7.999999999999998,
+            "exceedance_probability": 0.0831752658944187,
             "effort": 0.0,
+            "objectives": {
+              "throughput_index": 1.0,
+              "throughput_change_pct": 0,
+              "energy_cost_index": 1.0,
+              "regime_severity": {
+                "status": "ok",
+                "index": 0.018465814107890374,
+                "class": "normal",
+                "within_model_limit": true,
+                "model_limit": 1.0,
+                "factors": [
+                  {
+                    "metric_id": "ht.T6",
+                    "value": 364.5626525878906,
+                    "train_mean": 362.8890198864554,
+                    "train_std": 12.715825316681757,
+                    "positive_z": 0.13161809475627217
+                  },
+                  {
+                    "metric_id": "ht.P13",
+                    "value": 3.918800115585327,
+                    "train_mean": 3.893977390723942,
+                    "train_std": 0.168031617211358,
+                    "positive_z": 0.147726512863123
+                  },
+                  {
+                    "metric_id": "ht.F9",
+                    "value": 203.38870239257807,
+                    "train_mean": 213.44224885991036,
+                    "train_std": 31.516209881777463,
+                    "positive_z": 0.0
+                  }
+                ],
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
+                "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
+                "failure_probability": null,
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
+              },
+              "exceedance_probability": 0.0831752658944187,
+              "quality_risk_index": 0.27725088631472905,
+              "ranking_loss": 0.14324189668433712,
+              "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
+              "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
+              "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
+            },
             "safety_gate": {
               "passed": false,
               "reasons": [
@@ -2860,6 +4716,11 @@
                   "name": "sulfur_editable_target",
                   "passed": true,
                   "basis": "editable_target"
+                },
+                {
+                  "name": "sulfur_exceedance_probability",
+                  "passed": true,
+                  "basis": "editable_probability_target_from_forecast_residuals"
                 },
                 {
                   "name": "blend_sulfur_hard_limit",
@@ -2897,8 +4758,54 @@
             "id": "conservative",
             "status": "ok",
             "feasible": false,
-            "predicted_sulfur": 8.0,
+            "predicted_sulfur": 7.999999999999998,
+            "exceedance_probability": 0.0831752658944187,
             "effort": 0.0,
+            "objectives": {
+              "throughput_index": 1.0,
+              "throughput_change_pct": 0.0,
+              "energy_cost_index": 1.0,
+              "regime_severity": {
+                "status": "ok",
+                "index": 0.018465814107890374,
+                "class": "normal",
+                "within_model_limit": true,
+                "model_limit": 1.0,
+                "factors": [
+                  {
+                    "metric_id": "ht.T6",
+                    "value": 364.5626525878906,
+                    "train_mean": 362.8890198864554,
+                    "train_std": 12.715825316681757,
+                    "positive_z": 0.13161809475627217
+                  },
+                  {
+                    "metric_id": "ht.P13",
+                    "value": 3.918800115585327,
+                    "train_mean": 3.893977390723942,
+                    "train_std": 0.168031617211358,
+                    "positive_z": 0.147726512863123
+                  },
+                  {
+                    "metric_id": "ht.F9",
+                    "value": 203.38870239257807,
+                    "train_mean": 213.44224885991036,
+                    "train_std": 31.516209881777463,
+                    "positive_z": 0.0
+                  }
+                ],
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
+                "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
+                "failure_probability": null,
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
+              },
+              "exceedance_probability": 0.0831752658944187,
+              "quality_risk_index": 0.27725088631472905,
+              "ranking_loss": 0.14324189668433712,
+              "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
+              "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
+              "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
+            },
             "safety_gate": {
               "passed": false,
               "reasons": [
@@ -2914,6 +4821,11 @@
                   "name": "sulfur_editable_target",
                   "passed": true,
                   "basis": "editable_target"
+                },
+                {
+                  "name": "sulfur_exceedance_probability",
+                  "passed": true,
+                  "basis": "editable_probability_target_from_forecast_residuals"
                 },
                 {
                   "name": "blend_sulfur_hard_limit",
@@ -2951,8 +4863,54 @@
             "id": "automatic",
             "status": "ok",
             "feasible": false,
-            "predicted_sulfur": 8.0,
+            "predicted_sulfur": 7.999999999999998,
+            "exceedance_probability": 0.0831752658944187,
             "effort": 0.0,
+            "objectives": {
+              "throughput_index": 1.0,
+              "throughput_change_pct": 0.0,
+              "energy_cost_index": 1.0,
+              "regime_severity": {
+                "status": "ok",
+                "index": 0.018465814107890374,
+                "class": "normal",
+                "within_model_limit": true,
+                "model_limit": 1.0,
+                "factors": [
+                  {
+                    "metric_id": "ht.T6",
+                    "value": 364.5626525878906,
+                    "train_mean": 362.8890198864554,
+                    "train_std": 12.715825316681757,
+                    "positive_z": 0.13161809475627217
+                  },
+                  {
+                    "metric_id": "ht.P13",
+                    "value": 3.918800115585327,
+                    "train_mean": 3.893977390723942,
+                    "train_std": 0.168031617211358,
+                    "positive_z": 0.147726512863123
+                  },
+                  {
+                    "metric_id": "ht.F9",
+                    "value": 203.38870239257807,
+                    "train_mean": 213.44224885991036,
+                    "train_std": 31.516209881777463,
+                    "positive_z": 0.0
+                  }
+                ],
+                "basis": "max positive z(T6,P13,F9) / 8; train-only normalization, same threshold as forecast applicability",
+                "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
+                "failure_probability": null,
+                "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 8σ — экспериментальный, не промышленный предел."
+              },
+              "exceedance_probability": 0.0831752658944187,
+              "quality_risk_index": 0.27725088631472905,
+              "ranking_loss": 0.14324189668433712,
+              "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.5*P(>10)/P_max",
+              "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units; P(>10) from forecast residuals",
+              "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"
+            },
             "safety_gate": {
               "passed": false,
               "reasons": [
@@ -2968,6 +4926,11 @@
                   "name": "sulfur_editable_target",
                   "passed": true,
                   "basis": "editable_target"
+                },
+                {
+                  "name": "sulfur_exceedance_probability",
+                  "passed": true,
+                  "basis": "editable_probability_target_from_forecast_residuals"
                 },
                 {
                   "name": "blend_sulfur_hard_limit",
@@ -3011,163 +4974,163 @@
       "method": "GET",
       "path": "/api/health",
       "status": 200,
-      "elapsed_seconds": 0.02
+      "elapsed_seconds": 0.049
     },
     {
       "method": "GET",
       "path": "/api/datasets/hackathon",
       "status": 200,
-      "elapsed_seconds": 0.009
+      "elapsed_seconds": 0.004
     },
     {
       "method": "GET",
       "path": "/api/datasets/hackathon/snapshot?at=2026-01-08T07%3A00%3A00",
       "status": 200,
-      "elapsed_seconds": 2.534
+      "elapsed_seconds": 1.123
     },
     {
       "method": "GET",
       "path": "/api/datasets/hackathon/forecast?at=2026-01-08T07%3A00%3A00",
       "status": 200,
-      "elapsed_seconds": 0.274
+      "elapsed_seconds": 0.173
     },
     {
       "method": "POST",
       "path": "/api/datasets/hackathon/decision",
       "status": 200,
-      "elapsed_seconds": 2.835
+      "elapsed_seconds": 0.972
     },
     {
       "method": "GET",
       "path": "/api/datasets/hackathon/snapshot?at=2026-01-14T07%3A00%3A00",
       "status": 200,
-      "elapsed_seconds": 2.595
+      "elapsed_seconds": 0.847
     },
     {
       "method": "GET",
       "path": "/api/datasets/hackathon/forecast?at=2026-01-14T07%3A00%3A00",
       "status": 200,
-      "elapsed_seconds": 0.263
+      "elapsed_seconds": 0.159
     },
     {
       "method": "POST",
       "path": "/api/datasets/hackathon/decision",
       "status": 200,
-      "elapsed_seconds": 3.032
+      "elapsed_seconds": 1.044
     },
     {
       "method": "GET",
       "path": "/api/datasets/hackathon/snapshot?at=2022-12-31T00%3A00%3A00",
       "status": 200,
-      "elapsed_seconds": 0.1
+      "elapsed_seconds": 0.033
     },
     {
       "method": "GET",
       "path": "/api/datasets/hackathon/forecast?at=2022-12-31T00%3A00%3A00",
       "status": 200,
-      "elapsed_seconds": 0.082
+      "elapsed_seconds": 0.014
     },
     {
       "method": "POST",
       "path": "/api/datasets/hackathon/decision",
       "status": 200,
-      "elapsed_seconds": 0.173
+      "elapsed_seconds": 0.076
     },
     {
       "method": "GET",
       "path": "/api/datasets/hackathon/snapshot?at=2026-08-08T12%3A00%3A00",
       "status": 200,
-      "elapsed_seconds": 3.307
+      "elapsed_seconds": 0.934
     },
     {
       "method": "GET",
       "path": "/api/datasets/hackathon/forecast?at=2026-08-08T12%3A00%3A00",
       "status": 200,
-      "elapsed_seconds": 0.063
+      "elapsed_seconds": 0.155
     },
     {
       "method": "POST",
       "path": "/api/datasets/hackathon/decision",
       "status": 200,
-      "elapsed_seconds": 3.366
+      "elapsed_seconds": 1.18
     },
     {
       "method": "GET",
       "path": "/api/datasets/hackathon/snapshot?at=2026-06-19T12%3A00%3A00",
       "status": 200,
-      "elapsed_seconds": 3.467
+      "elapsed_seconds": 1.095
     },
     {
       "method": "GET",
       "path": "/api/datasets/hackathon/forecast?at=2026-06-19T12%3A00%3A00",
       "status": 200,
-      "elapsed_seconds": 0.302
+      "elapsed_seconds": 0.156
     },
     {
       "method": "POST",
       "path": "/api/datasets/hackathon/decision",
       "status": 200,
-      "elapsed_seconds": 3.694
+      "elapsed_seconds": 1.087
     },
     {
       "method": "GET",
       "path": "/api/datasets/hackathon/snapshot?at=2026-01-08T07%3A00%3A00",
       "status": 200,
-      "elapsed_seconds": 2.967
+      "elapsed_seconds": 0.862
     },
     {
       "method": "GET",
       "path": "/api/datasets/hackathon/forecast?at=2026-01-08T07%3A00%3A00",
       "status": 200,
-      "elapsed_seconds": 0.29
+      "elapsed_seconds": 0.15
     },
     {
       "method": "POST",
       "path": "/api/datasets/hackathon/decision",
       "status": 200,
-      "elapsed_seconds": 3.22
+      "elapsed_seconds": 1.018
     },
     {
       "method": "GET",
       "path": "/api/datasets/hackathon/snapshot?at=2026-01-08T07%3A00%3A00",
       "status": 200,
-      "elapsed_seconds": 2.934
+      "elapsed_seconds": 0.937
     },
     {
       "method": "GET",
       "path": "/api/datasets/hackathon/forecast?at=2026-01-08T07%3A00%3A00",
       "status": 200,
-      "elapsed_seconds": 0.29
+      "elapsed_seconds": 0.149
     },
     {
       "method": "POST",
       "path": "/api/datasets/hackathon/decision",
       "status": 200,
-      "elapsed_seconds": 2.873
+      "elapsed_seconds": 0.994
     },
     {
       "method": "GET",
       "path": "/api/datasets/hackathon/snapshot?at=2026-01-08T07%3A00%3A00",
       "status": 200,
-      "elapsed_seconds": 2.648
+      "elapsed_seconds": 0.875
     },
     {
       "method": "GET",
       "path": "/api/datasets/hackathon/forecast?at=2026-01-08T07%3A00%3A00",
       "status": 200,
-      "elapsed_seconds": 0.276
+      "elapsed_seconds": 0.15
     },
     {
       "method": "POST",
       "path": "/api/datasets/hackathon/decision",
       "status": 200,
-      "elapsed_seconds": 2.929
+      "elapsed_seconds": 0.97
     },
     {
       "method": "POST",
       "path": "/api/datasets/hackathon/scenario",
       "status": 422,
-      "elapsed_seconds": 2.582
+      "elapsed_seconds": 0.944
     }
   ],
   "failures": [],

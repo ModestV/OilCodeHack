@@ -30,7 +30,7 @@ from .agents import make_decision
 from .config import ROOT, STORAGE
 from .formulas import formula_results
 from .forecast import ForecastUnavailable, forecast_sulfur
-from .scenarios import ScenarioRequest, calculate_scenario
+from .scenarios import ScenarioRequest, calculate_scenario, scenario_defaults
 
 IMPORT_LOCK = threading.Lock()
 
@@ -269,13 +269,20 @@ def decision(dataset_id: str, body: ScenarioRequest):
 
 
 @app.get("/api/datasets/{dataset_id}/forecast")
-def forecast(dataset_id: str, at: str):
-    """Run the fitted, leakage-safe first-iteration sulphur forecast."""
+def forecast(dataset_id: str, at: str, horizon_minutes: Annotated[float, Query(ge=0, le=180)] = 180):
+    """Lab-anchored sulphur nowcast and forecast issued at ``at`` for ``horizon_minutes``."""
 
     try:
-        return forecast_sulfur(dataset(dataset_id), at)
+        return forecast_sulfur(dataset(dataset_id), at, horizon_minutes=horizon_minutes)
     except ForecastUnavailable as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+
+@app.get("/api/scenario-defaults")
+def scenario_parameter_defaults():
+    """Default scenario coefficients (analyser step responses) with their evidence."""
+
+    return scenario_defaults()
 
 
 @app.get("/api/datasets/{dataset_id}/quality")

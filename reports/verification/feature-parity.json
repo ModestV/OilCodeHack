@@ -1,36 +1,342 @@
 {
   "passed": true,
-  "artifact_sha256": "93c2f3875d224d59ea9b6c0ecd63cac8150f49725d30fdc84c8ccbbfcff972ee",
+  "artifact_sha256": "0bda48e3288a0c27995ec7435226a9e6f5e04373ae1f13dc487561427cd51725",
   "samples": [
     {
-      "origin": "2026-01-01T07:00:00",
-      "max_feature_absolute_error": 1.2126537675492127e-11,
-      "prediction_absolute_error": 0.0
+      "origin": "2026-01-01 10:00:00",
+      "horizon_minutes": 0,
+      "offline_prediction": 8.984822099962477,
+      "runtime_prediction": 8.984822099962477,
+      "absolute_error": 0.0
     },
     {
-      "origin": "2026-01-03T11:58:15",
-      "max_feature_absolute_error": 5.861188081103877e-12,
-      "prediction_absolute_error": 1.2434497875801753e-14
+      "origin": "2026-01-16 10:00:00",
+      "horizon_minutes": 0,
+      "offline_prediction": 9.251955840852329,
+      "runtime_prediction": 9.251955840852329,
+      "absolute_error": 0.0
     },
     {
-      "origin": "2026-01-15T07:00:00",
-      "max_feature_absolute_error": 1.4551862021145237e-11,
-      "prediction_absolute_error": 2.4868995751603507e-14
+      "origin": "2026-02-01 10:00:00",
+      "horizon_minutes": 0,
+      "offline_prediction": 8.905834260923099,
+      "runtime_prediction": 8.905834260923102,
+      "absolute_error": 3.552713678800501e-15
     },
     {
-      "origin": "2026-02-23T07:00:00",
-      "max_feature_absolute_error": 7.067531745168302e-12,
-      "prediction_absolute_error": 5.329070518200751e-15
+      "origin": "2026-02-22 10:00:00",
+      "horizon_minutes": 0,
+      "offline_prediction": 8.141202476974874,
+      "runtime_prediction": 8.141202476974877,
+      "absolute_error": 3.552713678800501e-15
     },
     {
-      "origin": "2026-05-03T07:00:00",
-      "max_feature_absolute_error": 2.4253508408437e-12,
-      "prediction_absolute_error": 1.4210854715202004e-14
+      "origin": "2026-03-15 22:00:00",
+      "horizon_minutes": 0,
+      "offline_prediction": 8.655901701142241,
+      "runtime_prediction": 8.655901701142241,
+      "absolute_error": 0.0
     },
     {
-      "origin": "2026-08-06T07:00:00",
-      "max_feature_absolute_error": 2.0615184554003893e-11,
-      "prediction_absolute_error": 3.375077994860476e-14
+      "origin": "2026-04-03 10:00:00",
+      "horizon_minutes": 0,
+      "offline_prediction": 8.584180942863933,
+      "runtime_prediction": 8.584180942863929,
+      "absolute_error": 3.552713678800501e-15
+    },
+    {
+      "origin": "2026-04-30 20:00:00",
+      "horizon_minutes": 0,
+      "offline_prediction": 9.067942238607785,
+      "runtime_prediction": 9.067942238607785,
+      "absolute_error": 0.0
+    },
+    {
+      "origin": "2026-05-14 10:00:00",
+      "horizon_minutes": 0,
+      "offline_prediction": 9.11181003334348,
+      "runtime_prediction": 9.111810033343485,
+      "absolute_error": 5.329070518200751e-15
+    },
+    {
+      "origin": "2026-05-31 10:00:00",
+      "horizon_minutes": 0,
+      "offline_prediction": 9.070936150742826,
+      "runtime_prediction": 9.070936150742826,
+      "absolute_error": 0.0
+    },
+    {
+      "origin": "2026-06-15 10:00:00",
+      "horizon_minutes": 0,
+      "offline_prediction": 9.172481898012872,
+      "runtime_prediction": 9.172481898012869,
+      "absolute_error": 3.552713678800501e-15
+    },
+    {
+      "origin": "2026-07-16 10:00:00",
+      "horizon_minutes": 0,
+      "offline_prediction": 9.791206345155146,
+      "runtime_prediction": 9.791206345155146,
+      "absolute_error": 0.0
+    },
+    {
+      "origin": "2026-08-06 10:00:00",
+      "horizon_minutes": 0,
+      "offline_prediction": 9.035184363347872,
+      "runtime_prediction": 9.035184363347872,
+      "absolute_error": 0.0
+    },
+    {
+      "origin": "2026-01-01 09:00:00",
+      "horizon_minutes": 60,
+      "offline_prediction": 8.960937656801182,
+      "runtime_prediction": 8.960937656801182,
+      "absolute_error": 0.0
+    },
+    {
+      "origin": "2026-01-16 09:00:00",
+      "horizon_minutes": 60,
+      "offline_prediction": 9.743958325573224,
+      "runtime_prediction": 9.743958325573223,
+      "absolute_error": 1.7763568394002505e-15
+    },
+    {
+      "origin": "2026-02-01 09:00:00",
+      "horizon_minutes": 60,
+      "offline_prediction": 9.293022192794554,
+      "runtime_prediction": 9.293022192794554,
+      "absolute_error": 0.0
+    },
+    {
+      "origin": "2026-02-23 09:00:00",
+      "horizon_minutes": 60,
+      "offline_prediction": 8.492115196973272,
+      "runtime_prediction": 8.492115196973275,
+      "absolute_error": 3.552713678800501e-15
+    },
+    {
+      "origin": "2026-03-15 14:00:00",
+      "horizon_minutes": 60,
+      "offline_prediction": 8.675618331177795,
+      "runtime_prediction": 8.675618331177795,
+      "absolute_error": 0.0
+    },
+    {
+      "origin": "2026-04-02 09:00:00",
+      "horizon_minutes": 60,
+      "offline_prediction": 10.75834285026679,
+      "runtime_prediction": 10.75834285026679,
+      "absolute_error": 0.0
+    },
+    {
+      "origin": "2026-04-30 19:00:00",
+      "horizon_minutes": 60,
+      "offline_prediction": 9.110982910398146,
+      "runtime_prediction": 9.110982910398146,
+      "absolute_error": 0.0
+    },
+    {
+      "origin": "2026-05-14 09:00:00",
+      "horizon_minutes": 60,
+      "offline_prediction": 8.578781389572377,
+      "runtime_prediction": 8.578781389572377,
+      "absolute_error": 0.0
+    },
+    {
+      "origin": "2026-05-30 09:00:00",
+      "horizon_minutes": 60,
+      "offline_prediction": 8.915061164981779,
+      "runtime_prediction": 8.915061164981779,
+      "absolute_error": 0.0
+    },
+    {
+      "origin": "2026-06-15 09:00:00",
+      "horizon_minutes": 60,
+      "offline_prediction": 8.837995119953144,
+      "runtime_prediction": 8.837995119953144,
+      "absolute_error": 0.0
+    },
+    {
+      "origin": "2026-07-16 09:00:00",
+      "horizon_minutes": 60,
+      "offline_prediction": 8.85075297061837,
+      "runtime_prediction": 8.85075297061837,
+      "absolute_error": 0.0
+    },
+    {
+      "origin": "2026-08-06 09:00:00",
+      "horizon_minutes": 60,
+      "offline_prediction": 8.80344093578062,
+      "runtime_prediction": 8.80344093578062,
+      "absolute_error": 0.0
+    },
+    {
+      "origin": "2026-01-01 08:00:00",
+      "horizon_minutes": 120,
+      "offline_prediction": 8.98803632246916,
+      "runtime_prediction": 8.98803632246916,
+      "absolute_error": 0.0
+    },
+    {
+      "origin": "2026-01-16 08:00:00",
+      "horizon_minutes": 120,
+      "offline_prediction": 9.76242155674032,
+      "runtime_prediction": 9.762421556740321,
+      "absolute_error": 1.7763568394002505e-15
+    },
+    {
+      "origin": "2026-02-01 08:00:00",
+      "horizon_minutes": 120,
+      "offline_prediction": 9.337920871038005,
+      "runtime_prediction": 9.337920871038005,
+      "absolute_error": 0.0
+    },
+    {
+      "origin": "2026-02-23 08:00:00",
+      "horizon_minutes": 120,
+      "offline_prediction": 8.018416706049484,
+      "runtime_prediction": 8.018416706049491,
+      "absolute_error": 7.105427357601002e-15
+    },
+    {
+      "origin": "2026-03-15 13:00:00",
+      "horizon_minutes": 120,
+      "offline_prediction": 8.577162219475477,
+      "runtime_prediction": 8.577162219475477,
+      "absolute_error": 0.0
+    },
+    {
+      "origin": "2026-04-02 08:00:00",
+      "horizon_minutes": 120,
+      "offline_prediction": 10.399644712896205,
+      "runtime_prediction": 10.399644712896205,
+      "absolute_error": 0.0
+    },
+    {
+      "origin": "2026-04-30 18:00:00",
+      "horizon_minutes": 120,
+      "offline_prediction": 8.69726763565811,
+      "runtime_prediction": 8.69726763565811,
+      "absolute_error": 0.0
+    },
+    {
+      "origin": "2026-05-14 08:00:00",
+      "horizon_minutes": 120,
+      "offline_prediction": 8.478476657113088,
+      "runtime_prediction": 8.478476657113088,
+      "absolute_error": 0.0
+    },
+    {
+      "origin": "2026-05-30 08:00:00",
+      "horizon_minutes": 120,
+      "offline_prediction": 8.719098553219792,
+      "runtime_prediction": 8.719098553219792,
+      "absolute_error": 0.0
+    },
+    {
+      "origin": "2026-06-15 08:00:00",
+      "horizon_minutes": 120,
+      "offline_prediction": 8.844040832446526,
+      "runtime_prediction": 8.844040832446526,
+      "absolute_error": 0.0
+    },
+    {
+      "origin": "2026-07-16 08:00:00",
+      "horizon_minutes": 120,
+      "offline_prediction": 8.553730535772091,
+      "runtime_prediction": 8.553730535772091,
+      "absolute_error": 0.0
+    },
+    {
+      "origin": "2026-08-06 08:00:00",
+      "horizon_minutes": 120,
+      "offline_prediction": 8.153136072659807,
+      "runtime_prediction": 8.153136072659807,
+      "absolute_error": 0.0
+    },
+    {
+      "origin": "2026-01-01 07:00:00",
+      "horizon_minutes": 180,
+      "offline_prediction": 8.893241583263034,
+      "runtime_prediction": 8.893241583263038,
+      "absolute_error": 3.552713678800501e-15
+    },
+    {
+      "origin": "2026-01-16 07:00:00",
+      "horizon_minutes": 180,
+      "offline_prediction": 9.172068754371823,
+      "runtime_prediction": 9.172068754371823,
+      "absolute_error": 0.0
+    },
+    {
+      "origin": "2026-02-01 07:00:00",
+      "horizon_minutes": 180,
+      "offline_prediction": 8.8660157791543,
+      "runtime_prediction": 8.8660157791543,
+      "absolute_error": 0.0
+    },
+    {
+      "origin": "2026-02-23 07:00:00",
+      "horizon_minutes": 180,
+      "offline_prediction": 8.24354722260255,
+      "runtime_prediction": 8.24354722260255,
+      "absolute_error": 0.0
+    },
+    {
+      "origin": "2026-03-15 12:00:00",
+      "horizon_minutes": 180,
+      "offline_prediction": 8.55433285352346,
+      "runtime_prediction": 8.55433285352346,
+      "absolute_error": 0.0
+    },
+    {
+      "origin": "2026-04-02 07:00:00",
+      "horizon_minutes": 180,
+      "offline_prediction": 8.936164939400076,
+      "runtime_prediction": 8.93616493940008,
+      "absolute_error": 3.552713678800501e-15
+    },
+    {
+      "origin": "2026-04-30 17:00:00",
+      "horizon_minutes": 180,
+      "offline_prediction": 8.24678294521083,
+      "runtime_prediction": 8.24678294521083,
+      "absolute_error": 0.0
+    },
+    {
+      "origin": "2026-05-14 07:00:00",
+      "horizon_minutes": 180,
+      "offline_prediction": 7.67403891756538,
+      "runtime_prediction": 7.67403891756538,
+      "absolute_error": 0.0
+    },
+    {
+      "origin": "2026-05-30 07:00:00",
+      "horizon_minutes": 180,
+      "offline_prediction": 8.612984390209885,
+      "runtime_prediction": 8.612984390209888,
+      "absolute_error": 3.552713678800501e-15
+    },
+    {
+      "origin": "2026-06-15 07:00:00",
+      "horizon_minutes": 180,
+      "offline_prediction": 8.785614235604259,
+      "runtime_prediction": 8.785614235604255,
+      "absolute_error": 3.552713678800501e-15
+    },
+    {
+      "origin": "2026-07-16 07:00:00",
+      "horizon_minutes": 180,
+      "offline_prediction": 9.337465624957948,
+      "runtime_prediction": 9.337465624957947,
+      "absolute_error": 1.7763568394002505e-15
+    },
+    {
+      "origin": "2026-08-06 07:00:00",
+      "horizon_minutes": 180,
+      "offline_prediction": 8.360881824493864,
+      "runtime_prediction": 8.360881824493864,
+      "absolute_error": 0.0
     }
   ]
 }
