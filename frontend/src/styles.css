@@ -2880,3 +2880,24 @@ td {
   color: var(--text);
   box-shadow: var(--shadow-popover);
 }
+
+/* Refreshing data keeps the previous view mounted */
+.view {
+  position: relative;
+  transition: opacity var(--dur-2) var(--ease);
+}
+.view.busy {
+  opacity: 0.6;
+  pointer-events: none;
+}
+.view-progress {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  margin: 0 0 -2px;
+}
+.chart-loading {
+  background: var(--surface-2);
+  border-radius: var(--r-1);
+  animation: pulse 1.2s ease-in-out infinite;
+}

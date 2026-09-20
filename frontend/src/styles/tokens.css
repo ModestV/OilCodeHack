@@ -69,7 +69,7 @@
   --sp-8: 40px;
 
   /* Type scale */
-  --font: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+  --font: Inter, "Inter Fallback", "Segoe UI", Roboto, Arial, sans-serif;
   --fs-xs: 11px;
   --fs-sm: 12px;
   --fs-base: 13px;

@@ -8,16 +8,10 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { api } from "../api";
-import type {
-  DecisionResult,
-  ScenarioRequest,
-  ScenarioResult,
-} from "../types";
+import type { DecisionResult, ScenarioRequest, ScenarioResult } from "../types";
 import { Chart } from "../components/Chart";
 import { formatNumber } from "../visualization";
-import {
-  pipelineStages,
-} from "../demo/decisionSupportDemo";
+import { pipelineStages } from "../demo/decisionSupportDemo";
 
 const controls = [
   ["ht.T6", "Температура на входе Р-202", "°C"],
@@ -33,7 +27,12 @@ const initial = (at: string, sandbox: boolean): ScenarioRequest => ({
   baseline_feed_sulfur: 0.93,
   feed_sulfur: 0.93,
   // 1 mg/kg technological margin (expert) and 30 % residual exceedance risk.
-  targets: { sulfur_max: 9, t95_max: 360, cetane_min: 51, max_exceedance_probability: 0.3 },
+  targets: {
+    sulfur_max: 9,
+    t95_max: 360,
+    cetane_min: 51,
+    max_exceedance_probability: 0.3,
+  },
   // Log-domain surrogate: analyser step-response estimates from
   // reports/modeling/sulfur-forecast (editable assumptions, direction confirmed for T6).
   parameters: {
@@ -71,15 +70,17 @@ const initial = (at: string, sandbox: boolean): ScenarioRequest => ({
 });
 
 const number = (value: string) => Number(value.replace(",", "."));
-const forecastReason = (reason: string) => ({
-  no_sulfur_evidence: "нет ни анализатора, ни опубликованной пробы серы",
-  no_control_telemetry: "нет свежей телеметрии T6/F9/P13",
-  too_many_missing_features: "слишком много пропусков",
-  outside_training_support: "режим установки за пределами области обучения",
-  insufficient_lab_anchor: "мало пар ЛИМС/анализатор для калибровки",
-  model_not_yet_available_at_origin: "момент предшествует завершению обучения и выбора модели (01.01.2026)",
-  nonfinite_model_output: "некорректный численный результат",
-}[reason] || reason);
+const forecastReason = (reason: string) =>
+  ({
+    no_sulfur_evidence: "нет ни анализатора, ни опубликованной пробы серы",
+    no_control_telemetry: "нет свежей телеметрии T6/F9/P13",
+    too_many_missing_features: "слишком много пропусков",
+    outside_training_support: "режим установки за пределами области обучения",
+    insufficient_lab_anchor: "мало пар ЛИМС/анализатор для калибровки",
+    model_not_yet_available_at_origin:
+      "момент предшествует завершению обучения и выбора модели (01.01.2026)",
+    nonfinite_model_output: "некорректный численный результат",
+  })[reason] || reason;
 const percent = (value: number | null | undefined) =>
   value == null ? "—" : `${Math.round(value * 100)} %`;
 
@@ -100,7 +101,9 @@ export function DecisionSupportView({
   onOpenSandbox?: (request: ScenarioRequest) => void;
   initialRequest?: ScenarioRequest;
 }) {
-  const [request, setRequest] = useState(() => initialRequest ? structuredClone(initialRequest) : initial(at, sandbox));
+  const [request, setRequest] = useState(() =>
+    initialRequest ? structuredClone(initialRequest) : initial(at, sandbox),
+  );
   const [result, setResult] = useState<ScenarioResult | null>(null);
   const [decision, setDecision] = useState<DecisionResult | null>(null);
   const [error, setError] = useState("");
@@ -220,9 +223,7 @@ export function DecisionSupportView({
   );
 
   if (!sandbox) {
-    const validPeriod =
-      sourceMode === "latest" ||
-      Boolean(periodTo);
+    const validPeriod = sourceMode === "latest" || Boolean(periodTo);
     return (
       <section className="decision-page recommendation-page">
         <section className="decision-band recommendation-controls">
@@ -293,9 +294,14 @@ export function DecisionSupportView({
             <span>Последняя запись · {displayTime(latestAt)}</span>
           </div>
         </section>
-        {error && <p className="error" role="alert">{error}</p>}
+        {error && (
+          <p className="error" role="alert">
+            {error}
+          </p>
+        )}
         <p className="support-notice">
-          Прогноз на 3 часа и сравнение сценариев. Коэффициенты изменения режима — допущения для проверки технологом.
+          Прогноз на 3 часа и сравнение сценариев. Коэффициенты изменения режима
+          — допущения для проверки технологом.
         </p>
         {pipelineStarted ? (
           <PipelinePreview
@@ -332,7 +338,10 @@ export function DecisionSupportView({
         <div className="section-heading">
           <div>
             <h2>Условия расчёта</h2>
-            <p className="support-notice">На {displayTime(request.at)}{initialRequest ? " · условия из рекомендации" : ""}</p>
+            <p className="support-notice">
+              На {displayTime(request.at)}
+              {initialRequest ? " · условия из рекомендации" : ""}
+            </p>
           </div>
           <button className="primary" type="submit" disabled={loading}>
             <Play /> {loading ? "Расчёт…" : "Рассчитать сценарий"}
@@ -370,7 +379,10 @@ export function DecisionSupportView({
               step="any"
               value={request.targets.max_exceedance_probability}
               onChange={(e) =>
-                update("targets.max_exceedance_probability", number(e.target.value))
+                update(
+                  "targets.max_exceedance_probability",
+                  number(e.target.value),
+                )
               }
             />
           </label>
@@ -660,20 +672,36 @@ export function DecisionSupportView({
                   : result.baseline.sulfur_source}
               </span>
             </article>
-            <article className={result.sulfur_target_met && result.hard_sulfur_limit_met && result.exceedance_target_met !== false ? "ok" : "danger"}>
+            <article
+              className={
+                result.sulfur_target_met &&
+                result.hard_sulfur_limit_met &&
+                result.exceedance_target_met !== false
+                  ? "ok"
+                  : "danger"
+              }
+            >
               <small>Через {result.horizon_minutes} мин</small>
               <strong>{formatNumber(result.predicted_sulfur, 2)}</strong>
               <span>
-                {result.predicted_sulfur_lower != null && result.predicted_sulfur_upper != null && (
-                  <>80 %: {formatNumber(result.predicted_sulfur_lower, 1)}–{formatNumber(result.predicted_sulfur_upper, 1)} · P(&gt;10) {percent(result.exceedance_probability)} · </>
-                )}
-                {result.sulfur_target_met && result.hard_sulfur_limit_met && result.exceedance_target_met !== false ? (
+                {result.predicted_sulfur_lower != null &&
+                  result.predicted_sulfur_upper != null && (
+                    <>
+                      80 %: {formatNumber(result.predicted_sulfur_lower, 1)}–
+                      {formatNumber(result.predicted_sulfur_upper, 1)} ·
+                      P(&gt;10) {percent(result.exceedance_probability)} ·{" "}
+                    </>
+                  )}
+                {result.sulfur_target_met &&
+                result.hard_sulfur_limit_met &&
+                result.exceedance_target_met !== false ? (
                   <>
                     <CheckCircle2 /> цель достигнута
                   </>
                 ) : (
                   <>
-                    <AlertTriangle /> превышение цели, 10 мг/кг или допустимого риска
+                    <AlertTriangle /> превышение цели, 10 мг/кг или допустимого
+                    риска
                   </>
                 )}
               </span>
@@ -703,7 +731,11 @@ export function DecisionSupportView({
           {result.blend && (
             <section className="decision-results blend-results">
               <article
-                className={result.blend.meets_targets.sulfur && result.blend.sulfur <= 10 ? "ok" : "danger"}
+                className={
+                  result.blend.meets_targets.sulfur && result.blend.sulfur <= 10
+                    ? "ok"
+                    : "danger"
+                }
               >
                 <small>Сера смеси</small>
                 <strong>{formatNumber(result.blend.sulfur, 2)}</strong>
@@ -820,11 +852,12 @@ function PipelinePreview({
   const baseline = result?.baseline.sulfur;
   const reduction =
     baseline != null && predicted != null ? baseline - predicted : null;
-  const summary = decision?.status === "abstain"
-    ? `Рекомендация не сформирована: ${decision.abstain?.reason || "Недостаточно подтверждений."}`
-    : result
-      ? `Сценарный расчёт: сера ${formatNumber(predicted)} мг/кг после ${result.horizon_minutes} минут; исходное значение ${formatNumber(baseline)} мг/кг. Изменение режима требует проверки технологом; причинные эффекты заданы допущениями.`
-      : "Нет данных для расчёта.";
+  const summary =
+    decision?.status === "abstain"
+      ? `Рекомендация не сформирована: ${decision.abstain?.reason || "Недостаточно подтверждений."}`
+      : result
+        ? `Сценарный расчёт: сера ${formatNumber(predicted)} мг/кг после ${result.horizon_minutes} минут; исходное значение ${formatNumber(baseline)} мг/кг. Изменение режима требует проверки технологом; причинные эффекты заданы допущениями.`
+        : "Нет данных для расчёта.";
   async function copy() {
     try {
       await navigator.clipboard.writeText(`${period}\n${summary}`);
@@ -841,21 +874,25 @@ function PipelinePreview({
           {decision?.status === "abstain"
             ? "Надёжной рекомендации нет"
             : result?.sulfur_target_met
-            ? "Выбран сценарий для рассмотрения"
-            : "Цель по сере не достигается текущими изменениями"}
+              ? "Выбран сценарий для рассмотрения"
+              : "Цель по сере не достигается текущими изменениями"}
         </h2>
         <p className="recommendation-copy">
           {decision?.status === "abstain"
-            ? decision.abstain?.reason || "Пайплайн остановлен из-за качества данных."
+            ? decision.abstain?.reason ||
+              "Пайплайн остановлен из-за качества данных."
             : result
-            ? `Прогноз: ${formatNumber(predicted)} мг/кг после ${result.horizon_minutes} минут.`
-            : "Нет данных для сценарного расчёта."}
+              ? `Прогноз: ${formatNumber(predicted)} мг/кг после ${result.horizon_minutes} минут.`
+              : "Нет данных для сценарного расчёта."}
         </p>
         {sulfurEvidence && (
           <p className="support-notice">
-            Исходная сера: {formatNumber(sulfurEvidence.value)} мг/кг · {sulfurEvidence.source || "источник отсутствует"}
-            {sulfurEvidence.timestamp && ` · проба ${displayTime(sulfurEvidence.timestamp)}`}
-            {sulfurEvidence.available_at && ` · доступна ${displayTime(sulfurEvidence.available_at)}`}
+            Исходная сера: {formatNumber(sulfurEvidence.value)} мг/кг ·{" "}
+            {sulfurEvidence.source || "источник отсутствует"}
+            {sulfurEvidence.timestamp &&
+              ` · проба ${displayTime(sulfurEvidence.timestamp)}`}
+            {sulfurEvidence.available_at &&
+              ` · доступна ${displayTime(sulfurEvidence.available_at)}`}
           </p>
         )}
         <dl className="recommendation-metrics">
@@ -877,19 +914,40 @@ function PipelinePreview({
           </div>
           <div>
             <dt>Экономия в деньгах</dt>
-            <dd>
-              Не оценивалась
-            </dd>
+            <dd>Не оценивалась</dd>
           </div>
         </dl>
         {result && (
           <div className="scenario-table-scroll">
-            <table className="scenario-comparison" aria-label="Параметры выбранного сценария">
-              <thead><tr><th>Параметр</th><th>Сейчас</th><th>Предлагается</th><th>Изменение</th></tr></thead>
-              <tbody>{controls.map(([id, label, unit]) => {
-                const item = result.controls[id];
-                return <tr key={id}><td>{label} · {id}</td><td>{formatNumber(item.current, 2)}</td><td>{formatNumber(item.recommended, 2)}</td><td>{formatNumber(item.change, 2)} {unit}</td></tr>;
-              })}</tbody>
+            <table
+              className="scenario-comparison"
+              aria-label="Параметры выбранного сценария"
+            >
+              <thead>
+                <tr>
+                  <th>Параметр</th>
+                  <th>Сейчас</th>
+                  <th>Предлагается</th>
+                  <th>Изменение</th>
+                </tr>
+              </thead>
+              <tbody>
+                {controls.map(([id, label, unit]) => {
+                  const item = result.controls[id];
+                  return (
+                    <tr key={id}>
+                      <td>
+                        {label} · {id}
+                      </td>
+                      <td>{formatNumber(item.current, 2)}</td>
+                      <td>{formatNumber(item.recommended, 2)}</td>
+                      <td>
+                        {formatNumber(item.change, 2)} {unit}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
             </table>
           </div>
         )}
@@ -897,23 +955,32 @@ function PipelinePreview({
           {decision?.basis === "scenario_only"
             ? "Расчёт по заданным вручную условиям; прогноз по наблюдениям не подтверждает этот сценарий. "
             : "Прогноз по наблюдениям и сценарный эффект рассчитаны разными моделями. "}
-          Проверка относится к концу горизонта. Без расчёта смеси влияние режима на T95 и цетановое число не оценено; производственная безопасность не подтверждена.
+          Проверка относится к концу горизонта. Без расчёта смеси влияние режима
+          на T95 и цетановое число не оценено; производственная безопасность не
+          подтверждена.
         </p>
         <div className="recommendation-actions">
-          <button type="button" className="primary" onClick={() => {
-            if (!decision) return;
-            const seed = initial(decision.at, true);
-            seed.tanks = [];
-            seed.additive_pct = 0;
-            if (result) {
-              seed.current_sulfur = result.baseline.sulfur;
-              seed.horizon_minutes = result.horizon_minutes;
-              seed.step_minutes = result.step_minutes;
-              seed.changes = { temperature: result.controls["ht.T6"].change,
-                feed_rate_pct: result.controls["ht.F9"].change, pressure: result.controls["ht.P13"].change };
-            }
-            onOpenSandbox?.(seed);
-          }}>
+          <button
+            type="button"
+            className="primary"
+            onClick={() => {
+              if (!decision) return;
+              const seed = initial(decision.at, true);
+              seed.tanks = [];
+              seed.additive_pct = 0;
+              if (result) {
+                seed.current_sulfur = result.baseline.sulfur;
+                seed.horizon_minutes = result.horizon_minutes;
+                seed.step_minutes = result.step_minutes;
+                seed.changes = {
+                  temperature: result.controls["ht.T6"].change,
+                  feed_rate_pct: result.controls["ht.F9"].change,
+                  pressure: result.controls["ht.P13"].change,
+                };
+              }
+              onOpenSandbox?.(seed);
+            }}
+          >
             Проверить в песочнице <ArrowRight />
           </button>
           <button type="button" className="ghost-button" onClick={copy}>
@@ -927,7 +994,9 @@ function PipelinePreview({
       <section className="decision-band">
         <div className="section-heading">
           <h2>Сравнение сценариев</h2>
-          <span className="support-notice">Проверенные варианты: {decision?.candidates?.length || 0}</span>
+          <span className="support-notice">
+            Проверенные варианты: {decision?.candidates?.length || 0}
+          </span>
         </div>
         <div
           className="scenario-table-scroll"
@@ -952,7 +1021,11 @@ function PipelinePreview({
               {(decision?.candidates || []).map((candidate) => (
                 <tr
                   key={candidate.id}
-                  className={candidate.id === decision?.selected_candidate ? "is-preferred" : ""}
+                  className={
+                    candidate.id === decision?.selected_candidate
+                      ? "is-preferred"
+                      : ""
+                  }
                 >
                   <td>
                     {candidate.label}
@@ -973,74 +1046,135 @@ function PipelinePreview({
                         ? "Пройдена в модели"
                         : "Не пройдена"}
                     {!!candidate.safety_gate?.reasons.length && (
-                      <ul>{candidate.safety_gate.reasons.map((reason) => <li key={reason}>{reason}</li>)}</ul>
+                      <ul>
+                        {candidate.safety_gate.reasons.map((reason) => (
+                          <li key={reason}>{reason}</li>
+                        ))}
+                      </ul>
                     )}
                   </td>
                   <td>
-                    {candidate.effort == null ? "—" : formatNumber(candidate.effort, 2)}
+                    {candidate.effort == null
+                      ? "—"
+                      : formatNumber(candidate.effort, 2)}
                   </td>
-                  <td>{formatNumber(candidate.objectives?.throughput_change_pct, 1)}</td>
-                  <td>{formatNumber(candidate.objectives?.energy_cost_index, 3)}</td>
-                  <td>{formatNumber(candidate.objectives?.regime_severity.index, 3)}</td>
+                  <td>
+                    {formatNumber(
+                      candidate.objectives?.throughput_change_pct,
+                      1,
+                    )}
+                  </td>
+                  <td>
+                    {formatNumber(candidate.objectives?.energy_cost_index, 3)}
+                  </td>
+                  <td>
+                    {formatNumber(
+                      candidate.objectives?.regime_severity.index,
+                      3,
+                    )}
+                  </td>
                 </tr>
               ))}
               {!decision?.candidates?.length && (
-                <tr><td colSpan={8}>Сравнение не выполнено: сначала нужны достоверные исходные данные.</td></tr>
+                <tr>
+                  <td colSpan={8}>
+                    Сравнение не выполнено: сначала нужны достоверные исходные
+                    данные.
+                  </td>
+                </tr>
               )}
             </tbody>
           </table>
         </div>
-        <p className="support-notice">Выпуск предполагает неизменный выход продукта; энергия — условные затраты относительно текущего режима (=1). Нагрузка оценивает высокие T6/P13/F9 относительно обучающей истории, не вероятность отказа. Выбор учитывает все три критерия и масштаб изменений после проверки ограничений.</p>
+        <p className="support-notice">
+          Выпуск предполагает неизменный выход продукта; энергия — условные
+          затраты относительно текущего режима (=1). Нагрузка оценивает высокие
+          T6/P13/F9 относительно обучающей истории, не вероятность отказа. Выбор
+          учитывает все три критерия и масштаб изменений после проверки
+          ограничений.
+        </p>
       </section>
       {decision?.forecast && (
-        <section className="decision-band model-forecast" aria-label="Модельный прогноз серы">
+        <section
+          className="decision-band model-forecast"
+          aria-label="Модельный прогноз серы"
+        >
           <div className="section-heading">
             <h2>Прогноз качества без воздействия</h2>
             <span className="support-notice">
-              Анализатор, калиброванный по ЛИМС · горизонт {decision.forecast.horizon_minutes / 60} ч
+              Анализатор, калиброванный по ЛИМС · горизонт{" "}
+              {decision.forecast.horizon_minutes / 60} ч
             </span>
           </div>
           <p className="recommendation-copy">
-            Расчёт на {displayTime(decision.forecast.target_time)} по данным, доступным на {displayTime(decision.forecast.at)}.
-            Результат ЛИМС доступен через {decision.forecast.lims_publication_delay_minutes / 60} ч после отбора пробы.
-            Смещение анализатора относительно ЛИМС оценено по {decision.forecast.lab_anchor.pairs} последним парам.
-            Прогноз не оценивает эффект предложенного изменения режима.
+            Расчёт на {displayTime(decision.forecast.target_time)} по данным,
+            доступным на {displayTime(decision.forecast.at)}. Результат ЛИМС
+            доступен через{" "}
+            {decision.forecast.lims_publication_delay_minutes / 60} ч после
+            отбора пробы. Смещение анализатора относительно ЛИМС оценено по{" "}
+            {decision.forecast.lab_anchor.pairs} последним парам. Прогноз не
+            оценивает эффект предложенного изменения режима.
           </p>
           {decision.forecast.status === "abstain" && (
-            <p className="error" role="status">Прогноз не выдан: {decision.forecast.reasons.map(forecastReason).join("; ")}</p>
+            <p className="error" role="status">
+              Прогноз не выдан:{" "}
+              {decision.forecast.reasons.map(forecastReason).join("; ")}
+            </p>
           )}
           <dl className="recommendation-metrics">
             <div>
               <dt>Сера сейчас (nowcast)</dt>
-              <dd>{formatNumber(decision.forecast.nowcast?.prediction, 2)} <span>мг/кг</span></dd>
+              <dd>
+                {formatNumber(decision.forecast.nowcast?.prediction, 2)}{" "}
+                <span>мг/кг</span>
+              </dd>
             </div>
             <div>
               <dt>Через {decision.forecast.horizon_minutes} мин</dt>
               <dd>
-                {formatNumber(decision.forecast.prediction, 2)} <span>мг/кг</span>
+                {formatNumber(decision.forecast.prediction, 2)}{" "}
+                <span>мг/кг</span>
                 {decision.forecast.prediction_lower != null && (
-                  <small> · 80 %: {formatNumber(decision.forecast.prediction_lower, 1)}–{formatNumber(decision.forecast.prediction_upper, 1)}</small>
+                  <small>
+                    {" "}
+                    · 80 %:{" "}
+                    {formatNumber(decision.forecast.prediction_lower, 1)}–
+                    {formatNumber(decision.forecast.prediction_upper, 1)}
+                  </small>
                 )}
               </dd>
             </div>
             <div>
               <dt>P(&gt;10 мг/кг)</dt>
-              <dd>{percent(decision.forecast.exceedance_probability)} <span>порог тревоги {percent(decision.forecast.alarm_probability)}</span></dd>
+              <dd>
+                {percent(decision.forecast.exceedance_probability)}{" "}
+                <span>
+                  порог тревоги {percent(decision.forecast.alarm_probability)}
+                </span>
+              </dd>
             </div>
             <div>
               <dt>Последняя проба ЛИМС</dt>
-              <dd>{formatNumber(decision.forecast.prediction_previous_lab, 2)} <span>мг/кг</span></dd>
+              <dd>
+                {formatNumber(decision.forecast.prediction_previous_lab, 2)}{" "}
+                <span>мг/кг</span>
+              </dd>
             </div>
             <div>
               <dt>Анализатор Q21 / ПАК</dt>
               <dd>
-                {formatNumber(decision.forecast.analysers?.q21?.adjusted, 2)} / {formatNumber(decision.forecast.analysers?.pak?.adjusted, 2)}
+                {formatNumber(decision.forecast.analysers?.q21?.adjusted, 2)} /{" "}
+                {formatNumber(decision.forecast.analysers?.pak?.adjusted, 2)}
                 <span> калибр. мг/кг</span>
               </dd>
             </div>
             <div>
               <dt>Признаки</dt>
-              <dd>{decision.forecast.feature_count - decision.forecast.imputed_feature_count}/{decision.forecast.feature_count}</dd>
+              <dd>
+                {decision.forecast.feature_count -
+                  decision.forecast.imputed_feature_count}
+                /{decision.forecast.feature_count}
+              </dd>
             </div>
           </dl>
           <p className="support-notice">
@@ -1049,10 +1183,19 @@ function PipelinePreview({
               : decision.forecast.alarm_above_10
                 ? "Вероятность превышения 10 мг/кг выше порога тревоги: контур подбирает корректирующее действие, нужна проверка технологом."
                 : "Точечная оценка на горизонте 2–3 ч близка к локальному уровню; ориентируйтесь на интервал и вероятность превышения."}
-            {decision.forecast.leakage_check.passed ? " Временные границы признаков соблюдены." : " Нарушены временные границы признаков."}
+            {decision.forecast.leakage_check.passed
+              ? " Временные границы признаков соблюдены."
+              : " Нарушены временные границы признаков."}
           </p>
           {!!decision.forecast.warnings.length && (
-            <details><summary>Ограничения прогноза</summary><ul>{decision.forecast.warnings.map((warning) => <li key={warning}>{warning}</li>)}</ul></details>
+            <details>
+              <summary>Ограничения прогноза</summary>
+              <ul>
+                {decision.forecast.warnings.map((warning) => (
+                  <li key={warning}>{warning}</li>
+                ))}
+              </ul>
+            </details>
           )}
         </section>
       )}
@@ -1068,7 +1211,9 @@ function PipelinePreview({
                 (stage) => `${stage.role}: ${stage.summary} (${stage.status})`,
               )
             : pipelineStages
-          ).map((stage) => <li key={stage}>{stage}</li>)}
+          ).map((stage) => (
+            <li key={stage}>{stage}</li>
+          ))}
         </ol>
         <p>
           Результат модели требует проверки перед изменением режима установки.
@@ -1077,5 +1222,3 @@ function PipelinePreview({
     </>
   );
 }
-
-

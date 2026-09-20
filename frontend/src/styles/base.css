@@ -157,3 +157,13 @@ dd {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Metric-compatible fallback so the swap from Arial to Inter does not shift layout */
+@font-face {
+  font-family: "Inter Fallback";
+  src: local("Arial");
+  ascent-override: 90.2%;
+  descent-override: 22.48%;
+  line-gap-override: 0%;
+  size-adjust: 107.4%;
+}

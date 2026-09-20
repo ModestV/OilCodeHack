@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   Bell,
   BarChart3,
@@ -29,21 +36,30 @@ import { ThemeSwitch } from "./ui/ThemeSwitch";
 import { useChartTheme } from "./ui/useChartTheme";
 import { OperatorPanel, type SidePanelMode } from "./components/OperatorPanel";
 import { TimeControls, offset, type Mode } from "./components/TimeControls";
-import { UploadModal } from "./components/UploadModal";
 import { Chart } from "./components/Chart";
-import {
-  DataQuality,
-  ExportButton,
-  Kip,
-  Overview,
-  Statistics,
-  Trends,
-} from "./views/MonitoringViews";
-import { DecisionSupportView } from "./views/DecisionSupportView";
+import { Overview } from "./views/Overview";
+import { Trends } from "./views/Trends";
+import { ExportButton } from "./views/shared";
+const Statistics = lazy(() =>
+  import("./views/Statistics").then((m) => ({ default: m.Statistics })),
+);
+const Kip = lazy(() => import("./views/Kip").then((m) => ({ default: m.Kip })));
+const DataQuality = lazy(() =>
+  import("./views/DataQuality").then((m) => ({ default: m.DataQuality })),
+);
 import {
   buildOperatorAssessment,
   type AttentionTarget,
 } from "./operatorStatus";
+
+const DecisionSupportView = lazy(() =>
+  import("./views/DecisionSupportView").then((m) => ({
+    default: m.DecisionSupportView,
+  })),
+);
+const UploadModal = lazy(() =>
+  import("./components/UploadModal").then((m) => ({ default: m.UploadModal })),
+);
 
 type Tab = "overview" | "trends" | "kip" | "quality";
 type Page = "monitoring" | "recommendations" | "sandbox";
@@ -83,7 +99,10 @@ function preferences() {
   }
 }
 export function App() {
-  const [sandboxSeed, setSandboxSeed] = useState<{ datasetId: string; request: ScenarioRequest } | null>(null);
+  const [sandboxSeed, setSandboxSeed] = useState<{
+    datasetId: string;
+    request: ScenarioRequest;
+  } | null>(null);
   const [datasets, setDatasets] = useState<Manifest[]>([]),
     [datasetId, setDatasetId] = useState(""),
     [manifest, setManifest] = useState<Manifest | null>(null),
@@ -113,6 +132,11 @@ export function App() {
     [statsView, setStatsView] = useState(false);
   const [completedKey, setCompletedKey] = useState("");
   const [dataRevision, setDataRevision] = useState(0);
+  // Shape of the data currently held; when only the time range or selection
+  // changes, the previous view stays mounted while new data loads.
+  const shapeKey = JSON.stringify([datasetId, mode, tab, statsView]);
+  const [loadedShape, setLoadedShape] = useState("");
+  const [qualityRevision, setQualityRevision] = useState<string | null>(null);
   const requestKey = JSON.stringify([
     datasetId,
     from,
@@ -164,6 +188,9 @@ export function App() {
     setSnapshot(null);
     setSummary(null);
     setSeries(null);
+    setQuality(null);
+    setQualityRevision(null);
+    setLoadedShape("");
     setError("");
     setLoading(true);
     async function load() {
@@ -226,13 +253,14 @@ export function App() {
       return;
     const c = new AbortController();
     setError("");
-    setSnapshot(null);
-    setSummary(null);
-    setSeries(null);
-    setDistribution(null);
-    setDistillation(null);
-    setFormulas([]);
-    setQuality(null);
+    if (loadedShape !== shapeKey) {
+      setSnapshot(null);
+      setSummary(null);
+      setSeries(null);
+      setDistribution(null);
+      setDistillation(null);
+      setFormulas([]);
+    }
     if (!from || !to || (mode === "period" && from >= to)) {
       setError(
         !from || !to
@@ -301,10 +329,13 @@ export function App() {
               if (!c.signal.aborted) setFormulas(v.formulas);
             }),
           );
-        if (tab === "quality")
+        if (tab === "quality" && qualityRevision !== String(dataRevision))
           tasks.push(
             api.quality(datasetId, c.signal).then((v) => {
-              if (!c.signal.aborted) setQuality(v);
+              if (!c.signal.aborted) {
+                setQuality(v);
+                setQualityRevision(String(dataRevision));
+              }
             }),
           );
         if (tab === "trends" && statsView && mode === "period" && statMetric)
@@ -316,6 +347,7 @@ export function App() {
               }),
           );
         await Promise.all(tasks);
+        if (!c.signal.aborted) setLoadedShape(shapeKey);
       } catch (e) {
         if (!c.signal.aborted)
           setError(e instanceof Error ? e.message : "Ошибка расчёта");
@@ -343,6 +375,10 @@ export function App() {
     statMetric,
     exclude,
     requestKey,
+    shapeKey,
+    loadedShape,
+    dataRevision,
+    qualityRevision,
   ]);
   const allRange = useMemo<[string, string]>(
     () => [
@@ -372,14 +408,17 @@ export function App() {
     setMobile(false);
     setSidePanel("closed");
   }
-  const assessment = buildOperatorAssessment({
-    mode,
-    snapshot,
-    summary,
-    metrics,
-    pinned,
-  });
+  const assessment = useMemo(
+    () => buildOperatorAssessment({ mode, snapshot, summary, metrics, pinned }),
+    [mode, snapshot, summary, metrics, pinned],
+  );
+  const kipSelected = useMemo(
+    () => [...pinned, ...selected],
+    [pinned, selected],
+  );
   const visibleFilterCount = statsView ? Number(exclude) : selected.length;
+  const busy =
+    loading || (manifest?.status === "ready" && completedKey !== requestKey);
   const navigateFromFinding = (target: AttentionTarget, metricId?: string) => {
     setSidePanel("closed");
     if (target === "analysis") {
@@ -405,7 +444,7 @@ export function App() {
               snapshot,
               summary,
               series,
-              pinned,
+              assessment,
             }}
             onSelectTime={openMoment}
             toolbar={
@@ -457,7 +496,7 @@ export function App() {
       return (
         <Kip
           {...{ metrics, snapshot, mode, summary }}
-          selected={[...pinned, ...selected]}
+          selected={kipSelected}
           onTrend={(id) => {
             setSelected([id]);
             setStatsView(false);
@@ -570,20 +609,26 @@ export function App() {
         )}
         {page !== "monitoring" ? (
           manifest?.status === "ready" && datasetId && to ? (
-            <DecisionSupportView
-              key={`${datasetId}:${page}`}
-              datasetId={datasetId}
-              datasetName={manifest.name}
-              latestAt={manifest.telemetry_end || manifest.end || to}
-              at={to}
-              sandbox={page === "sandbox"}
-              initialRequest={page === "sandbox" && sandboxSeed?.datasetId === datasetId ? sandboxSeed.request : undefined}
-              onOpenSandbox={(request) => {
-                setSandboxSeed({ datasetId, request });
-                setTo(request.at);
-                setPage("sandbox");
-              }}
-            />
+            <Suspense fallback={<LoadingLine />}>
+              <DecisionSupportView
+                key={`${datasetId}:${page}`}
+                datasetId={datasetId}
+                datasetName={manifest.name}
+                latestAt={manifest.telemetry_end || manifest.end || to}
+                at={to}
+                sandbox={page === "sandbox"}
+                initialRequest={
+                  page === "sandbox" && sandboxSeed?.datasetId === datasetId
+                    ? sandboxSeed.request
+                    : undefined
+                }
+                onOpenSandbox={(request) => {
+                  setSandboxSeed({ datasetId, request });
+                  setTo(request.at);
+                  setPage("sandbox");
+                }}
+              />
+            </Suspense>
           ) : (
             <section className="empty-state compact">
               <Database />
@@ -676,13 +721,7 @@ export function App() {
                 )}
               </>
             )}
-            {loading ||
-            (manifest?.status === "ready" && completedKey !== requestKey) ? (
-              <div className="loading-state" role="status">
-                <div className="loading-line" />
-                Расчёт показателей…
-              </div>
-            ) : manifest?.status === "importing" ? (
+            {manifest?.status === "importing" ? (
               <div className="banner" role="status">
                 Обработка файлов…
               </div>
@@ -691,7 +730,18 @@ export function App() {
                 Ошибка импорта: {manifest.error}
               </div>
             ) : manifest?.status === "ready" ? (
-              view()
+              busy && loadedShape !== shapeKey ? (
+                <LoadingLine text="Расчёт показателей…" />
+              ) : (
+                <div className={busy ? "view busy" : "view"} aria-busy={busy}>
+                  {busy && (
+                    <div className="loading-line view-progress" role="status" />
+                  )}
+                  <Suspense fallback={<LoadingLine />}>{view()}</Suspense>
+                </div>
+              )
+            ) : loading ? (
+              <LoadingLine text="Загрузка…" />
             ) : (
               <section className="empty-state">
                 <Database />
@@ -704,16 +754,20 @@ export function App() {
           </>
         )}
       </main>
-      <UploadModal
-        open={upload}
-        onClose={() => setUpload(false)}
-        onStarted={(m) => {
-          setUpload(false);
-          setDatasets((v) => [m, ...v.filter((d) => d.id !== m.id)]);
-          setDatasetId(m.id);
-          setPage("monitoring");
-        }}
-      />
+      {upload && (
+        <Suspense fallback={null}>
+          <UploadModal
+            open={upload}
+            onClose={() => setUpload(false)}
+            onStarted={(m) => {
+              setUpload(false);
+              setDatasets((v) => [m, ...v.filter((d) => d.id !== m.id)]);
+              setDatasetId(m.id);
+              setPage("monitoring");
+            }}
+          />
+        </Suspense>
+      )}
       {sidePanel !== "closed" && (
         <OperatorPanel
           open={sidePanel}
@@ -738,6 +792,15 @@ export function App() {
     </div>
   );
 }
+function LoadingLine({ text }: { text?: string }) {
+  return (
+    <div className="loading-state" role="status">
+      <div className="loading-line" />
+      {text}
+    </div>
+  );
+}
+
 function DistillationView({ data }: { data: Distillation }) {
   const theme = useChartTheme();
   const option = useMemo(

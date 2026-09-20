@@ -1,59 +1,14 @@
+import { memo } from "react";
 import { Chart } from "./Chart";
-import type { Metric, Quality, Snapshot, Stat, Summary } from "../types";
-import { formatNumber, sulfurComposition } from "../visualization";
+import type { Metric, Quality, Snapshot, Stat } from "../types";
+import { formatNumber } from "../visualization";
 import { useChartTheme } from "../ui/useChartTheme";
 
-export function SulfurCoverage({ summary }: { summary: Summary }) {
-  const parts = sulfurComposition(summary);
-  return (
-    <div className="coverage-visual">
-      <h3>Структура периода ПАК</h3>
-      <Chart
-        height={65}
-        label="Доли периода ПАК: ниже порога, превышение, подозрительные данные и отсутствие наблюдения"
-        option={{
-          grid: { left: 0, right: 0, top: 8, bottom: 25 },
-          tooltip: {
-            trigger: "item",
-            valueFormatter: (v: number) => `${formatNumber(v)}%`,
-          },
-          xAxis: {
-            type: "value",
-            min: 0,
-            max: 100,
-            axisLabel: { formatter: "{value}%", fontSize: 10 },
-            splitLine: { show: false },
-          },
-          yAxis: { type: "category", data: ["ПАК"], show: false },
-          series: parts.map((p) => ({
-            name: p.label,
-            type: "bar",
-            stack: "period",
-            barWidth: 16,
-            data: [p.percent],
-            itemStyle: { color: p.color },
-          })),
-        }}
-      />
-      <dl className="coverage-legend">
-        {parts.map((p) => (
-          <div key={p.key}>
-            <dt>
-              <i style={{ background: p.color }} />
-              {p.label}
-            </dt>
-            <dd>
-              {formatNumber(p.minutes / 60)} ч{" "}
-              <small>{formatNumber(p.percent)}%</small>
-            </dd>
-          </div>
-        ))}
-      </dl>
-    </div>
-  );
-}
-
-export function SulfurAtMoment({ snapshot }: { snapshot: Snapshot }) {
+export const SulfurAtMoment = memo(function SulfurAtMoment({
+  snapshot,
+}: {
+  snapshot: Snapshot;
+}) {
   const theme = useChartTheme();
   const values = ["lims.ht.2.Mg.Sulfur", "pak.ht.Mg.Sulfur"].map((id) =>
     snapshot.values.find((v) => v.metric_id === id),
@@ -121,9 +76,9 @@ export function SulfurAtMoment({ snapshot }: { snapshot: Snapshot }) {
       }}
     />
   );
-}
+});
 
-export function MedianComparison({
+export const MedianComparison = memo(function MedianComparison({
   stat,
   unit,
 }: {
@@ -204,9 +159,9 @@ export function MedianComparison({
       )}
     </div>
   );
-}
+});
 
-export function QualityRanking({
+export const QualityRanking = memo(function QualityRanking({
   quality,
   metrics,
 }: {
@@ -292,4 +247,4 @@ export function QualityRanking({
       </details>
     </section>
   );
-}
+});
