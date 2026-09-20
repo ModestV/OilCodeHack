@@ -4,6 +4,7 @@ import { HelpTooltip } from "../components/HelpTooltip";
 import type { Metric, Snapshot, Summary } from "../types";
 import { FlagLine, format, freshness, stamp } from "./shared";
 import { Select } from "../ui/Select";
+import { DataTable, type Column } from "../ui/DataTable";
 import { Disclosure, SearchField, Segmented } from "../ui/Controls";
 import { Tooltip } from "../ui/Tooltip";
 
@@ -58,6 +59,108 @@ export function Kip({
         );
       });
   }, [metrics, plant, q, mode, stats, vals, selected]);
+  const columns = useMemo<Column<Metric>[]>(
+    () => [
+      {
+        key: "metric",
+        header: "Показатель / аппарат",
+        fixed: true,
+        role: "primary",
+        cell: (m) => (
+          <>
+            {m.label}
+            <small>
+              {m.id} · {m.group}
+            </small>
+          </>
+        ),
+      },
+      {
+        key: "value",
+        header: mode === "period" ? "Медиана и диапазон" : "Значение",
+        cell: (m) => {
+          const v = vals.get(m.id);
+          const s = stats.get(m.id);
+          return (
+            <>
+              {format(mode === "period" ? s?.median : v?.value)}
+              {m.unit ? ` ${m.unit}` : ""}
+              {mode === "period" ? (
+                <small>
+                  мин. {format(s?.min)} · макс. {format(s?.max)} · n=
+                  {s?.count || 0}
+                </small>
+              ) : (
+                <small className={v?.freshness === "fresh" ? "" : "warn"}>
+                  {freshness(v?.freshness)}
+                </small>
+              )}
+            </>
+          );
+        },
+      },
+      {
+        key: "time",
+        header:
+          mode === "period"
+            ? "Первое / последнее измерение"
+            : "Время / возраст",
+        cell: (m) => {
+          const v = vals.get(m.id);
+          const s = stats.get(m.id);
+          return mode === "period" ? (
+            <>
+              {stamp(s?.first_at)}
+              <small>{stamp(s?.last_at)}</small>
+            </>
+          ) : (
+            <>
+              {stamp(v?.timestamp)}
+              <small>
+                {format(v?.age_minutes, 0)} мин · Δ {format(v?.delta)}
+              </small>
+            </>
+          );
+        },
+      },
+      {
+        key: "quality",
+        header: "Качество",
+        cell: (m) => {
+          const v = vals.get(m.id);
+          const s = stats.get(m.id);
+          return (
+            <div className="kip-quality">
+              {mode === "period" ? (
+                <small>
+                  Некорректных: {s?.invalid_count || 0} · подозрительных:{" "}
+                  {s?.suspect_count || 0}
+                </small>
+              ) : (
+                <FlagLine flags={v?.flags} />
+              )}
+              {m.mapping_warning ? (
+                <small className="warn">{m.mapping_warning}</small>
+              ) : null}
+              {mode === "period" && m.available !== false && onTrend && (
+                <Tooltip text={`Открыть тренд ${m.id}`}>
+                  <button
+                    type="button"
+                    className="icon-button kip-trend"
+                    aria-label={`Открыть тренд ${m.id}`}
+                    onClick={() => onTrend(m.id)}
+                  >
+                    <ChartNoAxesCombined />
+                  </button>
+                </Tooltip>
+              )}
+            </div>
+          );
+        },
+      },
+    ],
+    [mode, vals, stats, onTrend],
+  );
   return (
     <section className="panel">
       <header>
@@ -90,90 +193,14 @@ export function Kip({
         </div>
       </header>
       <AvtScheme />
-      <div className="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>Показатель / аппарат</th>
-              <th>{mode === "period" ? "Медиана и диапазон" : "Значение"}</th>
-              <th>
-                {mode === "period"
-                  ? "Первое / последнее измерение"
-                  : "Время / возраст"}
-              </th>
-              <th>Качество</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((m) => {
-              const v = vals.get(m.id),
-                s = stats.get(m.id);
-              return (
-                <tr key={m.id}>
-                  <td>
-                    {m.label}
-                    <small>
-                      {m.id} · {m.group}
-                    </small>
-                  </td>
-                  <td>
-                    {format(mode === "period" ? s?.median : v?.value)}
-                    {m.unit ? ` ${m.unit}` : ""}
-                    {mode === "period" ? (
-                      <small>
-                        мин. {format(s?.min)} · макс. {format(s?.max)} · n=
-                        {s?.count || 0}
-                      </small>
-                    ) : (
-                      <small className={v?.freshness === "fresh" ? "" : "warn"}>
-                        {freshness(v?.freshness)}
-                      </small>
-                    )}
-                  </td>
-                  <td>
-                    {mode === "period" ? (
-                      <>
-                        {stamp(s?.first_at)}
-                        <small>{stamp(s?.last_at)}</small>
-                      </>
-                    ) : (
-                      <>
-                        {stamp(v?.timestamp)}
-                        <small>
-                          {format(v?.age_minutes, 0)} мин · Δ {format(v?.delta)}
-                        </small>
-                      </>
-                    )}
-                  </td>
-                  <td>
-                    {mode === "period" ? (
-                      <small>
-                        Некорректных: {s?.invalid_count || 0} · подозрительных:{" "}
-                        {s?.suspect_count || 0}
-                      </small>
-                    ) : (
-                      <FlagLine flags={v?.flags} />
-                    )}
-                    <small className="warn">{m.mapping_warning || ""}</small>
-                    {mode === "period" && m.available !== false && onTrend && (
-                      <Tooltip text={`Открыть тренд ${m.id}`}>
-                        <button
-                          type="button"
-                          className="icon-button kip-trend"
-                          aria-label={`Открыть тренд ${m.id}`}
-                          onClick={() => onTrend(m.id)}
-                        >
-                          <ChartNoAxesCombined />
-                        </button>
-                      </Tooltip>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        label="Показатели КИП"
+        rows={rows}
+        columns={columns}
+        rowKey={(m) => m.id}
+        minWidth={720}
+        emptyText="Нет показателей по запросу"
+      />
     </section>
   );
 }

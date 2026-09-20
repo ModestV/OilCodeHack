@@ -15,6 +15,7 @@ import { NumberField } from "../ui/NumberField";
 import { Select } from "../ui/Select";
 import { DateTimeField } from "../ui/DateTimeField";
 import { Disclosure, Segmented } from "../ui/Controls";
+import { DataTable } from "../ui/DataTable";
 import { pipelineStages } from "../demo/decisionSupportDemo";
 
 const controls = [
@@ -330,7 +331,11 @@ export function DecisionSupportView({
               {initialRequest ? " · условия из рекомендации" : ""}
             </p>
           </div>
-          <button className="primary" type="submit" disabled={loading}>
+          <button
+            className="primary sandbox-submit"
+            type="submit"
+            disabled={loading}
+          >
             <Play /> {loading ? "Расчёт…" : "Рассчитать сценарий"}
           </button>
         </div>
@@ -694,6 +699,11 @@ export function DecisionSupportView({
       >
         <RotateCcw /> Сбросить изменения
       </button>
+      <div className="sticky-action">
+        <button className="primary" type="submit" disabled={loading}>
+          <Play /> {loading ? "Расчёт…" : "Рассчитать сценарий"}
+        </button>
+      </div>
     </form>
   );
 }
@@ -915,94 +925,96 @@ function PipelinePreview({
             Проверенные варианты: {decision?.candidates?.length || 0}
           </span>
         </div>
-        <div
-          className="scenario-table-scroll"
-          tabIndex={0}
-          role="region"
-          aria-label="Сравнение сценариев"
-        >
-          <table className="scenario-comparison">
-            <thead>
-              <tr>
-                <th scope="col">Сценарий</th>
-                <th scope="col">Сера в конце горизонта</th>
-                <th scope="col">P(&gt;10)</th>
-                <th scope="col">Проверка ограничений</th>
-                <th scope="col">Масштаб изменения</th>
-                <th scope="col">Выпуск, Δ%</th>
-                <th scope="col">Энергозатраты, индекс</th>
-                <th scope="col">Нагрузка, индекс</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(decision?.candidates || []).map((candidate) => (
-                <tr
-                  key={candidate.id}
-                  className={
-                    candidate.id === decision?.selected_candidate
-                      ? "is-preferred"
-                      : ""
-                  }
-                >
-                  <td>
-                    {candidate.label}
-                    {candidate.id === decision?.selected_candidate && (
-                      <span className="support-notice"> · выбрано</span>
-                    )}
-                  </td>
-                  <td>
-                    {candidate.predicted_sulfur == null
-                      ? "—"
-                      : `${formatNumber(candidate.predicted_sulfur)} мг/кг серы`}
-                  </td>
-                  <td>{percent(candidate.exceedance_probability)}</td>
-                  <td>
-                    {candidate.status === "error"
-                      ? "Ошибка"
-                      : candidate.feasible
-                        ? "Пройдена в модели"
-                        : "Не пройдена"}
-                    {!!candidate.safety_gate?.reasons.length && (
-                      <ul>
-                        {candidate.safety_gate.reasons.map((reason) => (
-                          <li key={reason}>{reason}</li>
-                        ))}
-                      </ul>
-                    )}
-                  </td>
-                  <td>
-                    {candidate.effort == null
-                      ? "—"
-                      : formatNumber(candidate.effort, 2)}
-                  </td>
-                  <td>
-                    {formatNumber(
-                      candidate.objectives?.throughput_change_pct,
-                      1,
-                    )}
-                  </td>
-                  <td>
-                    {formatNumber(candidate.objectives?.energy_cost_index, 3)}
-                  </td>
-                  <td>
-                    {formatNumber(
-                      candidate.objectives?.regime_severity.index,
-                      3,
-                    )}
-                  </td>
-                </tr>
-              ))}
-              {!decision?.candidates?.length && (
-                <tr>
-                  <td colSpan={8}>
-                    Сравнение не выполнено: сначала нужны достоверные исходные
-                    данные.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          className="scenario-comparison-table"
+          label="Сравнение сценариев"
+          rows={decision?.candidates || []}
+          rowKey={(c) => c.id}
+          rowClassName={(c) =>
+            c.id === decision?.selected_candidate ? "is-preferred" : undefined
+          }
+          minWidth={760}
+          emptyText="Сравнение не выполнено: сначала нужны достоверные исходные данные."
+          columns={[
+            {
+              key: "label",
+              header: "Сценарий",
+              fixed: true,
+              role: "primary",
+              cell: (c) => (
+                <>
+                  {c.label}
+                  {c.id === decision?.selected_candidate && (
+                    <span className="support-notice"> · выбрано</span>
+                  )}
+                </>
+              ),
+            },
+            {
+              key: "sulfur",
+              header: "Сера в конце горизонта",
+              align: "right",
+              cell: (c) =>
+                c.predicted_sulfur == null
+                  ? "—"
+                  : `${formatNumber(c.predicted_sulfur)} мг/кг`,
+            },
+            {
+              key: "p",
+              header: "P(>10)",
+              align: "right",
+              cell: (c) => percent(c.exceedance_probability),
+            },
+            {
+              key: "gate",
+              header: "Проверка ограничений",
+              cell: (c) => (
+                <>
+                  {c.status === "error"
+                    ? "Ошибка"
+                    : c.feasible
+                      ? "Пройдена в модели"
+                      : "Не пройдена"}
+                  {!!c.safety_gate?.reasons.length && (
+                    <ul className="gate-reasons">
+                      {c.safety_gate.reasons.map((reason) => (
+                        <li key={reason}>{reason}</li>
+                      ))}
+                    </ul>
+                  )}
+                </>
+              ),
+            },
+            {
+              key: "effort",
+              header: "Масштаб изменения",
+              align: "right",
+              role: "detail",
+              cell: (c) => (c.effort == null ? "—" : formatNumber(c.effort, 2)),
+            },
+            {
+              key: "throughput",
+              header: "Выпуск, Δ%",
+              align: "right",
+              role: "detail",
+              cell: (c) => formatNumber(c.objectives?.throughput_change_pct, 1),
+            },
+            {
+              key: "energy",
+              header: "Энергозатраты, индекс",
+              align: "right",
+              role: "detail",
+              cell: (c) => formatNumber(c.objectives?.energy_cost_index, 3),
+            },
+            {
+              key: "severity",
+              header: "Нагрузка, индекс",
+              align: "right",
+              role: "detail",
+              cell: (c) => formatNumber(c.objectives?.regime_severity.index, 3),
+            },
+          ]}
+        />
         <p className="support-notice">
           Выпуск предполагает неизменный выход продукта; энергия — условные
           затраты относительно текущего режима (=1). Нагрузка оценивает высокие

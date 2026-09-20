@@ -6,6 +6,7 @@ import { api } from "../api";
 import type { Formula, Issue, Metric, Quality } from "../types";
 import { format, stamp } from "./shared";
 import { Disclosure } from "../ui/Controls";
+import { DataTable } from "../ui/DataTable";
 import { NumberField } from "../ui/NumberField";
 
 export function Formulas({ formulas }: { formulas: Formula[] }) {
@@ -282,35 +283,58 @@ export function DataQuality({
           className="quality-detail"
           summary="Покрытие и качество по всем показателям"
         >
-          <div className="table-scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th>Показатель</th>
-                  <th>Измерений</th>
-                  <th>Некорректных</th>
-                  <th>Подозрительных</th>
-                  <th>Зависших</th>
-                  <th>Начало / конец</th>
-                </tr>
-              </thead>
-              <tbody>
-                {quality?.metrics.map((m) => (
-                  <tr key={m.metric_id}>
-                    <td>{m.metric_id}</td>
-                    <td>{format(m.count, 0)}</td>
-                    <td>{format(m.invalid_count, 0)}</td>
-                    <td>{format(m.suspect_count, 0)}</td>
-                    <td>{format(m.flatline_count, 0)}</td>
-                    <td>
-                      {stamp(m.start)}
-                      <small>{stamp(m.end)}</small>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <DataTable
+            label="Покрытие и качество по показателям"
+            rows={quality?.metrics ?? []}
+            rowKey={(m) => m.metric_id}
+            minWidth={640}
+            maxHeight={480}
+            columns={[
+              {
+                key: "metric",
+                header: "Показатель",
+                fixed: true,
+                role: "primary",
+                cell: (m) => m.metric_id,
+              },
+              {
+                key: "count",
+                header: "Измерений",
+                align: "right",
+                cell: (m) => format(m.count, 0),
+              },
+              {
+                key: "invalid",
+                header: "Некорректных",
+                align: "right",
+                cell: (m) => format(m.invalid_count, 0),
+              },
+              {
+                key: "suspect",
+                header: "Подозрительных",
+                align: "right",
+                cell: (m) => format(m.suspect_count, 0),
+              },
+              {
+                key: "flat",
+                header: "Зависших",
+                align: "right",
+                role: "detail",
+                cell: (m) => format(m.flatline_count, 0),
+              },
+              {
+                key: "span",
+                header: "Начало / конец",
+                role: "detail",
+                cell: (m) => (
+                  <>
+                    {stamp(m.start)}
+                    <small>{stamp(m.end)}</small>
+                  </>
+                ),
+              },
+            ]}
+          />
         </Disclosure>
       </section>
 

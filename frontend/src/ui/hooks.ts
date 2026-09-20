@@ -131,19 +131,29 @@ export function useOutsideClick(
   }, [active, refs]);
 }
 
-/** Escape closes; stops propagation so nested layers close one at a time. */
+/* Escape closes only the topmost layer: handlers form a stack. */
+const escapeStack: { current: () => void }[] = [];
+let escapeListening = false;
+function ensureEscapeListener() {
+  if (escapeListening) return;
+  escapeListening = true;
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape" || !escapeStack.length) return;
+    event.preventDefault();
+    escapeStack[escapeStack.length - 1].current();
+  });
+}
 export function useEscape(handler: () => void, active = true) {
   const latest = useRef(handler);
   latest.current = handler;
   useEffect(() => {
     if (!active) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      event.stopPropagation();
-      latest.current();
+    ensureEscapeListener();
+    escapeStack.push(latest);
+    return () => {
+      const index = escapeStack.indexOf(latest);
+      if (index >= 0) escapeStack.splice(index, 1);
     };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
   }, [active]);
 }
 

@@ -3,6 +3,7 @@ import { Chart } from "../components/Chart";
 import { chartTimeLabel } from "../visualization";
 import { useChartTheme } from "../ui/useChartTheme";
 import { timeMenu } from "../ui/chartMenu";
+import { useViewport } from "../ui/hooks";
 import type { Metric, SeriesResponse } from "../types";
 import { Empty, epoch, metricMap } from "./shared";
 
@@ -20,6 +21,7 @@ export function Trends({
   const theme = useChartTheme();
   const map = useMemo(() => metricMap(metrics), [metrics]);
   const chartMenu = useMemo(() => timeMenu(onSelectTime), [onSelectTime]);
+  const phone = useViewport() === "phone";
   // Options are memoised per unit group so re-renders don't rebuild every chart.
   const groups = useMemo(() => {
     const allTimes =
@@ -49,11 +51,13 @@ export function Trends({
       const option = {
         tooltip: { trigger: "axis" },
         legend: { top: 0, type: "scroll" },
-        grid: { left: 62, right: 24, top: 48, bottom: 70 },
-        dataZoom: [
-          { type: "inside" },
-          { type: "slider", height: 18, bottom: 3, showDetail: false },
-        ],
+        grid: { left: 52, right: 16, top: 48, bottom: phone ? 36 : 70 },
+        dataZoom: phone
+          ? [{ type: "inside" }]
+          : [
+              { type: "inside" },
+              { type: "slider", height: 18, bottom: 3, showDetail: false },
+            ],
         useUTC: true,
         xAxis: {
           type: "time",
@@ -114,7 +118,7 @@ export function Trends({
           : firstMetric?.label || groupedSeries[0].metric_id;
       return { groupKey, option, title, count: groupedSeries.length };
     });
-  }, [series, map, theme]);
+  }, [series, map, theme, phone]);
   return (
     <section className="panel">
       <header>
@@ -135,7 +139,7 @@ export function Trends({
             </h3>
             <Chart
               option={option}
-              height={280}
+              height={phone ? 240 : 280}
               group="monitoring-trends"
               onSelectTime={onSelectTime}
               contextMenu={chartMenu}

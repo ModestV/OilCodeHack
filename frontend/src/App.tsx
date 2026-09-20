@@ -14,7 +14,8 @@ import {
   FlaskConical,
   Gauge,
   Lightbulb,
-  Menu,
+  PanelLeftClose,
+  PanelLeftOpen,
   SlidersHorizontal,
   Upload,
   X,
@@ -34,6 +35,8 @@ import type {
 import { DataMenu } from "./components/DataMenu";
 import { ThemeSwitch } from "./ui/ThemeSwitch";
 import { Disclosure, Segmented, Tabs } from "./ui/Controls";
+import { Tooltip } from "./ui/Tooltip";
+import { useViewport } from "./ui/hooks";
 import { stamp } from "./views/shared";
 import { useChartTheme } from "./ui/useChartTheme";
 import { OperatorPanel, type SidePanelMode } from "./components/OperatorPanel";
@@ -128,7 +131,13 @@ export function App() {
   const [exclude, setExclude] = useState(false),
     [upload, setUpload] = useState(false),
     [sidePanel, setSidePanel] = useState<SidePanelMode>("closed"),
-    [mobile, setMobile] = useState(false),
+    [collapsed, setCollapsedState] = useState(() => {
+      try {
+        return localStorage.getItem("oilcode:sidebar") === "rail";
+      } catch {
+        return false;
+      }
+    }),
     [error, setError] = useState(""),
     [loading, setLoading] = useState(true),
     [statsView, setStatsView] = useState(false);
@@ -405,9 +414,19 @@ export function App() {
     setFrom(f);
     setTo(t);
   }
+  const viewport = useViewport();
+  const setCollapsed = (update: (v: boolean) => boolean) =>
+    setCollapsedState((v) => {
+      const next = update(v);
+      try {
+        localStorage.setItem("oilcode:sidebar", next ? "rail" : "full");
+      } catch {
+        /* storage unavailable */
+      }
+      return next;
+    });
   function navigate(p: Page) {
     setPage(p);
-    setMobile(false);
     setSidePanel("closed");
   }
   const assessment = useMemo(
@@ -518,82 +537,93 @@ export function App() {
       />
     );
   };
+  const navItems: { id: Page; label: string; Icon: typeof BarChart3 }[] = [
+    { id: "monitoring", label: "Мониторинг", Icon: BarChart3 },
+    { id: "recommendations", label: "Рекомендации", Icon: Lightbulb },
+    { id: "sandbox", label: "Песочница", Icon: Beaker },
+  ];
+  const title =
+    page === "monitoring"
+      ? "Мониторинг качества"
+      : page === "recommendations"
+        ? "Рекомендации"
+        : "Песочница";
+  const phone = viewport === "phone";
+  const rail = viewport === "tablet" || (viewport === "desktop" && collapsed);
   return (
-    <div className="app">
-      {mobile && (
-        <div className="nav-backdrop" onClick={() => setMobile(false)} />
-      )}
-      <aside className={mobile ? "open" : ""}>
-        <button
-          className="close-menu"
-          aria-label="Закрыть меню"
-          onClick={() => setMobile(false)}
-        >
-          <X />
-        </button>
-        <div className="brand">
-          <span>
-            <FlaskConical />
-          </span>
-          <b>Нефтекод</b>
-        </div>
-        <nav aria-label="Основные разделы">
-          <button
-            aria-current={page === "monitoring" ? "page" : undefined}
-            className={page === "monitoring" ? "active" : ""}
-            onClick={() => navigate("monitoring")}
-          >
-            <BarChart3 /> <span>Мониторинг</span>
-          </button>
-
-          <button
-            aria-current={page === "recommendations" ? "page" : undefined}
-            className={page === "recommendations" ? "active" : ""}
-            onClick={() => navigate("recommendations")}
-          >
-            <Lightbulb /> <span>Рекомендации</span>
-          </button>
-          <button
-            aria-current={page === "sandbox" ? "page" : undefined}
-            className={page === "sandbox" ? "active" : ""}
-            onClick={() => navigate("sandbox")}
-          >
-            <Beaker /> <span>Песочница</span>
-          </button>
-        </nav>
-        <div className="history">
-          <div>
-            <Database />
-            <span>Исторические данные</span>
+    <div
+      className={`app${phone ? " with-bottom-nav" : ""}${rail ? " rail" : ""}`}
+    >
+      {!phone && (
+        <aside aria-label="Навигация">
+          <div className="brand">
+            <span>
+              <FlaskConical />
+            </span>
+            <b>Нефтекод</b>
           </div>
-          <ThemeSwitch />
-        </div>
-      </aside>
+          <nav aria-label="Основные разделы">
+            {navItems.map(({ id, label, Icon }) =>
+              rail ? (
+                <Tooltip key={id} text={label}>
+                  <button
+                    type="button"
+                    aria-current={page === id ? "page" : undefined}
+                    aria-label={label}
+                    className={page === id ? "active" : ""}
+                    onClick={() => navigate(id)}
+                  >
+                    <Icon /> <span>{label}</span>
+                  </button>
+                </Tooltip>
+              ) : (
+                <button
+                  key={id}
+                  type="button"
+                  aria-current={page === id ? "page" : undefined}
+                  className={page === id ? "active" : ""}
+                  onClick={() => navigate(id)}
+                >
+                  <Icon /> <span>{label}</span>
+                </button>
+              ),
+            )}
+          </nav>
+          <div className="history">
+            <div>
+              <Database />
+              <span>Исторические данные</span>
+            </div>
+            {!rail && <ThemeSwitch />}
+            {viewport === "desktop" && (
+              <Tooltip text={collapsed ? "Развернуть меню" : "Свернуть меню"}>
+                <button
+                  type="button"
+                  className="icon-button sidebar-toggle"
+                  aria-label={collapsed ? "Развернуть меню" : "Свернуть меню"}
+                  aria-pressed={collapsed}
+                  onClick={() => setCollapsed((v) => !v)}
+                >
+                  {collapsed ? <PanelLeftOpen /> : <PanelLeftClose />}
+                </button>
+              </Tooltip>
+            )}
+          </div>
+        </aside>
+      )}
       <main>
         <header className="top">
-          <button
-            className="menu"
-            aria-label="Открыть меню"
-            onClick={() => setMobile(true)}
-          >
-            <Menu />
-          </button>
           <div>
-            <h1>
-              {page === "monitoring"
-                ? "Мониторинг качества"
-                : page === "recommendations"
-                  ? "Рекомендации"
-                  : "Песочница"}
-            </h1>
+            <h1>{title}</h1>
             <p>Дизель после гидроочистки · Точка отбора 2</p>
           </div>
-          {page === "monitoring" && datasets.length > 0 && (
+          {datasets.length > 0 && (
             <DataMenu
               datasets={datasets}
               datasetId={datasetId}
               setDatasetId={setDatasetId}
               onUpload={() => setUpload(true)}
+              showTheme={phone || rail}
             />
           )}
         </header>
@@ -778,6 +808,22 @@ export function App() {
           filterTarget={statsView ? "statistics" : "trends"}
           onNavigate={navigateFromFinding}
         />
+      )}
+      {phone && (
+        <nav className="bottom-nav" aria-label="Основные разделы">
+          {navItems.map(({ id, label, Icon }) => (
+            <button
+              key={id}
+              type="button"
+              aria-current={page === id ? "page" : undefined}
+              className={page === id ? "active" : ""}
+              onClick={() => navigate(id)}
+            >
+              <Icon aria-hidden="true" />
+              {label}
+            </button>
+          ))}
+        </nav>
       )}
     </div>
   );

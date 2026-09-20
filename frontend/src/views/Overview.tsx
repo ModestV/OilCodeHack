@@ -32,6 +32,7 @@ import {
 } from "./shared";
 import { Disclosure } from "../ui/Controls";
 import { timeMenu } from "../ui/chartMenu";
+import { useViewport } from "../ui/hooks";
 
 export function Overview({
   mode,
@@ -62,6 +63,7 @@ export function Overview({
     [snapshot],
   );
   const chartMenu = useMemo(() => timeMenu(onSelectTime), [onSelectTime]);
+  const phone = useViewport() === "phone";
   const primaryFinding = assessment.findings[0];
   const secondaryFindings = assessment.findings.slice(1, 3);
   const sulfurSeries = useMemo(
@@ -81,11 +83,13 @@ export function Overview({
       useUTC: true,
       tooltip: { trigger: "axis" },
       legend: { top: 0, data: ["ЛИМС · пробы", "ПАК · медиана"] },
-      grid: { left: 50, right: 20, top: 60, bottom: 60 },
-      dataZoom: [
-        { type: "inside" },
-        { type: "slider", height: 15, bottom: 3, showDetail: false },
-      ],
+      grid: { left: 44, right: 16, top: 36, bottom: phone ? 34 : 60 },
+      dataZoom: phone
+        ? [{ type: "inside" }]
+        : [
+            { type: "inside" },
+            { type: "slider", height: 15, bottom: 3, showDetail: false },
+          ],
       xAxis: {
         type: "time",
         axisLabel: {
@@ -138,7 +142,7 @@ export function Overview({
         ];
       }),
     };
-  }, [sulfurSeries, map, theme]);
+  }, [sulfurSeries, map, theme, phone]);
   const history = (
     <section className="panel chart-panel">
       <header>
@@ -147,7 +151,7 @@ export function Overview({
       {sulfurSeries.some((s) => s.points.length) ? (
         <Chart
           option={option}
-          height={230}
+          height={phone ? 200 : 230}
           onSelectTime={onSelectTime}
           contextMenu={chartMenu}
         />

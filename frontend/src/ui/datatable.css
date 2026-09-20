@@ -1,0 +1,96 @@
+.datatable {
+  min-width: 0;
+}
+.datatable-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-2);
+}
+.datatable-empty {
+  margin: 0;
+  padding: var(--sp-4) 0;
+  color: var(--text-3);
+  font-size: var(--fs-sm);
+}
+.datatable .table-scroll:focus-visible {
+  outline-offset: -2px;
+}
+.datatable .sticky-first td:first-child,
+.datatable .sticky-first th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--surface);
+}
+.datatable .sticky-first th:first-child {
+  z-index: 3;
+  background: var(--surface-2);
+}
+.datatable th.align-right,
+.datatable td.align-right {
+  text-align: right;
+}
+
+/* Card layout (phones) */
+.card-list {
+  display: grid;
+  gap: var(--sp-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.card-row {
+  padding: var(--sp-3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-2);
+  background: var(--surface);
+}
+.card-row.selected-row {
+  border-color: var(--accent);
+}
+.card-row-title {
+  font-weight: 600;
+}
+.card-row-title small {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-3);
+  font-weight: 400;
+}
+.card-row-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-2) var(--sp-3);
+  margin: var(--sp-2) 0 0;
+}
+.card-row-facts > div {
+  display: grid;
+  gap: 2px;
+  padding: 0;
+  border: 0;
+}
+.card-row-facts dt {
+  color: var(--text-3);
+  font-size: var(--fs-xs);
+}
+.card-row-facts dd {
+  margin: 0;
+  font-weight: 500;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.card-row-facts dd small {
+  display: block;
+  color: var(--text-3);
+  font-weight: 400;
+}
+.card-row .disclosure {
+  margin-top: var(--sp-1);
+  border-top: 0;
+}
+.card-row .disclosure-body .card-row-facts {
+  margin-top: 0;
+}

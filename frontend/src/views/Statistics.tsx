@@ -3,9 +3,10 @@ import { Chart } from "../components/Chart";
 import { MedianComparison } from "../components/MonitoringCharts";
 import { HelpTooltip } from "../components/HelpTooltip";
 import { useChartTheme } from "../ui/useChartTheme";
-import type { Distribution, Metric, Snapshot, Summary } from "../types";
+import type { Distribution, Metric, Snapshot, Stat, Summary } from "../types";
 import { Empty, FlagLine, format, freshness, metricMap, stamp } from "./shared";
 import { Select } from "../ui/Select";
+import { DataTable, type Column } from "../ui/DataTable";
 import { Disclosure, SearchField } from "../ui/Controls";
 
 export function Statistics({
@@ -47,6 +48,144 @@ export function Statistics({
         description: `${m.source.toUpperCase()} · ${m.id}`,
       })),
     [metrics],
+  );
+  const statColumns = useMemo<Column<Stat>[]>(
+    () => [
+      {
+        key: "metric",
+        header: "Показатель",
+        fixed: true,
+        role: "primary",
+        cell: (s) => (
+          <>
+            {map.get(s.metric_id)?.label || s.metric_id}
+            <small>{map.get(s.metric_id)?.unit || ""}</small>
+          </>
+        ),
+      },
+      { key: "n", header: "n", align: "right", cell: (s) => s.count },
+      {
+        key: "median",
+        header: "Медиана",
+        align: "right",
+        cell: (s) => format(s.median),
+      },
+      {
+        key: "range",
+        header: "Мин. – макс.",
+        align: "right",
+        cell: (s) => `${format(s.min)} – ${format(s.max)}`,
+      },
+      {
+        key: "p",
+        header: (
+          <>
+            P05–P95{" "}
+            <HelpTooltip label="P05–P95">
+              Диапазон, внутри которого находится 90% измерений: от 5-го до
+              95-го процентиля.
+            </HelpTooltip>
+          </>
+        ),
+        title: "P05–P95",
+        align: "right",
+        cell: (s) => `${format(s.p05)}–${format(s.p95)}`,
+      },
+      {
+        key: "change",
+        header: "Изменение медианы",
+        align: "right",
+        cell: (s) => (
+          <>
+            {format(s.median_change)}
+            <small>от первого: {format(s.change)}</small>
+          </>
+        ),
+      },
+      {
+        key: "quality",
+        header: "Ошиб. / подозр.",
+        title: "Ошибочных / подозрительных",
+        align: "right",
+        cell: (s) => `${s.invalid_count} / ${s.suspect_count}`,
+      },
+      {
+        key: "mean",
+        header: "Среднее",
+        align: "right",
+        optional: true,
+        role: "detail",
+        cell: (s) => format(s.mean),
+      },
+      {
+        key: "previous",
+        header: "Пред. медиана",
+        title: "Предыдущая медиана",
+        align: "right",
+        optional: true,
+        role: "detail",
+        cell: (s) => format(s.previous_median),
+      },
+      {
+        key: "std",
+        header: (
+          <>
+            σ{" "}
+            <HelpTooltip label="σ">
+              Стандартное отклонение: разброс относительно среднего.
+            </HelpTooltip>
+          </>
+        ),
+        title: "σ",
+        align: "right",
+        optional: true,
+        role: "detail",
+        cell: (s) => format(s.std),
+      },
+      {
+        key: "iqr",
+        header: "IQR",
+        align: "right",
+        optional: true,
+        role: "detail",
+        cell: (s) => format(s.iqr),
+      },
+      {
+        key: "spread",
+        header: "Размах",
+        align: "right",
+        optional: true,
+        role: "detail",
+        cell: (s) => format(s.range),
+      },
+      {
+        key: "firstlast",
+        header: "Первое / последнее",
+        optional: true,
+        role: "detail",
+        cell: (s) => (
+          <>
+            {format(s.first)} / {format(s.last)}
+            <small>
+              {stamp(s.first_at)} — {stamp(s.last_at)}
+            </small>
+          </>
+        ),
+      },
+      {
+        key: "extrema",
+        header: "Время min / max",
+        optional: true,
+        role: "detail",
+        cell: (s) => (
+          <>
+            {stamp(s.min_at)}
+            <small>{stamp(s.max_at)}</small>
+          </>
+        ),
+      },
+    ],
+    [map],
   );
   const option = useMemo(() => {
     const bins = distribution?.bins || [];
@@ -173,82 +312,21 @@ export function Statistics({
           />
           <small>Показателей: {tableRows.length}</small>
         </div>
-        <div className="table-scroll statistics-table">
-          <table>
-            <thead>
-              <tr>
-                <th>Показатель</th>
-                <th>n</th>
-                <th>Медиана</th>
-                <th>Среднее</th>
-                <th>Мин.</th>
-                <th>Макс.</th>
-                <th>
-                  P05–P95{" "}
-                  <HelpTooltip label="P05–P95">
-                    Диапазон, внутри которого находится 90% измерений: от 5-го
-                    до 95-го процентиля.
-                  </HelpTooltip>
-                </th>
-                <th>Пред. медиана</th>
-                <th>Изменение</th>
-                <th>
-                  σ / IQR / размах{" "}
-                  <HelpTooltip label="σ и IQR">
-                    σ показывает разброс относительно среднего. IQR — ширину
-                    центральной половины измерений.
-                  </HelpTooltip>
-                </th>
-                <th>Первое / последнее</th>
-                <th>Время min / max</th>
-                <th>Ошиб. / подозр.</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tableRows.map((s) => (
-                <tr
-                  key={s.metric_id}
-                  className={s.metric_id === selected ? "selected-row" : ""}
-                >
-                  <td>
-                    {map.get(s.metric_id)?.label || s.metric_id}
-                    <small>{map.get(s.metric_id)?.unit || ""}</small>
-                  </td>
-                  <td>{s.count}</td>
-                  <td>{format(s.median)}</td>
-                  <td>{format(s.mean)}</td>
-                  <td>{format(s.min)}</td>
-                  <td>{format(s.max)}</td>
-                  <td>
-                    {format(s.p05)}–{format(s.p95)}
-                  </td>
-                  <td>{format(s.previous_median)}</td>
-                  <td>
-                    {format(s.median_change)}
-                    <small>От первого: {format(s.change)}</small>
-                  </td>
-                  <td>
-                    {format(s.std)} / {format(s.iqr)} / {format(s.range)}
-                  </td>
-                  <td>
-                    {format(s.first)} / {format(s.last)}
-                    <small>
-                      {s.first_at?.replace("T", " ")} —{" "}
-                      {s.last_at?.replace("T", " ")}
-                    </small>
-                  </td>
-                  <td>
-                    {s.min_at?.replace("T", " ")}
-                    <small>{s.max_at?.replace("T", " ")}</small>
-                  </td>
-                  <td>
-                    {s.invalid_count} / {s.suspect_count}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          className="statistics-table"
+          label="Статистика по показателям"
+          rows={tableRows}
+          columns={statColumns}
+          rowKey={(s) => s.metric_id}
+          rowClassName={(s) =>
+            s.metric_id === selected ? "selected-row" : undefined
+          }
+          storageKey="statistics"
+          stickyFirst
+          maxHeight={560}
+          minWidth={900}
+          emptyText="Нет показателей по запросу"
+        />
         <Disclosure
           className="agreement analysis-detail"
           summary="Согласованность ЛИМС и ПАК"
