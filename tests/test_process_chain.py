@@ -111,8 +111,8 @@ def test_forecast_alarm_is_checked_after_blending_without_control_credit():
 
 
 def test_economic_variants_exist_and_small_gain_can_be_rejected(monkeypatch,tmp_path):
-    monkeypatch.setattr(agents,'snapshot',lambda *a:FRAME)
-    monkeypatch.setattr(agents,'forecast_sulfur',lambda *a:{'status':'ok','alarm_above_10':False})
+    monkeypatch.setattr(agents,'snapshot',lambda *a, **kw:FRAME)
+    monkeypatch.setattr(agents,'forecast_sulfur',lambda *a, **kw:{'status':'ok','alarm_above_10':False})
     req=request(current_sulfur=8,tanks=[],optimize_economics=True,minimum_economic_gain=0)
     result=agents.make_decision(tmp_path,req)
     assert {'lower_heat','more_feed','lower_pressure'} <= {c['id'] for c in result['candidates']}
@@ -122,8 +122,8 @@ def test_economic_variants_exist_and_small_gain_can_be_rejected(monkeypatch,tmp_
 
 
 def test_recipe_candidates_respect_mass_shares_and_stock(monkeypatch,tmp_path):
-    monkeypatch.setattr(agents,'snapshot',lambda *a:FRAME)
-    monkeypatch.setattr(agents,'forecast_sulfur',lambda *a:{'status':'ok','alarm_above_10':False})
+    monkeypatch.setattr(agents,'snapshot',lambda *a, **kw:FRAME)
+    monkeypatch.setattr(agents,'forecast_sulfur',lambda *a, **kw:{'status':'ok','alarm_above_10':False})
     req=request(optimize_recipe=True,parameters=dict(additive_sulfur_mgkg=0))
     result=agents.make_decision(tmp_path,req)
     assert any('_mix' in c['id'] for c in result['candidates'])
@@ -150,8 +150,8 @@ def test_updated_formulas_and_unresolved_lims_are_versioned():
 
 
 def test_selected_recipe_round_trip_preserves_entire_request(monkeypatch,tmp_path):
-    monkeypatch.setattr(agents,'snapshot',lambda *a:FRAME)
-    monkeypatch.setattr(agents,'forecast_sulfur',lambda *a:{'status':'ok','alarm_above_10':False})
+    monkeypatch.setattr(agents,'snapshot',lambda *a, **kw:FRAME)
+    monkeypatch.setattr(agents,'forecast_sulfur',lambda *a, **kw:{'status':'ok','alarm_above_10':False})
     req=request(optimize_recipe=True,parameters=dict(additive_sulfur_mgkg=0,dead_time_minutes=30),transport_delay_minutes=15)
     result=agents.make_decision(tmp_path,req)
     selected=result['scenario']
@@ -163,8 +163,8 @@ def test_selected_recipe_round_trip_preserves_entire_request(monkeypatch,tmp_pat
 
 
 def test_other_horizon_does_not_borrow_h3_forecast_support(monkeypatch,tmp_path):
-    monkeypatch.setattr(agents,'snapshot',lambda *a:FRAME)
-    monkeypatch.setattr(agents,'forecast_sulfur',lambda *a:{'status':'ok','alarm_above_10':False,'forecast_horizon_minutes':180})
+    monkeypatch.setattr(agents,'snapshot',lambda *a, **kw:FRAME)
+    monkeypatch.setattr(agents,'forecast_sulfur',lambda *a, **kw:{'status':'ok','alarm_above_10':False,'forecast_horizon_minutes':180})
     result=agents.make_decision(tmp_path,request(current_sulfur=None,horizon_minutes=60))
     assert result['status']=='abstain'
     assert any('Горизонт' in s for s in result['agents']['reliability']['reasons'])
@@ -172,8 +172,8 @@ def test_other_horizon_does_not_borrow_h3_forecast_support(monkeypatch,tmp_path)
 
 def test_fresh_online_analyzer_disagreement_blocks_observed_decision(monkeypatch,tmp_path):
     frame={'values':FRAME['values']+[dict(FRAME['values'][-1],metric_id='ht.Q21',value=5)]}
-    monkeypatch.setattr(agents,'snapshot',lambda *a:frame)
-    monkeypatch.setattr(agents,'forecast_sulfur',lambda *a:{'status':'ok','alarm_above_10':False})
+    monkeypatch.setattr(agents,'snapshot',lambda *a, **kw:frame)
+    monkeypatch.setattr(agents,'forecast_sulfur',lambda *a, **kw:{'status':'ok','alarm_above_10':False})
     result=agents.make_decision(tmp_path,request(current_sulfur=None))
     assert result['status']=='abstain'
     assert result['agents']['quality']['evidence']['analyzer_comparison']['conflict']

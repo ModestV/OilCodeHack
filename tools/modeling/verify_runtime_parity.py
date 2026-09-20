@@ -9,7 +9,7 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
-from backend.forecast import _load_artifact, _runtime_features, forecast_sulfur
+from backend.forecast_legacy import _load_artifact, _runtime_features, forecast_sulfur
 from tools.modeling.sulfur_features import available_lab, telemetry_features
 from tools.modeling.sulfur_first_iteration import load_lab_target, load_telemetry
 

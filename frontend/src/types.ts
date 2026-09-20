@@ -268,12 +268,17 @@ export interface SulfurForecast {
   status: "ok" | "abstain";
   reasons: string[];
   target_time: string;
-  forecast_horizon_minutes: number;
+  horizon_minutes: number;
   lims_publication_delay_minutes: number;
   target: { metric_id: string; unit: string };
-  prediction_ridge: number | null;
+  prediction: number | null;
+  nowcast: { prediction: number; lower: number; upper: number } | null;
+  prediction_lower: number | null;
+  prediction_upper: number | null;
+  exceedance_probability: number | null;
+  alarm_probability: number;
+  path_supported: boolean;
   prediction_previous_lab: number | null;
-  prediction_risk_guard: number | null;
   alarm_above_10: boolean | null;
   feature_cutoff: string;
   feature_time: string | null;
@@ -282,9 +287,8 @@ export interface SulfurForecast {
   imputed_feature_count: number;
   model: {
     name: string;
-    alpha: number;
+    alpha: Record<string, number>;
     artifact: string;
-    risk_guard: string;
   };
   leakage_check: {
     passed: boolean;

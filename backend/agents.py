@@ -98,16 +98,23 @@ class QualityAgent:
 
         model_forecast = None
         try:
-            model_forecast = forecast_sulfur(context.directory, request.at)
+            model_forecast = forecast_sulfur(context.directory, request.at, horizon_minutes=request.horizon_minutes)
         except ForecastUnavailable as exc:
             warnings.append(f"Прогноз серы недоступен: {exc}")
+
+        if (request.current_sulfur is None and model_forecast and model_forecast.get("status") == "ok"
+                and model_forecast.get("path_supported") and model_forecast.get("nowcast")):
+            sulfur, sulfur_source = float(model_forecast["nowcast"]["prediction"]), "model.nowcast"
+            sulfur_item = {"timestamp": request.at, "available_at": request.at,
+                           "freshness": "fresh", "flags": []}
+            missing, status = [], "ok"
 
         if request.current_sulfur is not None:
             warnings.append("Базовая сера введена вручную: это условный сценарий, а не подтверждение качества продукта")
         if model_forecast and model_forecast.get("status") == "abstain":
             warnings.extend(model_forecast.get("reasons", []))
         if model_forecast and model_forecast.get("alarm_above_10"):
-            warnings.append("Независимый прогноз/risk_guard превышает 10 мг/кг; сценарные коэффициенты не доказывают устранение этого риска")
+            warnings.append("Прогноз без воздействия сигнализирует о риске превышения 10 мг/кг; сценарные коэффициенты не доказывают устранение этого риска")
 
         other_quality = {}
         for name, supplied, metric_id in (
@@ -178,9 +185,11 @@ class ReliabilityAgent:
         if not explicit:
             if not forecast or forecast.get("status") != "ok":
                 reasons.append("Нет допустимого модельного прогноза для решения по наблюдаемым данным")
+            elif not forecast.get("path_supported", True):
+                reasons.append("Не все горизонты траектории прошли проверку области применимости")
             elif forecast.get("alarm_above_10") and not context.request.tanks:
                 reasons.append("Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки")
-            if forecast and forecast.get("forecast_horizon_minutes", 180) != context.request.horizon_minutes:
+            if forecast and forecast.get("horizon_minutes", forecast.get("forecast_horizon_minutes", 180)) != context.request.horizon_minutes:
                 reasons.append("Горизонт сценария не совпадает с горизонтом независимой модели; прогноз не подтверждает эту конечную точку")
         analyzers = quality.get("evidence", {}).get("analyzer_comparison", {})
         if not explicit and analyzers.get("conflict"):
@@ -271,7 +280,17 @@ class OptimizationAgent:
             # without crediting an unvalidated beneficial control response.
             forecast = quality.get("evidence", {}).get("model_forecast") or {}
             if reliability.get("basis") != "scenario_only" and any(t.kind == "hydrotreated_batch" for t in request.tanks):
+                # A conservative envelope across the arriving segment, not the H3 endpoint
+                # used as if it described all material. No probability claim for batch quality.
                 guard = forecast.get("prediction_risk_guard", forecast.get("prediction_ridge"))
+                if forecast.get("path_supported") and forecast.get("nowcast"):
+                    from .scenarios import _at_knots
+                    horizon = request.horizon_minutes
+                    upper_knots = sorted([(float(r["minutes"]), float(r["upper"])) for r in forecast["horizons"]
+                                          if r["minutes"] < horizon and r.get("upper") is not None]
+                                         + [(float(horizon), float(forecast["prediction_upper"]))])
+                    end = scenario["batch"]["arriving_minutes"]
+                    guard = max([v for t, v in upper_knots if t <= end] + [_at_knots(upper_knots, end)])
                 if guard is None:
                     check("blend_forecast_guard", False, "Нет независимой оценки качества поступающей партии", "forecast_mass_balance")
                 else:
@@ -320,7 +339,8 @@ class OptimizationAgent:
         automatic_request = request.model_copy(deep=True)
         automatic_request.changes = None
         try:
-            automatic = calculate_scenario(context.directory, automatic_request, frame=context.frame)
+            automatic = calculate_scenario(context.directory, automatic_request, frame=context.frame,
+                                           forecast=quality.get("evidence", {}).get("model_forecast"))
         except ValueError:
             automatic = None
         # Controls in the scenario result use metric ids; map them explicitly
@@ -377,7 +397,8 @@ class OptimizationAgent:
             candidate_request.additive_pct = dose
             candidate_context = AgentContext(context.directory, candidate_request, context.frame)
             try:
-                scenario = calculate_scenario(context.directory, candidate_request, frame=context.frame)
+                scenario = calculate_scenario(context.directory, candidate_request, frame=context.frame,
+                                              forecast=quality.get("evidence", {}).get("model_forecast"))
             except ValueError as exc:
                 candidates.append(
                     {

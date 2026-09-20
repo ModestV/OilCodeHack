@@ -1,7 +1,9 @@
 """Declared experimental proxies; neither failure probabilities nor plant costs."""
 from math import isfinite
 
-from .forecast import ForecastUnavailable, _load_artifact
+# Freeze the original load proxy reference distribution across forecast upgrades.
+# Its engineering score is independent of the active sulphur model's support gate.
+from .forecast_legacy import ForecastUnavailable, _load_artifact
 
 
 def regime_severity(controls: dict) -> dict:
@@ -9,7 +11,7 @@ def regime_severity(controls: dict) -> dict:
 
     No failure labels exist. Positive standardized levels are a reproducible
     loading proxy, not a validated relation to equipment life. The 12-sigma
-    experimental cap matches the forecast's extreme-support guard.
+    experimental cap is the frozen first-iteration convention, not the new forecast gate.
     """
     try:
         artifact = _load_artifact()

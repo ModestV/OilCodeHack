@@ -898,8 +898,8 @@ function PipelinePreview({
         </p>
         {sulfurEvidence && (
           <p className="support-notice">
-            Исходная сера: {formatNumber(sulfurEvidence.value)} мг/кг · {sulfurEvidence.source || "источник отсутствует"}
-            {sulfurEvidence.timestamp && ` · проба ${displayTime(sulfurEvidence.timestamp)}`}
+            Исходная сера: {formatNumber(sulfurEvidence.value)} мг/кг · {sulfurEvidence.source === "model.nowcast" ? "модельная оценка текущего качества" : sulfurEvidence.source || "источник отсутствует"}
+            {sulfurEvidence.timestamp && ` · ${sulfurEvidence.source === "model.nowcast" ? "расчёт" : "измерение"} ${displayTime(sulfurEvidence.timestamp)}`}
             {sulfurEvidence.available_at && ` · доступна ${displayTime(sulfurEvidence.available_at)}`}
           </p>
         )}
@@ -1053,7 +1053,7 @@ function PipelinePreview({
           <div className="section-heading">
             <h2>Отдельный прогноз качества</h2>
             <span className="support-notice">
-              Ridge · горизонт {decision.forecast.forecast_horizon_minutes / 60} ч
+              Калиброванный Ridge · горизонт {decision.forecast.horizon_minutes / 60} ч
             </span>
           </div>
           <p className="recommendation-copy">
@@ -1067,11 +1067,15 @@ function PipelinePreview({
           <dl className="recommendation-metrics">
             <div>
               <dt>Ridge прогноз</dt>
-              <dd>{formatNumber(decision.forecast.prediction_ridge, 2)} <span>мг/кг</span></dd>
+              <dd>{formatNumber(decision.forecast.prediction, 2)} <span>мг/кг</span></dd>
             </div>
             <div>
-              <dt>Консервативная оценка</dt>
-              <dd>{formatNumber(decision.forecast.prediction_risk_guard, 2)} <span>мг/кг</span></dd>
+              <dt>80% интервал прогноза</dt>
+              <dd>{formatNumber(decision.forecast.prediction_lower, 2)}–{formatNumber(decision.forecast.prediction_upper, 2)} <span>мг/кг</span></dd>
+            </div>
+            <div>
+              <dt>Вероятность S &gt; 10 на выходе ГО</dt>
+              <dd>{formatNumber(decision.forecast.exceedance_probability == null ? null : 100 * decision.forecast.exceedance_probability, 1)} <span>%</span></dd>
             </div>
             <div>
               <dt>Признаки</dt>
@@ -1082,7 +1086,7 @@ function PipelinePreview({
             {decision.forecast.status === "abstain"
               ? "Числовой прогноз скрыт, поскольку проверка входных данных не пройдена."
               : decision.forecast.alarm_above_10
-                ? "Консервативная оценка выше 10 мг/кг: нужна проверка технологом."
+                ? "Прогноз без воздействия сигнализирует о риске превышения: нужна проверка технологом."
                 : "Оценка ниже 10 мг/кг не исключает превышение: модель пропускает часть опасных проб."}
             {decision.forecast.leakage_check.passed ? " Временные границы признаков соблюдены." : " Нарушены временные границы признаков."}
           </p>

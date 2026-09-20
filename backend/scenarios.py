@@ -9,6 +9,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .analytics import parse_time, snapshot
+from .forecast import ForecastUnavailable, forecast_sulfur
 
 
 # Physical source class is independent of file type: Q21 is also an online analyser.
@@ -215,16 +216,67 @@ def _blend(request: ScenarioRequest, *, produced_sulfur: float | None = None,
     return result
 
 
-def calculate_scenario(directory: Path, request: ScenarioRequest, *, frame: dict | None = None) -> dict:
+def _baseline_knots(forecast: dict | None, sulfur: float, horizon: int) -> list[tuple[float, float]]:
+    """Scenario interpolation is linear in concentration; exact requested endpoint is retained."""
+    if (forecast and forecast.get("status") == "ok" and forecast.get("path_supported")
+            and forecast.get("nowcast") and forecast.get("horizon_minutes") == horizon):
+        rows = [(float(r["minutes"]), float(r["prediction"])) for r in forecast["horizons"]
+                if r["minutes"] < horizon and r.get("prediction") is not None]
+        return sorted([*rows, (float(horizon), float(forecast["prediction"]))])
+    return [(0., sulfur), (float(horizon), sulfur)] if horizon else [(0., sulfur)]
+
+
+def _at_knots(knots: list[tuple[float, float]], minute: float) -> float:
+    if minute <= knots[0][0]:
+        return knots[0][1]
+    for (a, x), (b, y) in zip(knots, knots[1:]):
+        if minute <= b:
+            return x + (y-x) * (minute-a) / (b-a)
+    return knots[-1][1]
+
+
+def _batch_integral(knots: list[tuple[float, float]], effect: float, duration: float,
+                    lag: float, dead_time: float) -> float:
+    """Exact integral of clipped piecewise-linear concentration, including an instant step."""
+    points = sorted({0., duration, *[t for t, _ in knots if 0 < t < duration],
+                     min(duration, dead_time), min(duration, dead_time+lag)})
+    def concentration(t):
+        return _at_knots(knots, t) + effect * _response_fraction(t, lag, dead_time)
+    total = 0.
+    for a, b in zip(points, points[1:]):
+        # Interior values avoid giving a jump at dead_time nonzero integration mass.
+        u, v = concentration(a+(b-a)/4), concentration(a+3*(b-a)/4)
+        left, right = 1.5*u-.5*v, 1.5*v-.5*u
+        if left >= 0 and right >= 0:
+            total += (b-a)*(left+right)/2
+        elif max(left, right) > 0:
+            total += (b-a)*max(left, right)**2/(2*abs(right-left))
+    return total
+
+
+def calculate_scenario(directory: Path, request: ScenarioRequest, *, frame: dict | None = None,
+                       forecast: dict | None = None) -> dict:
     frame = snapshot(directory, request.at) if frame is None else frame
     values = {item["metric_id"]: item for item in frame["values"]}
     sulfur = request.current_sulfur
+    if sulfur is None and forecast is None:
+        try:
+            forecast = forecast_sulfur(directory, request.at, horizon_minutes=request.horizon_minutes)
+        except ForecastUnavailable:
+            forecast = None
+    forecast_ok = bool(forecast and forecast.get("status") == "ok" and forecast.get("path_supported")
+                       and forecast.get("nowcast") and forecast.get("horizon_minutes") == request.horizon_minutes)
+    sulfur_source = "request.current_sulfur" if sulfur is not None else None
+    if sulfur is None and forecast_ok:
+        sulfur, sulfur_source = float(forecast["nowcast"]["prediction"]), "model.nowcast"
     if sulfur is None:
-        sulfur, _ = select_sulfur(values)
+        sulfur, sulfur_source = select_sulfur(values)
     t95 = request.current_t95 or _value(values, "lims.ht.2.95%.T")
     cetane = request.current_cetane or _value(values, "lims.ht.2.CetaneNumber")
     if sulfur is None:
         raise ValueError("Нет базового значения серы: задайте его в сценарии")
+    knots = _baseline_knots(forecast if request.current_sulfur is None else None, sulfur, request.horizon_minutes)
+    endpoint = _at_knots(knots, request.horizon_minutes)
 
     feed_effect = request.parameters.feed_sulfur_transfer * (
         request.feed_sulfur - request.baseline_feed_sulfur
@@ -236,9 +288,9 @@ def calculate_scenario(directory: Path, request: ScenarioRequest, *, frame: dict
         # An editable target cannot relax the confirmed product sulphur limit.
         effective_target = min(request.targets.sulfur_max, HARD_SULFUR_MAX)
         if request.tanks:
-            effective_target = request.intermediate_sulfur_max if request.intermediate_sulfur_max is not None else sulfur + max(0, feed_effect)
+            effective_target = request.intermediate_sulfur_max if request.intermediate_sulfur_max is not None else endpoint + max(0, feed_effect)
         changes = _automatic_changes(
-            (sulfur - effective_target) / response + feed_effect if response else 0,
+            (endpoint - effective_target) / response + feed_effect if response else 0,
             request.parameters,
         )
     full_effect = (
@@ -247,7 +299,7 @@ def calculate_scenario(directory: Path, request: ScenarioRequest, *, frame: dict
         + request.parameters.feed_rate_effect * changes.feed_rate_pct
         + request.parameters.pressure_effect * changes.pressure
     )
-    steady_state_sulfur = max(0.0, sulfur + full_effect)
+    steady_state_sulfur = max(0.0, endpoint + full_effect)
     target_time = parse_time(request.at)
     minutes = list(range(0, request.horizon_minutes + 1, request.step_minutes))
     if request.horizon_minutes not in minutes:
@@ -259,7 +311,8 @@ def calculate_scenario(directory: Path, request: ScenarioRequest, *, frame: dict
             {
                 "minute": minute,
                 "timestamp": (target_time + timedelta(minutes=minute)).isoformat(),
-                "sulfur": max(0.0, sulfur + full_effect * response),
+                "sulfur": max(0.0, _at_knots(knots, minute) + full_effect * response),
+                "baseline_sulfur": _at_knots(knots, minute),
             }
         )
 
@@ -286,21 +339,8 @@ def calculate_scenario(directory: Path, request: ScenarioRequest, *, frame: dict
     final_sulfur = trajectory[-1]["sulfur"]
     # Integrate the linear response analytically; changing display step must not change batch chemistry.
     arriving_duration = max(0, request.horizon_minutes - request.transport_delay_minutes)
-    active = max(0, arriving_duration - request.parameters.dead_time_minutes)
-    ramp = request.parameters.lag_minutes
-    # Clipped sulfur trajectory: integrate piecewise at zero crossings as well.
-    points = sorted(set([0., float(arriving_duration), min(float(arriving_duration), float(request.parameters.dead_time_minutes)),
-                         min(float(arriving_duration), float(request.parameters.dead_time_minutes + ramp))]))
-    if full_effect < 0 and ramp > 0:
-        crossing = request.parameters.dead_time_minutes - sulfur*ramp/full_effect
-        if 0 < crossing < arriving_duration: points.append(crossing); points.sort()
-    def concentration(t):
-        return max(0., sulfur + full_effect * (0 if t <= request.parameters.dead_time_minutes else
-                    1 if ramp == 0 else min(1., (t-request.parameters.dead_time_minutes)/ramp)))
-    if ramp == 0:
-        integral_s = sulfur*(arriving_duration-active) + max(0., sulfur+full_effect)*active
-    else:
-        integral_s = sum((b-a)*(concentration(a)+concentration(b))/2 for a,b in zip(points,points[1:]))
+    integral_s = _batch_integral(knots, full_effect, arriving_duration,
+                                 request.parameters.lag_minutes, request.parameters.dead_time_minutes)
     produced_sulfur = integral_s / arriving_duration if arriving_duration else sulfur
     produced_mass = (request.production_rate_tph or 0) * (1+changes.feed_rate_pct/100) * arriving_duration/60
     blend = _blend(request, produced_sulfur=produced_sulfur, produced_mass=produced_mass)
@@ -309,7 +349,10 @@ def calculate_scenario(directory: Path, request: ScenarioRequest, *, frame: dict
         "at": request.at,
         "horizon_minutes": request.horizon_minutes,
         "step_minutes": request.step_minutes,
-        "baseline": {"sulfur": sulfur, "t95": t95, "cetane": cetane},
+        "baseline": {"sulfur": sulfur, "t95": t95, "cetane": cetane, "sulfur_source": sulfur_source,
+                     "kind": "model_forecast" if sulfur_source == "model.nowcast" else "flat_baseline",
+                     "knots": [{"minute": t, "sulfur": s} for t, s in knots]},
+        "forecast": forecast if request.current_sulfur is None else None,
         "controls": controls,
         "predicted_sulfur": final_sulfur,
         "steady_state_sulfur": steady_state_sulfur,
@@ -329,6 +372,7 @@ def calculate_scenario(directory: Path, request: ScenarioRequest, *, frame: dict
         "applied_recipe": {"tanks": [t.model_dump() for t in request.tanks], "additive_pct": request.additive_pct},
         "assumptions": [
             "Простая линейная сценарная модель, не промышленный оптимизатор.",
+            "Для наблюдаемого режима база — калиброванный прогноз H0/H1/H2/H3; между опорными точками линейная интерполяция концентрации. Качество поступления интегрируется до горизонта минус доставка, независимо от шага графика.",
             "Коэффициенты чувствительности и пределы изменения являются редактируемыми модельными допущениями.",
             "Параметр lag задаёт время линейного нарастания эффекта (0–180 минут), а не подтверждённое время прохождения продукта; значения ЛИМС доступны через 4 часа после отбора пробы.",
             "predicted_sulfur соответствует концу выбранного горизонта; steady_state_sulfur — полному условному эффекту. Проверка конечной точки не гарантирует качество на всём переходе.",

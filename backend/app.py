@@ -269,11 +269,11 @@ def decision(dataset_id: str, body: ScenarioRequest):
 
 
 @app.get("/api/datasets/{dataset_id}/forecast")
-def forecast(dataset_id: str, at: str):
-    """Run the fitted, leakage-safe first-iteration sulphur forecast."""
+def forecast(dataset_id: str, at: str, horizon_minutes: float = Query(default=180, ge=0, le=180)):
+    """Run the causal anchored sulphur forecast at the requested horizon."""
 
     try:
-        return forecast_sulfur(dataset(dataset_id), at)
+        return forecast_sulfur(dataset(dataset_id), at, horizon_minutes=horizon_minutes)
     except ForecastUnavailable as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
 
