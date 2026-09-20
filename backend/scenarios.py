@@ -4,28 +4,22 @@ from __future__ import annotations
 
 from datetime import timedelta
 from pathlib import Path
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .analytics import parse_time, snapshot
 
 
-# The source order follows the case requirement: a laboratory result is the
-# control fact, then the online analyser, then a future VAK result if one is
-# registered, and only then the available KIP sulphur analysers.  The current
-# bundle has no VAK metric for sulphur; ``vak.ht.Mg.Sulfur`` is kept as an
-# explicit insertion slot so a future registered VAK value is considered
-# before KIP without changing the source-priority contract.  It does not
-# invent a derived value while the metric is absent.  Keep this list in one
-# place so the scenario and agent paths cannot drift.
+# Physical source class is independent of file type: Q21 is also an online analyser.
 SULFUR_PRIORITY_IDS = (
     "lims.ht.2.Mg.Sulfur",
     "pak.ht.Mg.Sulfur",
-    "vak.ht.Mg.Sulfur",
     # Q21 is the mapped online sulphur analyser after hydro-treatment.  Q20
     # is an upstream analyser and must not silently become the product
     # quality baseline.
     "ht.Q21",
+    "vak.ht.Mg.Sulfur",
 )
 HARD_SULFUR_MAX = 10.0
 HARD_T95_MAX = 360.0
@@ -49,6 +43,8 @@ class ModelParameters(FiniteModel):
     feed_rate_effect: float = Field(default=0.05, gt=0)
     pressure_effect: float = Field(default=-0.15, lt=0)
     cetane_gain_per_pct: float = Field(default=4.0, ge=0)
+    dead_time_minutes: int = Field(default=0, ge=0, le=180)
+    additive_sulfur_mgkg: float | None = Field(default=None, ge=0)
 
 
 class ControlChanges(FiniteModel):
@@ -64,6 +60,8 @@ class BlendTank(FiniteModel):
     t95: float = Field(gt=0)
     cetane: float = Field(gt=0)
     cost_index: float = Field(default=1, gt=0)
+    kind: Literal["stored", "hydrotreated_batch"] = "stored"
+    stock_t: float | None = Field(default=None, ge=0)
 
 
 class ScenarioRequest(FiniteModel):
@@ -80,11 +78,24 @@ class ScenarioRequest(FiniteModel):
     changes: ControlChanges | None = None
     tanks: list[BlendTank] = Field(default_factory=list, max_length=8)
     additive_pct: float = Field(default=0, ge=0, le=3)
+    additive_stock_t: float | None = Field(default=None, ge=0)
+    batch_mass_t: float | None = Field(default=None, gt=0)
+    production_rate_tph: float | None = Field(default=None, gt=0)
+    transport_delay_minutes: int = Field(default=0, ge=0, le=1440)
+    intermediate_sulfur_max: float | None = Field(default=None, gt=0)
+    optimize_economics: bool = True
+    optimize_recipe: bool = False
+    minimum_economic_gain: float = Field(default=0.03, ge=0)
 
     @model_validator(mode="after")
     def valid_step(self):
         if self.horizon_minutes and self.step_minutes > self.horizon_minutes:
             raise ValueError("Шаг не может быть больше горизонта")
+        linked = [tank for tank in self.tanks if tank.kind == "hydrotreated_batch"]
+        if len(linked) > 1:
+            raise ValueError("В этой модели допускается один резервуар приёма новой партии")
+        if linked and (linked[0].stock_t is None or self.batch_mass_t is None or self.production_rate_tph is None):
+            raise ValueError("Для новой партии задайте запас резервуара, массу смеси и выпуск в т/ч")
         return self
 
 
@@ -98,12 +109,23 @@ def select_sulfur(values: dict) -> tuple[float | None, str | None]:
 
     ``values`` is the metric-id keyed snapshot map.  Values marked invalid or
     conflicting are already represented as ``None`` by ``snapshot`` and are
-    therefore skipped.  A stale higher-priority result is still selected and
-    is subsequently handled by the reliability gate; silently replacing it
-    with a lower-priority source would violate the source-priority contract.
+    therefore skipped. A stale lab result still reaches the reliability gate.
+    Q21 and the separate PAK series share the online-analyser source class:
+    among these two, prefer usable, fresh and then most recent evidence.
     """
 
-    for metric_id in SULFUR_PRIORITY_IDS:
+    lab = _value(values, SULFUR_PRIORITY_IDS[0])
+    if lab is not None:
+        return lab, SULFUR_PRIORITY_IDS[0]
+    analyzers = [mid for mid in ("pak.ht.Mg.Sulfur", "ht.Q21") if _value(values, mid) is not None]
+    if analyzers:
+        def rank(mid):
+            item = values[mid]
+            valid = not set(item.get("flags") or []) & {"invalid", "conflict", "suspect", "flatline", "gap"}
+            return valid, item.get("freshness") == "fresh", str(item.get("timestamp") or "")
+        chosen = max(analyzers, key=rank)
+        return _value(values, chosen), chosen
+    for metric_id in ("vak.ht.Mg.Sulfur",):
         value = _value(values, metric_id)
         if value is not None:
             return value, metric_id
@@ -121,14 +143,15 @@ def _automatic_changes(required_reduction: float, model: ModelParameters) -> Con
     return ControlChanges(temperature=temperature, pressure=pressure, feed_rate_pct=feed_rate)
 
 
-def _response_fraction(minute: int, lag_minutes: int) -> float:
+def _response_fraction(minute: int, lag_minutes: int, dead_time_minutes: int = 0) -> float:
     """Editable ramp assumption, with no intervention effect at the origin."""
-    if minute == 0:
+    if minute <= dead_time_minutes:
         return 0.0
-    return 1.0 if lag_minutes == 0 else min(1.0, minute / lag_minutes)
+    return 1.0 if lag_minutes == 0 else min(1.0, (minute - dead_time_minutes) / lag_minutes)
 
 
-def _blend(request: ScenarioRequest) -> dict | None:
+def _blend(request: ScenarioRequest, *, produced_sulfur: float | None = None,
+           produced_mass: float = 0) -> dict | None:
     if not request.tanks:
         return None
     total = sum(tank.share for tank in request.tanks)
@@ -142,19 +165,46 @@ def _blend(request: ScenarioRequest) -> dict | None:
         raise ValueError(
             f"Суммарная доля резервуаров должна быть равна 100%, сейчас {total:g}%"
         )
+    components = []
+    for tank in request.tanks:
+        available = tank.stock_t
+        sulfur = tank.sulfur
+        if tank.kind == "hydrotreated_batch":
+            available = tank.stock_t + produced_mass
+            if available > 0 and produced_mass > 0:
+                sulfur = (tank.stock_t * tank.sulfur + produced_mass * produced_sulfur) / available
+        required = (request.batch_mass_t * (1-request.additive_pct/100) * tank.share/100
+                    if request.batch_mass_t is not None else None)
+        stock_met = True if tank.share == 0 else available >= required - 1e-8 if available is not None and required is not None else None
+        components.append({**tank.model_dump(), "sulfur": sulfur, "available_t": available,
+                           "required_t": required, "stock_met": stock_met})
     base = {
-        key: sum(getattr(tank, key) * tank.share for tank in request.tanks) / total
+        key: sum(tank[key] * tank["share"] for tank in components) / total
         for key in ("sulfur", "t95", "cetane", "cost_index")
     }
     additive_fraction = request.additive_pct / 100
+    additive_required = request.batch_mass_t * additive_fraction if request.batch_mass_t is not None else None
+    additive_stock_met = (True if additive_fraction == 0 else
+                          request.additive_stock_t >= additive_required - 1e-8
+                          if request.additive_stock_t is not None and additive_required is not None else None)
+    stock_checks = [t["stock_met"] for t in components] + [additive_stock_met]
     result = {
-        "sulfur": base["sulfur"] * (1 - additive_fraction),
-        "t95": base["t95"] * (1 - additive_fraction),
+        "sulfur": (base["sulfur"] * (1 - additive_fraction) + request.parameters.additive_sulfur_mgkg * additive_fraction
+                   if request.parameters.additive_sulfur_mgkg is not None else base["sulfur"]),
+        "t95": base["t95"],
         "cetane": base["cetane"] + request.parameters.cetane_gain_per_pct * request.additive_pct,
         "cost_index": base["cost_index"] * (1 - additive_fraction) + 100 * additive_fraction,
         "normalized_shares": [
             {"name": tank.name, "share": tank.share / total * 100} for tank in request.tanks
         ],
+        "components": components,
+        "stock_constraints_met": (False if any(v is False for v in stock_checks)
+                                  else True if all(v is True for v in stock_checks) else None),
+        "additive_inventory": {"available_t": request.additive_stock_t, "required_t": additive_required, "stock_met": additive_stock_met},
+        "additive_sulfur_assessed": additive_fraction == 0 or request.parameters.additive_sulfur_mgkg is not None,
+        "additive_dose_kg_t": request.additive_pct * 10,
+        "mass_basis": "component mass shares before additive; additive fraction of final batch",
+        "quality_basis": "S mass balance; T95 and cetane are scenario surrogates; no T95 benefit from additive",
     }
     result["meets_targets"] = {
         "sulfur": result["sulfur"] <= min(HARD_SULFUR_MAX, request.targets.sulfur_max),
@@ -181,10 +231,12 @@ def calculate_scenario(directory: Path, request: ScenarioRequest, *, frame: dict
     )
     changes = request.changes
     if changes is None:
-        response = _response_fraction(request.horizon_minutes, request.parameters.lag_minutes)
+        response = _response_fraction(request.horizon_minutes, request.parameters.lag_minutes, request.parameters.dead_time_minutes)
         # Solve for the requested horizon, not for an unreachable steady state.
         # An editable target cannot relax the confirmed product sulphur limit.
         effective_target = min(request.targets.sulfur_max, HARD_SULFUR_MAX)
+        if request.tanks:
+            effective_target = request.intermediate_sulfur_max if request.intermediate_sulfur_max is not None else sulfur + max(0, feed_effect)
         changes = _automatic_changes(
             (sulfur - effective_target) / response + feed_effect if response else 0,
             request.parameters,
@@ -202,7 +254,7 @@ def calculate_scenario(directory: Path, request: ScenarioRequest, *, frame: dict
         minutes.append(request.horizon_minutes)
     trajectory = []
     for minute in minutes:
-        response = _response_fraction(minute, request.parameters.lag_minutes)
+        response = _response_fraction(minute, request.parameters.lag_minutes, request.parameters.dead_time_minutes)
         trajectory.append(
             {
                 "minute": minute,
@@ -232,6 +284,27 @@ def calculate_scenario(directory: Path, request: ScenarioRequest, *, frame: dict
         }
 
     final_sulfur = trajectory[-1]["sulfur"]
+    # Integrate the linear response analytically; changing display step must not change batch chemistry.
+    arriving_duration = max(0, request.horizon_minutes - request.transport_delay_minutes)
+    active = max(0, arriving_duration - request.parameters.dead_time_minutes)
+    ramp = request.parameters.lag_minutes
+    # Clipped sulfur trajectory: integrate piecewise at zero crossings as well.
+    points = sorted(set([0., float(arriving_duration), min(float(arriving_duration), float(request.parameters.dead_time_minutes)),
+                         min(float(arriving_duration), float(request.parameters.dead_time_minutes + ramp))]))
+    if full_effect < 0 and ramp > 0:
+        crossing = request.parameters.dead_time_minutes - sulfur*ramp/full_effect
+        if 0 < crossing < arriving_duration: points.append(crossing); points.sort()
+    def concentration(t):
+        return max(0., sulfur + full_effect * (0 if t <= request.parameters.dead_time_minutes else
+                    1 if ramp == 0 else min(1., (t-request.parameters.dead_time_minutes)/ramp)))
+    if ramp == 0:
+        integral_s = sulfur*(arriving_duration-active) + max(0., sulfur+full_effect)*active
+    else:
+        integral_s = sum((b-a)*(concentration(a)+concentration(b))/2 for a,b in zip(points,points[1:]))
+    produced_sulfur = integral_s / arriving_duration if arriving_duration else sulfur
+    produced_mass = (request.production_rate_tph or 0) * (1+changes.feed_rate_pct/100) * arriving_duration/60
+    blend = _blend(request, produced_sulfur=produced_sulfur, produced_mass=produced_mass)
+    product_sulfur = blend["sulfur"] if blend else final_sulfur
     return {
         "at": request.at,
         "horizon_minutes": request.horizon_minutes,
@@ -240,12 +313,20 @@ def calculate_scenario(directory: Path, request: ScenarioRequest, *, frame: dict
         "controls": controls,
         "predicted_sulfur": final_sulfur,
         "steady_state_sulfur": steady_state_sulfur,
-        "sulfur_target_met": final_sulfur <= request.targets.sulfur_max,
-        "hard_sulfur_limit_met": final_sulfur <= HARD_SULFUR_MAX,
+        "product_sulfur": product_sulfur,
+        "product_route": "blend" if blend else "direct",
+        "model_request": request.model_copy(update={"changes": changes}).model_dump(exclude_none=True),
+        "sulfur_target_met": product_sulfur <= request.targets.sulfur_max,
+        "hard_sulfur_limit_met": product_sulfur <= HARD_SULFUR_MAX,
+        "intermediate_sulfur_limit_met": request.intermediate_sulfur_max is None or final_sulfur <= request.intermediate_sulfur_max,
+        "intermediate_sulfur_max": request.intermediate_sulfur_max,
+        "batch": {"arriving_minutes": arriving_duration, "produced_t": produced_mass,
+                  "produced_sulfur": produced_sulfur, "withdrawal_at_horizon": True},
         "hard_sulfur_max": HARD_SULFUR_MAX,
         "prediction_scope": "horizon_endpoint_surrogate",
         "trajectory": trajectory,
-        "blend": _blend(request),
+        "blend": blend,
+        "applied_recipe": {"tanks": [t.model_dump() for t in request.tanks], "additive_pct": request.additive_pct},
         "assumptions": [
             "Простая линейная сценарная модель, не промышленный оптимизатор.",
             "Коэффициенты чувствительности и пределы изменения являются редактируемыми модельными допущениями.",
@@ -253,5 +334,9 @@ def calculate_scenario(directory: Path, request: ScenarioRequest, *, frame: dict
             "predicted_sulfur соответствует концу выбранного горизонта; steady_state_sulfur — полному условному эффекту. Проверка конечной точки не гарантирует качество на всём переходе.",
             "T95 и цетановое число гидроочистки не прогнозируются: известные базовые значения служат отдельными ограничениями; неизвестные показатели не считаются прошедшими проверку.",
             "Присадка стоит в 100 раз дороже ДТ; её влияние на цетановое число задаётся параметром эффективности.",
+            "Предел 10 мг/кг относится к товарному продукту. Отдельный предел гидроочистки задаётся явно.",
+            "Новая партия полностью перемешивается с запасом перед отбором смеси в конце горизонта; непрерывная отгрузка не моделируется. T95 и цетан новой партии задаются пользователем.",
+            "Выпуск т/ч задаётся отдельно: спорный объёмный расход F15 не используется для массового баланса. Массовый выпуск меняется пропорционально изменению подачи при неизменном условном выходе.",
+            "Дозировка 0–3% — модельный диапазон (0–30 кг/т), не установленный технологический предел. Присадке не приписывается снижение T95.",
         ],
     }

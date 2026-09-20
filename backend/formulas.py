@@ -11,9 +11,7 @@ from pathlib import Path
 from .analytics import snapshot
 from .config import REGISTRY
 
-LIMS_ALIASES = {
-    "LIMS:24-2000.Pipeline.95%.T": ("LIMS_95_T", "lims.ht.2.95%.T"),
-}
+LIMS_ALIASES = {}  # Pipeline sampling point has not been confirmed by the sources.
 
 
 def evaluate_expression(expression: str, inputs: dict[str, float]) -> float:
@@ -101,7 +99,9 @@ def formula_results(directory: Path, at: str) -> dict:
         )
         f.update(inputs=data, substitution=substitution, result=None)
         issues = []
-        if "LIMS:" in expression:
+        if f.get("status") == "unresolved":
+            issues.append("Численный результат заблокирован до разрешения зависимости или версии")
+        elif "LIMS:" in expression:
             f["status"] = "unresolved"
             issues.append(
                 "Не установлено соответствие зависимости LIMS:24-2000.Pipeline лабораторной точке"

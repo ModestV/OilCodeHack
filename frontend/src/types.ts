@@ -184,9 +184,18 @@ export interface ScenarioRequest {
   current_sulfur?: number;
   current_t95?: number;
   current_cetane?: number;
+  batch_mass_t?: number;
+  production_rate_tph?: number;
+  transport_delay_minutes?: number;
+  intermediate_sulfur_max?: number;
+  optimize_economics?: boolean;
+  optimize_recipe?: boolean;
+  minimum_economic_gain?: number;
   targets: { sulfur_max: number; t95_max: number; cetane_min: number };
   parameters: {
     lag_minutes: number;
+    dead_time_minutes?: number;
+    additive_sulfur_mgkg?: number;
     feed_sulfur_transfer: number;
     temperature_effect: number;
     feed_rate_effect: number;
@@ -196,6 +205,8 @@ export interface ScenarioRequest {
   changes?: { temperature: number; feed_rate_pct: number; pressure: number };
   tanks: {
     name: string;
+    kind?: "stored" | "hydrotreated_batch";
+    stock_t?: number;
     share: number;
     sulfur: number;
     t95: number;
@@ -203,6 +214,7 @@ export interface ScenarioRequest {
     cost_index: number;
   }[];
   additive_pct: number;
+  additive_stock_t?: number;
 }
 
 export interface ScenarioResult {
@@ -220,6 +232,10 @@ export interface ScenarioResult {
     }
   >;
   predicted_sulfur: number;
+  product_sulfur?: number;
+  product_route?: "blend" | "direct";
+  model_request?: ScenarioRequest;
+  batch?: { arriving_minutes: number; produced_t: number; produced_sulfur: number };
   steady_state_sulfur: number;
   sulfur_target_met: boolean;
   hard_sulfur_limit_met: boolean;
@@ -232,6 +248,10 @@ export interface ScenarioResult {
     normalized_shares: { name: string; share: number }[];
     meets_targets: { sulfur: boolean; t95: boolean; cetane: boolean };
     all_targets_met: boolean;
+    stock_constraints_met?: boolean | null;
+    additive_sulfur_assessed?: boolean;
+    additive_inventory?: { available_t: number | null; required_t: number | null; stock_met: boolean | null };
+    components?: { name: string; available_t: number | null; required_t: number | null; stock_met: boolean | null }[];
   };
   assumptions: string[];
 }
@@ -282,7 +302,7 @@ export interface DecisionResult {
   agents?: { quality: { evidence: { sulfur: {
     source: string | null; value: number | null; timestamp: string | null;
     available_at: string | null; freshness: string;
-  } } } };
+  }; reactor_pressure_drop?: { value: number | null; unit: string | null; freshness: string; change_from_previous: number | null } } } };
   recommendation: {
     action: string;
     predicted_sulfur: number;
@@ -299,11 +319,13 @@ export interface DecisionResult {
     feasible: boolean;
     reason?: string | null;
     predicted_sulfur?: number;
+    product_sulfur?: number;
     target_met?: boolean;
     effort?: number;
     objectives?: {
       throughput_change_pct: number;
       energy_cost_index: number;
+      blend_cost_index?: number;
       regime_severity: { index: number | null; class?: string };
       ranking_loss: number | null;
     };

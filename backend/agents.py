@@ -119,6 +119,18 @@ class QualityAgent:
                 if supplied is not None
                 else {"source": metric_id, **_evidence(values.get(metric_id))}
             )
+        analyser_rows = [values.get(mid, {}) for mid in ("pak.ht.Mg.Sulfur", "ht.Q21")]
+        comparable = all(item.get("value") is not None and isfinite(item["value"]) and item.get("freshness") == "fresh"
+                         and not UNUSABLE_FLAGS.intersection(item.get("flags") or []) for item in analyser_rows)
+        difference = abs(analyser_rows[0]["value"]-analyser_rows[1]["value"]) if comparable else None
+        comparison = {"ids": ["pak.ht.Mg.Sulfur", "ht.Q21"], "difference_mgkg": difference,
+                      "conflict": difference is not None and difference > 2,
+                      "threshold_mgkg": 2, "basis": "engineering disagreement threshold, not calibrated accuracy"}
+        pressure_drop = {"source": "ht.P8", **_evidence(values.get("ht.P8")),
+                         "unit": values.get("ht.P8", {}).get("unit"),
+                         "change_from_previous": values.get("ht.P8", {}).get("delta"),
+                         "industrial_limit": None, "failure_probability": None,
+                         "interpretation": "Measured reactor pressure drop; limits and failure relation are not identified"}
 
         return {
             "role": self.role,
@@ -136,6 +148,9 @@ class QualityAgent:
                 "available_control_count": len(available_controls),
                 "model_forecast": model_forecast,
                 "other_quality": other_quality,
+                "analyzer_comparison": comparison,
+                "reactor_pressure_drop": pressure_drop,
+                "blend_quality_basis": "user_supplied_scenario_properties" if request.tanks else None,
             },
             "warnings": warnings,
             "missing": missing,
@@ -163,8 +178,13 @@ class ReliabilityAgent:
         if not explicit:
             if not forecast or forecast.get("status") != "ok":
                 reasons.append("Нет допустимого модельного прогноза для решения по наблюдаемым данным")
-            elif forecast.get("alarm_above_10"):
+            elif forecast.get("alarm_above_10") and not context.request.tanks:
                 reasons.append("Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки")
+            if forecast and forecast.get("forecast_horizon_minutes", 180) != context.request.horizon_minutes:
+                reasons.append("Горизонт сценария не совпадает с горизонтом независимой модели; прогноз не подтверждает эту конечную точку")
+        analyzers = quality.get("evidence", {}).get("analyzer_comparison", {})
+        if not explicit and analyzers.get("conflict"):
+            reasons.append("Свежие поточные анализаторы серы расходятся; требуется проверка источников")
         can_recommend = not reasons
         severity = regime_severity({key: item.get("value") for key, item in quality["evidence"]["controls"].items()})
         # Compatibility field only: this is a gate score, not a calibrated
@@ -222,17 +242,44 @@ class OptimizationAgent:
             if not passed:
                 reasons.append(reason)
 
-        check("sulfur_hard_limit", scenario["predicted_sulfur"] <= HARD_SULFUR_MAX,
+        check("sulfur_hard_limit", scenario["product_sulfur"] <= HARD_SULFUR_MAX,
               "Сера в конце горизонта превышает обязательный предел 10 мг/кг", "confirmed_10_mg_kg")
         check("sulfur_editable_target", scenario["sulfur_target_met"],
               "Цель по сере не достигнута в выбранном горизонте", "editable_target")
         blend = scenario.get("blend")
+        check("intermediate_sulfur_limit", scenario["intermediate_sulfur_limit_met"],
+              "Нарушен отдельно заданный предел гидроочистки", "explicit_intermediate_limit")
         if blend is not None:
+            if not any(t.kind == "hydrotreated_batch" for t in request.tanks):
+                check("stored_blend_controls", all(c["change"] == 0 for c in scenario["controls"].values()),
+                      "Изменение гидроочистки не связано с запасённой смесью; задайте поступление новой партии",
+                      "no_upstream_control_credit_for_stored_inventory")
             check("blend_sulfur_hard_limit", blend["sulfur"] <= HARD_SULFUR_MAX,
                   "Расчётная сера смеси превышает обязательный предел 10 мг/кг", "confirmed_10_mg_kg")
             for name, passed in blend["meets_targets"].items():
                 check(f"blend_{name}_target", passed,
                       f"Смесь не выполняет ограничение {name}", "editable_blend_surrogate")
+            check("blend_stock", blend["stock_constraints_met"] is not False,
+                  "Недостаточно запаса компонента для массы партии", "component_mass_inventory")
+            if blend["stock_constraints_met"] is None:
+                checks.append({"name": "blend_stock_assessed", "passed": None, "basis": "missing_batch_mass_or_stock"})
+                if reliability.get("basis") != "scenario_only":
+                    reasons.append("Не заданы масса партии или запасы; доступность смеси не подтверждена")
+            check("additive_sulfur_assessed", blend["additive_sulfur_assessed"],
+                  "Не задано содержание серы в присадке", "explicit_additive_composition")
+            # Keep the independent warning. Propagate it through the same mass balance,
+            # without crediting an unvalidated beneficial control response.
+            forecast = quality.get("evidence", {}).get("model_forecast") or {}
+            if reliability.get("basis") != "scenario_only" and any(t.kind == "hydrotreated_batch" for t in request.tanks):
+                guard = forecast.get("prediction_risk_guard", forecast.get("prediction_ridge"))
+                if guard is None:
+                    check("blend_forecast_guard", False, "Нет независимой оценки качества поступающей партии", "forecast_mass_balance")
+                else:
+                    from .scenarios import _blend
+                    worst = max(float(guard), scenario["baseline"]["sulfur"], scenario["batch"]["produced_sulfur"])
+                    guard_blend = _blend(request, produced_sulfur=worst, produced_mass=scenario["batch"]["produced_t"])
+                    check("blend_forecast_guard", guard_blend["sulfur"] <= min(HARD_SULFUR_MAX, request.targets.sulfur_max),
+                          "Независимая оценка поступающей партии нарушает предел конечной смеси", "heuristic_guard_not_probability")
         else:
             # The hydro-treatment surrogate has no validated T95/cetane effect.
             # Known off-spec values must not be declared remedied by lowering S.
@@ -299,10 +346,36 @@ class OptimizationAgent:
         ]
         if request.changes is not None:
             definitions.append(("requested", "Изменение, заданное пользователем", request.changes))
+        if request.optimize_economics:
+            definitions.extend([
+                ("lower_heat", "Снизить нагрев на 2 °C", ControlChanges(temperature=-2)),
+                ("more_feed", "Увеличить подачу на 2%", ControlChanges(feed_rate_pct=2)),
+                ("lower_pressure", "Снизить давление на 0,1 МПа", ControlChanges(pressure=-.1)),
+            ])
+        if request.tanks and not any(t.kind == "hydrotreated_batch" for t in request.tanks):
+            definitions = [item for item in definitions if item[0] in {"hold", "requested"}]
+        recipes = [("", request.tanks, request.additive_pct)]
+        if request.optimize_recipe and request.tanks:
+            # Local, bounded recipe alternatives; shares remain exactly normalized.
+            for donor in range(len(request.tanks)):
+                for receiver in range(len(request.tanks)):
+                    if donor == receiver or request.tanks[donor].share < 5:
+                        continue
+                    tanks = [t.model_copy(deep=True) for t in request.tanks]
+                    tanks[donor].share -= 5; tanks[receiver].share += 5
+                    recipes.append((f"_mix{donor}_{receiver}", tanks, request.additive_pct))
+            for dose in sorted({0., max(0., request.additive_pct-.25), min(3., request.additive_pct+.25)}):
+                if dose != request.additive_pct:
+                    recipes.append((f"_dose{dose:g}", request.tanks, dose))
         candidates = []
-        for candidate_id, label, changes in definitions:
+        combinations = [(i+s, label+(f"; доли {'/'.join(f'{t.share:g}' for t in tanks)}%, присадка {dose*10:g} кг/т" if s else ""), changes, tanks, dose)
+                        for i,label,changes in definitions for s,tanks,dose in recipes]
+        for candidate_id, label, changes, tanks, dose in combinations:
             candidate_request = request.model_copy(deep=True)
             candidate_request.changes = changes
+            candidate_request.tanks = tanks
+            candidate_request.additive_pct = dose
+            candidate_context = AgentContext(context.directory, candidate_request, context.frame)
             try:
                 scenario = calculate_scenario(context.directory, candidate_request, frame=context.frame)
             except ValueError as exc:
@@ -320,7 +393,7 @@ class OptimizationAgent:
                 continue
             target_met = bool(scenario["sulfur_target_met"])
             effort = self._effort(changes)
-            gate = self._gate(scenario, context, reliability, quality)
+            gate = self._gate(scenario, candidate_context, reliability, quality)
             objectives = candidate_objectives(scenario, effort)
             severity = objectives["regime_severity"]
             severity_passed = severity.get("status") == "ok" and severity.get("within_model_limit") is True
@@ -337,6 +410,7 @@ class OptimizationAgent:
                     "feasible": gate["passed"],
                     "reason": None if gate["passed"] else "; ".join(gate["reasons"]),
                     "predicted_sulfur": scenario["predicted_sulfur"],
+                    "product_sulfur": scenario["product_sulfur"],
                     "steady_state_sulfur": scenario["steady_state_sulfur"],
                     "target_met": target_met,
                     "effort": effort,
@@ -346,8 +420,8 @@ class OptimizationAgent:
                     "scenario": scenario,
                 }
             )
-        # Feasible candidates win first; among them prefer the smallest
-        # intervention and then the lowest predicted sulfur. Failed candidates
+        # Feasible candidates win first; rank by the declared multi-objective
+        # loss, then intervention and final product sulfur. Failed candidates
         # remain diagnostic evidence; none is eligible for a recommendation.
         feasible = [item for item in candidates if item.get("feasible", False)]
         infeasible = [item for item in candidates if not item.get("feasible", False)]
@@ -355,14 +429,17 @@ class OptimizationAgent:
             key=lambda item: (
                 item["objectives"]["ranking_loss"],
                 item.get("effort", float("inf")),
-                item.get("predicted_sulfur", float("inf")),
+                item.get("product_sulfur", float("inf")),
             )
         )
+        hold = next((item for item in feasible if item["id"] == "hold"), None)
+        if hold and feasible and hold["objectives"]["ranking_loss"] - feasible[0]["objectives"]["ranking_loss"] < request.minimum_economic_gain:
+            feasible.remove(hold); feasible.insert(0, hold)
         # When the target is unreachable, show the lowest predicted quality
         # first so the operator can see the strongest escalation candidate.
         infeasible.sort(
             key=lambda item: (
-                item.get("predicted_sulfur", float("inf")),
+                item.get("product_sulfur", float("inf")),
                 item.get("effort", float("inf")),
             )
         )
@@ -412,7 +489,7 @@ class OptimizationAgent:
                 "scenario": None,
             }
         result = selected["scenario"]
-        predicted = result["predicted_sulfur"]
+        predicted = result["product_sulfur"]
         target = result["sulfur_target_met"]
         model_forecast = (quality or {}).get("evidence", {}).get("model_forecast")
         summary = (
@@ -442,6 +519,8 @@ class OptimizationAgent:
                 "target_sulfur": context.request.targets.sulfur_max,
                 "target_met": target,
                 "controls": result["controls"],
+                "product_route": result["product_route"],
+                "applied_recipe": result["applied_recipe"],
                 "candidate_id": selected["id"],
                 "objectives": selected["objectives"],
                 "model_forecast": model_forecast,

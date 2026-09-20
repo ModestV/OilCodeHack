@@ -2440,6 +2440,20 @@ select:focus-visible {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px 24px;
 }
+.scenario-fields label.scenario-toggle {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+.scenario-fields label.scenario-toggle input {
+  width: 20px;
+  height: 20px;
+  min-height: 20px;
+  padding: 0;
+  flex: 0 0 20px;
+  margin: 0;
+}
 .scenario-fields label,
 .picker-row label,
 .support-dates label {

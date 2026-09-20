@@ -1,0 +1,3510 @@
+{
+  "protocol": "Frozen 2026 LIMS origins, +180min, no manual quality, direct product, default controls and fixed freshness. Diagnostic replay only.",
+  "input_sha256": "9a6d9b644a2b1ddce0da27e816aad31654ea9aaf306f29865bb14503973db37b",
+  "origins_sha256": "b7bae7b2270da3e4bbd110b4fcbdeba7d4a455e6a4210bd2126183e14ef3b463",
+  "model_sha256": "93c2f3875d224d59ea9b6c0ecd63cac8150f49725d30fdc84c8ccbbfcff972ee",
+  "script_sha256": "58762da0d34321eb3c8e3ec5c6f370d6d4827bfbd8a678784e3197a0710115c4",
+  "n": 253,
+  "recommendations": 9,
+  "forecast_accepted": 214,
+  "fresh_cetane": 11,
+  "fresh_t95": 246,
+  "analyzer_conflicts": 15,
+  "reason_counts": {
+    "cetane: измерение не свежее (stale)": 242,
+    "Свежие поточные анализаторы серы расходятся; требуется проверка источников": 15,
+    "Нет допустимого модельного прогноза для решения по наблюдаемым данным": 39,
+    "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки": 24,
+    "Сера в конце горизонта превышает обязательный предел 10 мг/кг": 38,
+    "Цель по сере не достигнута в выбранном горизонте": 38,
+    "Базовый показатель t95 не выполняет ограничение; его отклик не моделируется": 15,
+    "Базовая сера: измерение не свежее (stale)": 4,
+    "t95: измерение не свежее (stale)": 7,
+    "Базовый показатель cetane не выполняет ограничение; его отклик не моделируется": 19,
+    "ht.F9: измерение не свежее (stale)": 4,
+    "ht.T6: измерение не свежее (stale)": 4,
+    "ht.P13: измерение не свежее (stale)": 4
+  },
+  "rows": [
+    {
+      "at": "2026-01-01 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-01-02 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-01-03 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-01-03 11:58:15",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-01-04 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-01-04 15:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-01-05 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-01-05 19:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-01-06 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-01-06 13:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-01-07 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-01-08 07:00:00",
+      "status": "recommendation",
+      "selected": "more_feed",
+      "forecast_status": "ok",
+      "cetane_fresh": true,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": []
+    },
+    {
+      "at": "2026-01-09 15:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": true,
+      "reasons": [
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "Свежие поточные анализаторы серы расходятся; требуется проверка источников",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-01-09 18:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": true,
+      "reasons": [
+        "Свежие поточные анализаторы серы расходятся; требуется проверка источников",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-01-10 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-01-11 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-01-12 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": true,
+      "reasons": [
+        "Свежие поточные анализаторы серы расходятся; требуется проверка источников",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-01-12 13:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": true,
+      "reasons": [
+        "Свежие поточные анализаторы серы расходятся; требуется проверка источников",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-01-13 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-01-13 19:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-01-14 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки",
+        "cetane: измерение не свежее (stale)",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте"
+      ]
+    },
+    {
+      "at": "2026-01-15 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": true,
+      "reasons": [
+        "Свежие поточные анализаторы серы расходятся; требуется проверка источников",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-01-16 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-01-17 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-01-18 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте"
+      ]
+    },
+    {
+      "at": "2026-01-18 11:30:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": true,
+      "reasons": [
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "Свежие поточные анализаторы серы расходятся; требуется проверка источников",
+        "cetane: измерение не свежее (stale)",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте"
+      ]
+    },
+    {
+      "at": "2026-01-18 19:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-01-19 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-01-19 14:44:10",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-01-19 19:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-01-20 02:30:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте"
+      ]
+    },
+    {
+      "at": "2026-01-20 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте"
+      ]
+    },
+    {
+      "at": "2026-01-21 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-01-22 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте"
+      ]
+    },
+    {
+      "at": "2026-01-23 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-01-24 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": true,
+      "reasons": [
+        "Свежие поточные анализаторы серы расходятся; требуется проверка источников",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-01-25 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-01-26 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-01-27 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-01-28 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-01-29 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": true,
+      "reasons": [
+        "Свежие поточные анализаторы серы расходятся; требуется проверка источников",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-01-30 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-01-31 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-02-01 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": true,
+      "reasons": [
+        "Свежие поточные анализаторы серы расходятся; требуется проверка источников",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-02-02 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": true,
+      "reasons": [
+        "Свежие поточные анализаторы серы расходятся; требуется проверка источников",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-02-03 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": true,
+      "reasons": [
+        "Свежие поточные анализаторы серы расходятся; требуется проверка источников",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-02-04 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": true,
+      "reasons": [
+        "Свежие поточные анализаторы серы расходятся; требуется проверка источников",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-02-05 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-02-06 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-02-07 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-02-08 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-02-09 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте"
+      ]
+    },
+    {
+      "at": "2026-02-10 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки",
+        "cetane: измерение не свежее (stale)",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте"
+      ]
+    },
+    {
+      "at": "2026-02-11 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-02-12 07:00:00",
+      "status": "recommendation",
+      "selected": "more_feed",
+      "forecast_status": "ok",
+      "cetane_fresh": true,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": []
+    },
+    {
+      "at": "2026-02-13 07:00:00",
+      "status": "recommendation",
+      "selected": "more_feed",
+      "forecast_status": "ok",
+      "cetane_fresh": true,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": []
+    },
+    {
+      "at": "2026-02-14 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-02-15 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-02-16 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-02-17 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-02-18 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-02-19 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-02-20 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-02-21 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-02-22 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-02-23 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-02-24 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки",
+        "cetane: измерение не свежее (stale)",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте"
+      ]
+    },
+    {
+      "at": "2026-02-25 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-02-26 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-02-27 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-02-28 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-03-01 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-03-02 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте"
+      ]
+    },
+    {
+      "at": "2026-03-03 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-03-04 10:30:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки",
+        "cetane: измерение не свежее (stale)",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте"
+      ]
+    },
+    {
+      "at": "2026-03-04 13:30:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки",
+        "cetane: измерение не свежее (stale)",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте"
+      ]
+    },
+    {
+      "at": "2026-03-05 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-03-06 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-03-07 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-03-08 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-03-09 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-03-10 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-03-10 19:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-03-11 11:30:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-03-12 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-03-13 07:00:00",
+      "status": "recommendation",
+      "selected": "more_feed",
+      "forecast_status": "ok",
+      "cetane_fresh": true,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": []
+    },
+    {
+      "at": "2026-03-14 07:00:00",
+      "status": "recommendation",
+      "selected": "more_feed",
+      "forecast_status": "ok",
+      "cetane_fresh": true,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": []
+    },
+    {
+      "at": "2026-03-15 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-03-15 12:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": true,
+      "reasons": [
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "Свежие поточные анализаторы серы расходятся; требуется проверка источников",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-03-15 19:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-03-16 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-03-16 19:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-03-17 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-03-17 13:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-03-17 19:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-03-19 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-03-20 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-03-21 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-03-22 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-03-23 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-03-24 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-03-25 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-03-26 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-03-27 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-03-28 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-03-29 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-03-30 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-03-31 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-04-01 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-04-02 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте"
+      ]
+    },
+    {
+      "at": "2026-04-03 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-04-04 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-04-04 13:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-04-05 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-04-06 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Базовый показатель t95 не выполняет ограничение; его отклик не моделируется",
+        "cetane: измерение не свежее (stale)",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте"
+      ]
+    },
+    {
+      "at": "2026-04-07 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-04-08 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-04-09 00:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-04-09 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-04-09 23:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-04-10 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-04-11 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-04-12 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-04-13 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-04-14 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-04-27 12:30:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": false,
+      "sulfur_fresh": false,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Базовая сера: измерение не свежее (stale)",
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "t95: измерение не свежее (stale)",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-04-27 14:30:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": false,
+      "sulfur_fresh": false,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Базовая сера: измерение не свежее (stale)",
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "t95: измерение не свежее (stale)",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-04-27 19:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": false,
+      "sulfur_fresh": false,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Базовая сера: измерение не свежее (stale)",
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "t95: измерение не свежее (stale)",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-04-28 03:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": false,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "t95: измерение не свежее (stale)",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-04-28 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": false,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "t95: измерение не свежее (stale)",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-04-28 19:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-04-29 03:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-04-29 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-04-29 17:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-04-30 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки",
+        "cetane: измерение не свежее (stale)",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте"
+      ]
+    },
+    {
+      "at": "2026-04-30 13:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки",
+        "cetane: измерение не свежее (stale)",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте"
+      ]
+    },
+    {
+      "at": "2026-04-30 17:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-05-01 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-05-02 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-05-03 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-05-04 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-05-04 11:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-05-04 13:30:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-05-04 21:01:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-05-05 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-05-07 06:30:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-05-08 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-05-08 20:50:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-05-09 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-05-09 15:30:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-05-09 19:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-05-10 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-05-11 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-05-12 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-05-12 15:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте"
+      ]
+    },
+    {
+      "at": "2026-05-13 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-05-14 00:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-05-14 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-05-15 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-05-15 12:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-05-16 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-05-18 08:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": true,
+      "reasons": [
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "Свежие поточные анализаторы серы расходятся; требуется проверка источников",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-05-19 08:30:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-05-20 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-05-20 13:30:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-05-21 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-05-22 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте"
+      ]
+    },
+    {
+      "at": "2026-05-22 09:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте"
+      ]
+    },
+    {
+      "at": "2026-05-23 06:35:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-05-24 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки",
+        "cetane: измерение не свежее (stale)",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте"
+      ]
+    },
+    {
+      "at": "2026-05-25 02:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-05-25 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-05-25 11:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки",
+        "cetane: измерение не свежее (stale)",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте"
+      ]
+    },
+    {
+      "at": "2026-05-26 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": true,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте"
+      ]
+    },
+    {
+      "at": "2026-05-27 02:00:00",
+      "status": "recommendation",
+      "selected": "more_feed",
+      "forecast_status": "ok",
+      "cetane_fresh": true,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": []
+    },
+    {
+      "at": "2026-05-27 07:00:00",
+      "status": "recommendation",
+      "selected": "more_feed",
+      "forecast_status": "ok",
+      "cetane_fresh": true,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": []
+    },
+    {
+      "at": "2026-05-28 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-05-29 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-05-30 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-05-31 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-06-01 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-06-02 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте"
+      ]
+    },
+    {
+      "at": "2026-06-03 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-06-03 17:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Базовый показатель t95 не выполняет ограничение; его отклик не моделируется",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-06-04 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Базовый показатель t95 не выполняет ограничение; его отклик не моделируется",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-06-05 07:00:00",
+      "status": "recommendation",
+      "selected": "more_feed",
+      "forecast_status": "ok",
+      "cetane_fresh": true,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": []
+    },
+    {
+      "at": "2026-06-06 07:00:00",
+      "status": "recommendation",
+      "selected": "more_feed",
+      "forecast_status": "ok",
+      "cetane_fresh": true,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": []
+    },
+    {
+      "at": "2026-06-07 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки",
+        "cetane: измерение не свежее (stale)",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте"
+      ]
+    },
+    {
+      "at": "2026-06-07 13:15:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки",
+        "cetane: измерение не свежее (stale)",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте"
+      ]
+    },
+    {
+      "at": "2026-06-08 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки",
+        "cetane: измерение не свежее (stale)",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте"
+      ]
+    },
+    {
+      "at": "2026-06-08 14:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Базовый показатель t95 не выполняет ограничение; его отклик не моделируется",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-06-08 19:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Базовый показатель t95 не выполняет ограничение; его отклик не моделируется",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-06-09 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-06-09 14:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-06-10 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-06-10 11:30:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-06-11 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-06-12 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-06-13 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-06-14 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Базовый показатель t95 не выполняет ограничение; его отклик не моделируется",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-06-15 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-06-16 01:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-06-17 06:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": true,
+      "reasons": [
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "Свежие поточные анализаторы серы расходятся; требуется проверка источников",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-06-17 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-06-17 11:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": false,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "t95: измерение не свежее (stale)",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-06-17 19:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-07-02 09:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": false,
+      "sulfur_fresh": false,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Базовая сера: измерение не свежее (stale)",
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "t95: измерение не свежее (stale)",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-07-02 17:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "Базовый показатель t95 не выполняет ограничение; его отклик не моделируется",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-07-03 10:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "Базовый показатель t95 не выполняет ограничение; его отклик не моделируется",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-07-03 15:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "Базовый показатель t95 не выполняет ограничение; его отклик не моделируется",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-07-03 18:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "Базовый показатель t95 не выполняет ограничение; его отклик не моделируется",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-07-03 21:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "Базовый показатель t95 не выполняет ограничение; его отклик не моделируется",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-07-04 01:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте",
+        "Базовый показатель t95 не выполняет ограничение; его отклик не моделируется",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-07-04 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "Базовый показатель t95 не выполняет ограничение; его отклик не моделируется",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-07-05 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-07-06 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-07-07 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-07-08 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-07-09 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-07-10 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-07-11 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-07-12 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-07-12 11:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-07-13 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-07-14 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-07-15 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-07-16 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки",
+        "cetane: измерение не свежее (stale)",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте"
+      ]
+    },
+    {
+      "at": "2026-07-17 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки",
+        "cetane: измерение не свежее (stale)",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте"
+      ]
+    },
+    {
+      "at": "2026-07-18 02:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-07-18 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-07-18 19:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте",
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-07-19 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки",
+        "cetane: измерение не свежее (stale)",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте"
+      ]
+    },
+    {
+      "at": "2026-07-20 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)"
+      ]
+    },
+    {
+      "at": "2026-07-21 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки",
+        "Базовый показатель t95 не выполняет ограничение; его отклик не моделируется",
+        "cetane: измерение не свежее (stale)",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте"
+      ]
+    },
+    {
+      "at": "2026-07-23 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": true,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Базовый показатель cetane не выполняет ограничение; его отклик не моделируется"
+      ]
+    },
+    {
+      "at": "2026-07-24 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)",
+        "Базовый показатель cetane не выполняет ограничение; его отклик не моделируется"
+      ]
+    },
+    {
+      "at": "2026-07-25 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)",
+        "Базовый показатель cetane не выполняет ограничение; его отклик не моделируется"
+      ]
+    },
+    {
+      "at": "2026-07-26 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)",
+        "Базовый показатель cetane не выполняет ограничение; его отклик не моделируется"
+      ]
+    },
+    {
+      "at": "2026-07-27 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)",
+        "Базовый показатель cetane не выполняет ограничение; его отклик не моделируется",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте"
+      ]
+    },
+    {
+      "at": "2026-07-28 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки",
+        "cetane: измерение не свежее (stale)",
+        "Базовый показатель cetane не выполняет ограничение; его отклик не моделируется",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте"
+      ]
+    },
+    {
+      "at": "2026-07-29 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)",
+        "Базовый показатель cetane не выполняет ограничение; его отклик не моделируется"
+      ]
+    },
+    {
+      "at": "2026-07-30 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)",
+        "Базовый показатель cetane не выполняет ограничение; его отклик не моделируется"
+      ]
+    },
+    {
+      "at": "2026-07-31 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)",
+        "Базовый показатель cetane не выполняет ограничение; его отклик не моделируется"
+      ]
+    },
+    {
+      "at": "2026-08-01 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)",
+        "Базовый показатель cetane не выполняет ограничение; его отклик не моделируется"
+      ]
+    },
+    {
+      "at": "2026-08-02 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)",
+        "Базовый показатель cetane не выполняет ограничение; его отклик не моделируется"
+      ]
+    },
+    {
+      "at": "2026-08-03 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки",
+        "cetane: измерение не свежее (stale)",
+        "Базовый показатель cetane не выполняет ограничение; его отклик не моделируется",
+        "Сера в конце горизонта превышает обязательный предел 10 мг/кг",
+        "Цель по сере не достигнута в выбранном горизонте"
+      ]
+    },
+    {
+      "at": "2026-08-04 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)",
+        "Базовый показатель cetane не выполняет ограничение; его отклик не моделируется"
+      ]
+    },
+    {
+      "at": "2026-08-05 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)",
+        "Базовый показатель cetane не выполняет ограничение; его отклик не моделируется"
+      ]
+    },
+    {
+      "at": "2026-08-06 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "ok",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "cetane: измерение не свежее (stale)",
+        "Базовый показатель cetane не выполняет ограничение; его отклик не моделируется"
+      ]
+    },
+    {
+      "at": "2026-08-07 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "ht.T6: измерение не свежее (stale)",
+        "ht.F9: измерение не свежее (stale)",
+        "ht.P13: измерение не свежее (stale)",
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "cetane: измерение не свежее (stale)",
+        "Базовый показатель cetane не выполняет ограничение; его отклик не моделируется"
+      ]
+    },
+    {
+      "at": "2026-08-07 10:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "ht.T6: измерение не свежее (stale)",
+        "ht.F9: измерение не свежее (stale)",
+        "ht.P13: измерение не свежее (stale)",
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "cetane: измерение не свежее (stale)",
+        "Базовый показатель cetane не выполняет ограничение; его отклик не моделируется"
+      ]
+    },
+    {
+      "at": "2026-08-08 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "ht.T6: измерение не свежее (stale)",
+        "ht.F9: измерение не свежее (stale)",
+        "ht.P13: измерение не свежее (stale)",
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "Базовый показатель t95 не выполняет ограничение; его отклик не моделируется",
+        "cetane: измерение не свежее (stale)",
+        "Базовый показатель cetane не выполняет ограничение; его отклик не моделируется"
+      ]
+    },
+    {
+      "at": "2026-08-09 07:00:00",
+      "status": "abstain",
+      "selected": null,
+      "forecast_status": "abstain",
+      "cetane_fresh": false,
+      "t95_fresh": true,
+      "sulfur_fresh": true,
+      "analyzer_conflict": false,
+      "reasons": [
+        "ht.T6: измерение не свежее (stale)",
+        "ht.F9: измерение не свежее (stale)",
+        "ht.P13: измерение не свежее (stale)",
+        "Нет допустимого модельного прогноза для решения по наблюдаемым данным",
+        "cetane: измерение не свежее (stale)",
+        "Базовый показатель cetane не выполняет ограничение; его отклик не моделируется"
+      ]
+    }
+  ]
+}

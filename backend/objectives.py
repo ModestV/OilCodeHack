@@ -45,9 +45,13 @@ def candidate_objectives(scenario: dict, effort: float) -> dict:
     # This is a configured preference, never a permission to violate quality.
     loss = (0.5 * (1 - throughput) / .10 + .25 * (energy - 1) / .25
             + .25 * severity["index"] + .05 * effort) if severity["index"] is not None else None
+    blend_cost = scenario["blend"]["cost_index"] if scenario.get("blend") else 1.
+    if loss is not None:
+        loss += .25 * (blend_cost - 1)
     return {"throughput_index": throughput, "throughput_change_pct": feed_pct,
             "energy_cost_index": energy, "regime_severity": severity,
             "ranking_loss": loss,
-            "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort",
+            "blend_cost_index": blend_cost,
+            "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.25*(blend_cost-1)",
             "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units",
             "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"}

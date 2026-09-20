@@ -27,6 +27,7 @@ def evidence(monkeypatch):
 
 
 def decide(tmp_path, **kwargs):
+    kwargs.setdefault("optimize_economics", False)
     return agents.make_decision(tmp_path, ScenarioRequest(at=AT, **kwargs))
 
 
@@ -156,7 +157,7 @@ def test_invalid_recipe_retains_each_candidate_error(tmp_path, evidence):
         {"name": "A", "share": 90, "sulfur": 8, "t95": 350, "cetane": 52},
     ])
     assert result["status"] == "abstain"
-    assert len(result["candidates"]) == 3
+    assert len(result["candidates"]) == 1  # Stored-only blend has no linked reactor intervention.
     assert all(item["status"] == "error" for item in result["candidates"])
     assert "100%" in result["safety_gate"]["reasons"][0]
 
