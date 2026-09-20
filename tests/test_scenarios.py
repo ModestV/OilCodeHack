@@ -128,12 +128,19 @@ def test_stale_quality_is_hard_gate_even_with_good_controls(tmp_path, evidence):
 
 
 def test_normal_observed_decision_has_forecast_basis_and_requires_review(tmp_path, evidence):
-    result = decide(tmp_path)
+    result = decide(tmp_path, current_t95=350, current_cetane=52)
     assert result["status"] == "recommendation"
     assert result["basis"] == "observed_and_forecast"
     assert result["selected_candidate"] == "hold"
     assert result["recommendation"]["requires_operator_review"] is True
     assert result["safety_gate"]["operational_safety_validated"] is False
+
+
+def test_missing_other_quality_blocks_observed_recommendation(tmp_path, evidence):
+    result = decide(tmp_path)
+    assert result["status"] == "abstain"
+    assert result["recommendation"] is None
+    assert "Нет обязательного показателя качества" in " ".join(result["safety_gate"]["reasons"])
 
 
 @pytest.mark.parametrize("quality", [{"current_t95": 370}, {"current_cetane": 49}])

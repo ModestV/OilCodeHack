@@ -241,6 +241,8 @@ class OptimizationAgent:
                 value = item.get("value")
                 if value is None:
                     checks.append({"name": name, "passed": None, "basis": "not_assessed_missing_quality_evidence"})
+                    if reliability.get("basis") != "scenario_only":
+                        reasons.append(f"Нет обязательного показателя качества {name}; допустимость наблюдаемого режима не подтверждена")
                     continue
                 if not item.get("source", "").startswith("request."):
                     failures = _evidence_failures(name, item, request.at)

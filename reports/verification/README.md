@@ -11,7 +11,7 @@
 - `deploy.json`: GitHub Actions run [35484733521](https://github.com/ModestV/OilCodeHack/actions/runs/35484733521), все шаги успешны, включая SSH, rsync, restart и публичную проверку SHA.
 - `../modeling/sulfur-first-iteration/REPORT.md`, `metrics.json`, `predictions.csv`, `model.json`: временная валидация, область применимости, артефакт инференса и поштучные результаты.
 
-Локальные проверки: **65 pytest**, **5 modeling unittest**, **11 frontend tests**, TypeScript и production build. CI повторяет эти команды на Python 3.12 / Node 22.12. Проверки не подменяют оценку точности и не подтверждают промышленную безопасность.
+Локальные проверки: **66 pytest**, **5 modeling unittest**, **11 frontend tests**, TypeScript и production build. CI повторяет эти команды на Python 3.12 / Node 22.12. Проверки не подменяют оценку точности и не подтверждают промышленную безопасность.
 
 ## Матрица задания и прямых доказательств
 
