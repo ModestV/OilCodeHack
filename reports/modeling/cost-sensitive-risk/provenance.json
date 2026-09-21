@@ -1,0 +1,16 @@
+{
+  "protocol_sha256": "108f81452eb2d2f9addc0f90c786bc620166c4c78ddd84a1d498c214a1494110",
+  "script_sha256": "3c6ca3e6df40747ea1f115f7fad8ce8199b4745aa51f11674d5459c3e80e817a",
+  "cache_sha256": "c77f03c272e2055978bb5a84def2adf19c9d0e00dff02382c5c7b24f50f1e166",
+  "observations_sha256": "9a6d9b644a2b1ddce0da27e816aad31654ea9aaf306f29865bb14503973db37b",
+  "source_parity_sha256": "71cfb1388b39a084f1221939ade9590ff65b51e49f3cc086dc043fd2534f281e",
+  "active_model_sha256": "deed6ff7941fc4b0460b970371ebf8c1dc8ee5cf272dc1afe9f582726d20efb5",
+  "dependency_sha256": {
+    "anchored_risk.py": "8a31e592c1778d3e44ded3ded8f26dd37ddf6ad7074ca467d519e20c65a3b0fd",
+    "anchored_challengers.py": "303aea83bfa56ee657ec5366228874b945d5abab6dedfb05fcfbc9b73f022534",
+    "anchored_features.py": "0f271456b6f637897c367cbb4c3157ec569ab0d87c4fd6016148e20049b36403",
+    "sulfur_forecast.py": "c159845ebb631c318cfb380a4bcc73edc6779feab9ce70ddc67f43eb49cf82a4"
+  },
+  "costs_are_assumptions": true,
+  "runtime_changed": false
+}
