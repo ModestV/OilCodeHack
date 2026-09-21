@@ -1,0 +1,8 @@
+{
+  "observations_sha256": "9a6d9b644a2b1ddce0da27e816aad31654ea9aaf306f29865bb14503973db37b",
+  "protocol_sha256": "da0a835623a05f97f8da9a7d13e78c1246dd55e1e332b823ddbee5c1577de0f7",
+  "script_sha256": "2c7d0167f8a83aae07e5aa2c3c73a7aaf0bfa22cf7b58b0e240498a5b0001e0d",
+  "origins_sha256": "b7bae7b2270da3e4bbd110b4fcbdeba7d4a455e6a4210bd2126183e14ef3b463",
+  "ridge_module_sha256": "c159845ebb631c318cfb380a4bcc73edc6779feab9ce70ddc67f43eb49cf82a4",
+  "runtime_changed": false
+}

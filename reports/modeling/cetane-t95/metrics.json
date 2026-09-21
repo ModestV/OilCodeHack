@@ -1,0 +1,1498 @@
+{
+  "2025_cetane_h0": {
+    "total": 11,
+    "common_n": 4,
+    "native": {
+      "previous": {
+        "n": 10,
+        "mae": 0.8799995422363281,
+        "rmse": 1.090870896740607,
+        "bias": 0.01999969482421875,
+        "violations": 0,
+        "detected": 0,
+        "missed": 0,
+        "false_alarms": 0
+      },
+      "median3": {
+        "n": 10,
+        "mae": 1.119999313354492,
+        "rmse": 1.270432408528416,
+        "bias": 0.12000007629394531,
+        "violations": 0,
+        "detected": 0,
+        "missed": 0,
+        "false_alarms": 0
+      },
+      "ridge1": {
+        "n": 4,
+        "mae": 2.384841656069778,
+        "rmse": 2.5167948126813333,
+        "bias": 2.384841656069778,
+        "violations": 0,
+        "detected": 0,
+        "missed": 0,
+        "false_alarms": 0
+      },
+      "ridge10": {
+        "n": 4,
+        "mae": 2.4122888282997597,
+        "rmse": 2.560742830171161,
+        "bias": 2.4122888282997597,
+        "violations": 0,
+        "detected": 0,
+        "missed": 0,
+        "false_alarms": 0
+      },
+      "ridge100": {
+        "n": 4,
+        "mae": 2.4394544281581254,
+        "rmse": 2.5082282326281997,
+        "bias": 2.4394544281581254,
+        "violations": 0,
+        "detected": 0,
+        "missed": 0,
+        "false_alarms": 0
+      },
+      "index": {
+        "n": 5,
+        "mae": 1.423003932651295,
+        "rmse": 1.455144021616191,
+        "bias": 0.8812818134613053,
+        "violations": 0,
+        "detected": 0,
+        "missed": 0,
+        "false_alarms": 0
+      },
+      "index_offset": {
+        "n": 5,
+        "mae": 3.0080879093823456,
+        "rmse": 3.2232560182957766,
+        "bias": 3.0080879093823456,
+        "violations": 0,
+        "detected": 0,
+        "missed": 0,
+        "false_alarms": 0
+      }
+    },
+    "common": {
+      "previous": {
+        "n": 4,
+        "mae": 0.5749998092651367,
+        "rmse": 0.712390717274331,
+        "bias": 0.22499942779541016,
+        "violations": 0,
+        "detected": 0,
+        "missed": 0,
+        "false_alarms": 0
+      },
+      "median3": {
+        "n": 4,
+        "mae": 1.0249996185302734,
+        "rmse": 1.22780266722659,
+        "bias": 0.875,
+        "violations": 0,
+        "detected": 0,
+        "missed": 0,
+        "false_alarms": 0
+      },
+      "ridge1": {
+        "n": 4,
+        "mae": 2.384841656069778,
+        "rmse": 2.5167948126813333,
+        "bias": 2.384841656069778,
+        "violations": 0,
+        "detected": 0,
+        "missed": 0,
+        "false_alarms": 0
+      },
+      "ridge10": {
+        "n": 4,
+        "mae": 2.4122888282997597,
+        "rmse": 2.560742830171161,
+        "bias": 2.4122888282997597,
+        "violations": 0,
+        "detected": 0,
+        "missed": 0,
+        "false_alarms": 0
+      },
+      "ridge100": {
+        "n": 4,
+        "mae": 2.4394544281581254,
+        "rmse": 2.5082282326281997,
+        "bias": 2.4394544281581254,
+        "violations": 0,
+        "detected": 0,
+        "missed": 0,
+        "false_alarms": 0
+      },
+      "index": {
+        "n": 4,
+        "mae": 1.4982712966307474,
+        "rmse": 1.52712832205937,
+        "bias": 0.8211186476432601,
+        "violations": 0,
+        "detected": 0,
+        "missed": 0,
+        "false_alarms": 0
+      },
+      "index_offset": {
+        "n": 4,
+        "mae": 2.9479247435643003,
+        "rmse": 3.2168533339658207,
+        "bias": 2.9479247435643003,
+        "violations": 0,
+        "detected": 0,
+        "missed": 0,
+        "false_alarms": 0
+      }
+    },
+    "training_labels": 25,
+    "training_complete_ridge": 22,
+    "missing_predictors": {
+      "previous": 1,
+      "d15": 6,
+      "t50": 0,
+      "t90": 0
+    },
+    "winner": "index_offset",
+    "paired_mae_ci": {
+      "previous": [
+        1.229075363004796,
+        3.1390317135854957
+      ],
+      "median3": [
+        -0.21998896778805488,
+        3.1880954721737567
+      ]
+    },
+    "fresh_previous": {
+      "n": 0
+    },
+    "stale_previous": {
+      "n": 4,
+      "mae": 2.9479247435643003,
+      "rmse": 3.2168533339658207,
+      "bias": 2.9479247435643003,
+      "violations": 0,
+      "detected": 0,
+      "missed": 0,
+      "false_alarms": 0
+    },
+    "latest_train_available": "2024-12-10 14:00:00",
+    "first_origin": "2025-01-01 10:00:00"
+  },
+  "2025_cetane_h180": {
+    "total": 11,
+    "common_n": 4,
+    "native": {
+      "previous": {
+        "n": 10,
+        "mae": 0.9599994659423828,
+        "rmse": 1.119821053242616,
+        "bias": 0.09999961853027343,
+        "violations": 0,
+        "detected": 0,
+        "missed": 0,
+        "false_alarms": 0
+      },
+      "median3": {
+        "n": 10,
+        "mae": 1.119999313354492,
+        "rmse": 1.270432408528416,
+        "bias": 0.12000007629394531,
+        "violations": 0,
+        "detected": 0,
+        "missed": 0,
+        "false_alarms": 0
+      },
+      "ridge1": {
+        "n": 4,
+        "mae": 2.270692042026896,
+        "rmse": 2.41056784386661,
+        "bias": 2.270692042026896,
+        "violations": 0,
+        "detected": 0,
+        "missed": 0,
+        "false_alarms": 0
+      },
+      "ridge10": {
+        "n": 4,
+        "mae": 2.3485201816809997,
+        "rmse": 2.5043626513663373,
+        "bias": 2.3485201816809997,
+        "violations": 0,
+        "detected": 0,
+        "missed": 0,
+        "false_alarms": 0
+      },
+      "ridge100": {
+        "n": 4,
+        "mae": 2.4787272999171943,
+        "rmse": 2.5489637785422707,
+        "bias": 2.4787272999171943,
+        "violations": 0,
+        "detected": 0,
+        "missed": 0,
+        "false_alarms": 0
+      },
+      "index": {
+        "n": 5,
+        "mae": 1.423003932651295,
+        "rmse": 1.455144021616191,
+        "bias": 0.8812818134613053,
+        "violations": 0,
+        "detected": 0,
+        "missed": 0,
+        "false_alarms": 0
+      },
+      "index_offset": {
+        "n": 5,
+        "mae": 3.1164846248983396,
+        "rmse": 3.324644778940367,
+        "bias": 3.1164846248983396,
+        "violations": 0,
+        "detected": 0,
+        "missed": 0,
+        "false_alarms": 0
+      }
+    },
+    "common": {
+      "previous": {
+        "n": 4,
+        "mae": 0.5749998092651367,
+        "rmse": 0.712390717274331,
+        "bias": 0.22499942779541016,
+        "violations": 0,
+        "detected": 0,
+        "missed": 0,
+        "false_alarms": 0
+      },
+      "median3": {
+        "n": 4,
+        "mae": 1.0249996185302734,
+        "rmse": 1.22780266722659,
+        "bias": 0.875,
+        "violations": 0,
+        "detected": 0,
+        "missed": 0,
+        "false_alarms": 0
+      },
+      "ridge1": {
+        "n": 4,
+        "mae": 2.270692042026896,
+        "rmse": 2.41056784386661,
+        "bias": 2.270692042026896,
+        "violations": 0,
+        "detected": 0,
+        "missed": 0,
+        "false_alarms": 0
+      },
+      "ridge10": {
+        "n": 4,
+        "mae": 2.3485201816809997,
+        "rmse": 2.5043626513663373,
+        "bias": 2.3485201816809997,
+        "violations": 0,
+        "detected": 0,
+        "missed": 0,
+        "false_alarms": 0
+      },
+      "ridge100": {
+        "n": 4,
+        "mae": 2.4787272999171943,
+        "rmse": 2.5489637785422707,
+        "bias": 2.4787272999171943,
+        "violations": 0,
+        "detected": 0,
+        "missed": 0,
+        "false_alarms": 0
+      },
+      "index": {
+        "n": 4,
+        "mae": 1.4982712966307474,
+        "rmse": 1.52712832205937,
+        "bias": 0.8211186476432601,
+        "violations": 0,
+        "detected": 0,
+        "missed": 0,
+        "false_alarms": 0
+      },
+      "index_offset": {
+        "n": 4,
+        "mae": 3.0563214590802943,
+        "rmse": 3.3164719114991867,
+        "bias": 3.0563214590802943,
+        "violations": 0,
+        "detected": 0,
+        "missed": 0,
+        "false_alarms": 0
+      }
+    },
+    "training_labels": 25,
+    "training_complete_ridge": 23,
+    "missing_predictors": {
+      "previous": 1,
+      "d15": 6,
+      "t50": 0,
+      "t90": 0
+    },
+    "winner": "ridge10",
+    "paired_mae_ci": {
+      "previous": [
+        1.0616377725486696,
+        2.3557363563154166
+      ],
+      "median3": [
+        -0.3193527101470277,
+        2.336726266806524
+      ]
+    },
+    "fresh_previous": {
+      "n": 0
+    },
+    "stale_previous": {
+      "n": 4,
+      "mae": 2.3485201816809997,
+      "rmse": 2.5043626513663373,
+      "bias": 2.3485201816809997,
+      "violations": 0,
+      "detected": 0,
+      "missed": 0,
+      "false_alarms": 0
+    },
+    "latest_train_available": "2024-12-10 14:00:00",
+    "first_origin": "2025-01-01 07:00:00"
+  },
+  "2025_t95_h0": {
+    "total": 373,
+    "common_n": 366,
+    "native": {
+      "previous": {
+        "n": 372,
+        "mae": 5.306451612903226,
+        "rmse": 6.968053059561201,
+        "bias": -0.026881720430107527,
+        "violations": 31,
+        "detected": 7,
+        "missed": 24,
+        "false_alarms": 24
+      },
+      "median3": {
+        "n": 372,
+        "mae": 4.706989247311828,
+        "rmse": 6.198117993929017,
+        "bias": -0.30913978494623656,
+        "violations": 31,
+        "detected": 3,
+        "missed": 28,
+        "false_alarms": 13
+      },
+      "ridge1": {
+        "n": 366,
+        "mae": 4.7308527151906254,
+        "rmse": 6.129899059459754,
+        "bias": -1.6058908144099693,
+        "violations": 30,
+        "detected": 1,
+        "missed": 29,
+        "false_alarms": 3
+      },
+      "ridge10": {
+        "n": 366,
+        "mae": 4.7348789795894195,
+        "rmse": 6.132676535136723,
+        "bias": -1.6231496391923002,
+        "violations": 30,
+        "detected": 1,
+        "missed": 29,
+        "false_alarms": 3
+      },
+      "ridge100": {
+        "n": 366,
+        "mae": 4.773714599226513,
+        "rmse": 6.167874184456557,
+        "bias": -1.7703645110887825,
+        "violations": 30,
+        "detected": 1,
+        "missed": 29,
+        "false_alarms": 2
+      },
+      "vak_feed_hypothesis": {
+        "n": 367,
+        "mae": 5.86797754713386,
+        "rmse": 7.148525324886165,
+        "bias": -0.666615754955414,
+        "violations": 30,
+        "detected": 5,
+        "missed": 25,
+        "false_alarms": 5
+      },
+      "vak_product_hypothesis": {
+        "n": 372,
+        "mae": 6.222145192651649,
+        "rmse": 7.787061083195712,
+        "bias": -3.2115562175664714,
+        "violations": 31,
+        "detected": 2,
+        "missed": 29,
+        "false_alarms": 2
+      }
+    },
+    "common": {
+      "previous": {
+        "n": 366,
+        "mae": 5.316939890710382,
+        "rmse": 6.983196067876397,
+        "bias": -0.10382513661202186,
+        "violations": 30,
+        "detected": 6,
+        "missed": 24,
+        "false_alarms": 22
+      },
+      "median3": {
+        "n": 366,
+        "mae": 4.69672131147541,
+        "rmse": 6.205277147789156,
+        "bias": -0.3469945355191257,
+        "violations": 30,
+        "detected": 3,
+        "missed": 27,
+        "false_alarms": 11
+      },
+      "ridge1": {
+        "n": 366,
+        "mae": 4.7308527151906254,
+        "rmse": 6.129899059459754,
+        "bias": -1.6058908144099693,
+        "violations": 30,
+        "detected": 1,
+        "missed": 29,
+        "false_alarms": 3
+      },
+      "ridge10": {
+        "n": 366,
+        "mae": 4.7348789795894195,
+        "rmse": 6.132676535136723,
+        "bias": -1.6231496391923002,
+        "violations": 30,
+        "detected": 1,
+        "missed": 29,
+        "false_alarms": 3
+      },
+      "ridge100": {
+        "n": 366,
+        "mae": 4.773714599226513,
+        "rmse": 6.167874184456557,
+        "bias": -1.7703645110887825,
+        "violations": 30,
+        "detected": 1,
+        "missed": 29,
+        "false_alarms": 2
+      },
+      "vak_feed_hypothesis": {
+        "n": 366,
+        "mae": 5.881202139641186,
+        "rmse": 7.15808281158237,
+        "bias": -0.6712452425084426,
+        "violations": 30,
+        "detected": 5,
+        "missed": 25,
+        "false_alarms": 5
+      },
+      "vak_product_hypothesis": {
+        "n": 366,
+        "mae": 6.273381593318172,
+        "rmse": 7.838804106781804,
+        "bias": -3.2457247507051683,
+        "violations": 30,
+        "detected": 2,
+        "missed": 28,
+        "false_alarms": 2
+      }
+    },
+    "training_labels": 714,
+    "training_complete_ridge": 704,
+    "missing_predictors": {
+      "previous": 1,
+      "feed_t95": 6,
+      "t90": 1,
+      "T6": 0,
+      "F9": 0,
+      "P13": 0
+    },
+    "winner": "median3",
+    "paired_mae_ci": {
+      "previous": [
+        -1.027787558685446,
+        -0.20988230280945136
+      ],
+      "median3": [
+        0.0,
+        0.0
+      ]
+    },
+    "fresh_previous": {
+      "n": 366,
+      "mae": 4.69672131147541,
+      "rmse": 6.205277147789156,
+      "bias": -0.3469945355191257,
+      "violations": 30,
+      "detected": 3,
+      "missed": 27,
+      "false_alarms": 11
+    },
+    "stale_previous": {
+      "n": 0
+    },
+    "latest_train_available": "2024-12-31 14:00:00",
+    "first_origin": "2025-01-01 10:00:00"
+  },
+  "2025_t95_h180": {
+    "total": 373,
+    "common_n": 365,
+    "native": {
+      "previous": {
+        "n": 372,
+        "mae": 5.346774193548387,
+        "rmse": 7.03657877524405,
+        "bias": -0.11559139784946236,
+        "violations": 31,
+        "detected": 6,
+        "missed": 25,
+        "false_alarms": 23
+      },
+      "median3": {
+        "n": 372,
+        "mae": 4.736559139784946,
+        "rmse": 6.2419841069485145,
+        "bias": -0.3387096774193548,
+        "violations": 31,
+        "detected": 3,
+        "missed": 28,
+        "false_alarms": 13
+      },
+      "ridge1": {
+        "n": 365,
+        "mae": 4.786988814877487,
+        "rmse": 6.199476334525452,
+        "bias": -1.5874744534581722,
+        "violations": 29,
+        "detected": 1,
+        "missed": 28,
+        "false_alarms": 2
+      },
+      "ridge10": {
+        "n": 365,
+        "mae": 4.791705176221238,
+        "rmse": 6.202584235279237,
+        "bias": -1.6053959484231268,
+        "violations": 29,
+        "detected": 1,
+        "missed": 28,
+        "false_alarms": 2
+      },
+      "ridge100": {
+        "n": 365,
+        "mae": 4.83080132672167,
+        "rmse": 6.239042031552063,
+        "bias": -1.7547416653177763,
+        "violations": 29,
+        "detected": 1,
+        "missed": 28,
+        "false_alarms": 1
+      },
+      "vak_feed_hypothesis": {
+        "n": 366,
+        "mae": 5.871825773004835,
+        "rmse": 7.18500188205299,
+        "bias": -0.6768123451587363,
+        "violations": 29,
+        "detected": 6,
+        "missed": 23,
+        "false_alarms": 3
+      },
+      "vak_product_hypothesis": {
+        "n": 372,
+        "mae": 6.240864386823514,
+        "rmse": 7.881236258595288,
+        "bias": -3.263475783864107,
+        "violations": 31,
+        "detected": 3,
+        "missed": 28,
+        "false_alarms": 2
+      }
+    },
+    "common": {
+      "previous": {
+        "n": 365,
+        "mae": 5.364383561643836,
+        "rmse": 7.06059875609148,
+        "bias": -0.20273972602739726,
+        "violations": 29,
+        "detected": 4,
+        "missed": 25,
+        "false_alarms": 21
+      },
+      "median3": {
+        "n": 365,
+        "mae": 4.734246575342466,
+        "rmse": 6.257488664277519,
+        "bias": -0.3726027397260274,
+        "violations": 29,
+        "detected": 2,
+        "missed": 27,
+        "false_alarms": 11
+      },
+      "ridge1": {
+        "n": 365,
+        "mae": 4.786988814877487,
+        "rmse": 6.199476334525452,
+        "bias": -1.5874744534581722,
+        "violations": 29,
+        "detected": 1,
+        "missed": 28,
+        "false_alarms": 2
+      },
+      "ridge10": {
+        "n": 365,
+        "mae": 4.791705176221238,
+        "rmse": 6.202584235279237,
+        "bias": -1.6053959484231268,
+        "violations": 29,
+        "detected": 1,
+        "missed": 28,
+        "false_alarms": 2
+      },
+      "ridge100": {
+        "n": 365,
+        "mae": 4.83080132672167,
+        "rmse": 6.239042031552063,
+        "bias": -1.7547416653177763,
+        "violations": 29,
+        "detected": 1,
+        "missed": 28,
+        "false_alarms": 1
+      },
+      "vak_feed_hypothesis": {
+        "n": 365,
+        "mae": 5.886313759842964,
+        "rmse": 7.194772746793447,
+        "bias": -0.6802658326169447,
+        "violations": 29,
+        "detected": 6,
+        "missed": 23,
+        "false_alarms": 3
+      },
+      "vak_product_hypothesis": {
+        "n": 365,
+        "mae": 6.298370345619938,
+        "rmse": 7.940244018591112,
+        "bias": -3.3028384627539373,
+        "violations": 29,
+        "detected": 3,
+        "missed": 26,
+        "false_alarms": 1
+      }
+    },
+    "training_labels": 714,
+    "training_complete_ridge": 707,
+    "missing_predictors": {
+      "previous": 1,
+      "feed_t95": 7,
+      "t90": 1,
+      "T6": 0,
+      "F9": 0,
+      "P13": 0
+    },
+    "winner": "median3",
+    "paired_mae_ci": {
+      "previous": [
+        -1.0411338340597758,
+        -0.2137051775595831
+      ],
+      "median3": [
+        0.0,
+        0.0
+      ]
+    },
+    "fresh_previous": {
+      "n": 365,
+      "mae": 4.734246575342466,
+      "rmse": 6.257488664277519,
+      "bias": -0.3726027397260274,
+      "violations": 29,
+      "detected": 2,
+      "missed": 27,
+      "false_alarms": 11
+    },
+    "stale_previous": {
+      "n": 0
+    },
+    "latest_train_available": "2024-12-31 14:00:00",
+    "first_origin": "2025-01-01 07:00:00"
+  },
+  "2026_cetane_h0": {
+    "total": 6,
+    "common_n": 2,
+    "native": {
+      "previous": {
+        "n": 5,
+        "mae": 1.1599998474121094,
+        "rmse": 1.3769527593096034,
+        "bias": 1.1599998474121094,
+        "violations": 1,
+        "detected": 0,
+        "missed": 1,
+        "false_alarms": 0
+      },
+      "median3": {
+        "n": 5,
+        "mae": 1.1400001525878907,
+        "rmse": 1.3820278825396326,
+        "bias": 1.1400001525878907,
+        "violations": 1,
+        "detected": 0,
+        "missed": 1,
+        "false_alarms": 0
+      },
+      "ridge1": {
+        "n": 2,
+        "mae": 4.948805841066683,
+        "rmse": 5.306167120642934,
+        "bias": 4.948805841066683,
+        "violations": 1,
+        "detected": 0,
+        "missed": 1,
+        "false_alarms": 0
+      },
+      "ridge10": {
+        "n": 2,
+        "mae": 4.52729208433135,
+        "rmse": 4.925326144334964,
+        "bias": 4.52729208433135,
+        "violations": 1,
+        "detected": 0,
+        "missed": 1,
+        "false_alarms": 0
+      },
+      "ridge100": {
+        "n": 2,
+        "mae": 4.0068074698738805,
+        "rmse": 4.301879296190292,
+        "bias": 4.0068074698738805,
+        "violations": 1,
+        "detected": 0,
+        "missed": 1,
+        "false_alarms": 0
+      },
+      "index": {
+        "n": 3,
+        "mae": 1.080590973564237,
+        "rmse": 1.4223121542852035,
+        "bias": 1.080590973564237,
+        "violations": 1,
+        "detected": 0,
+        "missed": 1,
+        "false_alarms": 0
+      },
+      "index_offset": {
+        "n": 3,
+        "mae": 2.719377302163404,
+        "rmse": 2.872334925387432,
+        "bias": 2.719377302163404,
+        "violations": 1,
+        "detected": 0,
+        "missed": 1,
+        "false_alarms": 0
+      }
+    },
+    "common": {
+      "previous": {
+        "n": 2,
+        "mae": 1.8999996185302734,
+        "rmse": 1.992485635626767,
+        "bias": 1.8999996185302734,
+        "violations": 1,
+        "detected": 0,
+        "missed": 1,
+        "false_alarms": 0
+      },
+      "median3": {
+        "n": 2,
+        "mae": 1.2999992370605469,
+        "rmse": 1.7691805581718543,
+        "bias": 1.2999992370605469,
+        "violations": 1,
+        "detected": 0,
+        "missed": 1,
+        "false_alarms": 0
+      },
+      "ridge1": {
+        "n": 2,
+        "mae": 4.948805841066683,
+        "rmse": 5.306167120642934,
+        "bias": 4.948805841066683,
+        "violations": 1,
+        "detected": 0,
+        "missed": 1,
+        "false_alarms": 0
+      },
+      "ridge10": {
+        "n": 2,
+        "mae": 4.52729208433135,
+        "rmse": 4.925326144334964,
+        "bias": 4.52729208433135,
+        "violations": 1,
+        "detected": 0,
+        "missed": 1,
+        "false_alarms": 0
+      },
+      "ridge100": {
+        "n": 2,
+        "mae": 4.0068074698738805,
+        "rmse": 4.301879296190292,
+        "bias": 4.0068074698738805,
+        "violations": 1,
+        "detected": 0,
+        "missed": 1,
+        "false_alarms": 0
+      },
+      "index": {
+        "n": 2,
+        "mae": 1.565607255295106,
+        "rmse": 1.740214416478305,
+        "bias": 1.565607255295106,
+        "violations": 1,
+        "detected": 0,
+        "missed": 1,
+        "false_alarms": 0
+      },
+      "index_offset": {
+        "n": 2,
+        "mae": 3.204393583894273,
+        "rmse": 3.2932291717991684,
+        "bias": 3.204393583894273,
+        "violations": 1,
+        "detected": 0,
+        "missed": 1,
+        "false_alarms": 0
+      }
+    },
+    "training_labels": 36,
+    "training_complete_ridge": 26,
+    "missing_predictors": {
+      "previous": 1,
+      "d15": 2,
+      "t50": 1,
+      "t90": 1
+    },
+    "winner": "index_offset",
+    "paired_mae_ci": {
+      "previous": [
+        1.144644297484433,
+        1.464143633243566
+      ],
+      "median3": [
+        1.464143633243566,
+        2.344645060423886
+      ]
+    },
+    "fresh_previous": {
+      "n": 0
+    },
+    "stale_previous": {
+      "n": 2,
+      "mae": 3.204393583894273,
+      "rmse": 3.2932291717991684,
+      "bias": 3.204393583894273,
+      "violations": 1,
+      "detected": 0,
+      "missed": 1,
+      "false_alarms": 0
+    },
+    "latest_train_available": "2025-12-03 14:00:00",
+    "first_origin": "2026-01-07 10:00:00",
+    "bound": {
+      "n": 4,
+      "q": null,
+      "nominal_one_sided": 0.9,
+      "empirical_coverage": null,
+      "predicted_compliant": 0,
+      "violations_among_claimed": 0
+    }
+  },
+  "2026_cetane_h180": {
+    "total": 6,
+    "common_n": 2,
+    "native": {
+      "previous": {
+        "n": 5,
+        "mae": 1.1599998474121094,
+        "rmse": 1.3769527593096034,
+        "bias": 1.1599998474121094,
+        "violations": 1,
+        "detected": 0,
+        "missed": 1,
+        "false_alarms": 0
+      },
+      "median3": {
+        "n": 5,
+        "mae": 1.1400001525878907,
+        "rmse": 1.3820278825396326,
+        "bias": 1.1400001525878907,
+        "violations": 1,
+        "detected": 0,
+        "missed": 1,
+        "false_alarms": 0
+      },
+      "ridge1": {
+        "n": 2,
+        "mae": 4.965139978036202,
+        "rmse": 5.333159209132539,
+        "bias": 4.965139978036202,
+        "violations": 1,
+        "detected": 0,
+        "missed": 1,
+        "false_alarms": 0
+      },
+      "ridge10": {
+        "n": 2,
+        "mae": 4.5795054718746435,
+        "rmse": 4.9879378797276654,
+        "bias": 4.5795054718746435,
+        "violations": 1,
+        "detected": 0,
+        "missed": 1,
+        "false_alarms": 0
+      },
+      "ridge100": {
+        "n": 2,
+        "mae": 4.102609512797837,
+        "rmse": 4.401160710320112,
+        "bias": 4.102609512797837,
+        "violations": 1,
+        "detected": 0,
+        "missed": 1,
+        "false_alarms": 0
+      },
+      "index": {
+        "n": 3,
+        "mae": 1.080590973564237,
+        "rmse": 1.4223121542852035,
+        "bias": 1.080590973564237,
+        "violations": 1,
+        "detected": 0,
+        "missed": 1,
+        "false_alarms": 0
+      },
+      "index_offset": {
+        "n": 3,
+        "mae": 2.748779587036078,
+        "rmse": 2.9001869302141787,
+        "bias": 2.748779587036078,
+        "violations": 1,
+        "detected": 0,
+        "missed": 1,
+        "false_alarms": 0
+      }
+    },
+    "common": {
+      "previous": {
+        "n": 2,
+        "mae": 1.8999996185302734,
+        "rmse": 1.992485635626767,
+        "bias": 1.8999996185302734,
+        "violations": 1,
+        "detected": 0,
+        "missed": 1,
+        "false_alarms": 0
+      },
+      "median3": {
+        "n": 2,
+        "mae": 1.2999992370605469,
+        "rmse": 1.7691805581718543,
+        "bias": 1.2999992370605469,
+        "violations": 1,
+        "detected": 0,
+        "missed": 1,
+        "false_alarms": 0
+      },
+      "ridge1": {
+        "n": 2,
+        "mae": 4.965139978036202,
+        "rmse": 5.333159209132539,
+        "bias": 4.965139978036202,
+        "violations": 1,
+        "detected": 0,
+        "missed": 1,
+        "false_alarms": 0
+      },
+      "ridge10": {
+        "n": 2,
+        "mae": 4.5795054718746435,
+        "rmse": 4.9879378797276654,
+        "bias": 4.5795054718746435,
+        "violations": 1,
+        "detected": 0,
+        "missed": 1,
+        "false_alarms": 0
+      },
+      "ridge100": {
+        "n": 2,
+        "mae": 4.102609512797837,
+        "rmse": 4.401160710320112,
+        "bias": 4.102609512797837,
+        "violations": 1,
+        "detected": 0,
+        "missed": 1,
+        "false_alarms": 0
+      },
+      "index": {
+        "n": 2,
+        "mae": 1.565607255295106,
+        "rmse": 1.740214416478305,
+        "bias": 1.565607255295106,
+        "violations": 1,
+        "detected": 0,
+        "missed": 1,
+        "false_alarms": 0
+      },
+      "index_offset": {
+        "n": 2,
+        "mae": 3.233795868766947,
+        "rmse": 3.321845249005502,
+        "bias": 3.233795868766947,
+        "violations": 1,
+        "detected": 0,
+        "missed": 1,
+        "false_alarms": 0
+      }
+    },
+    "training_labels": 36,
+    "training_complete_ridge": 27,
+    "missing_predictors": {
+      "previous": 1,
+      "d15": 2,
+      "t50": 1,
+      "t90": 1
+    },
+    "winner": "ridge10",
+    "paired_mae_ci": {
+      "previous": [
+        1.3027275610389282,
+        4.056284145649812
+      ],
+      "median3": [
+        2.5027283239783813,
+        4.056284145649812
+      ]
+    },
+    "fresh_previous": {
+      "n": 0
+    },
+    "stale_previous": {
+      "n": 2,
+      "mae": 4.5795054718746435,
+      "rmse": 4.9879378797276654,
+      "bias": 4.5795054718746435,
+      "violations": 1,
+      "detected": 0,
+      "missed": 1,
+      "false_alarms": 0
+    },
+    "latest_train_available": "2025-12-03 14:00:00",
+    "first_origin": "2026-01-07 07:00:00",
+    "bound": {
+      "n": 4,
+      "q": null,
+      "nominal_one_sided": 0.9,
+      "empirical_coverage": null,
+      "predicted_compliant": 0,
+      "violations_among_claimed": 0
+    }
+  },
+  "2026_t95_h0": {
+    "total": 204,
+    "common_n": 158,
+    "native": {
+      "previous": {
+        "n": 201,
+        "mae": 4.796019900497512,
+        "rmse": 6.461520237613942,
+        "bias": -0.04975124378109453,
+        "violations": 9,
+        "detected": 0,
+        "missed": 9,
+        "false_alarms": 10
+      },
+      "median3": {
+        "n": 201,
+        "mae": 4.199004975124378,
+        "rmse": 5.705020918593729,
+        "bias": -0.11940298507462686,
+        "violations": 9,
+        "detected": 0,
+        "missed": 9,
+        "false_alarms": 1
+      },
+      "ridge1": {
+        "n": 158,
+        "mae": 4.235134513875615,
+        "rmse": 5.518940869587983,
+        "bias": -1.1277922162649994,
+        "violations": 8,
+        "detected": 0,
+        "missed": 8,
+        "false_alarms": 1
+      },
+      "ridge10": {
+        "n": 158,
+        "mae": 4.231415739219405,
+        "rmse": 5.5135830108276105,
+        "bias": -1.1353238113981765,
+        "violations": 8,
+        "detected": 0,
+        "missed": 8,
+        "false_alarms": 0
+      },
+      "ridge100": {
+        "n": 158,
+        "mae": 4.2137608211750015,
+        "rmse": 5.485633876660807,
+        "bias": -1.2288072446890308,
+        "violations": 8,
+        "detected": 0,
+        "missed": 8,
+        "false_alarms": 0
+      },
+      "vak_feed_hypothesis": {
+        "n": 197,
+        "mae": 6.346031366366465,
+        "rmse": 7.579894377592789,
+        "bias": 1.9626304765761207,
+        "violations": 8,
+        "detected": 1,
+        "missed": 7,
+        "false_alarms": 10
+      },
+      "vak_product_hypothesis": {
+        "n": 198,
+        "mae": 5.67215939353866,
+        "rmse": 7.051946315090181,
+        "bias": -0.6071904264199736,
+        "violations": 8,
+        "detected": 1,
+        "missed": 7,
+        "false_alarms": 2
+      }
+    },
+    "common": {
+      "previous": {
+        "n": 158,
+        "mae": 4.6835443037974684,
+        "rmse": 6.453337866581384,
+        "bias": -0.08860759493670886,
+        "violations": 8,
+        "detected": 0,
+        "missed": 8,
+        "false_alarms": 9
+      },
+      "median3": {
+        "n": 158,
+        "mae": 3.9873417721518987,
+        "rmse": 5.626564480044752,
+        "bias": -0.189873417721519,
+        "violations": 8,
+        "detected": 0,
+        "missed": 8,
+        "false_alarms": 1
+      },
+      "ridge1": {
+        "n": 158,
+        "mae": 4.235134513875615,
+        "rmse": 5.518940869587983,
+        "bias": -1.1277922162649994,
+        "violations": 8,
+        "detected": 0,
+        "missed": 8,
+        "false_alarms": 1
+      },
+      "ridge10": {
+        "n": 158,
+        "mae": 4.231415739219405,
+        "rmse": 5.5135830108276105,
+        "bias": -1.1353238113981765,
+        "violations": 8,
+        "detected": 0,
+        "missed": 8,
+        "false_alarms": 0
+      },
+      "ridge100": {
+        "n": 158,
+        "mae": 4.2137608211750015,
+        "rmse": 5.485633876660807,
+        "bias": -1.2288072446890308,
+        "violations": 8,
+        "detected": 0,
+        "missed": 8,
+        "false_alarms": 0
+      },
+      "vak_feed_hypothesis": {
+        "n": 158,
+        "mae": 6.093437793652498,
+        "rmse": 7.390339437137281,
+        "bias": 0.8180078447984028,
+        "violations": 8,
+        "detected": 1,
+        "missed": 7,
+        "false_alarms": 9
+      },
+      "vak_product_hypothesis": {
+        "n": 158,
+        "mae": 5.715920237268379,
+        "rmse": 7.066928690296551,
+        "bias": -1.6530913957079258,
+        "violations": 8,
+        "detected": 1,
+        "missed": 7,
+        "false_alarms": 2
+      }
+    },
+    "training_labels": 1087,
+    "training_complete_ridge": 1070,
+    "missing_predictors": {
+      "previous": 3,
+      "feed_t95": 4,
+      "t90": 41,
+      "T6": 3,
+      "F9": 3,
+      "P13": 3
+    },
+    "winner": "median3",
+    "paired_mae_ci": {
+      "previous": [
+        -1.1710973034437946,
+        -0.2222222222222222
+      ],
+      "median3": [
+        0.0,
+        0.0
+      ]
+    },
+    "fresh_previous": {
+      "n": 158,
+      "mae": 3.9873417721518987,
+      "rmse": 5.626564480044752,
+      "bias": -0.189873417721519,
+      "violations": 8,
+      "detected": 0,
+      "missed": 8,
+      "false_alarms": 1
+    },
+    "stale_previous": {
+      "n": 0
+    },
+    "latest_train_available": "2025-12-31 14:00:00",
+    "first_origin": "2026-01-01 10:00:00",
+    "bound": {
+      "n": 366,
+      "q": 8.0,
+      "nominal_one_sided": 0.9,
+      "empirical_coverage": 0.9493670886075949,
+      "predicted_compliant": 96,
+      "violations_among_claimed": 2
+    }
+  },
+  "2026_t95_h180": {
+    "total": 204,
+    "common_n": 159,
+    "native": {
+      "previous": {
+        "n": 202,
+        "mae": 4.8316831683168315,
+        "rmse": 6.473862146285547,
+        "bias": -0.039603960396039604,
+        "violations": 9,
+        "detected": 0,
+        "missed": 9,
+        "false_alarms": 11
+      },
+      "median3": {
+        "n": 202,
+        "mae": 4.163366336633663,
+        "rmse": 5.666909332796725,
+        "bias": -0.10396039603960396,
+        "violations": 9,
+        "detected": 0,
+        "missed": 9,
+        "false_alarms": 1
+      },
+      "ridge1": {
+        "n": 159,
+        "mae": 4.227713733627545,
+        "rmse": 5.509026666333193,
+        "bias": -1.1068811296423668,
+        "violations": 8,
+        "detected": 0,
+        "missed": 8,
+        "false_alarms": 0
+      },
+      "ridge10": {
+        "n": 159,
+        "mae": 4.224152983992603,
+        "rmse": 5.502752624871467,
+        "bias": -1.1122594397777021,
+        "violations": 8,
+        "detected": 0,
+        "missed": 8,
+        "false_alarms": 0
+      },
+      "ridge100": {
+        "n": 159,
+        "mae": 4.20433644685411,
+        "rmse": 5.470713040546942,
+        "bias": -1.198766820274186,
+        "violations": 8,
+        "detected": 0,
+        "missed": 8,
+        "false_alarms": 0
+      },
+      "vak_feed_hypothesis": {
+        "n": 198,
+        "mae": 6.437438242791685,
+        "rmse": 7.920649321810992,
+        "bias": 1.805924057888446,
+        "violations": 8,
+        "detected": 1,
+        "missed": 7,
+        "false_alarms": 12
+      },
+      "vak_product_hypothesis": {
+        "n": 199,
+        "mae": 5.733096382061367,
+        "rmse": 7.423977262184137,
+        "bias": -0.7409441239875636,
+        "violations": 8,
+        "detected": 1,
+        "missed": 7,
+        "false_alarms": 3
+      }
+    },
+    "common": {
+      "previous": {
+        "n": 159,
+        "mae": 4.729559748427673,
+        "rmse": 6.469084680522708,
+        "bias": -0.07547169811320754,
+        "violations": 8,
+        "detected": 0,
+        "missed": 8,
+        "false_alarms": 10
+      },
+      "median3": {
+        "n": 159,
+        "mae": 3.943396226415094,
+        "rmse": 5.577921436087982,
+        "bias": -0.16981132075471697,
+        "violations": 8,
+        "detected": 0,
+        "missed": 8,
+        "false_alarms": 1
+      },
+      "ridge1": {
+        "n": 159,
+        "mae": 4.227713733627545,
+        "rmse": 5.509026666333193,
+        "bias": -1.1068811296423668,
+        "violations": 8,
+        "detected": 0,
+        "missed": 8,
+        "false_alarms": 0
+      },
+      "ridge10": {
+        "n": 159,
+        "mae": 4.224152983992603,
+        "rmse": 5.502752624871467,
+        "bias": -1.1122594397777021,
+        "violations": 8,
+        "detected": 0,
+        "missed": 8,
+        "false_alarms": 0
+      },
+      "ridge100": {
+        "n": 159,
+        "mae": 4.20433644685411,
+        "rmse": 5.470713040546942,
+        "bias": -1.198766820274186,
+        "violations": 8,
+        "detected": 0,
+        "missed": 8,
+        "false_alarms": 0
+      },
+      "vak_feed_hypothesis": {
+        "n": 159,
+        "mae": 6.269897961880664,
+        "rmse": 7.8760703920338395,
+        "bias": 0.6855577810246604,
+        "violations": 8,
+        "detected": 1,
+        "missed": 7,
+        "false_alarms": 11
+      },
+      "vak_product_hypothesis": {
+        "n": 159,
+        "mae": 5.855889384775223,
+        "rmse": 7.570618682492068,
+        "bias": -1.7699999548243983,
+        "violations": 8,
+        "detected": 1,
+        "missed": 7,
+        "false_alarms": 3
+      }
+    },
+    "training_labels": 1087,
+    "training_complete_ridge": 1072,
+    "missing_predictors": {
+      "previous": 2,
+      "feed_t95": 3,
+      "t90": 40,
+      "T6": 3,
+      "F9": 3,
+      "P13": 3
+    },
+    "winner": "median3",
+    "paired_mae_ci": {
+      "previous": [
+        -1.2040434894053316,
+        -0.3525210669266666
+      ],
+      "median3": [
+        0.0,
+        0.0
+      ]
+    },
+    "fresh_previous": {
+      "n": 159,
+      "mae": 3.943396226415094,
+      "rmse": 5.577921436087982,
+      "bias": -0.16981132075471697,
+      "violations": 8,
+      "detected": 0,
+      "missed": 8,
+      "false_alarms": 1
+    },
+    "stale_previous": {
+      "n": 0
+    },
+    "latest_train_available": "2025-12-31 14:00:00",
+    "first_origin": "2026-01-01 07:00:00",
+    "bound": {
+      "n": 365,
+      "q": 8.0,
+      "nominal_one_sided": 0.9,
+      "empirical_coverage": 0.9559748427672956,
+      "predicted_compliant": 96,
+      "violations_among_claimed": 2
+    }
+  }
+}

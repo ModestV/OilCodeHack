@@ -1,0 +1,16 @@
+{
+  "cetane": {
+    "n": 253,
+    "fresh_previous": 11,
+    "research_previous": 233,
+    "complete_ridge_inputs": 135,
+    "index_inputs": 155
+  },
+  "t95": {
+    "n": 253,
+    "fresh_previous": 246,
+    "research_previous": 246,
+    "complete_ridge_inputs": 194,
+    "index_inputs": null
+  }
+}
