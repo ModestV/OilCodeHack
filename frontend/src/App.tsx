@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   Bell,
   BarChart3,
@@ -37,7 +44,6 @@ import {
   Statistics,
   Trends,
 } from "./views/MonitoringViews";
-import { DecisionSupportView } from "./views/DecisionSupportView";
 import {
   buildOperatorAssessment,
   type AttentionTarget,
@@ -45,6 +51,12 @@ import {
 
 type Tab = "overview" | "trends" | "kip" | "quality";
 type Page = "monitoring" | "recommendations" | "sandbox";
+const loadDecisionSupport = () => import("./views/DecisionSupportView");
+const DecisionSupportView = lazy(() =>
+  loadDecisionSupport().then((module) => ({
+    default: module.DecisionSupportView,
+  })),
+);
 const tabs: [Tab, string][] = [
   ["overview", "Сводка"],
   ["trends", "Анализ"],
@@ -506,6 +518,8 @@ export function App() {
           <button
             aria-current={page === "recommendations" ? "page" : undefined}
             className={page === "recommendations" ? "active" : ""}
+            onMouseEnter={() => void loadDecisionSupport()}
+            onFocus={() => void loadDecisionSupport()}
             onClick={() => navigate("recommendations")}
           >
             <Lightbulb /> <span>Рекомендации</span>
@@ -513,6 +527,8 @@ export function App() {
           <button
             aria-current={page === "sandbox" ? "page" : undefined}
             className={page === "sandbox" ? "active" : ""}
+            onMouseEnter={() => void loadDecisionSupport()}
+            onFocus={() => void loadDecisionSupport()}
             onClick={() => navigate("sandbox")}
           >
             <Beaker /> <span>Песочница</span>
@@ -565,20 +581,29 @@ export function App() {
         )}
         {page !== "monitoring" ? (
           manifest?.status === "ready" && datasetId && to ? (
-            <DecisionSupportView
-              key={`${datasetId}:${page}`}
-              datasetId={datasetId}
-              datasetName={manifest.name}
-              latestAt={manifest.telemetry_end || manifest.end || to}
-              at={to}
-              sandbox={page === "sandbox"}
-              initialRequest={page === "sandbox" && sandboxSeed?.datasetId === datasetId ? sandboxSeed.request : undefined}
-              onOpenSandbox={(request) => {
-                setSandboxSeed({ datasetId, request });
-                setTo(request.at);
-                setPage("sandbox");
-              }}
-            />
+            <Suspense
+              fallback={
+                <div className="loading-state page-loading" role="status">
+                  <div className="loading-line" />
+                  Подготовка рабочего пространства…
+                </div>
+              }
+            >
+              <DecisionSupportView
+                key={`${datasetId}:${page}`}
+                datasetId={datasetId}
+                datasetName={manifest.name}
+                latestAt={manifest.telemetry_end || manifest.end || to}
+                at={to}
+                sandbox={page === "sandbox"}
+                initialRequest={page === "sandbox" && sandboxSeed?.datasetId === datasetId ? sandboxSeed.request : undefined}
+                onOpenSandbox={(request) => {
+                  setSandboxSeed({ datasetId, request });
+                  setTo(request.at);
+                  setPage("sandbox");
+                }}
+              />
+            </Suspense>
           ) : (
             <section className="empty-state compact">
               <Database />
@@ -699,6 +724,31 @@ export function App() {
           </>
         )}
       </main>
+      <nav className="mobile-primary-nav" aria-label="Основные разделы">
+        <button
+          aria-current={page === "monitoring" ? "page" : undefined}
+          className={page === "monitoring" ? "active" : ""}
+          onClick={() => navigate("monitoring")}
+        >
+          <BarChart3 /> <span>Мониторинг</span>
+        </button>
+        <button
+          aria-current={page === "recommendations" ? "page" : undefined}
+          className={page === "recommendations" ? "active" : ""}
+          onPointerDown={() => void loadDecisionSupport()}
+          onClick={() => navigate("recommendations")}
+        >
+          <Lightbulb /> <span>Рекомендации</span>
+        </button>
+        <button
+          aria-current={page === "sandbox" ? "page" : undefined}
+          className={page === "sandbox" ? "active" : ""}
+          onPointerDown={() => void loadDecisionSupport()}
+          onClick={() => navigate("sandbox")}
+        >
+          <Beaker /> <span>Песочница</span>
+        </button>
+      </nav>
       <UploadModal
         open={upload}
         onClose={() => setUpload(false)}
@@ -745,7 +795,7 @@ function DistillationView({ data }: { data: Distillation }) {
           type: "line",
           data: data.points.map((p) => [p.fraction, p.temperature]),
           symbolSize: 7,
-          lineStyle: { color: "#0079c2" },
+          lineStyle: { color: "#9ca5aa" },
         },
       ],
     }),

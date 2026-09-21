@@ -54,20 +54,20 @@ export function sulfurComposition(summary: Summary) {
       key: "below",
       label: "Не выше 10 мг/кг",
       minutes: trusted - above,
-      color: "#0079c2",
+      color: "#929ba0",
     },
-    { key: "above", label: "Выше 10 мг/кг", minutes: above, color: "#bf3d42" },
+    { key: "above", label: "Выше 10 мг/кг", minutes: above, color: "#c26f6f" },
     {
       key: "suspect",
       label: "Подозрительный сигнал",
       minutes: suspect,
-      color: "#b77b19",
+      color: "#bd985c",
     },
     {
       key: "missing",
       label: "Нет достоверного наблюдения",
       minutes: Math.max(0, total - trusted - suspect),
-      color: "#748391",
+      color: "#656d72",
     },
   ].map((item) => ({
     ...item,
@@ -195,6 +195,10 @@ export function composeChartOption<T extends ChartOptionLike>(value: T): T {
     valueFormatter: (v: number | null | undefined) => formatNumber(v),
     ...(value.tooltip || {}),
     renderMode: "richText",
+    backgroundColor: "#202427",
+    borderColor: "#4a5054",
+    textStyle: { color: "#e2e5e7", fontSize: 12 },
+    extraCssText: "box-shadow:0 10px 24px rgba(0,0,0,.48);border-radius:3px;",
   };
   if (
     !("formatter" in tooltip) &&
@@ -206,10 +210,31 @@ export function composeChartOption<T extends ChartOptionLike>(value: T): T {
   }
   let option: ChartOptionLike = {
     animation: false,
-    textStyle: { fontFamily: "Inter, Arial, sans-serif", fontSize: 12 },
-    color: ["#0079c2", "#168160", "#b77b19"],
+    backgroundColor: "transparent",
+    textStyle: {
+      color: "#aab0b4",
+      fontFamily: "Inter, Arial, sans-serif",
+      fontSize: 12,
+    },
+    color: ["#a5adb1", "#7f898e", "#b39a70", "#8f999e"],
     ...value,
     tooltip,
+    legend: {
+      textStyle: { color: "#aab0b4" },
+      ...(value.legend || {}),
+    },
+    xAxis: {
+      ...(value.xAxis || {}),
+      axisLabel: { color: "#8f979c", ...((value.xAxis?.axisLabel as object) || {}) },
+      axisLine: { lineStyle: { color: "#41474b" } },
+      splitLine: { lineStyle: { color: "#292e31" } },
+    },
+    yAxis: {
+      ...(value.yAxis || {}),
+      axisLabel: { color: "#8f979c", ...((value.yAxis?.axisLabel as object) || {}) },
+      axisLine: { lineStyle: { color: "#41474b" } },
+      splitLine: { lineStyle: { color: "#292e31" } },
+    },
   };
 
   if (overviewSulfur) {
@@ -223,7 +248,12 @@ export function composeChartOption<T extends ChartOptionLike>(value: T): T {
     ].filter((name): name is string => name != null);
     option = {
       ...option,
-      legend: { ...(option.legend || {}), top: 0, data: legendData },
+      legend: {
+        ...(option.legend || {}),
+        top: 0,
+        data: legendData,
+        textStyle: { color: "#aab0b4" },
+      },
       grid: { left: 44, right: 16, top: 36, bottom: 34 },
       dataZoom: Array.isArray(option.dataZoom)
         ? option.dataZoom.filter(
@@ -238,14 +268,16 @@ export function composeChartOption<T extends ChartOptionLike>(value: T): T {
         : option.dataZoom,
       xAxis: {
         ...(option.xAxis || {}),
-        axisLine: { lineStyle: { color: "#d8e0e8" } },
+        axisLabel: { color: "#8f979c" },
+        axisLine: { lineStyle: { color: "#41474b" } },
         axisTick: { show: false },
         splitLine: { show: false },
       },
       yAxis: {
         ...(option.yAxis || {}),
         name: "",
-        splitLine: { lineStyle: { color: "#edf2f7" } },
+        axisLabel: { color: "#8f979c" },
+        splitLine: { lineStyle: { color: "#292e31" } },
         axisLine: { show: false },
         axisTick: { show: false },
       },

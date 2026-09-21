@@ -4,6 +4,7 @@ import type { OperatorAssessment, AttentionTarget } from "../operatorStatus";
 import type { Metric, Snapshot, Stat, Summary } from "../types";
 import { HelpTooltip } from "./HelpTooltip";
 import { SignalSelector } from "./SignalSelector";
+import { UiSelect } from "./UiSelect";
 import { formatNumber } from "../visualization";
 
 export type SidePanelMode = "metrics" | "filters" | "warnings" | "closed";
@@ -154,18 +155,20 @@ export function OperatorPanel({
             {mode === "period" && (
               <label className="metric-statistic">
                 <span>Значение за период</span>
-                <select
+                <UiSelect
+                  ariaLabel="Значение за период"
                   value={statistic}
-                  onChange={(event) => setStatistic(event.target.value)}
-                >
-                  <option value="median">Медиана</option>
-                  <option value="mean">Среднее</option>
-                  <option value="min">Минимум</option>
-                  <option value="max">Максимум</option>
-                  <option value="p05">P05</option>
-                  <option value="p95">P95</option>
-                  <option value="std">Стандартное отклонение</option>
-                </select>
+                  onChange={setStatistic}
+                  options={[
+                    { value: "median", label: "Медиана" },
+                    { value: "mean", label: "Среднее" },
+                    { value: "min", label: "Минимум" },
+                    { value: "max", label: "Максимум" },
+                    { value: "p05", label: "P05" },
+                    { value: "p95", label: "P95" },
+                    { value: "std", label: "Стандартное отклонение" },
+                  ]}
+                />
               </label>
             )}
             <div className="side-metric-list">

@@ -18,6 +18,7 @@ import {
   QualityRanking,
 } from "../components/MonitoringCharts";
 import { HelpTooltip } from "../components/HelpTooltip";
+import { UiSelect } from "../components/UiSelect";
 import { chartTimeLabel, sourceEpoch } from "../visualization";
 import {
   buildOperatorAssessment,
@@ -137,13 +138,13 @@ export function Overview({
           symbolSize: lab ? 9 : 5,
           connectNulls: false,
           lineStyle: { width: lab ? 0 : 2 },
-          itemStyle: { color: lab ? "#15805b" : "#0079c2" },
+          itemStyle: { color: lab ? "#7fa68b" : "#a5adb1" },
           data: s.points.map((p) => [epoch(p.timestamp), p.value]),
           markLine: {
             silent: true,
             symbol: "none",
             label: { formatter: "10 мг/кг", position: "insideEndTop" },
-            lineStyle: { color: "#c53a3a" },
+            lineStyle: { color: "#c26f6f" },
             data: [{ yAxis: 10 }],
           },
         },
@@ -420,12 +421,12 @@ export function Trends({
     }, new Map<string, NonNullable<SeriesResponse["series"]>>()),
   );
   const palette = [
-    "#0079c2",
-    "#16805b",
-    "#9b650b",
-    "#7559a6",
-    "#c1484b",
-    "#4b7189",
+    "#a5adb1",
+    "#7f898e",
+    "#b39a70",
+    "#96909a",
+    "#a18282",
+    "#6f777c",
   ];
   return (
     <section className="panel">
@@ -499,7 +500,7 @@ export function Trends({
                         silent: true,
                         symbol: "none",
                         label: { formatter: "Порог 10 мг/кг" },
-                        lineStyle: { color: "#bc3737" },
+                        lineStyle: { color: "#c26f6f" },
                         data: [{ yAxis: 10 }],
                       },
                     }
@@ -575,7 +576,7 @@ export function Statistics({
       {
         type: "bar",
         data: bins.map((b) => b.count),
-        itemStyle: { color: "#0786d8", borderRadius: [3, 3, 0, 0] },
+        itemStyle: { color: "#909aa0", borderRadius: [2, 2, 0, 0] },
       },
     ],
   };
@@ -587,17 +588,15 @@ export function Statistics({
             <h2>Статистика периода</h2>
             <p>Конец периода не включён в расчёт</p>
           </div>
-          <select
-            aria-label="Показатель распределения"
+          <UiSelect
+            ariaLabel="Показатель распределения"
             value={selected}
-            onChange={(e) => setSelected(e.target.value)}
-          >
-            {metrics.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.label} · {m.source.toUpperCase()} · {m.id}
-              </option>
-            ))}
-          </select>
+            onChange={setSelected}
+            options={metrics.map((metric) => ({
+              value: metric.id,
+              label: `${metric.label} · ${metric.source.toUpperCase()} · ${metric.id}`,
+            }))}
+          />
         </header>
         <h3 className="selected-stat-title">
           {map.get(selected)?.label}
@@ -637,7 +636,7 @@ export function Statistics({
                       {
                         type: "boxplot",
                         data: [distribution.quartiles],
-                        itemStyle: { color: "#dceef9", borderColor: "#0079c2" },
+                        itemStyle: { color: "#363c40", borderColor: "#a5adb1" },
                       },
                     ],
                   }}
@@ -872,15 +871,16 @@ export function Kip({
             onChange={(e) => setQ(e.target.value)}
             placeholder="Тег, аппарат или описание"
           />
-          <select
-            aria-label="Установка"
+          <UiSelect
+            ariaLabel="Установка"
             value={plant}
-            onChange={(e) => setPlant(e.target.value as typeof plant)}
-          >
-            <option value="all">Все установки</option>
-            <option value="avt">АВТ</option>
-            <option value="ht">Гидроочистка</option>
-          </select>
+            onChange={(value) => setPlant(value as typeof plant)}
+            options={[
+              { value: "all", label: "Все установки" },
+              { value: "avt", label: "АВТ" },
+              { value: "ht", label: "Гидроочистка" },
+            ]}
+          />
         </div>
       </header>
       <AvtScheme />

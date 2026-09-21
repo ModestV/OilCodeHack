@@ -92,10 +92,10 @@ export function SulfurAtMoment({ snapshot }: { snapshot: Snapshot }) {
               itemStyle: {
                 color:
                   !v || v.freshness !== "fresh" || v.flags.length
-                    ? "#748391"
+                    ? "#656d72"
                     : v.value! > 10
-                      ? "#bf3d42"
-                      : "#0079c2",
+                      ? "#c26f6f"
+                      : "#929ba0",
               },
             })),
             label: {
@@ -106,7 +106,7 @@ export function SulfurAtMoment({ snapshot }: { snapshot: Snapshot }) {
             markLine: {
               symbol: "none",
               silent: true,
-              lineStyle: { color: "#bf3d42" },
+              lineStyle: { color: "#c26f6f" },
               label: {
                 formatter: "Порог 10",
                 position: "insideEndTop",
@@ -175,7 +175,7 @@ export function MedianComparison({
                 ],
                 symbol: "none",
                 silent: true,
-                lineStyle: { color: "#a3b0be", width: 2 },
+                lineStyle: { color: "#737c81", width: 2 },
               },
               {
                 name: "Предыдущий",
@@ -183,7 +183,7 @@ export function MedianComparison({
                 data: [[previous, 0]],
                 symbol: "emptyCircle",
                 symbolSize: 13,
-                itemStyle: { color: "#61748a" },
+                itemStyle: { color: "#687176" },
               },
               {
                 name: "Выбранный",
@@ -191,7 +191,7 @@ export function MedianComparison({
                 data: [[stat.median, 0]],
                 symbol: "diamond",
                 symbolSize: 13,
-                itemStyle: { color: "#0079c2" },
+                itemStyle: { color: "#a5adb1" },
               },
             ],
           }}
@@ -261,7 +261,7 @@ export function QualityRanking({
               type: "bar",
               barWidth: 12,
               data: rows.map((r) => r.percentage),
-              itemStyle: { color: "#b77b19" },
+              itemStyle: { color: "#b39a70" },
               label: {
                 show: true,
                 position: "right",

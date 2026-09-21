@@ -4,6 +4,7 @@ import {
   ArrowRight,
   CheckCircle2,
   Clipboard,
+  MoreHorizontal,
   Play,
   RotateCcw,
 } from "lucide-react";
@@ -14,6 +15,9 @@ import type {
   ScenarioResult,
 } from "../types";
 import { Chart } from "../components/Chart";
+import { DateTimeField } from "../components/DateTimeField";
+import { UiSelect } from "../components/UiSelect";
+import { ContextMenu } from "../components/ContextMenu";
 import { formatNumber } from "../visualization";
 import {
   pipelineStages,
@@ -272,11 +276,11 @@ export function DecisionSupportView({
             <div className="support-dates">
               <label>
                 Момент расчёта
-                <input
-                  type="datetime-local"
+                <DateTimeField
+                  ariaLabel="Момент расчёта"
                   value={periodTo}
-                  onChange={(e) => {
-                    setPeriodTo(e.target.value);
+                  onChange={(value) => {
+                    setPeriodTo(value);
                     setPipelineStarted(false);
                   }}
                 />
@@ -375,27 +379,29 @@ export function DecisionSupportView({
           </label>
           <label>
             Горизонт
-            <select
-              value={request.horizon_minutes}
-              onChange={(e) =>
-                update("horizon_minutes", number(e.target.value))
-              }
-            >
-              <option value="60">1 час</option>
-              <option value="120">2 часа</option>
-              <option value="180">3 часа</option>
-            </select>
+            <UiSelect
+              ariaLabel="Горизонт"
+              value={String(request.horizon_minutes)}
+              onChange={(value) => update("horizon_minutes", number(value))}
+              options={[
+                { value: "60", label: "1 час" },
+                { value: "120", label: "2 часа" },
+                { value: "180", label: "3 часа" },
+              ]}
+            />
           </label>
           <label>
             Шаг прогноза
-            <select
-              value={request.step_minutes}
-              onChange={(e) => update("step_minutes", number(e.target.value))}
-            >
-              <option value="15">15 минут</option>
-              <option value="30">30 минут</option>
-              <option value="60">1 час</option>
-            </select>
+            <UiSelect
+              ariaLabel="Шаг прогноза"
+              value={String(request.step_minutes)}
+              onChange={(value) => update("step_minutes", number(value))}
+              options={[
+                { value: "15", label: "15 минут" },
+                { value: "30", label: "30 минут" },
+                { value: "60", label: "1 час" },
+              ]}
+            />
           </label>
           <label>
             Время нарастания отклика, мин
@@ -489,11 +495,16 @@ export function DecisionSupportView({
                 {request.tanks.map((tank, index) => (
                   <tr key={tank.name}>
                     <td>{tank.name}</td>
-                    <td><select aria-label={`${tank.name}: поступление`} value={tank.kind ?? "stored"}
-                      onChange={(e) => update(`tanks.${index}.kind`, e.target.value)}>
-                      <option value="stored">Только запас</option>
-                      <option value="hydrotreated_batch">Из гидроочистки</option>
-                    </select></td>
+                    <td><UiSelect
+                      ariaLabel={`${tank.name}: поступление`}
+                      className="ui-select--table"
+                      value={tank.kind ?? "stored"}
+                      onChange={(value) => update(`tanks.${index}.kind`, value)}
+                      options={[
+                        { value: "stored", label: "Только запас" },
+                        { value: "hydrotreated_batch", label: "Из гидроочистки" },
+                      ]}
+                    /></td>
                     <td><input aria-label={`${tank.name}: запас`} type="number" min="0" step="1"
                       value={tank.stock_t ?? ""} onChange={(e) => update(`tanks.${index}.stock_t`, number(e.target.value))} /></td>
                     {(["share", "sulfur", "t95", "cetane"] as const).map(
@@ -824,14 +835,16 @@ function DatasetRowPicker({
         {!manualMode ? (
           <label>
             Набор значений
-            <select
+            <UiSelect
+              ariaLabel="Набор значений"
               value={selectedRow}
-              onChange={(e) => onSelect(e.target.value as typeof selectedRow)}
-            >
-              <option value="base">Базовый режим</option>
-              <option value="feed">Рост серы в сырье</option>
-              <option value="strict">Сниженная цель по сере</option>
-            </select>
+              onChange={(value) => onSelect(value as typeof selectedRow)}
+              options={[
+                { value: "base", label: "Базовый режим" },
+                { value: "feed", label: "Рост серы в сырье" },
+                { value: "strict", label: "Сниженная цель по сере" },
+              ]}
+            />
           </label>
         ) : (
           <span className="muted">Ручной ввод</span>
@@ -860,9 +873,17 @@ function PipelinePreview({
   decision: DecisionResult | null;
 }) {
   const [copyStatus, setCopyStatus] = useState("");
+  const [scenarioMenu, setScenarioMenu] = useState<{
+    x: number;
+    y: number;
+    id: string;
+  } | null>(null);
   const sulfurEvidence = decision?.agents?.quality.evidence.sulfur;
   const predicted = result?.product_sulfur ?? result?.predicted_sulfur;
   const baseline = result?.baseline.sulfur;
+  const contextCandidate = decision?.candidates?.find(
+    (candidate) => candidate.id === scenarioMenu?.id,
+  );
   const reduction =
     !result?.blend && baseline != null && predicted != null ? baseline - predicted : null;
   const summary = decision?.status === "abstain"
@@ -997,6 +1018,7 @@ function PipelinePreview({
                 <th scope="col">Энергозатраты, индекс</th>
                 <th scope="col">Стоимость смеси, индекс</th>
                 <th scope="col">Нагрузка, индекс</th>
+                <th scope="col" aria-label="Действия" />
               </tr>
             </thead>
             <tbody>
@@ -1004,6 +1026,14 @@ function PipelinePreview({
                 <tr
                   key={candidate.id}
                   className={candidate.id === decision?.selected_candidate ? "is-preferred" : ""}
+                  onContextMenu={(event) => {
+                    event.preventDefault();
+                    setScenarioMenu({
+                      x: event.clientX,
+                      y: event.clientY,
+                      id: candidate.id,
+                    });
+                  }}
                 >
                   <td>
                     {candidate.label}
@@ -1033,10 +1063,27 @@ function PipelinePreview({
                   <td>{formatNumber(candidate.objectives?.energy_cost_index, 3)}</td>
                   <td>{candidate.scenario?.blend ? formatNumber(candidate.objectives?.blend_cost_index, 3) : "—"}</td>
                   <td>{formatNumber(candidate.objectives?.regime_severity.index, 3)}</td>
+                  <td className="row-actions">
+                    <button
+                      type="button"
+                      className="icon-btn"
+                      aria-label={`Действия: ${candidate.label}`}
+                      onClick={(event) => {
+                        const box = event.currentTarget.getBoundingClientRect();
+                        setScenarioMenu({
+                          x: box.right,
+                          y: box.bottom + 4,
+                          id: candidate.id,
+                        });
+                      }}
+                    >
+                      <MoreHorizontal aria-hidden="true" />
+                    </button>
+                  </td>
                 </tr>
               ))}
               {!decision?.candidates?.length && (
-                <tr><td colSpan={8}>Сравнение не выполнено: сначала нужны достоверные исходные данные.</td></tr>
+                <tr><td colSpan={9}>Сравнение не выполнено: сначала нужны достоверные исходные данные.</td></tr>
               )}
             </tbody>
           </table>
@@ -1047,6 +1094,43 @@ function PipelinePreview({
           {decision.agents.quality.evidence.reactor_pressure_drop.freshness !== "fresh" && " Нет свежего подтверждения."}
           {" "}Промышленный предел и связь с отказами не установлены.
         </p>}
+        <ContextMenu
+          position={scenarioMenu}
+          onClose={() => setScenarioMenu(null)}
+          label="Действия со сценарием"
+          actions={[
+            {
+              label: "Открыть в песочнице",
+              disabled: !contextCandidate?.scenario?.model_request || !onOpenSandbox,
+              onSelect: () => {
+                if (contextCandidate?.scenario?.model_request)
+                  onOpenSandbox?.(structuredClone(contextCandidate.scenario.model_request));
+              },
+            },
+            {
+              label: "Скопировать параметры",
+              disabled: !contextCandidate?.scenario?.model_request,
+              onSelect: async () => {
+                if (!contextCandidate?.scenario?.model_request) return;
+                await navigator.clipboard.writeText(
+                  JSON.stringify(contextCandidate.scenario.model_request, null, 2),
+                );
+                setCopyStatus("Параметры сценария скопированы");
+              },
+            },
+            {
+              label: "Скопировать результат",
+              disabled: !contextCandidate,
+              onSelect: async () => {
+                if (!contextCandidate) return;
+                await navigator.clipboard.writeText(
+                  JSON.stringify(contextCandidate, null, 2),
+                );
+                setCopyStatus("Результат сценария скопирован");
+              },
+            },
+          ]}
+        />
       </section>
       {decision?.forecast && (
         <section className="decision-band model-forecast" aria-label="Модельный прогноз серы">
