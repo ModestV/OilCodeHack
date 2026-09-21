@@ -14,6 +14,7 @@ import type {
   ScenarioResult,
 } from "../types";
 import { Chart } from "../components/Chart";
+import { QualityDiagnosticsPanel } from "../components/QualityDiagnosticsPanel";
 import { formatNumber } from "../visualization";
 import {
   pipelineStages,
@@ -299,6 +300,7 @@ export function DecisionSupportView({
         </p>
         {pipelineStarted ? (
           <PipelinePreview
+            datasetId={datasetId}
             onOpenSandbox={onOpenSandbox}
             period={recommendationPeriod}
             result={result}
@@ -779,7 +781,7 @@ export function DecisionSupportView({
         </>
       )}
       {decision && <>
-        <PipelinePreview decision={decision} result={decision.scenario} period="Автоматическое сравнение вариантов при тех же условиях" />
+        <PipelinePreview datasetId={datasetId} decision={decision} result={decision.scenario} period="Автоматическое сравнение вариантов при тех же условиях" />
         {decision.status === "recommendation" && decision.scenario?.model_request && <button type="button" className="secondary"
           onClick={() => { setRequest(structuredClone(decision.scenario!.model_request!)); setResult(decision.scenario); }}>
           Перенести выбранный вариант в форму
@@ -849,11 +851,13 @@ function DatasetRowPicker({
 }
 
 function PipelinePreview({
+  datasetId,
   onOpenSandbox,
   period,
   result,
   decision,
 }: {
+  datasetId: string;
   onOpenSandbox?: (request: ScenarioRequest) => void;
   period: string;
   result: ScenarioResult | null;
@@ -975,6 +979,7 @@ function PipelinePreview({
           </span>
         </div>
       </section>
+      {decision && <QualityDiagnosticsPanel datasetId={datasetId} at={decision.at} />}
       <section className="decision-band">
         <div className="section-heading">
           <h2>Сравнение сценариев</h2>

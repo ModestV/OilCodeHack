@@ -30,6 +30,7 @@ from .agents import make_decision
 from .config import ROOT, STORAGE
 from .formulas import formula_results
 from .forecast import ForecastUnavailable, forecast_sulfur
+from .quality_diagnostics import quality_diagnostics
 from .scenarios import ScenarioRequest, calculate_scenario
 
 IMPORT_LOCK = threading.Lock()
@@ -276,6 +277,11 @@ def forecast(dataset_id: str, at: str, horizon_minutes: float = Query(default=18
         return forecast_sulfur(dataset(dataset_id), at, horizon_minutes=horizon_minutes)
     except ForecastUnavailable as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+
+@app.get("/api/datasets/{dataset_id}/quality-diagnostics")
+def diagnose_quality(dataset_id: str, at: str):
+    return quality_diagnostics(dataset(dataset_id), at)
 
 
 @app.get("/api/datasets/{dataset_id}/quality")

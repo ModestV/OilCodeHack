@@ -299,6 +299,45 @@ export interface SulfurForecast {
   warnings: string[];
 }
 
+export interface QualityObservation {
+  metric_id: string;
+  value: number | null;
+  unit: string;
+  timestamp: string | null;
+  available_at: string | null;
+  age_hours: number | null;
+  freshness: "missing" | "fresh" | "stale";
+  flags: string[];
+  usable: boolean;
+  reasons: string[];
+}
+
+export interface QualityDiagnosticTarget {
+  measurement: QualityObservation;
+  reference_warning: string | null;
+  estimate: {
+    method: string;
+    value: number | null;
+    unit: string;
+    status: "available" | "unavailable";
+    inputs: QualityObservation[];
+    reasons: string[];
+    limitations: string[];
+  };
+}
+
+export interface QualityDiagnostics {
+  at: string;
+  scope: string;
+  diagnostic_only: true;
+  can_authorize: false;
+  lims_publication_delay_hours: number;
+  measurement_freshness_hours: number;
+  estimate_max_age_hours: number;
+  t95: QualityDiagnosticTarget;
+  cetane: QualityDiagnosticTarget;
+}
+
 export interface DecisionResult {
   at: string;
   status: "recommendation" | "abstain";

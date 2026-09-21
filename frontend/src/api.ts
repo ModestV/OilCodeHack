@@ -5,6 +5,7 @@ import type {
   Manifest,
   Metric,
   Quality,
+  QualityDiagnostics,
   SeriesResponse,
   ScenarioRequest,
   ScenarioResult,
@@ -78,6 +79,8 @@ export const api = {
     request<{ formulas: Formula[] }>(`${base(id)}/formulas?at=${enc(at)}`, s),
   quality: (id: string, s?: AbortSignal) =>
     request<Quality>(`${base(id)}/quality`, s),
+  qualityDiagnostics: (id: string, at: string, s?: AbortSignal) =>
+    request<QualityDiagnostics>(`${base(id)}/quality-diagnostics?at=${enc(at)}`, s),
   settings: (id: string, s?: AbortSignal) =>
     request<Settings>(`${base(id)}/settings`, s),
   saveSettings: (id: string, value: Settings) =>
