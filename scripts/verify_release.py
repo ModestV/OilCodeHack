@@ -60,6 +60,7 @@ class API:
         if local:
             sys.path.insert(0, str(ROOT))
             from fastapi.testclient import TestClient
+
             from backend.app import app
 
             # Do not run import-recovery lifespan: all verification is read-only.
@@ -146,7 +147,11 @@ def assert_forecast(forecast, origin):
 def assert_decision(decision, request, expected):
     origin = parse_time(request["at"])
     require(decision.get("status") == expected, f"Expected {expected}, got {decision.get('status')}: {decision.get('abstain')}")
-    require([step.get("role") for step in decision.get("trace", [])] == ["quality", "reliability", "optimization"], "Incomplete ordered agent trace")
+    require([step.get("role") for step in decision.get("trace", [])] == ["quality", "reliability", "optimization", "orchestrator"], "Incomplete ordered agent trace")
+    require(all(step.get("consumes") and step.get("produces") for step in decision.get("trace", [])), "Agent trace does not show the information exchange")
+    require(isinstance(decision.get("explanation"), dict) and decision["explanation"].get("text"), "Decision has no operator explanation")
+    require(isinstance(decision.get("consistency"), list) and isinstance(decision.get("conflicts"), list), "Decision lacks orchestrator checks")
+    require(isinstance(decision.get("confidence"), dict) and 0 <= (decision["confidence"].get("score") or 0) <= 1, "Decision lacks a bounded confidence score")
     agents = decision.get("agents", {})
     reliability = agents.get("reliability", {})
     evidence = agents.get("quality", {}).get("evidence", {})
@@ -190,20 +195,28 @@ def assert_decision(decision, request, expected):
         selected = [item for item in candidates if item.get("id") == decision.get("selected_candidate")]
         require(len(selected) == 1 and selected[0].get("feasible") is True, "Selected candidate is absent/infeasible")
         recommendation = decision.get("recommendation", {})
-        require(recommendation.get("action") == "review_controls", "Prototype must require operator review")
+        require(recommendation.get("action") in {"review_controls", "hold"}, "Prototype must require operator review")
+        require(decision.get("selected_candidate") in (decision.get("pareto_front") or []) or decision.get("selected_candidate") == "hold",
+                "Selected candidate is not on the Pareto front")
+        require(all(check.get("passed") for check in decision.get("consistency", [])), "Recommendation issued with failed consistency checks")
+        require(not any(c.get("resolution") == "abstain" for c in decision.get("conflicts", [])), "Recommendation issued despite an abstain-level conflict")
         require(recommendation.get("requires_operator_review") is True, "Operator review flag missing")
         require(recommendation.get("operational_safety_validated") is False, "Unvalidated process safety claimed")
         if not manual:
             require(decision.get("forecast", {}).get("status") == "ok", "Observed recommendation lacks usable forecast")
-            if decision["forecast"].get("alarm_above_10"):
-                # A no-action alarm must be answered by a corrective candidate, never by "hold".
-                require(decision.get("selected_candidate") != "hold", "Forecast alarm answered by hold")
-                require(any(abs(c.get("change", 0)) > 0 for c in recommendation.get("controls", {}).values()), "Alarm recommendation changes nothing")
+            if (decision.get("problem") or {}).get("requires_action"):
+                # A detected quality problem must be answered by a corrective candidate, never by "hold".
+                require(decision.get("selected_candidate") != "hold", "Quality problem answered by hold")
+                require(any(abs(c.get("change", 0)) > 0 for c in recommendation.get("controls", {}).values()), "Corrective recommendation changes nothing")
+            else:
+                require(decision.get("selected_candidate") == "hold", "Stable period answered by an unnecessary control action")
     return candidates
 
 
 def compact_decision(decision):
-    result = {key: decision.get(key) for key in ("status", "selected_candidate", "safety_gate", "abstain", "trace", "forecast")}
+    result = {key: decision.get(key) for key in ("status", "selected_candidate", "selection_rule", "safety_gate", "abstain", "trace", "forecast",
+                                                 "problem", "confidence", "risk", "constraints", "conflicts", "consistency", "pareto_front",
+                                                 "alternatives", "explanation")}
     result["quality_evidence"] = decision.get("agents", {}).get("quality", {}).get("evidence")
     result["reliability"] = decision.get("agents", {}).get("reliability")
     result["candidates"] = [{key: item.get(key) for key in ("id", "status", "feasible", "predicted_sulfur", "exceedance_probability", "effort", "objectives", "safety_gate")} for item in decision.get("candidates") or []]
@@ -235,8 +248,21 @@ def run_case(api, prefix, case):
         require(sulfur.get("value") is not None and sulfur["value"] > 10, "Danger case does not demonstrate observed sulfur exceedance")
         last_lab = decision.get("agents", {}).get("quality", {}).get("evidence", {}).get("last_lab_sulfur", {})
         require(last_lab.get("source", "").startswith("lims.") and (last_lab.get("value") or 0) > 10, "Danger case needs a published LIMS exceedance")
+    if case.get("published_lab_above_10"):
+        last_lab = decision.get("agents", {}).get("quality", {}).get("evidence", {}).get("last_lab_sulfur", {})
+        require(last_lab.get("source", "").startswith("lims.") and (last_lab.get("value") or 0) > 10, "Danger case needs a published LIMS exceedance")
+    if case.get("selected_candidate"):
+        require(decision.get("selected_candidate") == case["selected_candidate"], f"Expected selected candidate {case['selected_candidate']}")
     if case.get("forecast_alarm") is not None:
         require(forecast.get("alarm_above_10") is case["forecast_alarm"], "Case does not demonstrate expected forecast alarm state")
+    if case.get("requires_action") is not None:
+        require((decision.get("problem") or {}).get("requires_action") is case["requires_action"], "Case does not demonstrate the expected problem state")
+    if case.get("model_fit_end"):
+        require((forecast.get("model") or {}).get("fit_end", "").startswith(case["model_fit_end"]), f"Expected walk-forward model {case['model_fit_end']}")
+    if case.get("conflict"):
+        require(any(c.get("code") == case["conflict"] for c in decision.get("conflicts", [])), f"Case does not demonstrate conflict {case['conflict']}")
+    if case.get("risk_class"):
+        require((decision.get("risk") or {}).get("class") == case["risk_class"], f"Case does not demonstrate risk class {case['risk_class']}")
     if case.get("selected_candidate_not"):
         require(decision.get("selected_candidate") != case["selected_candidate_not"], f"Selected candidate must not be {case['selected_candidate_not']}")
     if case.get("controls_state"):

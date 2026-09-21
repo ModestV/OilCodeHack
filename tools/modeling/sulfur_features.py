@@ -1,4 +1,4 @@
-"""Shared, past-only features for hydro-treated diesel sulphur inference.
+"""Shared, past-only features for hydro-treated diesel sulphur inference (v4).
 
 An origin is the moment the prediction is issued.  Every feature is built only
 from observations that are already known at the origin:
@@ -11,13 +11,18 @@ clocks.  Rolling windows end at the exact origin, never at a rounded grid.
 
 Design (see reports/modeling/sulfur-forecast/REPORT.md):
 
-* The daily LIMS sample is the control fact but arrives ~once per day.  The
-  online analysers (KIP ``Q21`` and the PAK export) run every 10 minutes and
-  track the lab result at sampling time (corr ~0.5-0.6), but their offset to the
-  lab drifts by up to +-1 mg/kg between quarters.  The offset is therefore
-  re-estimated from the last published lab/analyser pairs ("lab anchoring").
-* Control moves (``T6``, ``F9``, ``P13``) reach the product with a lag of about
-  1-2 hours; recent changes are exposed as separate features.
+* Stage 1 ("dynamics"): the online analysers (KIP ``Q21`` and the PAK export)
+  run every 10 minutes.  Their change over the next 60/120/180 minutes is
+  predicted from their own recent history and from the recent moves of the
+  three control tags (``T6``, ``F9``, ``P13``), in the raw (un-anchored)
+  ln space of each analyser.
+* Lab anchoring: the daily LIMS sample is the control fact.  The analyser
+  offset to the lab drifts by up to +-1 mg/kg between quarters, so it is
+  re-estimated from the last published lab/analyser pairs and added to the
+  raw analyser (now or predicted at ``origin + horizon``).
+* Stage 2 ("calibration"): a convex (or linear) combination of the anchored
+  analyser estimates, the local lab level and the previous published lab
+  gives the ln sulphur estimate whose residuals define intervals and P(>10).
 """
 from __future__ import annotations
 
@@ -34,23 +39,40 @@ LAB_ANCHOR_MAX_AGE_DAYS = 45
 ANALYSER_PLATEAU_MINUTES = 60
 ANALYSER_PLATEAU_TOLERANCE = 0.01
 ANALYSER_RANGE = (0.0, 100.0)
+ANALYSER_TARGET_HALF_WINDOW_MINUTES = 30
 LOG_FLOOR = 0.3
 
 ANALYSER_METRICS = {"q21": "ht.Q21", "pak": "pak.ht.Mg.Sulfur"}
 CONTROL_METRICS = {"T6": "ht.T6", "F9": "ht.F9", "P13": "ht.P13"}
-# Regression inputs: only product-sulphur evidence.  Absolute control levels
-# and multi-day analyser means drift with catalyst age and analyser
-# calibration, and learned coefficients on recent control moves mostly encode
-# the operator's reaction to sulphur rather than the physical response; both
-# degraded the 2026 hold-out, so they are excluded from the regression and
-# kept only for the applicability (regime) gate and the scenario model.
-MODEL_COLUMNS = ["ln_q21", "ln_q21_1h", "ln_pak", "ln_pak_1h", "ln_level", "ln_previous_lab"]
-FEATURE_COLUMNS = [
-    *MODEL_COLUMNS,
-    "ln_q21_24h", "ln_pak_24h",
-    "dT6_1h", "dT6_3h", "dlnF9_3h", "dP13_3h",
+# Normal-regime envelope for Stage 1 training rows (start-ups, shutdowns and
+# upsets are excluded).  A documented prototype assumption, not a plant limit.
+STAGE1_REGIME = {"T6": (320.0, 400.0), "F9": (100.0, None), "P13": (3.0, None)}
+DELTA_WINDOWS_HOURS = (1.0, 3.0, 6.0)
+# Stage 1 regression inputs: raw analyser history and control moves/levels.
+DYNAMICS_COLUMNS = [
+    "ln_q21_raw", "ln_q21_raw_1h", "ln_q21_raw_6h", "ln_q21_raw_24h",
+    "ln_pak_raw", "ln_pak_raw_1h", "ln_pak_raw_6h", "ln_pak_raw_24h",
+    "dT6_1h", "dT6_3h", "dT6_6h", "dlnF9_1h", "dlnF9_3h", "dlnF9_6h", "dP13_1h", "dP13_3h", "dP13_6h",
     "T6", "F9", "P13",
 ]
+CONTROL_DELTA_COLUMNS = [c for c in DYNAMICS_COLUMNS if c.startswith("d")]
+# Applicability (regime) gate: anchored evidence, lab anchor, control moves and levels.
+SUPPORT_COLUMNS = [
+    "ln_q21", "ln_q21_1h", "ln_pak", "ln_pak_1h", "ln_level", "ln_previous_lab",
+    "ln_q21_24h", "ln_pak_24h",
+    *CONTROL_DELTA_COLUMNS,
+    "T6", "F9", "P13",
+]
+# Stage 2 inputs per horizon: at the origin the anchored analysers themselves,
+# for h>0 the anchored Stage-1 predictions at origin+h.
+STAGE2_INPUTS = {
+    0: ["ln_q21", "ln_pak", "ln_level", "ln_previous_lab"],
+    "h": ["ln_q21_pred", "ln_pak_pred", "ln_level", "ln_previous_lab"],
+}
+# Every column ``build_features`` produces before the anchor bookkeeping.
+FEATURE_COLUMNS = list(dict.fromkeys([*SUPPORT_COLUMNS, *DYNAMICS_COLUMNS]))
+# Kept for older callers; the v4 artifact stores column names explicitly.
+MODEL_COLUMNS = STAGE2_INPUTS[0]
 APPLICABILITY_POLICY = {
     "max_missing_fraction": 0.34,
     "max_ood_fraction": 0.20,
@@ -59,6 +81,19 @@ APPLICABILITY_POLICY = {
     "support_margin_fraction": 0.10,
     "min_anchor_pairs": 3,
     "description": "Engineering abstention heuristics, not calibrated confidence or safe control limits",
+}
+# Multivariate process-anomaly features of the hydro-treating reactor block.
+# Level-invariant balances between related signals (the organisers' example:
+# "temperatures normal on their own, but their balance unusual"), not the
+# absolute operating point, which drifts with catalyst age.
+ANOMALY_TAGS = ["ht.T6", "ht.T5", "ht.T11", "ht.P13", "ht.P8", "ht.F9", "ht.F14", "ht.F25"]
+ANOMALY_FEATURES = {
+    "R202_delta_T": ("ht.T11", "ht.T6", "difference"),      # reactor R-202 temperature rise
+    "quench_delta_T": ("ht.T5", "ht.T6", "difference"),     # cooling between R-201 outlet and R-202 inlet
+    "R202_delta_P": ("ht.P8", None, "value"),               # pressure drop across R-202
+    "quench_per_feed": ("ht.F14", "ht.F9", "ratio"),        # quench flow per feed
+    "hydrogen_per_feed": ("ht.F25", "ht.F9", "ratio"),      # fresh hydrogen per feed
+    "P13": ("ht.P13", None, "value"),                       # reactor inlet pressure
 }
 
 
@@ -72,14 +107,17 @@ def ln(values) -> np.ndarray:
 
 
 def clean_analyser(series: pd.Series, flags: pd.Series | None = None) -> pd.Series:
-    """Drop implausible analyser readings and frozen plateaus.
+    """Drop implausible analyser readings and frozen plateaus, causally.
 
     A reading is unusable when it is outside ``ANALYSER_RANGE``, carries a
-    ``flatline`` flag from the importer, or stays within
-    ``ANALYSER_PLATEAU_TOLERANCE`` of the previous reading for at least
-    ``ANALYSER_PLATEAU_MINUTES`` (a stuck or saturated analyser, e.g. the exact
-    307 plateau and the 24.87+-0.005 saturation in the source data).  Values are
-    never interpolated.
+    ``flatline`` flag from the importer, or has stayed within
+    ``ANALYSER_PLATEAU_TOLERANCE`` of the previous readings for at least
+    ``ANALYSER_PLATEAU_MINUTES`` *up to that reading* (a stuck or saturated
+    analyser, e.g. the exact 307 plateau and the 24.87+-0.005 saturation in
+    the source data).  The rule only looks backwards, so cleaning a series
+    truncated at any time gives the same values as cleaning the full series
+    and truncating afterwards; offline and runtime therefore agree.  Values
+    are never interpolated.
     """
     values = series.sort_index().astype(float).copy()
     low, high = ANALYSER_RANGE
@@ -92,9 +130,6 @@ def clean_analyser(series: pd.Series, flags: pd.Series | None = None) -> pd.Seri
     run_start = values.index.to_series().groupby(run_id).transform("first")
     plateau_length = (values.index.to_series() - run_start).dt.total_seconds() / 60
     values[(plateau_length >= ANALYSER_PLATEAU_MINUTES).to_numpy() & same.to_numpy()] = np.nan
-    # Also drop the first samples of a plateau that later proves to be stuck.
-    stuck_runs = set(run_id[(plateau_length >= ANALYSER_PLATEAU_MINUTES) & same])
-    values[run_id.isin(stuck_runs).to_numpy()] = np.nan
     return values
 
 
@@ -139,6 +174,17 @@ def _delta(series: pd.Series, origin_ns: np.ndarray, hours: float, log: bool = F
     return now - before
 
 
+def analyser_target(series: pd.Series, origins: pd.DatetimeIndex, horizon_minutes: float) -> np.ndarray:
+    """Analyser level around ``origin + horizon``: mean over +-30 minutes (>= 2 readings).
+
+    The same window is used by ``lab_anchor`` to pair an analyser with a lab
+    sample, so Stage 1 predicts exactly the quantity that is anchored.
+    """
+    origin_ns = pd.DatetimeIndex(origins).as_unit("ns").asi8
+    centre = origin_ns + pd.Timedelta(minutes=horizon_minutes + ANALYSER_TARGET_HALF_WINDOW_MINUTES).value
+    return _window_mean(series, centre, 2 * ANALYSER_TARGET_HALF_WINDOW_MINUTES / 60, 2)
+
+
 def available_lab(target: pd.DataFrame, origins: pd.DatetimeIndex,
                   publication_delay_minutes: float = LIMS_PUBLICATION_DELAY_MINUTES) -> pd.DataFrame:
     """Last finite nonnegative lab result whose ``sample + publication_delay <= origin``."""
@@ -177,8 +223,7 @@ def lab_anchor(labs: pd.DataFrame, analysers: dict[str, pd.Series], origins: pd.
     available_ns = sample_ns + pd.Timedelta(minutes=publication_delay_minutes).value
     analyser_at_sample = {}
     for name, series in analysers.items():
-        centre = _window_mean(series, sample_ns + pd.Timedelta(minutes=30).value, 1.0, 2)
-        analyser_at_sample[name] = centre
+        analyser_at_sample[name] = analyser_target(series, pd.DatetimeIndex(ordered["target_time"]), 0)
     origin_ns = pd.DatetimeIndex(origins).as_unit("ns").asi8
     max_age = pd.Timedelta(days=LAB_ANCHOR_MAX_AGE_DAYS).value
     level = np.full(len(origin_ns), np.nan)
@@ -208,10 +253,55 @@ def lab_anchor(labs: pd.DataFrame, analysers: dict[str, pd.Series], origins: pd.
     return frame
 
 
+def build_dynamics_features(analysers: dict[str, pd.Series], controls: dict[str, pd.Series],
+                            origins: pd.DatetimeIndex) -> pd.DataFrame:
+    """Stage-1 inputs for a list of origins: raw analyser history, control moves and levels.
+
+    No laboratory information is used, so the frame can be built on a dense
+    grid.  Missing sources produce NaN columns.
+    """
+    origins = pd.DatetimeIndex(origins)
+    origin_ns = origins.as_unit("ns").asi8
+    empty = pd.Series(dtype=float, index=pd.DatetimeIndex([]))
+    frame = pd.DataFrame(index=np.arange(len(origins)))
+    for name in ANALYSER_METRICS:
+        series = analysers.get(name, empty)
+        frame[f"ln_{name}_raw"] = ln(_asof(series, origin_ns, TELEMETRY_TOLERANCE_MINUTES))
+        frame[f"ln_{name}_raw_1h"] = ln(_window_mean(series, origin_ns, 1.0, 3))
+        frame[f"ln_{name}_raw_6h"] = ln(_window_mean(series, origin_ns, 6.0, 18))
+        frame[f"ln_{name}_raw_24h"] = ln(_window_mean(series, origin_ns, 24.0, 36))
+    t6 = controls.get("T6", empty)
+    f9 = controls.get("F9", empty)
+    p13 = controls.get("P13", empty)
+    for hours in DELTA_WINDOWS_HOURS:
+        label = f"{int(hours)}h"
+        frame[f"dT6_{label}"] = _delta(t6, origin_ns, hours)
+        frame[f"dlnF9_{label}"] = _delta(f9, origin_ns, hours, log=True)
+        frame[f"dP13_{label}"] = _delta(p13, origin_ns, hours)
+    frame["T6"] = _asof(t6, origin_ns, TELEMETRY_TOLERANCE_MINUTES)
+    frame["F9"] = _asof(f9, origin_ns, TELEMETRY_TOLERANCE_MINUTES)
+    frame["P13"] = _asof(p13, origin_ns, TELEMETRY_TOLERANCE_MINUTES)
+    return frame[DYNAMICS_COLUMNS]
+
+
+def regime_mask(frame: pd.DataFrame) -> np.ndarray:
+    """Rows inside the documented normal-regime envelope (``STAGE1_REGIME``)."""
+    mask = np.ones(len(frame), dtype=bool)
+    for name, (low, high) in STAGE1_REGIME.items():
+        values = frame[name].to_numpy(dtype=float)
+        ok = np.isfinite(values)
+        if low is not None:
+            ok &= values > low
+        if high is not None:
+            ok &= values < high
+        mask &= ok
+    return mask
+
+
 def build_features(analysers: dict[str, pd.Series], controls: dict[str, pd.Series],
                    labs: pd.DataFrame, origins: pd.DatetimeIndex,
                    publication_delay_minutes: float = LIMS_PUBLICATION_DELAY_MINUTES) -> pd.DataFrame:
-    """Assemble the shared feature frame for a list of origins.
+    """Assemble the shared feature frame (dynamics + lab-anchored evidence) for a list of origins.
 
     ``analysers`` maps ``q21``/``pak`` to *cleaned* series; ``controls`` maps
     ``T6``/``F9``/``P13`` to telemetry series.  Missing sources produce NaN
@@ -220,9 +310,9 @@ def build_features(analysers: dict[str, pd.Series], controls: dict[str, pd.Serie
     origins = pd.DatetimeIndex(origins)
     origin_ns = origins.as_unit("ns").asi8
     empty = pd.Series(dtype=float, index=pd.DatetimeIndex([]))
+    frame = build_dynamics_features(analysers, controls, origins)
     anchor = lab_anchor(labs, {k: analysers.get(k, empty) for k in ANALYSER_METRICS}, origins, publication_delay_minutes)
     previous = available_lab(labs, origins, publication_delay_minutes)
-    frame = pd.DataFrame(index=np.arange(len(origins)))
     for name in ANALYSER_METRICS:
         series = analysers.get(name, empty)
         offset = anchor[f"offset_{name}"].to_numpy()
@@ -231,16 +321,6 @@ def build_features(analysers: dict[str, pd.Series], controls: dict[str, pd.Serie
         frame[f"ln_{name}_24h"] = ln(_window_mean(series, origin_ns, 24.0, 36) + offset)
     frame["ln_level"] = ln(anchor["level"].to_numpy())
     frame["ln_previous_lab"] = ln(previous["previous_lab_available"].to_numpy())
-    t6 = controls.get("T6", empty)
-    f9 = controls.get("F9", empty)
-    p13 = controls.get("P13", empty)
-    frame["dT6_1h"] = _delta(t6, origin_ns, 1.0)
-    frame["dT6_3h"] = _delta(t6, origin_ns, 3.0)
-    frame["dlnF9_3h"] = _delta(f9, origin_ns, 3.0, log=True)
-    frame["dP13_3h"] = _delta(p13, origin_ns, 3.0)
-    frame["T6"] = _asof(t6, origin_ns, TELEMETRY_TOLERANCE_MINUTES)
-    frame["F9"] = _asof(f9, origin_ns, TELEMETRY_TOLERANCE_MINUTES)
-    frame["P13"] = _asof(p13, origin_ns, TELEMETRY_TOLERANCE_MINUTES)
     frame = frame[FEATURE_COLUMNS]
     for column in anchor.columns:
         frame[column] = anchor[column].to_numpy()
@@ -250,8 +330,59 @@ def build_features(analysers: dict[str, pd.Series], controls: dict[str, pd.Serie
     return frame
 
 
+def predict_linear(model: dict, raw: np.ndarray) -> np.ndarray:
+    """Standardized linear model from the artifact with train-only median imputation.
+
+    ``raw`` is a 1-D or 2-D array ordered as ``model["feature_columns"]``.
+    """
+    raw = np.asarray(raw, dtype=float)
+    filled = np.where(np.isfinite(raw), raw, np.asarray(model["medians"], dtype=float))
+    standardized = (filled - np.asarray(model["mean"], dtype=float)) / np.asarray(model["scale"], dtype=float)
+    coef = np.asarray(model["coef"], dtype=float)
+    return standardized @ coef[1:] + coef[0]
+
+
+def predict_convex(model: dict, inputs: np.ndarray) -> np.ndarray:
+    """Convex combination of ln inputs; weights renormalised over the finite inputs.
+
+    When every input that carries weight is missing but other evidence is
+    finite, the finite inputs are averaged with equal weights (documented
+    fallback: the lab level / previous lab still bound the estimate).
+    """
+    inputs = np.asarray(inputs, dtype=float)
+    weights = np.asarray(model["weights"], dtype=float)
+    single = inputs.ndim == 1
+    inputs = np.atleast_2d(inputs)
+    finite = np.isfinite(inputs)
+    weighted = np.where(finite, inputs, 0.0) * weights
+    mass = (finite * weights).sum(axis=1)
+    out = np.full(len(inputs), np.nan)
+    usable = mass > 0
+    out[usable] = weighted[usable].sum(axis=1) / mass[usable]
+    fallback = ~usable & finite.any(axis=1)
+    if fallback.any():
+        out[fallback] = np.where(finite[fallback], inputs[fallback], 0.0).sum(axis=1) / finite[fallback].sum(axis=1)
+    out[np.isfinite(out)] += float(model.get("bias", 0.0))
+    return out[0] if single else out
+
+
+def stage2_predict(model: dict, inputs: np.ndarray) -> np.ndarray:
+    """ln sulphur from Stage-2 inputs ordered as ``model["feature_columns"]``."""
+    if model.get("kind") == "linear":
+        return predict_linear(model, inputs)
+    return predict_convex(model, inputs)
+
+
+def stage1_predict(model: dict, raw: np.ndarray) -> np.ndarray:
+    """Predicted change of raw ln analyser over the model horizon."""
+    return predict_linear(model, raw)
+
+
 def applicability(raw: np.ndarray, artifact: dict, anchor_pairs: int | None = None) -> dict:
-    """Return explicit support evidence; thresholds are fixed before evaluation."""
+    """Return explicit support evidence; thresholds are fixed before evaluation.
+
+    ``raw`` is ordered as ``artifact["feature_columns"]`` (the support model).
+    """
     finite = np.isfinite(raw)
     missing_fraction = float((~finite).mean())
     lower = np.asarray(artifact["support_lower"], dtype=float)
@@ -292,7 +423,29 @@ def residual_quantile_function(residuals: np.ndarray, probabilities: np.ndarray 
     probabilities = np.linspace(0.01, 0.99, 99) if probabilities is None else np.asarray(probabilities)
     return {"probabilities": probabilities.tolist(),
             "quantiles": np.quantile(residuals, probabilities).tolist(),
-            "count": int(len(residuals))}
+            "count": int(len(residuals)),
+            "sigma": float(np.std(residuals)) if len(residuals) > 1 else None}
+
+
+def widen_quantiles(quantile_function: dict, extra_sigma: float) -> dict:
+    """Quantile function of the residual convolved with an independent N(0, extra_sigma^2).
+
+    The empirical quantiles are stretched around their median by
+    ``sqrt(1 + extra_sigma^2 / sigma^2)``: exact for Gaussian residuals,
+    monotone and median-preserving otherwise.  ``extra_sigma`` is the ln
+    uncertainty of a scenario effect (coefficient standard errors times the
+    proposed move).
+    """
+    extra_sigma = float(extra_sigma or 0.0)
+    sigma = quantile_function.get("sigma")
+    if extra_sigma <= 0 or not sigma:
+        return quantile_function
+    probabilities = np.asarray(quantile_function["probabilities"], dtype=float)
+    quantiles = np.asarray(quantile_function["quantiles"], dtype=float)
+    median = float(np.interp(0.5, probabilities, quantiles))
+    factor = float(np.sqrt(1.0 + (extra_sigma / sigma) ** 2))
+    return {**quantile_function, "quantiles": (median + (quantiles - median) * factor).tolist(),
+            "sigma": float(np.sqrt(sigma ** 2 + extra_sigma ** 2)), "widened_by_sigma": extra_sigma}
 
 
 def exceedance_probability(quantile_function: dict, ln_prediction: float, ln_limit: float) -> float:
@@ -314,3 +467,61 @@ def interval(quantile_function: dict, ln_prediction: float, lower: float = 0.1, 
     low = float(np.interp(lower, probabilities, quantiles))
     high = float(np.interp(upper, probabilities, quantiles))
     return float(np.exp(ln_prediction + low)), float(np.exp(ln_prediction + high))
+
+
+def anomaly_vector(values: dict[str, float | None], features: dict | None = None) -> dict[str, float]:
+    """Derived anomaly features (``ANOMALY_FEATURES``) from raw tag values; NaN where inputs are missing."""
+    features = features or ANOMALY_FEATURES
+    out = {}
+    for name, (a, b, kind) in features.items():
+        x = values.get(a)
+        y = values.get(b) if b else None
+        x = np.asarray(x, dtype=float) if x is not None else np.nan
+        y = np.asarray(y, dtype=float) if y is not None else np.nan
+        if kind == "value":
+            out[name] = x
+        elif kind == "difference":
+            out[name] = x - y
+        else:
+            with np.errstate(divide="ignore", invalid="ignore"):
+                out[name] = np.where(np.isfinite(y) & (y != 0), x / np.where(y == 0, np.nan, y), np.nan)
+                if np.ndim(out[name]) == 0:
+                    out[name] = float(out[name])
+    return out
+
+
+def mahalanobis_score(model: dict, values: dict[str, float | None]) -> dict:
+    """Robust Mahalanobis distance of the current reactor-block balance vector to the train regime.
+
+    ``model`` holds ``tags`` (feature names), ``features`` (their
+    definitions), ``location``, ``scale`` (robust per-feature std),
+    ``precision`` (inverse robust covariance) and ``thresholds``
+    (``attention`` = train 95% quantile, ``high`` = train 99% quantile of
+    d^2).  The index is ``d^2 / high``; classes are a prototype proxy for an
+    unusual combination of signals, not a failure probability.
+    """
+    tags = list(model["tags"])
+    if model.get("features"):
+        derived = anomaly_vector(values, {k: tuple(v) for k, v in model["features"].items()})
+        vector = np.array([derived.get(tag, np.nan) for tag in tags], dtype=float)
+    else:
+        vector = np.array([values.get(tag) if values.get(tag) is not None else np.nan for tag in tags], dtype=float)
+    if not np.isfinite(vector).all():
+        missing = [tag for tag, value in zip(tags, vector) if not np.isfinite(value)]
+        return {"status": "unavailable", "d2": None, "index": None, "class": None, "factors": [],
+                "reason": f"Нет достоверных значений для индекса аномалии: {', '.join(missing)}"}
+    location = np.asarray(model["location"], dtype=float)
+    scale = np.asarray(model["scale"], dtype=float)
+    precision = np.asarray(model["precision"], dtype=float)
+    centred = vector - location
+    d2 = float(centred @ precision @ centred)
+    high = float(model["thresholds"]["high"])
+    attention = float(model["thresholds"]["attention"])
+    index = d2 / high if high > 0 else None
+    contributions = centred * (precision @ centred)
+    factors = [{"metric_id": tag, "value": float(v), "train_location": float(m), "robust_z": float(z),
+                "contribution": float(c)} for tag, v, m, z, c in zip(tags, vector, location, centred / scale, contributions)]
+    factors.sort(key=lambda f: -abs(f["contribution"]))
+    klass = "high" if d2 > high else "attention" if d2 > attention else "normal"
+    return {"status": "ok", "d2": d2, "index": index, "class": klass, "thresholds": {"attention": attention, "high": high},
+            "factors": factors, "method": model.get("method"), "train_rows": model.get("train_rows")}

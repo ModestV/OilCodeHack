@@ -1,6 +1,8 @@
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+# pandas 2.3 + numpy 2.5 emit this from pd.Timedelta arithmetic; not actionable here.
+filterwarnings = ["ignore:The 'generic' unit for NumPy timedelta:DeprecationWarning"]
 
 [tool.ruff]
 target-version = "py311"

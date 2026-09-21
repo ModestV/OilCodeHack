@@ -2,22 +2,56 @@
   "cases": [
     {
       "id": "normal",
-      "purpose": "Observed stable period: hold with no unnecessary changes; all quality evidence fresh",
+      "purpose": "Observed stable period: no-action forecast within the target and allowed P(>10); hold with no unnecessary changes; walk-forward model fit_end 2026",
       "at": "2026-01-08T07:00:00",
       "decision_status": "recommendation",
       "forecast_status": "ok",
-      "min_candidates": 3
+      "min_candidates": 30,
+      "requires_action": false,
+      "selected_candidate": "hold",
+      "model_fit_end": "2026-01-01"
     },
     {
       "id": "quality_exceedance",
-      "purpose": "Nowcast above target with published LIMS > 10: forecast alarm triggers a corrective (temperature increase) recommendation instead of hold",
-      "at": "2026-01-14T07:00:00",
+      "purpose": "Published LIMS > 10 and no-action forecast above the target: the quality agent requires an action and a corrective candidate (temperature increase) is selected instead of hold",
+      "at": "2026-06-08T07:00:00",
       "decision_status": "recommendation",
       "forecast_status": "ok",
-      "observed_sulfur_above_10": true,
-      "min_candidates": 3,
-      "forecast_alarm": true,
-      "selected_candidate_not": "hold"
+      "published_lab_above_10": true,
+      "requires_action": true,
+      "min_candidates": 30,
+      "selected_candidate_not": "hold",
+      "model_fit_end": "2026-01-01"
+    },
+    {
+      "id": "history_2024",
+      "purpose": "Historical origin served by the first walk-forward model (fit_end 2024-01-01) without future information; stable period, hold",
+      "at": "2024-01-03T07:00:00",
+      "decision_status": "recommendation",
+      "forecast_status": "ok",
+      "model_fit_end": "2024-01-01",
+      "requires_action": false,
+      "min_candidates": 30
+    },
+    {
+      "id": "history_2025",
+      "purpose": "Historical origin served by the 2025 walk-forward model; no-action forecast above the target, corrective candidate on the Pareto front",
+      "at": "2025-02-16T07:00:00",
+      "decision_status": "recommendation",
+      "forecast_status": "ok",
+      "model_fit_end": "2025-01-01",
+      "requires_action": true,
+      "selected_candidate_not": "hold",
+      "min_candidates": 30
+    },
+    {
+      "id": "conflict_low_confidence",
+      "purpose": "Orchestrator conflict: a corrective action is required but data confidence is low and hold is infeasible; the contour abstains and names the conflict",
+      "at": "2025-03-06T07:00:00",
+      "decision_status": "abstain",
+      "forecast_status": "ok",
+      "conflict": "low_confidence_action",
+      "min_candidates": 30
     },
     {
       "id": "missing_history",
@@ -50,7 +84,7 @@
         "current_sulfur": 20
       },
       "decision_status": "abstain",
-      "min_candidates": 3,
+      "min_candidates": 30,
       "all_candidates_infeasible": true
     },
     {
@@ -64,7 +98,7 @@
         }
       },
       "decision_status": "abstain",
-      "min_candidates": 3,
+      "min_candidates": 30,
       "all_candidates_infeasible": true
     },
     {
@@ -84,7 +118,7 @@
         ]
       },
       "decision_status": "abstain",
-      "min_candidates": 3,
+      "min_candidates": 30,
       "all_candidates_infeasible": true
     }
   ]

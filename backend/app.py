@@ -28,8 +28,8 @@ from pydantic import BaseModel, Field
 from . import analytics as a
 from .agents import make_decision
 from .config import ROOT, STORAGE
-from .formulas import formula_results
 from .forecast import ForecastUnavailable, forecast_sulfur
+from .formulas import formula_results
 from .scenarios import ScenarioRequest, calculate_scenario, scenario_defaults
 
 IMPORT_LOCK = threading.Lock()
@@ -279,10 +279,10 @@ def forecast(dataset_id: str, at: str, horizon_minutes: Annotated[float, Query(g
 
 
 @app.get("/api/scenario-defaults")
-def scenario_parameter_defaults():
-    """Default scenario coefficients (analyser step responses) with their evidence."""
+def scenario_parameter_defaults(at: str | None = None):
+    """Default scenario coefficients (train-only analyser step responses of the model applicable at ``at``) with their evidence."""
 
-    return scenario_defaults()
+    return scenario_defaults(at)
 
 
 @app.get("/api/datasets/{dataset_id}/quality")

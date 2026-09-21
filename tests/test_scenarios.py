@@ -8,7 +8,6 @@ from pydantic import ValidationError
 from backend import agents, scenarios
 from backend.scenarios import ScenarioRequest, calculate_scenario
 
-
 AT = "2025-01-01T00:00:00"
 # Explicit surrogate coefficients so the tests do not depend on the shipped artifact.
 PARAMS = {"lag_minutes": 90, "temperature_effect": -0.04, "feed_rate_effect": 0.02, "pressure_effect": -0.2}
@@ -30,12 +29,17 @@ def evidence(monkeypatch):
     return values
 
 
-def forecast_with_nowcast(value, exceedance=0.1):
-    """A forecast object as the runtime returns it, with a flat no-action path."""
+def forecast_with_nowcast(value, exceedance=0.1, **overrides):
+    """A forecast object as the runtime returns it, with a flat no-action path and good data evidence."""
     return {"status": "ok", "prediction": value, "alarm_above_10": exceedance >= 0.3, "alarm_probability": 0.3,
-            "exceedance_probability": exceedance, "feature_time": AT,
+            "exceedance_probability": exceedance, "feature_time": AT, "horizon_minutes": 180,
             "nowcast": {"prediction": value, "lower": value * 0.8, "upper": value * 1.2, "exceedance_probability": exceedance},
-            "horizons": [{"minutes": h, "prediction": value} for h in (0, 60, 120, 180)]}
+            "horizons": [{"minutes": h, "prediction": value, "status": "ok"} for h in (0, 60, 120, 180)],
+            "previous_lab": {"sample_time": "2024-12-31T10:00:00", "available_at": "2024-12-31T14:00:00", "value": value},
+            "lab_anchor": {"level": value, "samples": 10, "pairs": 10},
+            "analysers": {"q21": {"value": value, "age_minutes": 5.0}, "pak": {"value": value, "age_minutes": 5.0}},
+            "feature_count": 20, "imputed_feature_count": 0, "stage1": {"status": "ok"},
+            "in_flight_controls": {"dT6_1h": 0.0}, "leakage_check": {"passed": True}, **overrides}
 
 
 def decide(tmp_path, **kwargs):
@@ -102,10 +106,12 @@ def test_all_infeasible_abstains_and_retains_diagnostics(tmp_path, evidence):
     result = decide(tmp_path, current_sulfur=25)
     assert result["status"] == "abstain"
     assert result["recommendation"] is result["scenario"] is result["selected_candidate"] is None
-    assert len(result["candidates"]) == 3
+    assert len(result["candidates"]) >= 30
     assert all(not candidate["feasible"] for candidate in result["candidates"])
+    assert result["pareto_front"] == []
     assert result["safety_gate"]["passed"] is False
     assert result["safety_gate"]["reasons"]
+    assert "Надёжной рекомендации нет" in result["explanation"]["text"]
 
 
 def test_feasible_choice_minimizes_effort_and_retains_manual_input(tmp_path, evidence):
@@ -115,16 +121,23 @@ def test_feasible_choice_minimizes_effort_and_retains_manual_input(tmp_path, evi
     requested = next(item for item in result["candidates"] if item["id"] == "requested")
     assert requested["controls"]["ht.T6"]["change"] == 10
     assert requested["predicted_sulfur"] == pytest.approx(8 * math.exp(-0.4))
-    assert result["recommendation"]["action"] == "review_controls"
+    assert result["recommendation"]["action"] == "hold"
+    assert result["selection_rule"] == "stable_period_hold"
     assert result["basis"] == "scenario_only"
     assert result["operational_safety_validated"] is False
     assert result["safety_gate"]["unassessed"] == ["t95", "cetane"]
+    assert "лишних управляющих воздействий" in result["explanation"]["rationale"]
 
 
-def test_requested_candidate_can_win_when_feasible_with_less_effort(tmp_path, evidence):
+def test_requested_candidate_is_evaluated_and_a_cheaper_grid_move_can_win(tmp_path, evidence):
     result = decide(tmp_path, current_sulfur=10.4, parameters={**PARAMS, "pressure_effect": -1.5}, changes={"pressure": .15})
-    assert result["selected_candidate"] == "requested"
-    assert result["recommendation"]["predicted_sulfur"] == pytest.approx(10.4 * math.exp(-0.225))
+    requested = next(item for item in result["candidates"] if item["id"] == "requested")
+    assert requested["feasible"] and requested["predicted_sulfur"] == pytest.approx(10.4 * math.exp(-0.225))
+    assert result["status"] == "recommendation"
+    selected = next(item for item in result["candidates"] if item["id"] == result["selected_candidate"])
+    assert selected["pareto"] and selected["predicted_sulfur"] <= 9.0 + 1e-9
+    assert selected["objectives"]["ranking_loss"] <= requested["objectives"]["ranking_loss"]
+    assert result["selected_candidate"] in result["pareto_front"]
 
 
 def test_editable_target_cannot_relax_ten_mg_limit(tmp_path, evidence):
@@ -137,10 +150,10 @@ def test_editable_target_cannot_relax_ten_mg_limit(tmp_path, evidence):
 
 def test_exceedance_probability_gate_blocks_risky_hold(tmp_path, evidence, monkeypatch):
     monkeypatch.setattr(agents, "forecast_sulfur", lambda *args, **kwargs: forecast_with_nowcast(9.6, exceedance=0.45))
-    monkeypatch.setattr(scenarios, "exceedance_at", lambda artifact, horizon, ln_pred, limit=None: {
+    monkeypatch.setattr(scenarios, "exceedance_at", lambda entry, horizon, ln_pred, **kwargs: {
         "prediction": math.exp(ln_pred), "lower": math.exp(ln_pred) * 0.8, "upper": math.exp(ln_pred) * 1.2,
         "exceedance_probability": 0.45 if math.exp(ln_pred) > 9.5 else 0.15, "limit": 10.0, "interval": "test"})
-    monkeypatch.setattr(scenarios, "_load_artifact", lambda *args, **kwargs: {})
+    monkeypatch.setattr(scenarios, "applicable_model", lambda *args, **kwargs: ({}, {"fit_end": AT}))
     result = decide(tmp_path, current_t95=350, current_cetane=52)
     assert result["agents"]["quality"]["evidence"]["sulfur"]["source"] == "model.nowcast"
     hold = next(item for item in result["candidates"] if item["id"] == "hold")
@@ -177,9 +190,10 @@ def test_each_control_requires_fresh_unflagged_available_evidence(tmp_path, evid
     evidence[0][field] = value
     result = decide(tmp_path, current_sulfur=8)
     assert result["status"] == "abstain"
-    assert len(result["candidates"]) == 3
+    assert len(result["candidates"]) >= 30
     assert result["recommendation"] is None
     assert "ht.T6" in " ".join(result["safety_gate"]["reasons"])
+    assert result["constraints"]["ht.T6"]["blocked"] is True
 
 
 def test_stale_quality_is_hard_gate_even_with_good_controls(tmp_path, evidence):
@@ -216,19 +230,19 @@ def test_cetane_uses_declared_slow_quality_window(tmp_path, evidence):
     assert decide(tmp_path, current_t95=350)["status"] == "abstain"
 
 
-def test_stale_t95_falls_back_to_vak_virtual_analyser(tmp_path, evidence, monkeypatch):
-    evidence.append({"metric_id": "lims.ht.2.95%.T", "value": 350, "timestamp": "2024-12-20T10:00:00",
-                     "available_at": "2024-12-20T14:00:00", "freshness": "stale", "flags": [], "age_minutes": 12 * 24 * 60.0})
-    monkeypatch.setattr(agents, "formula_results", lambda *args: {"formulas": [
-        {"id": "24-2000:GODT:T95", "result": 352.5, "status": "experimental",
-         "inputs": [{"tag": "T6", "freshness": "fresh", "flags": []}]}]})
+def test_t95_uses_declared_slow_quality_window(tmp_path, evidence):
+    evidence.append({"metric_id": "lims.ht.2.95%.T", "value": 350, "timestamp": "2024-12-28T10:00:00",
+                     "available_at": "2024-12-28T14:00:00", "freshness": "stale", "flags": [], "age_minutes": 4 * 24 * 60.0})
     result = decide(tmp_path, current_cetane=52)
     quality = result["agents"]["quality"]["evidence"]["other_quality"]
-    assert quality["t95"]["source"] == "vak.24-2000:GODT:T95" and quality["t95"]["value"] == 352.5
+    assert quality["t95"]["source"] == "lims.ht.2.95%.T" and quality["t95"]["value"] == 350
     assert result["status"] == "recommendation"
-    monkeypatch.setattr(agents, "formula_results", lambda *args: {"formulas": [
-        {"id": "24-2000:GODT:T95", "result": 365.0, "status": "experimental",
-         "inputs": [{"tag": "T6", "freshness": "fresh", "flags": []}]}]})
+    checks = {c["name"]: c for c in result["safety_gate"]["checks"]}
+    assert checks["t95_evidence"]["basis"] == "slow_quality_window"
+    evidence[-1]["age_minutes"] = 8 * 24 * 60.0
+    assert decide(tmp_path, current_cetane=52)["status"] == "abstain"
+    evidence[-1]["age_minutes"] = 4 * 24 * 60.0
+    evidence[-1]["value"] = 365
     assert decide(tmp_path, current_cetane=52)["status"] == "abstain"
 
 
@@ -236,7 +250,9 @@ def test_stale_t95_falls_back_to_vak_virtual_analyser(tmp_path, evidence, monkey
 def test_sulfur_target_cannot_override_known_other_quality_failure(tmp_path, evidence, quality):
     result = decide(tmp_path, current_sulfur=8, **quality)
     assert result["status"] == "abstain"
-    assert all(item["target_met"] for item in result["candidates"])
+    hold = next(item for item in result["candidates"] if item["id"] == "hold")
+    assert hold["target_met"] and not hold["feasible"]
+    assert all(not item["feasible"] for item in result["candidates"])
     assert result["safety_gate"]["passed"] is False
 
 
@@ -245,7 +261,7 @@ def test_invalid_recipe_retains_each_candidate_error(tmp_path, evidence):
         {"name": "A", "share": 90, "sulfur": 8, "t95": 350, "cetane": 52},
     ])
     assert result["status"] == "abstain"
-    assert len(result["candidates"]) == 3
+    assert len(result["candidates"]) >= 30
     assert all(item["status"] == "error" for item in result["candidates"])
     assert "100%" in result["safety_gate"]["reasons"][0]
 
@@ -265,16 +281,20 @@ def test_forecast_abstain_blocks_observed_decision_but_allows_labeled_what_if(tm
 
 def test_forecast_alarm_triggers_corrective_candidate_instead_of_blocking(tmp_path, evidence, monkeypatch):
     monkeypatch.setattr(agents, "forecast_sulfur", lambda *args, **kwargs: forecast_with_nowcast(11, exceedance=0.6))
-    monkeypatch.setattr(scenarios, "_load_artifact", lambda *args, **kwargs: (_ for _ in ()).throw(scenarios.ForecastUnavailable("x")))
+    monkeypatch.setattr(scenarios, "applicable_model", lambda *args, **kwargs: (_ for _ in ()).throw(scenarios.ForecastUnavailable("x")))
     result = decide(tmp_path, current_t95=350, current_cetane=52)
     assert result["agents"]["quality"]["evidence"]["sulfur"]["value"] == 11
+    assert result["problem"]["requires_action"] is True
     hold = next(item for item in result["candidates"] if item["id"] == "hold")
     assert hold["feasible"] is False
     assert result["status"] == "recommendation"
-    assert result["selected_candidate"] in {"automatic", "conservative"}
+    assert result["selection_rule"] == "min_ranking_loss_on_pareto_front"
     assert result["recommendation"]["controls"]["ht.T6"]["change"] > 0
+    assert result["recommendation"]["predicted_sulfur"] <= 9.0 + 1e-9
     assert result["safety_gate"]["forecast_alarm"] is True
     assert result["operational_safety_validated"] is False
+    assert result["explanation"]["action"] and "T6" in result["explanation"]["action"][0]
+    assert len(result["alternatives"]) >= 1
 
 
 @pytest.mark.parametrize("kwargs", [
@@ -294,8 +314,13 @@ def test_candidate_objectives_report_physical_tradeoffs(tmp_path, evidence):
     assert objectives["throughput_index"] == pytest.approx(.95)
     assert objectives["energy_cost_index"] == pytest.approx(1.005)
     assert objectives["regime_severity"]["failure_probability"] is None
+    assert objectives["overshoot_index"] > 0
+    # Stable period: hold is selected even if a corrective move has a lower weighted loss.
+    assert result["selected_candidate"] == "hold" and result["selection_rule"] == "stable_period_hold"
     feasible = [c for c in result["candidates"] if c["feasible"]]
-    assert result["selected_candidate"] == min(feasible, key=lambda c: (c["objectives"]["ranking_loss"], c["effort"], c["predicted_sulfur"]))["id"]
+    front = [c for c in feasible if c["pareto"]]
+    assert front and all(not c["dominated_by"] for c in front)
+    assert all(c["dominated_by"] for c in feasible if not c["pareto"])
 
 
 def test_regime_model_cap_cannot_be_offset_by_quality_or_economics(tmp_path, evidence):
@@ -303,9 +328,11 @@ def test_regime_model_cap_cannot_be_offset_by_quality_or_economics(tmp_path, evi
     evidence[2]["value"] = 20
     result = decide(tmp_path, current_sulfur=8)
     assert result["status"] == "abstain"
-    assert all(c["target_met"] for c in result["candidates"])
+    hold = next(c for c in result["candidates"] if c["id"] == "hold")
+    assert hold["target_met"] and not hold["feasible"]
     assert all(not c["feasible"] for c in result["candidates"])
     assert "экспериментальный предел" in " ".join(result["safety_gate"]["reasons"])
+    assert result["risk"]["class"] == "high"
 
 
 @pytest.mark.parametrize("quality,targets", [
@@ -318,11 +345,111 @@ def test_updated_scheme_quality_limits_cannot_be_relaxed(tmp_path, evidence, qua
     assert all(not c["feasible"] for c in result["candidates"])
 
 
-def test_scenario_defaults_come_from_step_response_evidence(tmp_path, evidence):
-    defaults = scenarios.scenario_defaults()
+def test_scenario_defaults_follow_model_applicable_at(tmp_path, evidence):
+    defaults = scenarios.scenario_defaults(AT)
     assert defaults["temperature_effect"] < 0 < defaults["feed_rate_effect"]
     assert defaults["pressure_effect"] < 0
     assert 0 <= defaults["lag_minutes"] <= 180
+    assert all(0 <= lag <= 180 for lag in defaults["lags"].values())
+    assert defaults["uncertainty"]["temperature_effect"] >= 0
+    assert defaults["model_fit_end"] <= AT
     result = calculate_scenario(tmp_path, ScenarioRequest(at=AT, current_sulfur=8))
     assert result["parameters"]["temperature_effect"] == defaults["temperature_effect"]
     assert result["parameter_defaults"]["basis"]
+    later = scenarios.scenario_defaults("2026-03-01T00:00:00")
+    assert later["model_fit_end"] > defaults["model_fit_end"]
+
+
+def test_feed_effect_is_ramped_consistently_in_trajectory_endpoint_and_solver(tmp_path, evidence):
+    # Horizon shorter than the lag: the feed effect must be ramped everywhere.
+    hold = scenario(tmp_path, current_sulfur=8.5, baseline_feed_sulfur=0.9, feed_sulfur=1.1, horizon_minutes=45,
+                    step_minutes=15, changes={})
+    assert hold["predicted_sulfur"] == pytest.approx(8.5 * math.exp(math.log(1.1 / 0.9) * 0.5))
+    assert hold["predicted_sulfur"] == hold["trajectory"][-1]["sulfur"]
+    automatic = scenario(tmp_path, current_sulfur=8.5, baseline_feed_sulfur=0.9, feed_sulfur=1.1, horizon_minutes=45, step_minutes=15)
+    assert automatic["predicted_sulfur"] == pytest.approx(min(9.0, hold["predicted_sulfur"]))
+    # The solver sizes the move for the ramped feed effect at the horizon (not the full effect).
+    assert automatic["control_effect_ln"] == pytest.approx(2 * (math.log(9 / 8.5) - 0.5 * math.log(1.1 / 0.9)))
+
+
+def test_candidate_interval_widens_with_move_size_not_for_hold(tmp_path, evidence, monkeypatch):
+    monkeypatch.setattr(agents, "forecast_sulfur", lambda *args, **kwargs: forecast_with_nowcast(9.4, exceedance=0.2))
+    result = decide(tmp_path, current_t95=350, current_cetane=52)
+    by_id = {c["id"]: c for c in result["candidates"] if c.get("scenario")}
+    assert by_id["hold"]["scenario"]["interval_widening_ln_sigma"] == 0
+    assert by_id["t6_p2"]["scenario"]["interval_widening_ln_sigma"] > 0
+    assert by_id["t6_p5"]["scenario"]["interval_widening_ln_sigma"] > by_id["t6_p2"]["scenario"]["interval_widening_ln_sigma"]
+    assert by_id["t6_p5"]["scenario"]["coefficient_uncertainty"]["temperature_effect"] > 0
+
+
+def test_candidate_grid_is_deterministic_and_respects_constraints(tmp_path, evidence):
+    first = decide(tmp_path, current_sulfur=8)
+    second = decide(tmp_path, current_sulfur=8)
+    assert [c["id"] for c in first["candidates"]] == [c["id"] for c in second["candidates"]]
+    ids = {c["id"] for c in first["candidates"]}
+    assert {"hold", "automatic", "t6_p1", "t6_p10", "p13_p0.5", "f9_m10", "t6_p3_p13_p0.1"} <= ids
+    assert all(c["controls"]["ht.T6"]["change"] <= 10 for c in first["candidates"] if c.get("scenario"))
+
+
+def test_reliability_blocks_upward_steps_when_risk_high(tmp_path, evidence, monkeypatch):
+    high = {"status": "ok", "index": 0.9, "class": "high", "dominant": "anomaly", "factors": [],
+            "severity": {"status": "ok", "index": 0.2, "within_model_limit": True, "failure_probability": None}, "anomaly": {}}
+    monkeypatch.setattr(agents, "risk_assessment", lambda *args, **kwargs: high)
+    monkeypatch.setattr(agents, "forecast_sulfur", lambda *args, **kwargs: forecast_with_nowcast(11, exceedance=0.6))
+    result = decide(tmp_path, current_t95=350, current_cetane=52)
+    assert result["constraints"]["ht.T6"]["max_step_up"] == 0
+    assert result["constraints"]["ht.P13"]["max_step_up"] == 0
+    up = next(c for c in result["candidates"] if c["id"] == "t6_p3")
+    assert not up["feasible"] and "агент надёжности" in up["reason"]
+    # Sulphur must be lowered but every lowering move is blocked: a declared conflict, not a silent abstain.
+    assert result["status"] == "abstain"
+    assert any(c["code"] == "quality_vs_reliability" for c in result["conflicts"])
+
+
+def test_low_confidence_blocks_corrective_but_not_hold(tmp_path, evidence, monkeypatch):
+    weak = forecast_with_nowcast(11, exceedance=0.6, previous_lab=None, lab_anchor={"pairs": 1}, analysers={}, imputed_feature_count=8)
+    monkeypatch.setattr(agents, "forecast_sulfur", lambda *args, **kwargs: weak)
+    result = decide(tmp_path, current_t95=350, current_cetane=52)
+    assert result["confidence"]["class"] == "low"
+    assert result["status"] == "abstain"
+    assert any(c["code"] == "low_confidence_action" for c in result["conflicts"])
+    calm = forecast_with_nowcast(8, exceedance=0.05, previous_lab=None, lab_anchor={"pairs": 1}, analysers={}, imputed_feature_count=8)
+    monkeypatch.setattr(agents, "forecast_sulfur", lambda *args, **kwargs: calm)
+    result = decide(tmp_path, current_t95=350, current_cetane=52)
+    assert result["status"] == "recommendation" and result["selected_candidate"] == "hold"
+
+
+def test_consistency_check_detects_baseline_mismatch(tmp_path, evidence, monkeypatch):
+    monkeypatch.setattr(agents, "forecast_sulfur", lambda *args, **kwargs: forecast_with_nowcast(8, exceedance=0.05))
+    original = agents.calculate_scenario
+
+    def shifted(directory, request, **kwargs):
+        result = original(directory, request, **kwargs)
+        result["baseline"]["sulfur"] = 7.0
+        return result
+
+    monkeypatch.setattr(agents, "calculate_scenario", shifted)
+    result = decide(tmp_path, current_t95=350, current_cetane=52)
+    assert result["status"] == "abstain"
+    assert "несогласованность" in result["abstain"]["reason"]
+    assert any(c["code"] == "K1_baseline_shared" and not c["passed"] for c in result["consistency"])
+
+
+def test_explanation_contains_table6_blocks(tmp_path, evidence, monkeypatch):
+    monkeypatch.setattr(agents, "forecast_sulfur", lambda *args, **kwargs: forecast_with_nowcast(11, exceedance=0.6))
+    result = decide(tmp_path, current_t95=350, current_cetane=52)
+    explanation = result["explanation"]
+    for key in ("time_state", "problem", "action", "expected_effect", "constraints_check", "confidence", "rationale", "text"):
+        assert explanation.get(key)
+    assert "P(>10)" in explanation["expected_effect"]
+    assert "→" in explanation["action"][0]
+    assert result["trace"][-1]["role"] == "orchestrator"
+    assert all(step.get("consumes") and step.get("produces") for step in result["trace"])
+
+
+def test_shared_baseline_selection_matches_between_quality_and_scenario(tmp_path, evidence, monkeypatch):
+    monkeypatch.setattr(agents, "forecast_sulfur", lambda *args, **kwargs: forecast_with_nowcast(8.4, exceedance=0.1))
+    result = decide(tmp_path, current_t95=350, current_cetane=52)
+    assert result["agents"]["quality"]["evidence"]["sulfur"]["value"] == 8.4
+    assert result["scenario"]["baseline"]["sulfur"] == 8.4
+    assert all(c["passed"] for c in result["consistency"])

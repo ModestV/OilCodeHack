@@ -93,20 +93,19 @@ def test_decision_runs_deterministic_agents_and_returns_trace(tmp_path, monkeypa
         "quality",
         "reliability",
         "optimization",
+        "orchestrator",
     ]
     assert all("summary" in item and "status" in item for item in body["trace"])
     # An unreachable target is diagnostic evidence, never an action suggestion.
     assert body["recommendation"] is None
     assert body["scenario"] is None
     assert body["candidates"][0]["scenario"]["baseline"]["sulfur"] == 25
-    assert [candidate["id"] for candidate in body["candidates"]] == [
-        "automatic",
-        "conservative",
-        "hold",
-    ]
+    ids = [candidate["id"] for candidate in body["candidates"]]
+    assert len(ids) >= 30 and {"automatic", "hold"} <= set(ids)
     assert body["selected_candidate"] is None
     assert body["safety_gate"]["passed"] is False
-    assert "внешний LLM" in body["assumptions"][0]
+    assert "детерминированным правилам" in body["assumptions"][0]
+    assert body["explanation"]["text"]
 
 
 def test_decision_abstains_when_sulfur_baseline_is_missing(tmp_path, monkeypatch):
@@ -138,7 +137,7 @@ def test_decision_abstains_when_sulfur_baseline_is_missing(tmp_path, monkeypatch
     assert body["scenario"] is None
     assert body["abstain"]["missing"] == ["sulfur_baseline"]
     assert body["agents"]["optimization"]["status"] == "skipped"
-    assert body["trace"][-1]["status"] == "skipped"
+    assert body["trace"][2]["status"] == "skipped"
 
 
 def test_decision_abstains_when_quality_exists_but_controls_are_missing(tmp_path, monkeypatch):
@@ -166,7 +165,7 @@ def test_decision_abstains_when_quality_exists_but_controls_are_missing(tmp_path
     body = result.json()
     assert body["status"] == "abstain"
     assert body["agents"]["quality"]["evidence"]["available_control_count"] == 0
-    assert body["agents"]["reliability"]["confidence"] < 0.5
+    assert body["agents"]["reliability"]["confidence"]["score"] < 0.75 and body["agents"]["reliability"]["can_recommend"] is False
     assert body["recommendation"] is None
 
 
@@ -194,4 +193,4 @@ def test_decision_abstains_when_control_vector_is_partial(tmp_path, monkeypatch)
     body = result.json()
     assert body["status"] == "abstain"
     assert body["agents"]["quality"]["evidence"]["available_control_count"] == 2
-    assert body["agents"]["reliability"]["confidence"] < 0.5
+    assert body["agents"]["reliability"]["confidence"]["score"] < 0.75 and body["agents"]["reliability"]["can_recommend"] is False

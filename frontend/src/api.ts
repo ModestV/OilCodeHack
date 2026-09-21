@@ -6,6 +6,7 @@ import type {
   Metric,
   Quality,
   SeriesResponse,
+  ScenarioDefaults,
   ScenarioRequest,
   ScenarioResult,
   Settings,
@@ -106,6 +107,8 @@ export const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(value),
     }),
+  scenarioDefaults: (at?: string, s?: AbortSignal) =>
+    request<ScenarioDefaults>(`/api/scenario-defaults${at ? `?at=${enc(at)}` : ""}`, s),
   decision: (id: string, value: ScenarioRequest, s?: AbortSignal) =>
     request<DecisionResult>(`${base(id)}/decision`, s, {
       method: "POST",

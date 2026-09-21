@@ -193,11 +193,12 @@ export interface ScenarioRequest {
   };
   /** Log-domain surrogate coefficients: ln(mg/kg) per °C, per % feed, per MPa. */
   parameters: {
-    lag_minutes: number;
+    /** null = estimated default of the walk-forward model applicable at `at`. */
+    lag_minutes: number | null;
     feed_sulfur_elasticity: number;
-    temperature_effect: number;
-    feed_rate_effect: number;
-    pressure_effect: number;
+    temperature_effect: number | null;
+    feed_rate_effect: number | null;
+    pressure_effect: number | null;
     cetane_gain_per_pct: number;
   };
   changes?: { temperature: number; feed_rate_pct: number; pressure: number };
@@ -267,6 +268,8 @@ export interface DecisionTraceItem {
   role: "quality" | "reliability" | "optimization";
   status: string;
   summary: string;
+  consumes?: string[];
+  produces?: string[];
 }
 
 export interface ForecastPoint {
@@ -310,11 +313,15 @@ export interface SulfurForecast {
   feature_time: string | null;
   feature_count: number;
   imputed_feature_count: number;
+  stage1?: { status: "ok" | "fallback_persistence" | null };
+  in_flight_controls?: Record<string, number | null>;
   model: {
     name: string;
     artifact: string;
     artifact_sha256: string;
-    model_columns: string[];
+    fit_end: string | null;
+    available_from: string | null;
+    stage2_kind_by_horizon?: Record<string, string> | null;
   };
   leakage_check: {
     passed: boolean;
@@ -359,17 +366,54 @@ export interface DecisionResult {
       throughput_change_pct: number;
       energy_cost_index: number;
       regime_severity: { index: number | null; class?: string };
+      risk_index?: number | null;
+      risk_class?: string | null;
       ranking_loss: number | null;
     };
+    pareto?: boolean;
+    dominated_by?: string[];
     controls?: ScenarioResult["controls"];
     safety_gate?: { passed: boolean; reasons: string[] };
     scenario?: ScenarioResult | null;
   }[];
+  pareto_front?: string[];
+  alternatives?: { id: string; label: string; predicted_sulfur: number; exceedance_probability?: number | null; effort: number }[];
   selected_candidate?: string | null;
+  selection_rule?: "stable_period_hold" | "min_ranking_loss_on_pareto_front" | null;
+  problem?: { requires_action: boolean; reasons: string[] } | null;
+  confidence?: { score: number; class: "high" | "medium" | "low"; factors: { name: string; score: number; note: string; value?: unknown }[]; meaning: string } | null;
+  risk?: { status: string; index: number | null; class: string | null; dominant?: string; factors: { metric_id?: string; kind?: string }[] } | null;
+  constraints?: Record<string, { min: number | null; max: number | null; max_step_up: number; max_step_down: number; blocked: boolean; reason: string | null }> | null;
+  conflicts?: { code: string; resolution: "abstain" | "warning"; message: string }[];
+  consistency?: { code: string; passed: boolean; message: string }[];
+  explanation?: {
+    time_state: string;
+    problem: string;
+    action: string | string[];
+    expected_effect: string | null;
+    constraints_check: string;
+    confidence: { text?: string; class?: string; score?: number } | null;
+    rationale: string;
+    alternatives: { id: string; label: string }[];
+    warnings?: string[];
+    text: string;
+  } | null;
   safety_gate?: { passed: boolean; reasons: string[] };
   abstain: { reason: string; missing: string[] } | null;
   forecast: SulfurForecast | null;
   trace: DecisionTraceItem[];
   assumptions: string[];
+}
+
+export interface ScenarioDefaults {
+  temperature_effect: number;
+  feed_rate_effect: number;
+  pressure_effect: number;
+  lag_minutes: number;
+  lags?: Record<"T6" | "F9" | "P13", number>;
+  uncertainty?: Record<string, number>;
+  feed_sulfur_elasticity: number;
+  basis: string;
+  model_fit_end?: string | null;
 }
 

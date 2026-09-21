@@ -1,8 +1,22 @@
 """Deterministic multi-agent decision support for the local prototype.
 
-The agents in this module are deliberately small, transparent Python rules.  They
-provide the same separation of concerns as a future LLM or service based setup,
-while keeping every decision reproducible in the closed hackathon network.
+Four roles with an explicit information exchange (``trace[i].consumes`` /
+``produces``):
+
+* ``QualityAgent`` — current and forecast product quality, the detected
+  problem (does the situation require an action?) and the data behind it.
+* ``ReliabilityAgent`` — freshness/availability gates, the regime-risk index
+  with its factors, the *constraints* the optimiser must respect and a
+  documented data-quality confidence score.
+* ``OptimizationAgent`` — a deterministic grid of admissible control moves
+  evaluated with the transparent scenario model, hard gates, multi-criteria
+  objectives and a Pareto front, then a weighted selection.
+* ``Orchestrator`` — conflict resolution between the roles, consistency
+  checks across their outputs, the final recommendation (or a reasoned
+  abstention), alternatives and an operator explanation.
+
+Every agent is a small transparent Python rule set; the decision is
+reproducible offline in the closed hackathon network.
 """
 
 from __future__ import annotations
@@ -13,22 +27,38 @@ from pathlib import Path
 from typing import Any
 
 from .analytics import parse_time, snapshot
-from .formulas import formula_results
-from .scenarios import HARD_SULFUR_MAX, HARD_T95_MAX, HARD_CETANE_MIN, ControlChanges, ScenarioRequest, calculate_scenario, select_sulfur
-from .forecast import ForecastUnavailable, forecast_sulfur
-from .objectives import candidate_objectives, regime_severity
+from .candidates import candidate_grid
+from .explain import build_explanation
+from .forecast import ForecastUnavailable, applicable_model, forecast_sulfur
+from .objectives import candidate_objectives, pareto_front, risk_assessment
+from .scenarios import (
+    FEED_RATE_CHANGE_LIMIT_PCT,
+    HARD_CETANE_MIN,
+    HARD_SULFUR_MAX,
+    HARD_T95_MAX,
+    PRESSURE_CHANGE_LIMIT,
+    TEMPERATURE_CHANGE_LIMIT,
+    ControlChanges,
+    ScenarioRequest,
+    calculate_scenario,
+    select_baseline,
+    select_sulfur,
+)
 
 CONTROL_IDS = ("ht.T6", "ht.F9", "ht.P13")
 UNUSABLE_FLAGS = {"invalid", "conflict", "suspect", "flatline", "gap"}
 # Slowly varying product properties are sampled rarely (cetane: ~monthly in
-# the source LIMS).  Their last laboratory value stays usable as a baseline
-# constraint for a declared window instead of the 48-hour sulphur freshness.
-# This is a prototype assumption: the hydro-treating scenario does not model
-# a cetane response, so the window only affects whether the baseline check
-# can be performed at all.
-SLOW_QUALITY_MAX_AGE_MINUTES = {"lims.ht.2.CetaneNumber": 60 * 24 * 60}
-# Virtual analyser used for T95 when the laboratory value is stale.
-T95_VAK_FORMULA = "24-2000:GODT:T95"
+# the source LIMS; T95 daily but its day-to-day persistence beats the VAK
+# soft sensor, see reports/verification/agent-backtest).  Their last
+# laboratory value stays usable as a baseline constraint for a declared
+# window instead of the 48-hour sulphur freshness.  A prototype assumption:
+# the hydro-treating scenario does not model a T95/cetane response, so the
+# window only affects whether the baseline check can be performed at all.
+SLOW_QUALITY_MAX_AGE_MINUTES = {"lims.ht.2.CetaneNumber": 60 * 24 * 60, "lims.ht.2.95%.T": 7 * 24 * 60}
+STEP_LIMITS = {"ht.T6": TEMPERATURE_CHANGE_LIMIT, "ht.F9": FEED_RATE_CHANGE_LIMIT_PCT, "ht.P13": PRESSURE_CHANGE_LIMIT}
+# Reliability constraints by risk class: multiplier on upward T6/P13 steps.
+RISK_STEP_FACTORS = {"normal": 1.0, "elevated": 0.5, "high": 0.0}
+CONFIDENCE_CLASSES = ((0.75, "high"), (0.5, "medium"))
 
 
 @dataclass(frozen=True)
@@ -36,6 +66,7 @@ class AgentContext:
     directory: Path
     request: ScenarioRequest
     frame: dict[str, Any]
+    model_entry: dict[str, Any] | None = None
 
 
 def _values(frame: dict[str, Any]) -> dict[str, dict[str, Any]]:
@@ -87,29 +118,9 @@ def _evidence_failures(label: str, item: dict[str, Any], at: str, max_age_minute
 
 
 class QualityAgent:
-    """Estimates current and forecast product quality and the data behind it."""
+    """Estimates current and forecast product quality, detects the problem and exposes the data behind it."""
 
     role = "quality"
-
-    @staticmethod
-    def _vak_t95(context: AgentContext) -> dict[str, Any] | None:
-        try:
-            formulas = formula_results(context.directory, context.request.at)["formulas"]
-        except (OSError, ValueError):
-            return None
-        for formula in formulas:
-            if formula.get("id") != T95_VAK_FORMULA:
-                continue
-            result = formula.get("result")
-            if result is None or not isfinite(result) or formula.get("status") == "invalid":
-                return None
-            if any(item.get("freshness") != "fresh" for item in formula.get("inputs", [])):
-                return None
-            return {"source": f"vak.{T95_VAK_FORMULA}", "value": float(result), "timestamp": context.request.at,
-                    "available_at": context.request.at, "freshness": "fresh", "age_minutes": 0.0,
-                    "flags": sorted({flag for item in formula.get("inputs", []) for flag in (item.get("flags") or [])}),
-                    "basis": "virtual_analyser_expert_formula", "reason": formula.get("reason")}
-        return None
 
     def run(self, context: AgentContext) -> dict[str, Any]:
         values = _values(context.frame)
@@ -124,32 +135,16 @@ class QualityAgent:
 
         raw_sulfur, raw_source = select_sulfur(values)
         raw_item = values.get(raw_source) if raw_source else None
-        if request.current_sulfur is not None:
-            sulfur, sulfur_source, sulfur_item = request.current_sulfur, "request.current_sulfur", None
-        elif forecast_ok:
-            # Lab-anchored analyser nowcast: the best estimate of sulphur now.
-            # The last laboratory sample may be up to 48 hours old and is
-            # kept as separate evidence below.
-            nowcast = model_forecast["nowcast"]
-            sulfur, sulfur_source = float(nowcast["prediction"]), "model.nowcast"
-            sulfur_item = {"value": sulfur, "timestamp": model_forecast.get("feature_time"),
-                           "available_at": model_forecast.get("feature_time"), "freshness": "fresh", "flags": [],
-                           "lower": nowcast["lower"], "upper": nowcast["upper"],
-                           "exceedance_probability": nowcast["exceedance_probability"]}
-        else:
-            sulfur, sulfur_source, sulfur_item = raw_sulfur, raw_source, raw_item
+        sulfur, sulfur_source, sulfur_item = select_baseline(request, values, model_forecast)
 
         controls = {metric_id: _evidence(values.get(metric_id)) for metric_id in CONTROL_IDS}
-        available_controls = [
-            metric_id for metric_id, evidence in controls.items() if evidence["value"] is not None
-        ]
+        available_controls = [metric_id for metric_id, evidence in controls.items() if evidence["value"] is not None]
         missing = [] if sulfur is not None else ["sulfur_baseline"]
         status = "ok" if not missing else "insufficient"
         if sulfur_item and sulfur_item.get("freshness") == "stale":
             warnings.append("Базовое измерение серы устарело")
         if not available_controls:
             warnings.append("Нет текущих значений управляющих тегов T6/F9/P13")
-
         if request.current_sulfur is not None:
             warnings.append("Базовая сера введена вручную: это условный сценарий, а не подтверждение качества продукта")
         if model_forecast and model_forecast.get("status") == "abstain":
@@ -159,6 +154,25 @@ class QualityAgent:
                 f"Прогноз без воздействия: вероятность превышения 10 мг/кг {model_forecast['exceedance_probability']:.0%} "
                 f"(порог тревоги {model_forecast['alarm_probability']:.0%}); требуется корректирующее действие или ручная проверка"
             )
+        if forecast_ok and (model_forecast.get("stage1") or {}).get("status") == "fallback_persistence":
+            warnings.append("Динамика анализатора недоступна: путь без воздействия — персистентность")
+
+        # Problem detection: the trigger for a corrective candidate.
+        # The decision concerns the horizon endpoint: the no-action path of
+        # the forecast when it is usable, otherwise the (flat) current level.
+        # The forecast alarm (F1-optimal threshold of the model) is a warning;
+        # whether an action is *required* follows the decision targets.
+        problem_reasons = []
+        target = request.targets.sulfur_max
+        if forecast_ok and request.current_sulfur is None and model_forecast.get("prediction") is not None:
+            if model_forecast["prediction"] > target:
+                problem_reasons.append(f"Прогноз без воздействия на горизонте {model_forecast['prediction']:.1f} мг/кг выше цели {target:g} мг/кг")
+        elif sulfur is not None and sulfur > target:
+            problem_reasons.append(f"Текущая оценка серы {sulfur:.1f} мг/кг выше цели {target:g} мг/кг (путь без воздействия — плоский)")
+        if forecast_ok and model_forecast.get("exceedance_probability") is not None \
+                and model_forecast["exceedance_probability"] > request.targets.max_exceedance_probability:
+            problem_reasons.append(f"P(>10) без воздействия {model_forecast['exceedance_probability']:.0%} выше допустимой "
+                                   f"{request.targets.max_exceedance_probability:.0%}")
 
         other_quality = {}
         for name, supplied, metric_id in (
@@ -168,24 +182,21 @@ class QualityAgent:
             other_quality[name] = (
                 {"source": f"request.current_{name}", "value": supplied}
                 if supplied is not None
-                else {"source": metric_id, **_evidence(values.get(metric_id))}
+                else {"source": metric_id, **_evidence(values.get(metric_id)), "max_age_minutes": SLOW_QUALITY_MAX_AGE_MINUTES[metric_id]}
             )
-            if name == "cetane" and supplied is None:
-                other_quality[name]["max_age_minutes"] = SLOW_QUALITY_MAX_AGE_MINUTES[metric_id]
-        if request.current_t95 is None and other_quality["t95"].get("freshness") != "fresh":
-            # Source priority LIMS -> VAK: the corrected 24-2000 T95 soft sensor
-            # (MAE ~6 °C vs LIMS, see reports/verification/agent-backtest).
-            vak = self._vak_t95(context)
-            if vak is not None:
-                other_quality["t95_lims"] = other_quality["t95"]
-                other_quality["t95"] = vak
-                warnings.append("T95: лабораторное значение устарело, используется ВАК 24-2000:GODT:T95 (виртуальный анализатор)")
+        previous_lab = (model_forecast or {}).get("previous_lab") if model_forecast else None
+        lab_age_minutes = None
+        if previous_lab and previous_lab.get("sample_time"):
+            lab_age_minutes = (parse_time(request.at) - parse_time(previous_lab["sample_time"])).total_seconds() / 60
+        elif raw_item and raw_source == "lims.ht.2.Mg.Sulfur":
+            lab_age_minutes = raw_item.get("age_minutes")
 
         return {
             "role": self.role,
             "status": status,
             "summary": (
-                "Базовое качество доступно для расчёта"
+                ("Базовое качество доступно; " + ("требуется действие: " + "; ".join(problem_reasons) if problem_reasons
+                                                else "проблем с качеством не обнаружено"))
                 if status == "ok"
                 else "Невозможно определить базовую серу"
             ),
@@ -198,16 +209,90 @@ class QualityAgent:
                 "available_control_count": len(available_controls),
                 "model_forecast": model_forecast,
                 "other_quality": other_quality,
+                "in_flight_controls": (model_forecast or {}).get("in_flight_controls") if forecast_ok else None,
+                "data_age": {"last_lab_minutes": lab_age_minutes,
+                             "analysers": {name: item.get("age_minutes") for name, item in ((model_forecast or {}).get("analysers") or {}).items()}},
             },
+            "problem": {"requires_action": bool(problem_reasons), "reasons": problem_reasons},
             "warnings": warnings,
             "missing": missing,
         }
 
 
 class ReliabilityAgent:
-    """Applies freshness and availability gates before an action is proposed."""
+    """Freshness gates, regime risk with factors, constraints for the optimiser and a data-quality confidence."""
 
     role = "reliability"
+
+    @staticmethod
+    def _constraints(context: AgentContext, controls: dict[str, dict], risk: dict) -> dict[str, dict]:
+        entry = context.model_entry
+        support = None
+        if entry:
+            horizon = max(entry["support"], key=int)
+            support = entry["support"][horizon]
+        factor = RISK_STEP_FACTORS.get(risk.get("class") or "normal", 1.0)
+        out = {}
+        for metric_id in CONTROL_IDS:
+            tag = metric_id.split(".")[1]
+            limit = STEP_LIMITS[metric_id]
+            rule = {"min": None, "max": None, "max_step_up": limit, "max_step_down": limit, "blocked": False, "reason": None,
+                    "relative": metric_id == "ht.F9", "basis": "prototype step limit"}
+            if support is not None:
+                i = list(support["feature_columns"]).index(tag)
+                rule["min"], rule["max"] = float(support["support_lower"][i]), float(support["support_upper"][i])
+                rule["basis"] = "train support of the applicable forecast model (0.5–99.5% + margin) ∩ prototype step limit"
+            evidence = controls.get(metric_id) or {}
+            failures = _evidence_failures(metric_id, evidence, context.request.at)
+            if failures:
+                rule["blocked"], rule["reason"] = True, "; ".join(failures)
+            elif metric_id in ("ht.T6", "ht.P13") and factor < 1.0:
+                rule["max_step_up"] = limit * factor
+                rule["reason"] = (f"риск режима {risk.get('class')}: шаг вверх ограничен {rule['max_step_up']:g}"
+                                  if factor > 0 else f"риск режима {risk.get('class')}: повышение заблокировано")
+            out[metric_id] = rule
+        return out
+
+    @staticmethod
+    def _confidence(quality: dict[str, Any], explicit: bool) -> dict[str, Any]:
+        evidence = quality["evidence"]
+        forecast = evidence.get("model_forecast") or {}
+        factors = []
+
+        def factor(name, score, note, value=None):
+            factors.append({"name": name, "score": round(float(score), 3), "note": note, "value": value})
+
+        if explicit:
+            factor("hypothetical_baseline", 0.9, "база задана вручную: условный сценарий, качество данных прогноза не оценивается")
+        age = (evidence.get("data_age") or {}).get("last_lab_minutes")
+        if explicit:
+            pass
+        elif age is None:
+            factor("last_lab_age", 0.4, "последняя опубликованная проба серы неизвестна")
+        else:
+            factor("last_lab_age", 1.0 if age <= 30 * 60 else 0.7 if age <= 48 * 60 else 0.4,
+                   "возраст последней опубликованной пробы серы", round(age / 60, 1))
+        pairs = (forecast.get("lab_anchor") or {}).get("pairs")
+        if pairs is not None:
+            factor("lab_anchor_pairs", 1.0 if pairs >= 8 else 0.8 if pairs >= 3 else 0.5, "число пар ЛИМС/анализатор для калибровки", pairs)
+        analysers = forecast.get("analysers") or {}
+        fresh = sum(1 for a in analysers.values() if a.get("value") is not None and a.get("age_minutes") is not None and a["age_minutes"] <= 30)
+        if analysers:
+            factor("analysers_fresh", {2: 1.0, 1: 0.8}.get(fresh, 0.5), "свежие поточные анализаторы серы (Q21, ПАК)", fresh)
+        if forecast.get("feature_count"):
+            missing = forecast.get("imputed_feature_count", 0) / forecast["feature_count"]
+            factor("imputed_features", max(0.0, 1.0 - missing), "доля признаков прогноза, заменённых медианами", round(missing, 2))
+        stage1 = (forecast.get("stage1") or {}).get("status")
+        if not explicit:
+            factor("forecast_status", 1.0 if forecast.get("status") == "ok" else 0.5, "статус модельного прогноза", forecast.get("status"))
+            factor("stage1", {"ok": 1.0, "fallback_persistence": 0.8}.get(stage1, 0.9), "динамика анализатора (ступень 1)", stage1)
+        score = 1.0
+        for f in factors:
+            score *= f["score"]
+        klass = next((label for edge, label in CONFIDENCE_CLASSES if score >= edge), "low")
+        return {"score": round(score, 3), "class": klass, "factors": factors,
+                "meaning": "эвристический индекс качества входных данных прогноза [0, 1] (произведение факторов); риск режима учитывается "
+                           "отдельно через ограничения; не вероятность и не гарантия"}
 
     def run(self, context: AgentContext, quality: dict[str, Any]) -> dict[str, Any]:
         sulfur = quality["evidence"]["sulfur"]
@@ -222,7 +307,8 @@ class ReliabilityAgent:
             reasons.extend(_evidence_failures("Базовая сера", sulfur, context.request.at))
         # All three controls define the intervention vector.  Missing, stale or
         # flagged inputs block it even when another input has high confidence.
-        for metric_id, evidence in quality["evidence"]["controls"].items():
+        controls = quality["evidence"]["controls"]
+        for metric_id, evidence in controls.items():
             reasons.extend(_evidence_failures(metric_id, evidence, context.request.at))
         forecast = quality["evidence"].get("model_forecast")
         if not explicit and (not forecast or forecast.get("status") != "ok"):
@@ -230,22 +316,26 @@ class ReliabilityAgent:
         # A forecast alarm does not block the contour: it is the trigger for a
         # corrective candidate, which the safety gate then checks per candidate.
         can_recommend = not reasons
-        severity = regime_severity({key: item.get("value") for key, item in quality["evidence"]["controls"].items()})
-        # Compatibility field only: this is a gate score, not a calibrated
-        # confidence, reliability probability, or probability of safe product.
-        confidence = 1.0 if can_recommend else 0.0
+        values = _values(context.frame)
+        risk = risk_assessment({key: item.get("value") for key, item in controls.items()},
+                               {mid: (values.get(mid) or {}).get("value") for mid in values}, context.model_entry)
+        if risk.get("status") == "ok" and risk.get("class") == "high":
+            warnings.append(f"Высокий риск режима ({risk.get('dominant')}): повышение T6/P13 заблокировано агентом надёжности")
+        constraints = self._constraints(context, controls, risk)
+        confidence = self._confidence(quality, explicit)
         reason = "; ".join(reasons) if reasons else None
         return {
             "role": self.role,
             "status": "ok" if can_recommend else "insufficient",
             "summary": (
-                "Временная доступность и свежесть прошли контроль"
+                f"Данные пригодны; риск режима {risk.get('class') or 'не оценён'}; уверенность {confidence['class']} ({confidence['score']:.2f})"
                 if can_recommend
                 else reason
             ),
             "confidence": confidence,
-            "confidence_kind": "binary_data_gate_not_probability",
-            "regime_severity": severity,
+            "risk": risk,
+            "regime_severity": risk.get("severity"),
+            "constraints": constraints,
             "can_recommend": can_recommend,
             "basis": "scenario_only" if explicit else "observed_and_forecast",
             "reasons": reasons,
@@ -255,7 +345,7 @@ class ReliabilityAgent:
 
 
 class OptimizationAgent:
-    """Runs the existing transparent scenario model after reliability gates."""
+    """Evaluates a grid of control moves with the transparent scenario model after the reliability gates."""
 
     role = "optimization"
 
@@ -318,8 +408,7 @@ class OptimizationAgent:
                     failures = _evidence_failures(name, item, request.at, item.get("max_age_minutes"))
                     reasons.extend(failures)
                     checks.append({"name": f"{name}_evidence", "passed": not failures,
-                                   "basis": "virtual_analyser" if item.get("source", "").startswith("vak.") else
-                                   "slow_quality_window" if item.get("max_age_minutes") else "observed_baseline"})
+                                   "basis": "slow_quality_window" if item.get("max_age_minutes") else "observed_baseline"})
                 check(name, value <= maximum if name == "t95" else value >= maximum,
                       f"Базовый показатель {name} не выполняет ограничение; его отклик не моделируется",
                       "editable_target_baseline_only")
@@ -339,8 +428,8 @@ class OptimizationAgent:
         self, context: AgentContext, reliability: dict[str, Any], quality: dict[str, Any],
     ) -> list[dict[str, Any]]:
         request = context.request
-        # First calculate the editable automatic action.  The other candidates
-        # are derived from this same transparent model, so their comparison is
+        # First calculate the editable automatic action.  The grid candidates
+        # are evaluated with the same transparent model, so their comparison is
         # deterministic and does not claim an independently validated policy.
         forecast = quality.get("evidence", {}).get("model_forecast")
         automatic_request = request.model_copy(deep=True)
@@ -349,31 +438,16 @@ class OptimizationAgent:
             automatic = calculate_scenario(context.directory, automatic_request, frame=context.frame, forecast=forecast)
         except ValueError:
             automatic = None
-        # Controls in the scenario result use metric ids; map them explicitly
-        # to the public request fields to keep this adapter independent of dict
-        # ordering and future control additions.
         automatic_changes = ControlChanges(
             temperature=automatic["controls"]["ht.T6"]["change"],
             feed_rate_pct=automatic["controls"]["ht.F9"]["change"],
             pressure=automatic["controls"]["ht.P13"]["change"],
-        ) if automatic else ControlChanges()
-        definitions = [
-            ("hold", "Удержать текущий режим", ControlChanges()),
-            (
-                "conservative",
-                "Консервативное изменение (50% от automatic)",
-                ControlChanges(
-                    temperature=automatic_changes.temperature * 0.5,
-                    feed_rate_pct=automatic_changes.feed_rate_pct * 0.5,
-                    pressure=automatic_changes.pressure * 0.5,
-                ),
-            ),
-            ("automatic", "Изменение до цели в рамках модели", automatic_changes),
-        ]
-        if request.changes is not None:
-            definitions.append(("requested", "Изменение, заданное пользователем", request.changes))
+        ) if automatic else None
+        current = {mid.split(".")[1]: (quality["evidence"]["controls"].get(mid) or {}).get("value") for mid in CONTROL_IDS}
+        grid = candidate_grid(automatic_changes, request.changes, reliability.get("constraints"), current)
         candidates = []
-        for candidate_id, label, changes in definitions:
+        for definition in grid:
+            candidate_id, label, changes = definition["id"], definition["label"], definition["changes"]
             candidate_request = request.model_copy(deep=True)
             candidate_request.changes = changes
             try:
@@ -383,6 +457,7 @@ class OptimizationAgent:
                     {
                         "id": candidate_id,
                         "label": label,
+                        "origin": definition["origin"],
                         "status": "error",
                         "feasible": False,
                         "reason": str(exc),
@@ -394,18 +469,26 @@ class OptimizationAgent:
             target_met = bool(scenario["sulfur_target_met"])
             effort = self._effort(changes)
             gate = self._gate(scenario, context, reliability, quality)
-            objectives = candidate_objectives(scenario, effort, request.targets.max_exceedance_probability)
-            severity = objectives["regime_severity"]
-            severity_passed = severity.get("status") == "ok" and severity.get("within_model_limit") is True
-            gate["checks"].append({"name": "regime_severity_model_limit", "passed": severity_passed,
-                                   "basis": "experimental_high_side_12sigma_not_industrial_limit"})
-            if not severity_passed:
-                gate["reasons"].append("Индекс нагрузки недоступен или превышает экспериментальный предел")
+            risk = risk_assessment({key: value["recommended"] for key, value in scenario["controls"].items()},
+                                   {mid: (_values(context.frame).get(mid) or {}).get("value") for mid in _values(context.frame)},
+                                   context.model_entry)
+            objectives = candidate_objectives(scenario, effort, request.targets.max_exceedance_probability, risk,
+                                              min(request.targets.sulfur_max, HARD_SULFUR_MAX))
+            risk_passed = risk.get("status") == "ok" and (risk.get("severity") or {}).get("within_model_limit") is True
+            gate["checks"].append({"name": "regime_risk_model_limit", "passed": risk_passed,
+                                   "basis": "train_support_edge_of_forecast_not_industrial_limit"})
+            if not risk_passed:
+                gate["reasons"].append("Индекс нагрузки недоступен или превышает экспериментальный предел (край обучающего режима)")
+                gate["passed"] = False
+            for violation in definition["constraint_violations"]:
+                gate["checks"].append({"name": "reliability_constraint", "passed": False, "basis": "reliability_agent_constraint"})
+                gate["reasons"].append(violation)
                 gate["passed"] = False
             candidates.append(
                 {
                     "id": candidate_id,
                     "label": label,
+                    "origin": definition["origin"],
                     "status": "ok",
                     "feasible": gate["passed"],
                     "reason": None if gate["passed"] else "; ".join(gate["reasons"]),
@@ -417,19 +500,25 @@ class OptimizationAgent:
                     "target_met": target_met,
                     "effort": effort,
                     "objectives": objectives,
+                    "risk": risk,
                     "controls": scenario["controls"],
                     "safety_gate": gate,
                     "scenario": scenario,
                 }
             )
-        # Feasible candidates win first; among them prefer the smallest
-        # intervention and then the lowest predicted sulfur. Failed candidates
-        # remain diagnostic evidence; none is eligible for a recommendation.
         feasible = [item for item in candidates if item.get("feasible", False)]
         infeasible = [item for item in candidates if not item.get("feasible", False)]
+        front = pareto_front(feasible)
+        for item in infeasible:
+            item["pareto"] = False
+            item["dominated_by"] = []
+        # Feasible candidates win first, the Pareto front before dominated
+        # ones; within the front the weighted loss, then the smallest
+        # intervention, then the lowest predicted sulphur.
         feasible.sort(
             key=lambda item: (
-                item["objectives"]["ranking_loss"],
+                0 if item["pareto"] else 1,
+                item["objectives"]["ranking_loss"] if item["objectives"]["ranking_loss"] is not None else float("inf"),
                 item.get("effort", float("inf")),
                 item.get("predicted_sulfur", float("inf")),
             )
@@ -442,8 +531,7 @@ class OptimizationAgent:
                 item.get("effort", float("inf")),
             )
         )
-        candidates = feasible + infeasible
-        return candidates
+        return feasible + infeasible, [item["id"] for item in front]
 
     def run(
         self,
@@ -458,26 +546,40 @@ class OptimizationAgent:
                 "status": "skipped",
                 "summary": "Расчёт пропущен: отсутствует базовое качество",
                 "candidates": [],
+                "pareto_front": [],
                 "safety_gate": {"passed": False, "reasons": reliability.get("reasons", []), "checks": []},
                 "scenario": None,
             }
         try:
-            candidates = self._candidates(context, reliability, quality)
+            candidates, front = self._candidates(context, reliability, quality)
         except ValueError as exc:
             return {
                 "role": self.role,
                 "status": "error",
                 "summary": "Сценарная модель вернула ошибку",
                 "error": str(exc),
+                "candidates": [],
+                "pareto_front": [],
                 "scenario": None,
             }
-        selected = next((candidate for candidate in candidates if candidate.get("feasible")), None)
+        feasible = [item for item in candidates if item.get("feasible")]
+        hold = next((item for item in candidates if item["id"] == "hold"), None)
+        requires_action = bool((quality.get("problem") or {}).get("requires_action"))
+        selection_rule = None
+        selected = None
+        if not requires_action and hold is not None and hold.get("feasible"):
+            # Stable period: no unnecessary control action (organisers' demo requirement).
+            selected, selection_rule = hold, "stable_period_hold"
+        elif feasible:
+            selected, selection_rule = feasible[0], "min_ranking_loss_on_pareto_front"
         if selected is None or selected.get("scenario") is None:
             return {
                 "role": self.role,
                 "status": "insufficient",
                 "summary": "Ни один кандидат не прошёл все применимые проверки; требуется ручной разбор",
                 "candidates": candidates,
+                "pareto_front": front,
+                "requires_action": requires_action,
                 "safety_gate": {
                     "passed": False,
                     "reasons": list(dict.fromkeys(reason for item in candidates
@@ -487,77 +589,172 @@ class OptimizationAgent:
                 },
                 "scenario": None,
             }
+        alternatives = [item for item in feasible if item is not selected and item.get("pareto")][:3]
         result = selected["scenario"]
-        predicted = result["predicted_sulfur"]
-        target = result["sulfur_target_met"]
         model_forecast = (quality or {}).get("evidence", {}).get("model_forecast")
-        summary = (
-            "Расчётный кандидат проходит применимые проверки для рассмотрения оператором"
-            if target
-            else "Сценарий не достигает цели по сере; требуется ручная проверка"
-        )
-        summary = (
-            f"{summary}; кандидатов: {len(candidates)}, выбрано: {selected['id']}, "
-            f"safety gate: {'passed' if selected['safety_gate']['passed'] else 'failed'}"
-        )
+        summary = (f"Кандидатов: {len(candidates)}, допустимых: {len(feasible)}, на фронте Парето: {len(front)}; "
+                   f"выбрано: {selected['id']} ({'стабильный период — удержание' if selection_rule == 'stable_period_hold' else 'минимум взвешенных потерь'})")
         return {
             "role": self.role,
             "status": "ok",
             "summary": summary,
             "scenario": result,
             "candidates": candidates,
+            "pareto_front": front,
+            "requires_action": requires_action,
+            "selection_rule": selection_rule,
             "selected_candidate": selected["id"],
+            "alternatives": [{"id": item["id"], "label": item["label"], "predicted_sulfur": item["predicted_sulfur"],
+                              "exceedance_probability": item.get("exceedance_probability"), "effort": item["effort"],
+                              "objectives": item["objectives"], "controls": item["controls"]} for item in alternatives],
             "safety_gate": selected["safety_gate"],
             "model_forecast": model_forecast,
             "recommendation": {
-                "action": "review_controls",
+                "action": "review_controls" if selected["id"] != "hold" else "hold",
                 "basis": reliability.get("basis", "scenario_only"),
                 "requires_operator_review": True,
                 "operational_safety_validated": False,
-                "predicted_sulfur": predicted,
+                "predicted_sulfur": result["predicted_sulfur"],
                 "predicted_sulfur_lower": result.get("predicted_sulfur_lower"),
                 "predicted_sulfur_upper": result.get("predicted_sulfur_upper"),
                 "exceedance_probability": result.get("exceedance_probability"),
                 "target_sulfur": context.request.targets.sulfur_max,
-                "target_met": target,
+                "target_met": bool(result["sulfur_target_met"]),
                 "controls": result["controls"],
                 "candidate_id": selected["id"],
+                "candidate_label": selected["label"],
                 "objectives": selected["objectives"],
+                "risk": selected.get("risk"),
                 "model_forecast": model_forecast,
             },
         }
 
 
 class Orchestrator:
-    """Runs agents in a fixed order and returns an explainable execution trace."""
+    """Runs the roles in order, resolves their conflicts, checks consistency and assembles the answer."""
 
     def __init__(self):
         self.quality = QualityAgent()
         self.reliability = ReliabilityAgent()
         self.optimization = OptimizationAgent()
 
+    @staticmethod
+    def _conflicts(quality: dict, reliability: dict, optimization: dict) -> list[dict]:
+        conflicts = []
+        requires_action = bool((quality.get("problem") or {}).get("requires_action"))
+        candidates = optimization.get("candidates", [])
+        hold = next((c for c in candidates if c["id"] == "hold"), None)
+        constraints = reliability.get("constraints") or {}
+        if requires_action and reliability.get("can_recommend") and candidates and not any(c.get("feasible") for c in candidates):
+            # Candidates that would pass every quality gate but are excluded
+            # only by the reliability constraints: the two roles disagree.
+            blocked_only = [c for c in candidates if c.get("status") == "ok" and c["id"] != "hold"
+                            and all(chk["passed"] is not False or chk["name"] == "reliability_constraint"
+                                    for chk in c["safety_gate"]["checks"])
+                            and any(chk["name"] == "reliability_constraint" for chk in c["safety_gate"]["checks"])]
+            if blocked_only:
+                conflicts.append({"code": "quality_vs_reliability", "resolution": "abstain",
+                                  "message": "Качество требует снижения серы, но все подходящие изменения заблокированы ограничениями надёжности "
+                                             f"({', '.join(c['id'] for c in blocked_only[:5])})"})
+        if requires_action and reliability.get("basis") != "scenario_only" \
+                and (reliability.get("confidence") or {}).get("class") == "low" and (hold is None or not hold.get("feasible")):
+            conflicts.append({"code": "low_confidence_action", "resolution": "abstain",
+                              "message": "Требуется корректирующее действие, но уверенность в данных низкая; удержание недопустимо — нужен ручной разбор"})
+        selected = next((c for c in candidates if c["id"] == optimization.get("selected_candidate")), None)
+        if selected and selected["id"] != "hold" and hold is not None and selected.get("scenario"):
+            effect = selected["scenario"].get("control_effect_ln_at_horizon") or 0.0
+            sigma = selected["scenario"].get("interval_widening_ln_sigma") or 0.0
+            if sigma and abs(effect) < 1.28 * sigma:
+                conflicts.append({"code": "effect_uncertain", "resolution": "warning",
+                                  "message": "Эффект выбранного изменения неотличим от нуля с учётом неопределённости коэффициентов (80% ДИ)"})
+        for metric_id, rule in constraints.items():
+            if rule.get("blocked") and selected and selected["id"] != "hold" and selected["controls"][metric_id]["change"]:
+                conflicts.append({"code": "blocked_control_selected", "resolution": "abstain",
+                                  "message": f"Выбранный кандидат меняет заблокированный тег {metric_id}"})
+        return conflicts
+
+    @staticmethod
+    def _consistency(request: ScenarioRequest, quality: dict, optimization: dict) -> list[dict]:
+        checks = []
+        forecast = quality.get("evidence", {}).get("model_forecast") or {}
+        candidates = optimization.get("candidates", [])
+        hold = next((c for c in candidates if c["id"] == "hold" and c.get("scenario")), None)
+        baseline = quality["evidence"]["sulfur"]["value"]
+
+        def check(code, passed, message):
+            checks.append({"code": code, "passed": bool(passed), "message": message})
+
+        if hold is not None:
+            scenario = hold["scenario"]
+            check("K1_baseline_shared", abs((scenario["baseline"]["sulfur"] or 0) - (baseline or 0)) < 1e-9,
+                  "База сценария совпадает с оценкой агента качества")
+            if forecast.get("status") == "ok" and scenario["baseline"]["baseline_kind"] == "model_forecast" and forecast.get("prediction"):
+                check("K1_hold_equals_forecast", abs(scenario["predicted_sulfur"] - forecast["prediction"]) < 1e-6,
+                      "Кандидат hold совпадает с прогнозом без воздействия")
+            signs = {"ht.T6": -1, "ht.F9": 1, "ht.P13": -1}
+            ok = True
+            for c in candidates:
+                if not c.get("scenario"):
+                    continue
+                for metric_id, sign in signs.items():
+                    effect = c["controls"][metric_id].get("effect_ln_at_horizon") or 0.0
+                    change = c["controls"][metric_id]["change"]
+                    if change and effect and (effect > 0) != ((change * sign) > 0):
+                        ok = False
+            check("K2_effect_signs", ok, "Знаки эффектов кандидатов соответствуют направлению коэффициентов")
+            check("K4_same_origin", all(c["scenario"]["at"] == request.at for c in candidates if c.get("scenario"))
+                  and (not forecast.get("feature_time") or parse_time(forecast["feature_time"]) <= parse_time(request.at)),
+                  "Все кандидаты рассчитаны на один момент, признаки прогноза не позже момента решения")
+        if forecast:
+            check("K5_leakage", (forecast.get("leakage_check") or {}).get("passed", True), "Проверка отсутствия утечки будущего в прогнозе")
+        return checks
+
     def decide(self, directory: Path, request: ScenarioRequest) -> dict[str, Any]:
         frame = snapshot(directory, request.at)
-        context = AgentContext(directory=directory, request=request, frame=frame)
+        try:
+            _, model_entry = applicable_model(request.at)
+        except ForecastUnavailable:
+            model_entry = None
+        context = AgentContext(directory=directory, request=request, frame=frame, model_entry=model_entry)
         quality = self.quality.run(context)
         reliability = self.reliability.run(context, quality)
         optimization = self.optimization.run(context, reliability, quality)
+        conflicts = self._conflicts(quality, reliability, optimization)
+        consistency = self._consistency(request, quality, optimization)
         trace = [
-            {
-                "step": index,
-                "role": result["role"],
-                "status": result["status"],
-                "summary": result["summary"],
-            }
-            for index, result in enumerate((quality, reliability, optimization), start=1)
+            {"step": 1, "role": quality["role"], "status": quality["status"], "summary": quality["summary"],
+             "consumes": ["snapshot", "forecast"], "produces": ["sulfur baseline", "problem", "other quality", "controls evidence"]},
+            {"step": 2, "role": reliability["role"], "status": reliability["status"], "summary": reliability["summary"],
+             "consumes": ["quality.evidence", "forecast.applicability", "model support"],
+             "produces": ["gates", "risk index", "constraints", "confidence"]},
+            {"step": 3, "role": optimization["role"], "status": optimization["status"], "summary": optimization["summary"],
+             "consumes": ["quality.problem", "reliability.constraints", "reliability.risk", "scenario model"],
+             "produces": ["candidates", "pareto front", "selection", "alternatives"]},
+            {"step": 4, "role": "orchestrator", "status": "abstain" if any(c["resolution"] == "abstain" for c in conflicts)
+             or not all(c["passed"] for c in consistency) else "ok",
+             "summary": f"Конфликтов: {len(conflicts)}, проверок согласованности: {sum(c['passed'] for c in consistency)}/{len(consistency)}",
+             "consumes": ["quality", "reliability", "optimization"], "produces": ["recommendation | abstain", "explanation"]},
         ]
         abstain_reason = reliability.get("abstain_reason")
         if optimization["status"] == "error":
             abstain_reason = optimization.get("error")
         elif optimization["status"] != "ok" and not abstain_reason:
             abstain_reason = optimization["summary"]
+        conflict_abstain = [c["message"] for c in conflicts if c["resolution"] == "abstain"]
+        failed_checks = [c["message"] for c in consistency if not c["passed"]]
+        if not abstain_reason and optimization["status"] == "ok" and conflict_abstain:
+            abstain_reason = "Конфликт целей: " + "; ".join(conflict_abstain)
+        if not abstain_reason and optimization["status"] == "ok" and failed_checks:
+            abstain_reason = "Внутренняя несогласованность агентов: " + "; ".join(failed_checks)
         abstained = bool(abstain_reason) or optimization["status"] != "ok"
-        return {
+        safety_gate = optimization.get("safety_gate", {"passed": False, "reasons": [abstain_reason], "checks": []})
+        if abstained and safety_gate.get("passed"):
+            # The optimiser found an admissible candidate but the orchestrator
+            # refused it (conflict or failed consistency): the published gate
+            # must reflect the refusal.
+            safety_gate = {**safety_gate, "passed": False, "reasons": [abstain_reason, *safety_gate.get("reasons", [])],
+                           "orchestrator_override": True}
+        decision = {
             "at": request.at,
             "status": "abstain" if abstained else "recommendation",
             "basis": reliability["basis"],
@@ -566,9 +763,18 @@ class Orchestrator:
             "recommendation": None if abstained else optimization.get("recommendation"),
             "scenario": None if abstained else optimization.get("scenario"),
             "candidates": optimization.get("candidates", []),
+            "pareto_front": optimization.get("pareto_front", []),
+            "alternatives": [] if abstained else optimization.get("alternatives", []),
             "selected_candidate": None if abstained else optimization.get("selected_candidate"),
-            "safety_gate": optimization.get("safety_gate", {"passed": False, "reasons": [abstain_reason], "checks": []}),
+            "selection_rule": None if abstained else optimization.get("selection_rule"),
+            "safety_gate": safety_gate,
             "forecast": quality.get("evidence", {}).get("model_forecast"),
+            "confidence": reliability.get("confidence"),
+            "risk": reliability.get("risk"),
+            "constraints": reliability.get("constraints"),
+            "problem": quality.get("problem"),
+            "conflicts": conflicts,
+            "consistency": consistency,
             "abstain": (
                 {
                     "reason": abstain_reason or optimization["summary"],
@@ -585,18 +791,22 @@ class Orchestrator:
             "trace": trace,
             "assumptions": [
                 (
-                    "Все агенты работают локально по детерминированным правилам; "
-                    "внешний LLM не вызывается."
+                    "Все агенты работают локально по детерминированным правилам; обмен данными между ролями "
+                    "показан в trace (consumes/produces)."
                 ),
                 (
                     "Рекомендация основана на snapshot без будущих измерений и "
-                    "на линейной сценарной модели."
+                    "на мультипликативной сценарной модели поверх двухступенчатого прогноза."
                 ),
                 (
-                    "База качества — калиброванный по ЛИМС nowcast анализатора; прогноз без воздействия, "
-                    "интервал и вероятность превышения получены из эмпирических остатков модели. "
-                    "Эффект изменения режима — сценарная модель с наблюдательными коэффициентами; "
-                    "он не заменяет проверку технологом."
+                    "База качества — калиброванный по ЛИМС nowcast анализатора; путь без воздействия учитывает уже сделанные "
+                    "изменения режима; интервал и вероятность превышения получены из эмпирических остатков модели, "
+                    "расширенных на неопределённость коэффициентов. Эффект изменения режима — сценарная модель с "
+                    "наблюдательными коэффициентами; он не заменяет проверку технологом."
+                ),
+                (
+                    "Ограничения агента надёжности — край обучающего режима модели и шаговые пределы прототипа, "
+                    "не паспортные пределы. Индекс риска и уверенность — эвристические прокси, не вероятности."
                 ),
                 (
                     "Результат предназначен для рассмотрения оператором. Проверяются "
@@ -606,6 +816,8 @@ class Orchestrator:
                 ),
             ],
         }
+        decision["explanation"] = build_explanation(decision)
+        return decision
 
 
 def make_decision(directory: Path, request: ScenarioRequest) -> dict[str, Any]:

@@ -2,14 +2,13 @@
 
 ## Назначение ветки
 
-Ветка добавляет интерактивные UI-разделы поверх существующего мониторинга. Для серверной интеграции доступен локальный детерминированный контур `QualityAgent → ReliabilityAgent → OptimizationAgent → Orchestrator`, который запускается через `POST /api/datasets/{id}/decision`. Внешний LLM не вызывается в smoke-контуре: логические роли отделены от расчётных инструментов и могут быть обёрнуты локальным LLM-адаптером в закрытой сети. Endpoint `POST /api/datasets/{id}/scenario` остаётся источником расчёта для редактируемой песочницы.
+Ветка добавляет интерактивные UI-разделы поверх существующего мониторинга. Для серверной интеграции доступен локальный детерминированный контур `QualityAgent → ReliabilityAgent → OptimizationAgent → Orchestrator`, который запускается через `POST /api/datasets/{id}/decision`. Все роли — детерминированные локальные правила поверх обученных офлайн моделей; объяснение оператору (`decision.explanation`: состояние → проблема → действие → эффект → ограничения → уверенность → обоснование) формируется шаблоном. Языковые модели и внешние API не используются. Endpoint `POST /api/datasets/{id}/scenario` остаётся источником расчёта для редактируемой песочницы.
 
 ## Точки интеграции
 
 - `frontend/src/App.tsx` владеет навигацией, выбранным датасетом и моментом `to`.
 - `frontend/src/views/DecisionSupportView.tsx` остаётся единым внешним контейнером для двух режимов.
-- `frontend/src/demo/decisionSupportDemo.ts` содержит только временные presentation fixtures.
-- `frontend/src/api.ts` и `frontend/src/types.ts` содержат контракты `ScenarioRequest`/`ScenarioResult`/`DecisionResult`, включая модельный прогноз серы.
+- `frontend/src/api.ts` и `frontend/src/types.ts` содержат контракты `ScenarioRequest`/`ScenarioResult`/`DecisionResult`, включая модельный прогноз серы, объяснение, альтернативы, уверенность, риск и ограничения; коэффициенты сценария загружаются из `GET /api/scenario-defaults?at=`.
 - `backend/app.py` предоставляет endpoint decision; `backend/agents.py` содержит роли, trace и правило abstain при недостатке базовых данных.
 
 ## Поток данных

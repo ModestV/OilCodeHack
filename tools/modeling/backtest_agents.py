@@ -1,14 +1,19 @@
 """Historical backtest of the agent contour and of the VAK soft sensors.
 
 Part 1 — decision contour.  For every hydro-treating sulphur lab sample in
-the evaluation period the contour is executed exactly as the API would run it
-at ``origin = sample_time - horizon`` (default 180 minutes), with only data
-known at the origin.  The forecast, the nowcast at the sampling time, the
-``hold`` candidate and the final decision are compared with the laboratory
-result that arrives later.  Nothing here validates the effect of a
-recommended change (there is no counterfactual history); the backtest checks
-whether the contour sees the right level, raises alarms before real
-exceedances, and abstains for the right reasons.
+the evaluation period (default: from 2024-01-01, the first walk-forward
+model) the contour is executed exactly as the API would run it at
+``origin = sample_time - horizon`` (default 180 minutes), with only data
+known at the origin and the walk-forward model applicable at the origin.
+The forecast, the nowcast at the sampling time, the ``hold`` candidate and
+the final decision are compared with the laboratory result that arrives
+later.  Nothing here validates the effect of a recommended change (there is
+no counterfactual history); the backtest checks whether the contour sees the
+right level, raises alarms before real exceedances, abstains for the right
+reasons, does not act in stable periods, and — as a labelled proxy only —
+whether the recommended direction agrees with what the operators actually
+did in the following three hours.  Every row asserts the leakage contract
+(feature time <= origin, model fit_end <= origin, lab publication <= origin).
 
 Part 2 — VAK formulas.  Each corrected formula is evaluated at the sampling
 times of every LIMS series with the same parameter and the error statistics
@@ -43,10 +48,18 @@ from backend.config import REGISTRY  # noqa: E402
 from backend.forecast import ForecastUnavailable, forecast_sulfur  # noqa: E402
 from backend.formulas import LIMS_ALIASES  # noqa: E402
 from backend.scenarios import ScenarioRequest  # noqa: E402
-from tools.modeling.sulfur_forecast import HARD_LIMIT, _json_default, probability_metrics, regression_metrics  # noqa: E402
+from tools.modeling.sulfur_forecast import (  # noqa: E402
+    HARD_LIMIT,
+    _json_default,
+    probability_metrics,
+    regression_metrics,
+)
 
 TARGET_METRIC = "lims.ht.2.Mg.Sulfur"
 LIMS_DELAY = pd.Timedelta(minutes=240)
+# A deliberate operator move of T6 (the step-event threshold; 3-hour changes of
+# 1-2 °C are routine controller noise: median |ΔT6 over 3h| is 1.2 °C).
+MOVE_THRESHOLD_DEGC = 3.0
 VAK_TARGETS = {
     "24-2000:GODT:T90": "90%.T", "24-2000:GODT:T50": "50%.T", "24-2000:GODT:I250": "I250", "24-2000:GODT:D15": "D15",
     "24-2000:GODT:CloudPoint": "CloudPoint", "24-2000:GODT:CFPP": "CFPP", "24-2000:GODT:T95": "95%.T", "24-2000:GODT:IBP": "IBP.T",
@@ -70,9 +83,28 @@ def load_labs(directory: Path, metric: str, start: str | None, end: str | None) 
     return labs.reset_index(drop=True)
 
 
+def load_control(directory: Path, metric: str = "ht.T6") -> pd.Series:
+    path = str(directory / "observations.parquet").replace("'", "''")
+    with duckdb.connect(":memory:") as db:
+        rows = db.execute(f"""SELECT timestamp, value FROM read_parquet('{path}') WHERE metric_id=? AND value IS NOT NULL AND isfinite(value)
+                              ORDER BY timestamp""", [metric]).fetchdf()
+    rows["timestamp"] = pd.to_datetime(rows["timestamp"])
+    return rows.drop_duplicates("timestamp").set_index("timestamp")["value"].astype(float)
+
+
+def _actual_move(series: pd.Series, origin: pd.Timestamp, hours: float = 3.0) -> float | None:
+    """Operator's actual change of a control between the origin and origin+hours (evaluation only)."""
+    before = series[series.index <= origin]
+    after = series[series.index <= origin + pd.Timedelta(hours=hours)]
+    if before.empty or after.empty:
+        return None
+    return float(after.iloc[-1] - before.iloc[-1])
+
+
 def run_decisions(directory: Path, labs: pd.DataFrame, horizon: int) -> pd.DataFrame:
     rows = []
     started = time.time()
+    t6 = load_control(directory, "ht.T6")
     for index, lab in labs.iterrows():
         origin = lab["timestamp"] - pd.Timedelta(minutes=horizon)
         request = ScenarioRequest(at=origin.isoformat(), horizon_minutes=horizon)
@@ -86,11 +118,33 @@ def run_decisions(directory: Path, labs: pd.DataFrame, horizon: int) -> pd.DataF
         except ForecastUnavailable:
             nowcast_at_sample = {}
         quality = decision["agents"]["quality"]["evidence"]
+        # Leakage contract, asserted on every row.
+        model_fit_end = (forecast.get("model") or {}).get("fit_end")
+        feature_time = forecast.get("feature_time")
+        assert (forecast.get("leakage_check") or {}).get("passed", True), (origin, forecast.get("leakage_check"))
+        assert not model_fit_end or pd.Timestamp(model_fit_end) <= origin, (origin, model_fit_end)
+        assert not feature_time or pd.Timestamp(feature_time) <= origin, (origin, feature_time)
+        assert all(c["scenario"]["at"] == origin.isoformat() for c in decision.get("candidates", []) if c.get("scenario")), origin
+        previous = forecast.get("previous_lab") or {}
+        assert not previous.get("available_at") or pd.Timestamp(previous["available_at"]) <= origin, (origin, previous)
+        confidence = decision.get("confidence") or {}
+        risk = decision.get("risk") or {}
+        stable = bool(decision.get("problem") and not decision["problem"].get("requires_action")
+                      and risk.get("class") == "normal" and forecast.get("status") == "ok")
         rows.append({
-            "sample_time": lab["timestamp"], "origin": origin, "actual": float(lab["value"]),
+            "sample_time": lab["timestamp"], "origin": origin, "actual": float(lab["value"]), "year": lab["timestamp"].year,
+            "model_fit_end": model_fit_end,
             "decision_status": decision["status"], "abstain_reason": (decision.get("abstain") or {}).get("reason"),
-            "selected_candidate": decision.get("selected_candidate"),
+            "selected_candidate": decision.get("selected_candidate"), "selection_rule": decision.get("selection_rule"),
+            "requires_action": (decision.get("problem") or {}).get("requires_action"), "stable_period": stable,
+            "confidence_score": confidence.get("score"), "confidence_class": confidence.get("class"),
+            "risk_class": risk.get("class"), "risk_index": risk.get("index"),
+            "pareto_size": len(decision.get("pareto_front") or []),
+            "feasible_count": sum(1 for c in decision.get("candidates", []) if c.get("feasible")),
+            "conflicts": "|".join(c["code"] for c in decision.get("conflicts") or []),
+            "consistency_failed": "|".join(c["code"] for c in decision.get("consistency") or [] if not c["passed"]),
             "forecast_status": forecast.get("status"), "forecast_reasons": "|".join(forecast.get("reasons") or []),
+            "stage1_status": (forecast.get("stage1") or {}).get("status"),
             "forecast": forecast.get("prediction"), "forecast_lower": forecast.get("prediction_lower"),
             "forecast_upper": forecast.get("prediction_upper"), "exceedance_probability": forecast.get("exceedance_probability"),
             "alarm": forecast.get("alarm_above_10"), "alarm_probability": forecast.get("alarm_probability"),
@@ -102,7 +156,12 @@ def run_decisions(directory: Path, labs: pd.DataFrame, horizon: int) -> pd.DataF
             "selected_predicted": selected.get("predicted_sulfur") if selected else None,
             "selected_exceedance": selected.get("exceedance_probability") if selected else None,
             "selected_dT6": (selected.get("controls") or {}).get("ht.T6", {}).get("change") if selected else None,
+            "selected_dP13": (selected.get("controls") or {}).get("ht.P13", {}).get("change") if selected else None,
+            "selected_dF9": (selected.get("controls") or {}).get("ht.F9", {}).get("change") if selected else None,
+            "actual_dT6_next_3h": _actual_move(t6, origin, 3.0),
             "gate_reasons": "|".join(dict.fromkeys(r for c in decision.get("candidates", []) for r in (c.get("safety_gate") or {}).get("reasons", []))),
+            "gate_reasons_by_candidate": json.dumps({c["id"]: (c.get("safety_gate") or {}).get("reasons", []) for c in decision.get("candidates", [])
+                                                     if not c.get("feasible")}, ensure_ascii=False),
         })
         if (index + 1) % 25 == 0:
             print(f"  {index + 1}/{len(labs)} decisions, {time.time() - started:.0f}s", file=sys.stderr)
@@ -143,10 +202,65 @@ def summarize_decisions(frame: pd.DataFrame, horizon: int) -> dict:
     summary["recommendations"] = {
         "count": int(len(recommended)),
         "with_temperature_increase": int((recommended["selected_dT6"].fillna(0) > 0.05).sum()),
+        "with_pressure_increase": int((recommended["selected_dP13"].fillna(0) > 0.005).sum()),
+        "with_feed_decrease": int((recommended["selected_dF9"].fillna(0) < -0.05).sum()),
+        "selected_counts": recommended["selected_candidate"].value_counts().head(12).astype(str).to_dict(),
         "actual_above_10_after_hold_recommendation": int(((recommended["selected_candidate"] == "hold") & (recommended["actual"] > HARD_LIMIT)).sum()),
+        "actual_above_10_after_corrective_recommendation": int(((recommended["selected_candidate"] != "hold") & (recommended["actual"] > HARD_LIMIT)).sum()),
         "actual_above_10_when_hold_was_infeasible": int(((frame["hold_feasible"] == False) & (frame["actual"] > HARD_LIMIT)).sum()),  # noqa: E712
         "hold_infeasible": int((frame["hold_feasible"] == False).sum()),  # noqa: E712
     }
+    stable = frame[frame["stable_period"] == True]  # noqa: E712
+    summary["stable_periods"] = {
+        "count": int(len(stable)),
+        "unnecessary_action_rate": float((stable["selected_candidate"].fillna("hold") != "hold").mean()) if len(stable) else None,
+        "actual_above_10_in_stable_periods": int((stable["actual"] > HARD_LIMIT).sum()),
+        "definition": "no action required by the quality agent, risk class normal, forecast ok",
+    }
+    # Direction agreement with the operators' real moves: a labelled proxy
+    # (operators react to information the contour may not see), not a
+    # validation of the recommendation's effect.
+    moved = recommended[recommended["actual_dT6_next_3h"].notna()]
+    corrective = moved[moved["selected_dT6"].fillna(0).abs() > 0.05]
+    held = moved[moved["selected_candidate"] == "hold"]
+    summary["direction_agreement_proxy"] = {
+        "corrective_recommendations": int(len(corrective)),
+        "operator_moved_same_direction": float((np.sign(corrective["selected_dT6"]) == np.sign(corrective["actual_dT6_next_3h"].where(corrective["actual_dT6_next_3h"].abs() >= MOVE_THRESHOLD_DEGC, 0))).mean()) if len(corrective) else None,
+        "operator_moved_at_all_after_corrective": float((corrective["actual_dT6_next_3h"].abs() >= MOVE_THRESHOLD_DEGC).mean()) if len(corrective) else None,
+        "hold_recommendations": int(len(held)),
+        "operator_also_held": float((held["actual_dT6_next_3h"].abs() < MOVE_THRESHOLD_DEGC).mean()) if len(held) else None,
+        "threshold_degc": MOVE_THRESHOLD_DEGC, "window_hours": 3.0,
+        "note": "proxy only: agreement with historical operator behaviour, not the effect of the recommendation",
+    }
+    summary["confidence"] = frame["confidence_class"].value_counts(dropna=False).astype(str).to_dict()
+    summary["risk_class"] = frame["risk_class"].value_counts(dropna=False).astype(str).to_dict()
+    summary["conflicts"] = pd.Series([c for cs in frame["conflicts"].fillna("") for c in cs.split("|") if c]).value_counts().to_dict()
+    summary["consistency_failures"] = pd.Series([c for cs in frame["consistency_failed"].fillna("") for c in cs.split("|") if c]).value_counts().to_dict()
+    summary["stage1_status"] = frame["stage1_status"].value_counts(dropna=False).astype(str).to_dict()
+    reasons_by_candidate: dict[str, dict[str, int]] = {}
+    for text in frame["gate_reasons_by_candidate"].fillna("{}"):
+        for candidate, reasons in json.loads(text).items():
+            bucket = reasons_by_candidate.setdefault(candidate, {})
+            for reason in reasons:
+                key = reason[:80]
+                bucket[key] = bucket.get(key, 0) + 1
+    summary["gate_reasons_by_candidate"] = {c: dict(sorted(v.items(), key=lambda kv: -kv[1])[:5]) for c, v in reasons_by_candidate.items()
+                                            if c in ("hold", "automatic", "t6_p3", "t6_p5", "p13_p0.2", "f9_m5")}
+    by_year = {}
+    for year, part in frame.groupby("year"):
+        ok_year = part["forecast_status"].eq("ok")
+        acc = part[ok_year]
+        by_year[str(int(year))] = {
+            "samples": int(len(part)), "model_fit_end": str(part["model_fit_end"].dropna().iloc[0])[:10] if part["model_fit_end"].notna().any() else None,
+            "forecast_coverage": float(ok_year.mean()),
+            "forecast_mae": regression_metrics(acc["actual"], acc["forecast"]).get("mae"),
+            "nowcast_at_sample_mae": regression_metrics(part["actual"], part["nowcast_at_sample"]).get("mae"),
+            "previous_lab_mae": regression_metrics(acc["actual"], acc["previous_lab"]).get("mae"),
+            "auc": probability_metrics(acc["actual"], acc["exceedance_probability"], 0.3).get("auc"),
+            "decision_status": part["decision_status"].value_counts().to_dict(),
+            "hold_share": float((part["selected_candidate"] == "hold").mean()),
+        }
+    summary["by_year"] = by_year
     return summary
 
 
@@ -271,8 +385,43 @@ def write_report(path: Path, decisions: dict, vak: list[dict], args: argparse.Na
         f"- Рекомендаций: {rec['count']}, из них с повышением T6: {rec['with_temperature_increase']}; hold недопустим в {rec['hold_infeasible']} случаях, "
         f"из них реальное превышение наступило в {rec['actual_above_10_when_hold_was_infeasible']}; превышений после рекомендации hold: {rec['actual_above_10_after_hold_recommendation']}.",
         f"- Причины отказа контура (топ): {decisions['decision_abstain_reasons']}.",
+        f"- Конфликты ролей: {decisions.get('conflicts')}; провалы проверок согласованности: {decisions.get('consistency_failures')}; "
+        f"статус ступени 1: {decisions.get('stage1_status')}.",
+        f"- Классы уверенности: {decisions.get('confidence')}; классы риска режима: {decisions.get('risk_class')}.",
+        f"- Стабильные периоды (нет проблемы качества, риск normal, прогноз ok): {decisions['stable_periods']['count']}, "
+        f"доля лишних действий {decisions['stable_periods']['unnecessary_action_rate']!s:.5}, фактических превышений в них "
+        f"{decisions['stable_periods']['actual_above_10_in_stable_periods']}.",
+        f"- Выбранные кандидаты среди рекомендаций: {decisions['recommendations']['selected_counts']}; превышений после корректирующей рекомендации: "
+        f"{decisions['recommendations']['actual_above_10_after_corrective_recommendation']}.",
         "",
-        "Эффект рекомендованных изменений исторически не проверяем (контрфактических данных нет); проверяется уровень, тревоги и причины отказов.",
+        "| год | модель fit_end | проб | покрытие прогноза | MAE прогноза (180) | MAE nowcast в момент пробы | MAE пред. пробы | AUC | доля hold | статусы |",
+        "|---|---|---:|---:|---:|---:|---:|---:|---:|---|",
+    ]
+    for year, y in decisions.get("by_year", {}).items():
+        rows.append(f"| {year} | {y['model_fit_end']} | {y['samples']} | {y['forecast_coverage']:.1%} | {y['forecast_mae'] if y['forecast_mae'] is None else round(y['forecast_mae'], 3)} | "
+                    f"{y['nowcast_at_sample_mae'] if y['nowcast_at_sample_mae'] is None else round(y['nowcast_at_sample_mae'], 3)} | "
+                    f"{y['previous_lab_mae'] if y['previous_lab_mae'] is None else round(y['previous_lab_mae'], 3)} | "
+                    f"{y['auc'] if y['auc'] is None else round(y['auc'], 3)} | {y['hold_share']:.2f} | {y['decision_status']} |")
+    proxy = decisions["direction_agreement_proxy"]
+    rows += [
+        "",
+        "### Согласие направления с реальными действиями операторов (прокси)",
+        "",
+        f"Корректирующих рекомендаций с изменением T6: {proxy['corrective_recommendations']}; оператор в следующие {proxy['window_hours']:g} ч двигал T6 "
+        f"(|ΔT6| ≥ {proxy['threshold_degc']:g} °C) в {proxy['operator_moved_at_all_after_corrective']!s:.5} случаев, в ту же сторону — "
+        f"{proxy['operator_moved_same_direction']!s:.5}. Рекомендаций hold: {proxy['hold_recommendations']}; оператор тоже не двигал T6 в "
+        f"{proxy['operator_also_held']!s:.5} случаев. Это согласие с историческим поведением операторов, а не проверка эффекта рекомендации: "
+        "операторы реагируют и на информацию, недоступную контуру.",
+        "",
+        "### Причины отказа по кандидатам (топ)",
+        "",
+    ]
+    for candidate, reasons in decisions.get("gate_reasons_by_candidate", {}).items():
+        rows.append(f"- `{candidate}`: " + "; ".join(f"{k} — {v}" for k, v in reasons.items()))
+    rows += [
+        "",
+        "Эффект рекомендованных изменений исторически не проверяем (контрфактических данных нет); проверяется уровень, тревоги, отказы, "
+        "отсутствие лишних действий в стабильные периоды и согласие направления с действиями операторов.",
         "",
         "## ВАК против ЛИМС",
         "",
@@ -300,7 +449,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dataset", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--start", default="2026-01-01")
+    parser.add_argument("--start", default="2024-01-01")
     parser.add_argument("--end", default=None)
     parser.add_argument("--horizon-minutes", type=int, default=180)
     parser.add_argument("--vak-start", default=None, help="Period for the VAK comparison (default: whole history)")
@@ -316,8 +465,10 @@ def main() -> None:
     if not args.skip_decisions:
         print(f"decision backtest over {len(labs)} samples", file=sys.stderr)
         decisions = run_decisions(directory, labs, args.horizon_minutes)
-        decisions.to_csv(args.output / "decisions.csv", index=False, encoding="utf-8-sig")
         result["decisions"] = summarize_decisions(decisions, args.horizon_minutes)
+        # Per-candidate gate reasons are summarised in results.json; the raw
+        # JSON column would multiply the CSV size several times.
+        decisions.drop(columns=["gate_reasons_by_candidate"]).to_csv(args.output / "decisions.csv", index=False, encoding="utf-8-sig")
     else:
         result["decisions"] = json.loads((args.output / "results.json").read_text(encoding="utf-8"))["decisions"]
     print("VAK backtest", file=sys.stderr)
