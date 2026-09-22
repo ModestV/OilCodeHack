@@ -15,6 +15,7 @@ from typing import Any
 from .analytics import parse_time, snapshot
 from .explain import build_explanation
 from .forecast import ForecastUnavailable, forecast_sulfur
+from .llm import explain as llm_explain
 from .objectives import annotate_pareto, candidate_objectives, operating_state, regime_severity
 from .scenarios import (
     HARD_CETANE_MIN,
@@ -780,7 +781,9 @@ class Orchestrator:
         conflicts = self._conflicts(request, quality, reliability, optimization)
         consistency = self._consistency(request, quality, optimization)
         decision = self._assemble(request, quality, reliability, optimization, conflicts, consistency)
-        decision["explanation"] = build_explanation(decision)
+        # The explanation is attached after the decision is final: the optional
+        # LLM sees the finished answer and cannot influence it.
+        decision["explanation"] = llm_explain(decision, build_explanation(decision))
         return decision
 
 

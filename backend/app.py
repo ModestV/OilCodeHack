@@ -26,7 +26,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from . import analytics as a
-from . import decision_log
+from . import decision_log, llm
 from .agents import make_decision
 from .config import ROOT, STORAGE
 from .formulas import formula_results
@@ -95,7 +95,9 @@ async def value_error(request, exc):
 def health():
     revision_path = ROOT / "build_revision.txt"
     revision = revision_path.read_text(encoding="utf-8").strip() if revision_path.exists() else "development"
-    return {"status": "ok", "revision": revision}
+    config = llm.settings()
+    return {"status": "ok", "revision": revision,
+            "llm": {"enabled": config["enabled"], "model": config["model"]}}
 
 
 @app.get("/api/reference/avt/{page}")
