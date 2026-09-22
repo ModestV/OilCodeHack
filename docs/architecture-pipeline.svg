@@ -1,0 +1,430 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3280" height="2180" viewBox="0 0 3280 2180" font-family="Inter, 'Segoe UI', system-ui, -apple-system, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#44597A"/>
+    </marker>
+    <marker id="arrowDash" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#8A7BC8"/>
+    </marker>
+  </defs>
+
+  <rect width="3280" height="2180" fill="#FBFCFE"/>
+
+  <!-- ============================ HEADER ============================ -->
+  <text xml:space="preserve" x="48" y="86" font-size="40" font-weight="700" fill="#15233B">Нефтекод — контур принятия решения</text>
+  <text xml:space="preserve" x="48" y="126" font-size="18" fill="#5A6B85">ветка feat/forecast-v4-contour-v2 · локальный офлайн-прототип · детерминированные правила, без LLM</text>
+  <text xml:space="preserve" x="48" y="154" font-size="18" fill="#5A6B85">данные → снимок без будущего → двухступенчатый прогноз → четыре роли агентов → рекомендация или обоснованный отказ</text>
+
+  <g font-size="15" fill="#3C4F6B">
+    <rect x="1750" y="88" width="22" height="22" rx="5" fill="#BFE6CE" stroke="#86C9A2" stroke-width="1.5"/>
+    <text xml:space="preserve" x="1780" y="105">данные</text>
+    <rect x="1860" y="88" width="22" height="22" rx="5" fill="#FBC08A" stroke="#E89B52" stroke-width="1.5"/>
+    <text xml:space="preserve" x="1890" y="105">модель / агент</text>
+    <rect x="2020" y="88" width="22" height="22" rx="5" fill="#FFE066" stroke="#E8C637" stroke-width="1.5"/>
+    <text xml:space="preserve" x="2050" y="105">оркестратор</text>
+    <rect x="2160" y="88" width="22" height="22" rx="5" fill="#D8D2F2" stroke="#B0A6E0" stroke-width="1.5"/>
+    <text xml:space="preserve" x="2190" y="105">отказ</text>
+    <rect x="2250" y="88" width="22" height="22" rx="5" fill="#F7CFDA" stroke="#E8A8BA" stroke-width="1.5"/>
+    <text xml:space="preserve" x="2280" y="105">объяснение</text>
+    <rect x="2385" y="88" width="22" height="22" rx="5" fill="#C3DCF7" stroke="#8FB8E8" stroke-width="1.5"/>
+    <text xml:space="preserve" x="2415" y="105">интерфейс</text>
+    <rect x="2510" y="88" width="22" height="22" rx="5" fill="#151A2E"/>
+    <text xml:space="preserve" x="2540" y="105">пример payload</text>
+  </g>
+
+  <!-- ============================ 1 · ДАННЫЕ ============================ -->
+  <rect x="40" y="220" width="1160" height="900" rx="18" fill="#EEF4FD" stroke="#C3D8F2" stroke-width="2"/>
+  <text xml:space="preserve" x="68" y="268" font-size="23" font-weight="700" fill="#2C4A7C">1 · Данные</text>
+  <text xml:space="preserve" x="68" y="294" font-size="14" fill="#6B7F9E">backend/ingest.py · analytics.py · formulas.py</text>
+
+  <rect x="860" y="320" width="250" height="100" rx="11" fill="#C3DCF7" stroke="#8FB8E8" stroke-width="2"/>
+  <text xml:space="preserve" x="985" y="358" font-size="17" font-weight="700" fill="#1F3355" text-anchor="middle">Мониторинг / UI</text>
+  <text xml:space="preserve" x="985" y="384" font-size="13.5" fill="#2E4463" text-anchor="middle">момент · период · 17 ВАК</text>
+
+  <rect x="80" y="500" width="210" height="140" rx="11" fill="#BFE6CE" stroke="#86C9A2" stroke-width="2"/>
+  <text xml:space="preserve" x="185" y="536" font-size="17" font-weight="700" fill="#1F3355" text-anchor="middle">Источники</text>
+  <text xml:space="preserve" x="100" y="568" font-size="13.5" fill="#2E4463">
+    <tspan x="100" dy="0">КИП · csv</tspan>
+    <tspan x="100" dy="24">ЛИМС · xlsx</tspan>
+    <tspan x="100" dy="24">ПАК · csv</tspan>
+  </text>
+
+  <rect x="330" y="470" width="250" height="200" rx="11" fill="#BFE6CE" stroke="#86C9A2" stroke-width="2"/>
+  <text xml:space="preserve" x="455" y="506" font-size="17" font-weight="700" fill="#1F3355" text-anchor="middle">backend/ingest.py</text>
+  <text xml:space="preserve" x="350" y="536" font-size="13.5" fill="#2E4463">
+    <tspan x="350" dy="0">единый metric_id</tspan>
+    <tspan x="350" dy="21">по справочнику DataMap</tspan>
+    <tspan x="350" dy="21">типы · время · единицы</tspan>
+    <tspan x="350" dy="21">флаги: invalid, conflict,</tspan>
+    <tspan x="350" dy="21">suspect, flatline, gap</tspan>
+  </text>
+
+  <rect x="620" y="500" width="230" height="140" rx="11" fill="#BFE6CE" stroke="#86C9A2" stroke-width="2"/>
+  <text xml:space="preserve" x="735" y="536" font-size="16" font-weight="700" fill="#1F3355" text-anchor="middle">observations.parquet</text>
+  <text xml:space="preserve" x="640" y="568" font-size="13.5" fill="#2E4463">
+    <tspan x="640" dy="0">DuckDB · каталог метрик</tspan>
+    <tspan x="640" dy="22">formulas.py → 17 ВАК</tspan>
+  </text>
+
+  <rect x="890" y="470" width="230" height="200" rx="11" fill="#BFE6CE" stroke="#86C9A2" stroke-width="2"/>
+  <text xml:space="preserve" x="1005" y="506" font-size="17" font-weight="700" fill="#1F3355" text-anchor="middle">snapshot(at)</text>
+  <text xml:space="preserve" x="910" y="536" font-size="13.5" fill="#2E4463">
+    <tspan x="910" dy="0">«одна доска» на момент:</tspan>
+    <tspan x="910" dy="21">timestamp ≤ at,</tspan>
+    <tspan x="910" dy="21">ЛИМС ещё −240 мин</tspan>
+    <tspan x="910" dy="21">(задержка публикации)</tspan>
+    <tspan x="910" dy="21">value · age · flags</tspan>
+  </text>
+
+  <rect x="80" y="720" width="1040" height="370" rx="11" fill="#151A2E"/>
+  <text xml:space="preserve" x="100" y="752" font-size="14" fill="#6E88B8" font-family="SFMono-Regular, Menlo, Consolas, monospace">GET /api/datasets/{id}/snapshot?at=…</text>
+  <text x="100" y="782" font-size="15" font-family="SFMono-Regular, Menlo, Consolas, monospace" xml:space="preserve">
+    <tspan x="100" dy="0"><tspan fill="#7FB0F5">{ "at": </tspan><tspan fill="#9BD5A9">"2025-08-07T09:00:00",</tspan></tspan>
+    <tspan x="100" dy="26"><tspan fill="#7FB0F5">  "values": </tspan><tspan fill="#6C80A6">[</tspan></tspan>
+    <tspan x="100" dy="26"><tspan fill="#6C80A6">    { </tspan><tspan fill="#7FB0F5">"metric_id": </tspan><tspan fill="#9BD5A9">"ht.T6",   </tspan><tspan fill="#7FB0F5">"value": </tspan><tspan fill="#FFC98A">334.7, </tspan><tspan fill="#7FB0F5">"unit": </tspan><tspan fill="#9BD5A9">"°C",</tspan></tspan>
+    <tspan x="100" dy="26"><tspan fill="#7FB0F5">      "age_minutes": </tspan><tspan fill="#FFC98A">2.0,  </tspan><tspan fill="#7FB0F5">"freshness": </tspan><tspan fill="#9BD5A9">"fresh", </tspan><tspan fill="#7FB0F5">"flags": </tspan><tspan fill="#6C80A6">[] },</tspan></tspan>
+    <tspan x="100" dy="26"><tspan fill="#6C80A6">    { </tspan><tspan fill="#7FB0F5">"metric_id": </tspan><tspan fill="#9BD5A9">"ht.Q21",  </tspan><tspan fill="#7FB0F5">"value": </tspan><tspan fill="#FFC98A">7.9,   </tspan><tspan fill="#7FB0F5">"unit": </tspan><tspan fill="#9BD5A9">"мг/кг",</tspan></tspan>
+    <tspan x="100" dy="26"><tspan fill="#7FB0F5">      "age_minutes": </tspan><tspan fill="#FFC98A">1.0,  </tspan><tspan fill="#7FB0F5">"freshness": </tspan><tspan fill="#9BD5A9">"fresh", </tspan><tspan fill="#7FB0F5">"flags": </tspan><tspan fill="#6C80A6">[] },</tspan></tspan>
+    <tspan x="100" dy="26"><tspan fill="#6C80A6">    { </tspan><tspan fill="#7FB0F5">"metric_id": </tspan><tspan fill="#9BD5A9">"lims.ht.2.Mg.Sulfur", </tspan><tspan fill="#7FB0F5">"value": </tspan><tspan fill="#FFC98A">8.4,</tspan></tspan>
+    <tspan x="100" dy="26"><tspan fill="#7FB0F5">      "age_minutes": </tspan><tspan fill="#FFC98A">1015.0, </tspan><tspan fill="#7FB0F5">"freshness": </tspan><tspan fill="#9BD5A9">"stale",</tspan></tspan>
+    <tspan x="100" dy="26"><tspan fill="#7FB0F5">      "available_at": </tspan><tspan fill="#9BD5A9">"2025-08-06T20:05:00" </tspan><tspan fill="#6C80A6">} ],</tspan></tspan>
+    <tspan x="100" dy="26"><tspan fill="#7FB0F5">  "alerts": </tspan><tspan fill="#6C80A6">[ { </tspan><tspan fill="#7FB0F5">"metric_id": </tspan><tspan fill="#9BD5A9">"ht.Q21", </tspan><tspan fill="#7FB0F5">"kind": </tspan><tspan fill="#9BD5A9">"above_limit" </tspan><tspan fill="#6C80A6">} ],</tspan></tspan>
+    <tspan x="100" dy="26"><tspan fill="#7FB0F5">  "settings": </tspan><tspan fill="#6C80A6">{ </tspan><tspan fill="#7FB0F5">"freshness_minutes": </tspan><tspan fill="#6C80A6">{ </tspan><tspan fill="#7FB0F5">"kip": </tspan><tspan fill="#FFC98A">10, </tspan><tspan fill="#7FB0F5">"lims": </tspan><tspan fill="#FFC98A">1440 </tspan><tspan fill="#6C80A6">} } }</tspan></tspan>
+  </text>
+
+  <!-- ============================ 2 · ПРОГНОЗ ============================ -->
+  <rect x="1240" y="220" width="640" height="900" rx="18" fill="#FDF0E3" stroke="#F0C89A" stroke-width="2"/>
+  <text xml:space="preserve" x="1268" y="268" font-size="23" font-weight="700" fill="#8A5620">2 · Прогноз серы</text>
+  <text xml:space="preserve" x="1268" y="294" font-size="14" fill="#A0764C">backend/forecast.py · артефакт model.json v4</text>
+
+  <rect x="1275" y="320" width="570" height="130" rx="11" fill="#F4F5F8" stroke="#B9C2D4" stroke-width="2" stroke-dasharray="7 5"/>
+  <text xml:space="preserve" x="1560" y="354" font-size="16" font-weight="700" fill="#38496A" text-anchor="middle">offline · tools/modeling/sulfur_forecast.py</text>
+  <text xml:space="preserve" x="1295" y="384" font-size="13.5" fill="#44557A">
+    <tspan x="1295" dy="0">walk-forward: fit_end 2024 / 2025 / 2026 — модель учится</tspan>
+    <tspan x="1295" dy="21">только на прошлом; 2026 трогается один раз как тест</tspan>
+  </text>
+
+  <rect x="1275" y="480" width="570" height="100" rx="11" fill="#F4F5F8" stroke="#B9C2D4" stroke-width="2"/>
+  <text xml:space="preserve" x="1560" y="514" font-size="16" font-weight="700" fill="#38496A" text-anchor="middle">model.json v4</text>
+  <text xml:space="preserve" x="1560" y="544" font-size="13.5" fill="#44557A" text-anchor="middle">коэффициенты · train-support · остатки · sha256</text>
+
+  <rect x="1275" y="615" width="570" height="140" rx="11" fill="#FBC08A" stroke="#E89B52" stroke-width="2"/>
+  <text xml:space="preserve" x="1560" y="649" font-size="17" font-weight="700" fill="#5C3410" text-anchor="middle">Ступень 1 · динамика анализатора</text>
+  <text xml:space="preserve" x="1295" y="679" font-size="13.5" fill="#4A3418">
+    <tspan x="1295" dy="0">ridge на 30-мин сетке: история Q21 / ПАК + ΔT6, ΔF9,</tspan>
+    <tspan x="1295" dy="21">ΔP13 → изменение ln(S) на 60 / 120 / 180 мин</tspan>
+    <tspan x="1295" dy="21">нет входов → персистентность (интервал шире)</tspan>
+  </text>
+
+  <rect x="1275" y="785" width="570" height="140" rx="11" fill="#FBC08A" stroke="#E89B52" stroke-width="2"/>
+  <text xml:space="preserve" x="1560" y="819" font-size="17" font-weight="700" fill="#5C3410" text-anchor="middle">Ступень 2 · калибровка к ЛИМС</text>
+  <text xml:space="preserve" x="1295" y="849" font-size="13.5" fill="#4A3418">
+    <tspan x="1295" dy="0">convex / Huber: оценка ступени 1 + локальный уровень</tspan>
+    <tspan x="1295" dy="21">проб + предыдущая опубликованная проба → ln(S)</tspan>
+    <tspan x="1295" dy="21">якорь: смещение анализатора по парам ЛИМС</tspan>
+  </text>
+
+  <rect x="1275" y="955" width="570" height="135" rx="11" fill="#FBC08A" stroke="#E89B52" stroke-width="2"/>
+  <text xml:space="preserve" x="1560" y="989" font-size="17" font-weight="700" fill="#5C3410" text-anchor="middle">Применимость и неопределённость</text>
+  <text xml:space="preserve" x="1295" y="1019" font-size="13.5" fill="#4A3418">
+    <tspan x="1295" dy="0">вне обучающего режима → отказ с причинами</tspan>
+    <tspan x="1295" dy="21">nowcast · точка · интервал 80 % · P(&gt;10) · alarm</tspan>
+    <tspan x="1295" dy="21">leakage_check: признаки не позже момента</tspan>
+  </text>
+
+  <!-- ============================ 3 · ОЦЕНКА ============================ -->
+  <rect x="1920" y="220" width="1320" height="900" rx="18" fill="#FDF0E3" stroke="#F0C89A" stroke-width="2"/>
+  <text xml:space="preserve" x="1948" y="268" font-size="23" font-weight="700" fill="#8A5620">3 · Оценка ситуации — агенты 1 и 2</text>
+  <text xml:space="preserve" x="1948" y="294" font-size="14" fill="#A0764C">backend/agents.py — прозрачные правила, офлайн, воспроизводимо</text>
+
+  <rect x="1950" y="320" width="540" height="370" rx="11" fill="#FBC08A" stroke="#E89B52" stroke-width="2"/>
+  <text xml:space="preserve" x="2220" y="358" font-size="19" font-weight="700" fill="#5C3410" text-anchor="middle">Агент качества</text>
+  <text xml:space="preserve" x="1972" y="394" font-size="13.5" fill="#4A3418">
+    <tspan x="1972" dy="0">база — nowcast анализатора, калиброванный</tspan>
+    <tspan x="1972" dy="23">по ЛИМС; последняя проба хранится</tspan>
+    <tspan x="1972" dy="23">отдельным свидетельством</tspan>
+    <tspan x="1972" dy="23"> </tspan>
+    <tspan x="1972" dy="23">problem.requires_action = true, если:</tspan>
+    <tspan x="1972" dy="23">• прогноз без воздействия &gt; цели (9 мг/кг)</tspan>
+    <tspan x="1972" dy="23">• P(&gt;10) &gt; допустимой (30 %)</tspan>
+    <tspan x="1972" dy="23"> </tspan>
+    <tspan x="1972" dy="23">тревога модели (порог по F1) —</tspan>
+    <tspan x="1972" dy="23">предупреждение, а не сам триггер</tspan>
+    <tspan x="1972" dy="23"> </tspan>
+    <tspan x="1972" dy="23">produces: база · problem · свидетельства</tspan>
+  </text>
+
+  <rect x="2510" y="320" width="700" height="370" rx="11" fill="#151A2E"/>
+  <text xml:space="preserve" x="2530" y="350" font-size="13" fill="#6E88B8" font-family="SFMono-Regular, Menlo, Consolas, monospace">agents.quality → decision.agents.quality</text>
+  <text x="2530" y="380" font-size="13" font-family="SFMono-Regular, Menlo, Consolas, monospace" xml:space="preserve">
+    <tspan x="2530" dy="0"><tspan fill="#7FB0F5">{ "role": </tspan><tspan fill="#9BD5A9">"quality", </tspan><tspan fill="#7FB0F5">"status": </tspan><tspan fill="#9BD5A9">"ok",</tspan></tspan>
+    <tspan x="2530" dy="22"><tspan fill="#7FB0F5">  "evidence": </tspan><tspan fill="#6C80A6">{</tspan></tspan>
+    <tspan x="2530" dy="22"><tspan fill="#7FB0F5">    "sulfur": </tspan><tspan fill="#6C80A6">{ </tspan><tspan fill="#7FB0F5">"source": </tspan><tspan fill="#9BD5A9">"model.nowcast", </tspan><tspan fill="#7FB0F5">"value": </tspan><tspan fill="#FFC98A">8.1 </tspan><tspan fill="#6C80A6">},</tspan></tspan>
+    <tspan x="2530" dy="22"><tspan fill="#7FB0F5">    "last_lab_sulfur": </tspan><tspan fill="#6C80A6">{ </tspan><tspan fill="#7FB0F5">"value": </tspan><tspan fill="#FFC98A">8.4, </tspan><tspan fill="#7FB0F5">"freshness": </tspan><tspan fill="#9BD5A9">"stale" </tspan><tspan fill="#6C80A6">},</tspan></tspan>
+    <tspan x="2530" dy="22"><tspan fill="#7FB0F5">    "model_forecast": </tspan><tspan fill="#6C80A6">{</tspan></tspan>
+    <tspan x="2530" dy="22"><tspan fill="#7FB0F5">      "prediction": </tspan><tspan fill="#FFC98A">9.6, </tspan><tspan fill="#7FB0F5">"prediction_lower": </tspan><tspan fill="#FFC98A">7.4,</tspan></tspan>
+    <tspan x="2530" dy="22"><tspan fill="#7FB0F5">      "prediction_upper": </tspan><tspan fill="#FFC98A">12.3,</tspan></tspan>
+    <tspan x="2530" dy="22"><tspan fill="#7FB0F5">      "exceedance_probability": </tspan><tspan fill="#FFC98A">0.34,</tspan></tspan>
+    <tspan x="2530" dy="22"><tspan fill="#7FB0F5">      "alarm_probability": </tspan><tspan fill="#FFC98A">0.28, </tspan><tspan fill="#7FB0F5">"alarm_above_10": </tspan><tspan fill="#FF9FB0">true,</tspan></tspan>
+    <tspan x="2530" dy="22"><tspan fill="#7FB0F5">      "stage1": </tspan><tspan fill="#6C80A6">{ </tspan><tspan fill="#7FB0F5">"status": </tspan><tspan fill="#9BD5A9">"ok" </tspan><tspan fill="#6C80A6">} },</tspan></tspan>
+    <tspan x="2530" dy="22"><tspan fill="#7FB0F5">    "in_flight_controls": </tspan><tspan fill="#6C80A6">{ </tspan><tspan fill="#7FB0F5">"d_T6_60m": </tspan><tspan fill="#FFC98A">1.2 </tspan><tspan fill="#6C80A6">} },</tspan></tspan>
+    <tspan x="2530" dy="22"><tspan fill="#7FB0F5">  "problem": </tspan><tspan fill="#6C80A6">{ </tspan><tspan fill="#7FB0F5">"requires_action": </tspan><tspan fill="#FF9FB0">true, </tspan><tspan fill="#7FB0F5">"reasons": </tspan><tspan fill="#6C80A6">[</tspan></tspan>
+    <tspan x="2530" dy="22"><tspan fill="#9BD5A9">      "Прогноз без воздействия 9.6 выше цели 9 мг/кг",</tspan></tspan>
+    <tspan x="2530" dy="22"><tspan fill="#9BD5A9">      "P(&gt;10) 34% выше допустимых 30%" </tspan><tspan fill="#6C80A6">] } }</tspan></tspan>
+  </text>
+
+  <rect x="1950" y="720" width="540" height="370" rx="11" fill="#FBC08A" stroke="#E89B52" stroke-width="2"/>
+  <text xml:space="preserve" x="2220" y="758" font-size="19" font-weight="700" fill="#5C3410" text-anchor="middle">Агент надёжности</text>
+  <text xml:space="preserve" x="1972" y="794" font-size="13.5" fill="#4A3418">
+    <tspan x="1972" dy="0">гейты: свежесть, флаги, доступность</tspan>
+    <tspan x="1972" dy="23">T6 / F9 / P13 и применимость прогноза</tspan>
+    <tspan x="1972" dy="23"> </tspan>
+    <tspan x="1972" dy="23">risk = max(тяжесть режима, аномалия)</tspan>
+    <tspan x="1972" dy="23">тяжесть — положение T6/P13/F9 между медианой</tspan>
+    <tspan x="1972" dy="23">и верхним краем обучающего режима (1 = край)</tspan>
+    <tspan x="1972" dy="23">аномалия — робастный Махаланобис по блоку Р-202</tspan>
+    <tspan x="1972" dy="23"> </tspan>
+    <tspan x="1972" dy="23">constraints оптимизатору: train-support ∩ шаг;</tspan>
+    <tspan x="1972" dy="23">elevated → шаг вверх T6/P13 ×0.5; high → блок</tspan>
+    <tspan x="1972" dy="23"> </tspan>
+    <tspan x="1972" dy="23">confidence — индекс качества входов, не вероятность</tspan>
+  </text>
+
+  <rect x="2510" y="720" width="700" height="370" rx="11" fill="#151A2E"/>
+  <text xml:space="preserve" x="2530" y="750" font-size="13" fill="#6E88B8" font-family="SFMono-Regular, Menlo, Consolas, monospace">agents.reliability → constraints для оптимизатора</text>
+  <text x="2530" y="780" font-size="13" font-family="SFMono-Regular, Menlo, Consolas, monospace" xml:space="preserve">
+    <tspan x="2530" dy="0"><tspan fill="#7FB0F5">{ "role": </tspan><tspan fill="#9BD5A9">"reliability", </tspan><tspan fill="#7FB0F5">"status": </tspan><tspan fill="#9BD5A9">"ok",</tspan></tspan>
+    <tspan x="2530" dy="22"><tspan fill="#7FB0F5">  "risk": </tspan><tspan fill="#6C80A6">{ </tspan><tspan fill="#7FB0F5">"index": </tspan><tspan fill="#FFC98A">0.62, </tspan><tspan fill="#7FB0F5">"class": </tspan><tspan fill="#9BD5A9">"elevated",</tspan></tspan>
+    <tspan x="2530" dy="22"><tspan fill="#7FB0F5">            "dominant": </tspan><tspan fill="#9BD5A9">"severity" </tspan><tspan fill="#6C80A6">},</tspan></tspan>
+    <tspan x="2530" dy="22"><tspan fill="#7FB0F5">  "constraints": </tspan><tspan fill="#6C80A6">{</tspan></tspan>
+    <tspan x="2530" dy="22"><tspan fill="#7FB0F5">    "ht.T6":  </tspan><tspan fill="#6C80A6">{ </tspan><tspan fill="#7FB0F5">"min": </tspan><tspan fill="#FFC98A">320.0, </tspan><tspan fill="#7FB0F5">"max": </tspan><tspan fill="#FFC98A">352.0,</tspan></tspan>
+    <tspan x="2530" dy="22"><tspan fill="#7FB0F5">                "max_step_up": </tspan><tspan fill="#FFC98A">5.0, </tspan><tspan fill="#7FB0F5">"max_step_down": </tspan><tspan fill="#FFC98A">10.0,</tspan></tspan>
+    <tspan x="2530" dy="22"><tspan fill="#7FB0F5">                "blocked": </tspan><tspan fill="#FF9FB0">false,</tspan></tspan>
+    <tspan x="2530" dy="22"><tspan fill="#7FB0F5">                "reason": </tspan><tspan fill="#9BD5A9">"риск режима elevated" </tspan><tspan fill="#6C80A6">},</tspan></tspan>
+    <tspan x="2530" dy="22"><tspan fill="#7FB0F5">    "ht.F9":  </tspan><tspan fill="#6C80A6">{ </tspan><tspan fill="#7FB0F5">"max_step_up": </tspan><tspan fill="#FFC98A">10.0, </tspan><tspan fill="#7FB0F5">"relative": </tspan><tspan fill="#FF9FB0">true </tspan><tspan fill="#6C80A6">},</tspan></tspan>
+    <tspan x="2530" dy="22"><tspan fill="#7FB0F5">    "ht.P13": </tspan><tspan fill="#6C80A6">{ </tspan><tspan fill="#7FB0F5">"max_step_up": </tspan><tspan fill="#FFC98A">0.25, </tspan><tspan fill="#7FB0F5">"blocked": </tspan><tspan fill="#FF9FB0">false </tspan><tspan fill="#6C80A6">} },</tspan></tspan>
+    <tspan x="2530" dy="22"><tspan fill="#7FB0F5">  "confidence": </tspan><tspan fill="#6C80A6">{ </tspan><tspan fill="#7FB0F5">"score": </tspan><tspan fill="#FFC98A">0.68, </tspan><tspan fill="#7FB0F5">"class": </tspan><tspan fill="#9BD5A9">"medium",</tspan></tspan>
+    <tspan x="2530" dy="22"><tspan fill="#7FB0F5">    "factors": </tspan><tspan fill="#6C80A6">[</tspan><tspan fill="#9BD5A9">"last_lab_age", "analysers_fresh",</tspan></tspan>
+    <tspan x="2530" dy="22"><tspan fill="#9BD5A9">                "lab_anchor_pairs", "imputed_features"</tspan><tspan fill="#6C80A6">] },</tspan></tspan>
+    <tspan x="2530" dy="22"><tspan fill="#7FB0F5">  "can_recommend": </tspan><tspan fill="#FF9FB0">true, </tspan><tspan fill="#7FB0F5">"basis": </tspan><tspan fill="#9BD5A9">"observed_and_forecast" </tspan><tspan fill="#6C80A6">}</tspan></tspan>
+  </text>
+
+  <!-- ============================ 4 · ОПТИМИЗАЦИЯ ============================ -->
+  <rect x="40" y="1220" width="1800" height="900" rx="18" fill="#FDF0E3" stroke="#F0C89A" stroke-width="2"/>
+  <text xml:space="preserve" x="68" y="1268" font-size="23" font-weight="700" fill="#8A5620">4 · Агент оптимизации</text>
+  <text xml:space="preserve" x="68" y="1294" font-size="14" fill="#A0764C">candidates.py · scenarios.py · objectives.py</text>
+
+  <rect x="80" y="1330" width="300" height="210" rx="11" fill="#FBC08A" stroke="#E89B52" stroke-width="2"/>
+  <text xml:space="preserve" x="230" y="1366" font-size="17" font-weight="700" fill="#5C3410" text-anchor="middle">Сетка кандидатов</text>
+  <text xml:space="preserve" x="98" y="1398" font-size="13.5" fill="#4A3418">
+    <tspan x="98" dy="0">≈36 вариантов:</tspan>
+    <tspan x="98" dy="21">hold;  T6 −5…+10 °C;</tspan>
+    <tspan x="98" dy="21">P13 −0.2…+0.5 МПа;</tspan>
+    <tspan x="98" dy="21">F9 −10…+5 %; пары</tspan>
+    <tspan x="98" dy="21">T6×P13, T6×F9, P13×F9;</tspan>
+    <tspan x="98" dy="21">automatic (солвер);</tspan>
+    <tspan x="98" dy="21">requested (оператор)</tspan>
+  </text>
+
+  <rect x="420" y="1330" width="300" height="210" rx="11" fill="#FBC08A" stroke="#E89B52" stroke-width="2"/>
+  <text xml:space="preserve" x="570" y="1366" font-size="17" font-weight="700" fill="#5C3410" text-anchor="middle">Сценарная модель</text>
+  <text xml:space="preserve" x="438" y="1398" font-size="13.5" fill="#4A3418">
+    <tspan x="438" dy="0">scenarios.py:</tspan>
+    <tspan x="438" dy="21">S × exp(k · Δ) в лог-</tspan>
+    <tspan x="438" dy="21">домене, линейная рампа</tspan>
+    <tspan x="438" dy="21">по lag_minutes тега</tspan>
+    <tspan x="438" dy="21">k — медианные отклики</tspan>
+    <tspan x="438" dy="21">на step-событиях до</tspan>
+    <tspan x="438" dy="21">fit_end, с ошибкой</tspan>
+  </text>
+
+  <rect x="760" y="1330" width="300" height="210" rx="11" fill="#D8D2F2" stroke="#B0A6E0" stroke-width="2"/>
+  <text xml:space="preserve" x="910" y="1366" font-size="17" font-weight="700" fill="#33256B" text-anchor="middle">Safety gate</text>
+  <text xml:space="preserve" x="778" y="1398" font-size="13.5" fill="#3A2C70">
+    <tspan x="778" dy="0">на каждого кандидата:</tspan>
+    <tspan x="778" dy="21">S ≤ 10 (жёсткий предел)</tspan>
+    <tspan x="778" dy="21">редактируемая цель</tspan>
+    <tspan x="778" dy="21">P(&gt;10) ≤ допустимой</tspan>
+    <tspan x="778" dy="21">T95 / цетан, смесь</tspan>
+    <tspan x="778" dy="21">край обучающего режима</tspan>
+    <tspan x="778" dy="21">ограничения надёжности</tspan>
+  </text>
+
+  <rect x="1100" y="1330" width="300" height="210" rx="11" fill="#FBC08A" stroke="#E89B52" stroke-width="2"/>
+  <text xml:space="preserve" x="1250" y="1366" font-size="17" font-weight="700" fill="#5C3410" text-anchor="middle">Фронт Парето</text>
+  <text xml:space="preserve" x="1118" y="1398" font-size="13.5" fill="#4A3418">
+    <tspan x="1118" dy="0">только среди допустимых</tspan>
+    <tspan x="1118" dy="21">пять критериев:</tspan>
+    <tspan x="1118" dy="21">P(&gt;10) · потеря выпуска</tspan>
+    <tspan x="1118" dy="21">энергия · риск · масштаб</tspan>
+    <tspan x="1118" dy="21">изменения</tspan>
+    <tspan x="1118" dy="21">→ недоминируемые</tspan>
+    <tspan x="1118" dy="21">кандидаты</tspan>
+  </text>
+
+  <rect x="1440" y="1330" width="340" height="210" rx="11" fill="#FBC08A" stroke="#E89B52" stroke-width="2"/>
+  <text xml:space="preserve" x="1610" y="1366" font-size="17" font-weight="700" fill="#5C3410" text-anchor="middle">Правило выбора</text>
+  <text xml:space="preserve" x="1458" y="1398" font-size="13.5" fill="#4A3418">
+    <tspan x="1458" dy="0">стабильный период и hold</tspan>
+    <tspan x="1458" dy="21">допустим → удержание</tspan>
+    <tspan x="1458" dy="21">(без лишних действий)</tspan>
+    <tspan x="1458" dy="21">иначе → минимум</tspan>
+    <tspan x="1458" dy="21">ranking_loss на фронте</tspan>
+    <tspan x="1458" dy="21">+ до трёх альтернатив</tspan>
+  </text>
+
+  <rect x="80" y="1590" width="1700" height="480" rx="11" fill="#151A2E"/>
+  <text xml:space="preserve" x="102" y="1624" font-size="14" fill="#6E88B8" font-family="SFMono-Regular, Menlo, Consolas, monospace">agents.optimization → decision.candidates / pareto_front</text>
+  <text x="102" y="1658" font-size="15" font-family="SFMono-Regular, Menlo, Consolas, monospace" xml:space="preserve">
+    <tspan x="102" dy="0"><tspan fill="#7FB0F5">{ "selected_candidate": </tspan><tspan fill="#9BD5A9">"t6_p3_p13_p0.1", </tspan><tspan fill="#7FB0F5">"selection_rule": </tspan><tspan fill="#9BD5A9">"min_ranking_loss_on_pareto_front", </tspan><tspan fill="#7FB0F5">"requires_action": </tspan><tspan fill="#FF9FB0">true,</tspan></tspan>
+    <tspan x="102" dy="26"><tspan fill="#7FB0F5">  "pareto_front": </tspan><tspan fill="#6C80A6">[</tspan><tspan fill="#9BD5A9">"hold", "t6_p2", "t6_p3_p13_p0.1", "f9_m5", "t6_p5_f9_m5"</tspan><tspan fill="#6C80A6">],</tspan></tspan>
+    <tspan x="102" dy="26"><tspan fill="#7FB0F5">  "candidates": </tspan><tspan fill="#6C80A6">[</tspan></tspan>
+    <tspan x="102" dy="26"><tspan fill="#6C80A6">    { </tspan><tspan fill="#7FB0F5">"id": </tspan><tspan fill="#9BD5A9">"t6_p3_p13_p0.1", </tspan><tspan fill="#7FB0F5">"label": </tspan><tspan fill="#9BD5A9">"T6 +3 °C, P13 +0.10 МПа", </tspan><tspan fill="#7FB0F5">"origin": </tspan><tspan fill="#9BD5A9">"grid", </tspan><tspan fill="#7FB0F5">"feasible": </tspan><tspan fill="#FF9FB0">true,</tspan></tspan>
+    <tspan x="102" dy="26"><tspan fill="#7FB0F5">      "predicted_sulfur": </tspan><tspan fill="#FFC98A">8.1, </tspan><tspan fill="#7FB0F5">"predicted_sulfur_lower": </tspan><tspan fill="#FFC98A">6.5, </tspan><tspan fill="#7FB0F5">"predicted_sulfur_upper": </tspan><tspan fill="#FFC98A">10.0,</tspan></tspan>
+    <tspan x="102" dy="26"><tspan fill="#7FB0F5">      "exceedance_probability": </tspan><tspan fill="#FFC98A">0.11, </tspan><tspan fill="#7FB0F5">"effort": </tspan><tspan fill="#FFC98A">0.35,</tspan></tspan>
+    <tspan x="102" dy="26"><tspan fill="#7FB0F5">      "objectives": </tspan><tspan fill="#6C80A6">{ </tspan><tspan fill="#7FB0F5">"throughput_loss": </tspan><tspan fill="#FFC98A">0.0, </tspan><tspan fill="#7FB0F5">"energy_cost_index": </tspan><tspan fill="#FFC98A">1.033, </tspan><tspan fill="#7FB0F5">"risk_index": </tspan><tspan fill="#FFC98A">0.62,</tspan></tspan>
+    <tspan x="102" dy="26"><tspan fill="#7FB0F5">                      "overshoot_index": </tspan><tspan fill="#FFC98A">0.0, </tspan><tspan fill="#7FB0F5">"ranking_loss": </tspan><tspan fill="#FFC98A">0.41 </tspan><tspan fill="#6C80A6">},</tspan></tspan>
+    <tspan x="102" dy="26"><tspan fill="#7FB0F5">      "safety_gate": </tspan><tspan fill="#6C80A6">{ </tspan><tspan fill="#7FB0F5">"passed": </tspan><tspan fill="#FF9FB0">true, </tspan><tspan fill="#7FB0F5">"checks": </tspan><tspan fill="#6C80A6">[</tspan><tspan fill="#9BD5A9">"sulfur_hard_limit", "sulfur_editable_target",</tspan></tspan>
+    <tspan x="102" dy="26"><tspan fill="#9BD5A9">                       "sulfur_exceedance_probability", "regime_risk_model_limit"</tspan><tspan fill="#6C80A6">] } },</tspan></tspan>
+    <tspan x="102" dy="26"><tspan fill="#6C80A6">    { </tspan><tspan fill="#7FB0F5">"id": </tspan><tspan fill="#9BD5A9">"t6_p10", </tspan><tspan fill="#7FB0F5">"label": </tspan><tspan fill="#9BD5A9">"T6 +10 °C", </tspan><tspan fill="#7FB0F5">"origin": </tspan><tspan fill="#9BD5A9">"grid", </tspan><tspan fill="#7FB0F5">"feasible": </tspan><tspan fill="#FF9FB0">false,</tspan></tspan>
+    <tspan x="102" dy="26"><tspan fill="#7FB0F5">      "reason": </tspan><tspan fill="#9BD5A9">"T6: шаг +10 °C превышает допустимый 5 °C (агент надёжности)" </tspan><tspan fill="#6C80A6">},</tspan></tspan>
+    <tspan x="102" dy="26"><tspan fill="#6C80A6">    { </tspan><tspan fill="#7FB0F5">"id": </tspan><tspan fill="#9BD5A9">"hold", </tspan><tspan fill="#7FB0F5">"label": </tspan><tspan fill="#9BD5A9">"Удержать текущий режим", </tspan><tspan fill="#7FB0F5">"feasible": </tspan><tspan fill="#FF9FB0">false,</tspan></tspan>
+    <tspan x="102" dy="26"><tspan fill="#7FB0F5">      "reason": </tspan><tspan fill="#9BD5A9">"Вероятность превышения 10 мг/кг 34% выше допустимой 30%" </tspan><tspan fill="#6C80A6">} ],</tspan></tspan>
+    <tspan x="102" dy="26"><tspan fill="#7FB0F5">  "ranking_formula": </tspan><tspan fill="#9BD5A9">"0.5*(1−выпуск)/0.10 + 0.25*(энергия−1)/0.25 + 0.25*риск + 0.15*масштаб + 0.5*P(&gt;10)/P_max + 0.25*овершут" </tspan><tspan fill="#6C80A6">}</tspan></tspan>
+  </text>
+
+  <!-- ============================ 5 · ОРКЕСТРАТОР ============================ -->
+  <rect x="1900" y="1220" width="1340" height="900" rx="18" fill="#F3F0FB" stroke="#CFC6EC" stroke-width="2"/>
+  <text xml:space="preserve" x="1928" y="1268" font-size="23" font-weight="700" fill="#43307F">5 · Оркестратор и выдача</text>
+  <text xml:space="preserve" x="1928" y="1294" font-size="14" fill="#6C5BA8">agents.py Orchestrator · explain.py · app.py</text>
+
+  <rect x="1930" y="1330" width="480" height="420" rx="11" fill="#FFE066" stroke="#E8C637" stroke-width="2"/>
+  <text xml:space="preserve" x="2170" y="1370" font-size="20" font-weight="700" fill="#5A4400" text-anchor="middle">Оркестратор</text>
+  <text xml:space="preserve" x="1952" y="1406" font-size="13.5" fill="#4A3A00">
+    <tspan x="1952" dy="0">порядок ролей и обмен данными</tspan>
+    <tspan x="1952" dy="23">(trace[].consumes / produces)</tspan>
+    <tspan x="1952" dy="23"> </tspan>
+    <tspan x="1952" dy="23">разрешает конфликты:</tspan>
+    <tspan x="1952" dy="23">• качество требует снижения, но все</tspan>
+    <tspan x="1952" dy="23">  изменения заблокированы → отказ</tspan>
+    <tspan x="1952" dy="23">• низкая уверенность при недопустимом</tspan>
+    <tspan x="1952" dy="23">  удержании → отказ</tspan>
+    <tspan x="1952" dy="23">• эффект неотличим от нуля по ДИ →</tspan>
+    <tspan x="1952" dy="23">  предупреждение</tspan>
+    <tspan x="1952" dy="23"> </tspan>
+    <tspan x="1952" dy="23">проверки согласованности: общая база,</tspan>
+    <tspan x="1952" dy="23">hold = прогноз без воздействия, знаки</tspan>
+    <tspan x="1952" dy="23">эффектов, единый момент, нет утечки</tspan>
+  </text>
+
+  <rect x="2440" y="1330" width="770" height="420" rx="11" fill="#FFF3BF" stroke="#E8D98A" stroke-width="2"/>
+  <text xml:space="preserve" x="2460" y="1370" font-size="18" font-weight="700" fill="#5A4400">Что получается на выходе</text>
+  <text xml:space="preserve" x="2460" y="1406" font-size="13.5" fill="#4A3A00">
+    <tspan x="2460" dy="0">reliability.can_recommend = false</tspan>
+    <tspan x="2460" dy="23">   → Optimization не запускается; отказ: данных недостаточно</tspan>
+    <tspan x="2460" dy="23"> </tspan>
+    <tspan x="2460" dy="23">все допустимые кандидаты нарушают ограничения надёжности</tspan>
+    <tspan x="2460" dy="23">   → отказ с указанием конфликта целей</tspan>
+    <tspan x="2460" dy="23"> </tspan>
+    <tspan x="2460" dy="23">проверка согласованности не пройдена</tspan>
+    <tspan x="2460" dy="23">   → отказ, даже если safety_gate кандидата прошёл</tspan>
+    <tspan x="2460" dy="23">      (safety_gate.orchestrator_override = true)</tspan>
+    <tspan x="2460" dy="23"> </tspan>
+    <tspan x="2460" dy="23">иначе → recommendation + scenario + alternatives[≤3]</tspan>
+    <tspan x="2460" dy="23">   action = review_controls | hold</tspan>
+    <tspan x="2460" dy="23">   requires_operator_review = true</tspan>
+    <tspan x="2460" dy="23">   operational_safety_validated = false</tspan>
+  </text>
+
+  <rect x="1930" y="1790" width="480" height="290" rx="11" fill="#D8D2F2" stroke="#B0A6E0" stroke-width="2"/>
+  <text xml:space="preserve" x="2170" y="1828" font-size="18" font-weight="700" fill="#33256B" text-anchor="middle">Отказ (abstain)</text>
+  <text xml:space="preserve" x="1952" y="1862" font-size="13.5" fill="#3A2C70">
+    <tspan x="1952" dy="0">status = abstain</tspan>
+    <tspan x="1952" dy="22">abstain.reason + missing[]</tspan>
+    <tspan x="1952" dy="22"> </tspan>
+    <tspan x="1952" dy="22">кандидаты, их причины,</tspan>
+    <tspan x="1952" dy="22">конфликты и проверки</tspan>
+    <tspan x="1952" dy="22">сохраняются в ответе;</tspan>
+    <tspan x="1952" dy="22">рекомендация не выдаётся</tspan>
+  </text>
+
+  <rect x="2440" y="1790" width="370" height="290" rx="11" fill="#F7CFDA" stroke="#E8A8BA" stroke-width="2"/>
+  <text xml:space="preserve" x="2625" y="1828" font-size="18" font-weight="700" fill="#6B1F38" text-anchor="middle">explain.py</text>
+  <text xml:space="preserve" x="2460" y="1862" font-size="13.5" fill="#5E2338">
+    <tspan x="2460" dy="0">детерминированный шаблон</tspan>
+    <tspan x="2460" dy="22">по блокам ТЗ:</tspan>
+    <tspan x="2460" dy="22">состояние → проблема →</tspan>
+    <tspan x="2460" dy="22">действие (тег: тек. → рек.)</tspan>
+    <tspan x="2460" dy="22">→ эффект → ограничения →</tspan>
+    <tspan x="2460" dy="22">уверенность → почему</tspan>
+    <tspan x="2460" dy="22">лучше альтернатив</tspan>
+    <tspan x="2460" dy="22"> </tspan>
+    <tspan x="2460" dy="22" font-weight="700">LLM не используется</tspan>
+  </text>
+
+  <rect x="2840" y="1790" width="370" height="290" rx="11" fill="#C3DCF7" stroke="#8FB8E8" stroke-width="2"/>
+  <text xml:space="preserve" x="3025" y="1828" font-size="18" font-weight="700" fill="#1F3355" text-anchor="middle">API → интерфейс</text>
+  <text xml:space="preserve" x="2860" y="1862" font-size="13.5" fill="#2E4463">
+    <tspan x="2860" dy="0">POST /api/datasets/{id}</tspan>
+    <tspan x="2860" dy="22">/decision</tspan>
+    <tspan x="2860" dy="22"> </tspan>
+    <tspan x="2860" dy="22">DecisionSupportView.tsx:</tspan>
+    <tspan x="2860" dy="22">рекомендация, кандидаты,</tspan>
+    <tspan x="2860" dy="22">Парето, trace, объяснение</tspan>
+    <tspan x="2860" dy="22"> </tspan>
+    <tspan x="2860" dy="22">решение — для рассмотрения</tspan>
+    <tspan x="2860" dy="22">оператором</tspan>
+  </text>
+
+  <!-- ============================ СТРЕЛКИ ============================ -->
+  <g fill="none" stroke="#44597A" stroke-width="2.4" marker-end="url(#arrow)">
+    <path d="M290 570 L330 570"/>
+    <path d="M580 570 L620 570"/>
+    <path d="M850 570 L890 570"/>
+    <path d="M1005 470 L1005 424"/>
+    <path d="M1120 570 L1180 570 L1180 685 L1271 685"/>
+    <path d="M1560 450 L1560 476"/>
+    <path d="M1560 580 L1560 611"/>
+    <path d="M1560 755 L1560 781"/>
+    <path d="M1560 925 L1560 951"/>
+    <path d="M1845 1022 L1900 1022 L1900 505 L1946 505"/>
+    <path d="M2220 690 L2220 716"/>
+    <path d="M2400 1120 L2400 1185 L24 1185 L24 1435 L76 1435"/>
+    <path d="M380 1435 L416 1435"/>
+    <path d="M720 1435 L756 1435"/>
+    <path d="M1060 1435 L1096 1435"/>
+    <path d="M1400 1435 L1436 1435"/>
+    <path d="M1780 1435 L1926 1435"/>
+    <path d="M2170 1750 L2170 1786"/>
+    <path d="M2290 1750 L2290 1770 L2625 1770 L2625 1786"/>
+    <path d="M2810 1935 L2836 1935"/>
+  </g>
+
+  <g fill="none" stroke="#8A7BC8" stroke-width="2.2" stroke-dasharray="8 6" marker-end="url(#arrowDash)">
+    <path d="M1560 1090 L1560 1145 L570 1145 L570 1326"/>
+    <path d="M2170 2080 L2170 2100 L3025 2100 L3025 2084"/>
+  </g>
+
+  <g fill="none" stroke="#9BAAC4" stroke-width="1.8" stroke-dasharray="6 5">
+    <path d="M1005 670 L1005 720"/>
+    <path d="M2490 505 L2510 505"/>
+    <path d="M2490 905 L2510 905"/>
+    <path d="M1610 1540 L1610 1590"/>
+    <path d="M2410 1540 L2440 1540"/>
+  </g>
+
+  <!-- подписи стрелок -->
+  <g font-size="13" fill="#5F7396">
+    <text xml:space="preserve" x="1192" y="628">признаки</text>
+    <text xml:space="preserve" x="1572" y="602">runtime</text>
+    <text xml:space="preserve" x="1855" y="1418" text-anchor="middle">кандидаты + фронт</text>
+    <text xml:space="preserve" x="1896" y="800" text-anchor="middle" transform="rotate(-90 1896 800)">nowcast · прогноз · интервал · P(&gt;10)</text>
+  </g>
+  <g font-size="13" fill="#6F5FAE">
+    <text xml:space="preserve" x="1060" y="1136" text-anchor="middle">прогноз = путь без воздействия (учтены уже сделанные изменения)</text>
+    <text xml:space="preserve" x="1400" y="1176" text-anchor="middle">problem · constraints · risk · confidence</text>
+  </g>
+
+  <!-- нижняя сноска -->
+  <text xml:space="preserve" x="48" y="2152" font-size="15" fill="#6B7F9E">Ни один шаг не использует данные позже момента решения: snapshot режет телеметрию по at и ЛИМС по at − 240 мин, walk-forward берёт модель с fit_end ≤ at, leakage_check проверяет контракт на каждой строке бэктеста с 2024 года.</text>
+</svg>
