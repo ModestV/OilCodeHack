@@ -101,3 +101,12 @@ python scripts/verify_release.py --local --dataset hackathon --output reports/re
 из его модельного requirements; не подменяйте его более новым HEAD молча.
 Исходный observations.parquet SHA-256:
 `9a6d9b644a2b1ddce0da27e816aad31654ea9aaf306f29865bb14503973db37b`.
+
+## Публикация
+
+Интеграция опубликована в main коммитом `ac0fa66`. Во время деплоя
+выявлено существующее перенаправление HTTP/IP на `https://oil-code.ru`:
+GET-проверка workflow получала HTML 301 вместо JSON, а urllib менял POST
+на GET при перенаправлении приёмочных запросов. Workflow исправлен для
+перехода на HTTPS; приёмку следует запускать сразу на каноническом домене.
+Модель и ограничения этим исправлением не изменяются.

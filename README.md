@@ -121,7 +121,7 @@ python tools/modeling/verify_runtime_parity.py --source '/путь/к/hakathon-d
 python tools/modeling/replay_anchored.py --dataset storage/hackathon --output reports/modeling/causal-anchored
 python tools/modeling/verify_anchored_integration.py --help
 python scripts/verify_release.py --local --output reports/verification/local.json
-python scripts/verify_release.py --base-url http://158.160.11.194 --expected-revision COMMIT_SHA --output reports/verification/server.json
+python scripts/verify_release.py --base-url https://oil-code.ru --expected-revision COMMIT_SHA --output reports/verification/server.json
 ```
 
 Даты и ожидаемые исходы — `reports/verification/cases.json`. Отчёты содержат запросы, прогнозы, причины отказов и trace, а не только код HTTP 200. Первые две команды воспроизводят прежний Ridge; `replay_anchored.py` проверяет активный v3. На принятых пробах 2026 года MAE активного H0/H1/H2/H3 составляет 1.175/1.280/1.389/1.452 мг/кг, покрытие H3 — 236 из 253 (93.3%). На H3 MAE предыдущей доступной пробы — 1.709, recall тревоги — 0.35; этого недостаточно для самостоятельного контроля качества. 2026 год уже использовался в исследованиях и не является новым слепым тестом. Подробности: [метрики и ограничения](reports/modeling/causal-anchored/corrected-claude/REPORT.md).
@@ -130,4 +130,4 @@ python scripts/verify_release.py --base-url http://158.160.11.194 --expected-rev
 
 ## Сервер и автодеплой
 
-Публичная демонстрация: http://158.160.11.194/. Workflow `.github/workflows/deploy.yml` запускается на push/merge в `main`, проверяет Python и frontend, передаёт релиз через SSH/rsync, перезапускает systemd и проверяет точный SHA через `/api/health`. Данные `storage/` сохраняются. Нужны secrets `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_PATH`, `DEPLOY_SSH_KEY`, `DEPLOY_KNOWN_HOSTS` (на текущем репозитории настроены). На сервере: `oilcode.service`, nginx, `/home/romakrutoi/oilcode`. Ручной путь: `deploy/server/remote_deploy.sh`. Приложение не обращается к внешним LLM/API при расчётах; для первоначальной установки зависимостей необходим интернет либо подготовленный локальный кэш пакетов.
+Публичная демонстрация: https://oil-code.ru/. Прежний HTTP-адрес по IP перенаправляет на этот домен; для POST/API-проверок используйте HTTPS напрямую, чтобы 301 не превращал запрос в GET. Workflow `.github/workflows/deploy.yml` запускается на push/merge в `main`, проверяет Python и frontend, передаёт релиз через SSH/rsync, перезапускает systemd и проверяет точный SHA через `/api/health`, следуя HTTPS-перенаправлению. Данные `storage/` сохраняются. Нужны secrets `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_PATH`, `DEPLOY_SSH_KEY`, `DEPLOY_KNOWN_HOSTS` (на текущем репозитории настроены). На сервере: `oilcode.service`, nginx, `/home/romakrutoi/oilcode`. Ручной путь: `deploy/server/remote_deploy.sh`. Приложение не обращается к внешним LLM/API при расчётах; для первоначальной установки зависимостей необходим интернет либо подготовленный локальный кэш пакетов.
