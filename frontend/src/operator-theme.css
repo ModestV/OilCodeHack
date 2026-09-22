@@ -764,7 +764,16 @@ tbody tr:hover td {
   box-shadow: 0 10px 24px #000b !important;
 }
 
+.help-tooltip {
+  position: relative;
+  flex: 0 0 auto;
+  isolation: isolate;
+}
+
 .help-tooltip__trigger {
+  position: relative;
+  z-index: 0;
+  margin: -8px 0;
   color: var(--muted);
 }
 
