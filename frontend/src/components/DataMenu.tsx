@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronDown, Database, Upload } from "lucide-react";
 import type { Manifest } from "../types";
 import { HelpTooltip } from "./HelpTooltip";
+import { UiSelect } from "./UiSelect";
 
 const statusName = {
   ready: "Готов",
@@ -66,18 +67,16 @@ export function DataMenu({
               поступают в реальном времени.
             </HelpTooltip>
           </div>
-          <label htmlFor="dataset">Активный набор</label>
-          <select
-            id="dataset"
+          <span className="field-label">Активный набор</span>
+          <UiSelect
+            ariaLabel="Активный набор"
             value={datasetId}
-            onChange={(event) => setDatasetId(event.target.value)}
-          >
-            {datasets.map((dataset) => (
-              <option key={dataset.id} value={dataset.id}>
-                {dataset.name} · {statusName[dataset.status]}
-              </option>
-            ))}
-          </select>
+            onChange={setDatasetId}
+            options={datasets.map((dataset) => ({
+              value: dataset.id,
+              label: `${dataset.name} · ${statusName[dataset.status]}`,
+            }))}
+          />
           <button
             className="secondary data-upload"
             onClick={() => {

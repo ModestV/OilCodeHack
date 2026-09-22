@@ -1,0 +1,264 @@
+.ui-select {
+  position: relative;
+  min-width: 0;
+}
+
+.ui-select__trigger {
+  width: 100%;
+  min-height: 36px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 16px;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 9px;
+  border: 1px solid var(--border-strong, var(--border));
+  border-radius: var(--radius-control, 3px);
+  background: var(--surface-raised, var(--surface));
+  color: var(--text, var(--navy));
+  text-align: left;
+}
+
+.ui-select__trigger > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ui-select__trigger svg {
+  width: 15px;
+  height: 15px;
+  color: var(--muted);
+  transition: transform 90ms ease-out;
+}
+
+.ui-select__trigger[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+
+.ui-select__menu {
+  position: fixed;
+  z-index: 230;
+  max-width: calc(100vw - 16px);
+  max-height: 280px;
+  overflow: auto;
+  padding: 3px;
+  border: 1px solid var(--border-strong, var(--border));
+  border-radius: var(--radius-control, 3px);
+  background: var(--surface-overlay, var(--surface));
+  box-shadow: 0 12px 28px #0008;
+}
+
+.ui-select__menu > button {
+  width: 100%;
+  min-height: 34px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 16px;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: 2px;
+  background: transparent;
+  color: var(--text, var(--navy));
+  text-align: left;
+}
+
+.ui-select__menu > button.is-active {
+  background: var(--surface-selected, #2b3034);
+}
+
+.ui-select__menu > button svg {
+  width: 14px;
+  height: 14px;
+  color: var(--accent, #a8b1b7);
+}
+
+.datetime-field {
+  position: relative;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 34px;
+  align-items: center;
+}
+
+.datetime-field > input {
+  width: 100%;
+  min-width: 0;
+  height: 36px;
+  padding: 7px 8px;
+  padding-right: 2px;
+  border: 0;
+  background: transparent;
+  color: var(--text, var(--navy));
+  font-variant-numeric: tabular-nums;
+}
+
+.datetime-field__toggle {
+  min-height: 34px;
+  padding: 7px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+}
+
+.datetime-field__toggle svg {
+  width: 16px;
+  height: 16px;
+}
+
+.datetime-popover {
+  position: absolute;
+  z-index: 100;
+  top: calc(100% + 6px);
+  right: 0;
+  width: 316px;
+  padding: 10px;
+  border: 1px solid var(--border-strong, var(--border));
+  border-radius: var(--radius-panel, 4px);
+  background: var(--surface-overlay, var(--surface));
+  box-shadow: 0 18px 42px #0009;
+}
+
+.datetime-popover > header {
+  display: grid;
+  grid-template-columns: 34px 1fr 34px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.datetime-popover > header strong {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.datetime-popover__month-year {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 84px;
+  gap: 6px;
+  min-width: 0;
+}
+
+.datetime-popover__month-year .ui-select__trigger {
+  min-height: 32px;
+  padding: 5px 7px;
+  font-size: 12px;
+}
+
+.datetime-popover > header button,
+.datetime-popover__days button {
+  border: 0;
+  background: transparent;
+  color: var(--text, var(--navy));
+}
+
+.datetime-popover__weekdays,
+.datetime-popover__days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.datetime-popover__weekdays span {
+  padding: 4px 0;
+  color: var(--muted);
+  font-size: 11px;
+  text-align: center;
+}
+
+.datetime-popover__days button {
+  min-height: 34px;
+  border-radius: 2px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.datetime-popover__days button:hover,
+.datetime-popover__days button:focus-visible {
+  background: var(--surface-hover, #24282c);
+}
+
+.datetime-popover__days button.is-outside {
+  color: var(--text-faint, #666d72);
+}
+
+.datetime-popover__days button.is-selected {
+  background: var(--accent, #a8b1b7);
+  color: var(--accent-contrast, #111315);
+  font-weight: 600;
+}
+
+.datetime-popover > footer {
+  display: grid;
+  grid-template-columns: auto 64px auto 64px 1fr;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+}
+
+.datetime-popover__time .ui-select__menu {
+  min-width: 64px;
+  max-height: 190px;
+}
+
+.datetime-popover > footer .secondary {
+  justify-self: end;
+  min-height: 34px;
+  padding: 6px 10px;
+}
+
+@media (max-width: 760px) {
+  .ui-select__trigger,
+  .ui-select__menu > button,
+  .datetime-field > input,
+  .datetime-field__toggle {
+    min-height: 44px;
+  }
+
+  .datetime-popover {
+    position: fixed;
+    inset: auto 8px 72px;
+    width: auto;
+    max-height: calc(100vh - 90px);
+    overflow: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-select__trigger svg {
+    transition: none;
+  }
+}
+
+.context-menu {
+  position: fixed;
+  z-index: 220;
+  min-width: 210px;
+  padding: 3px;
+  border: 1px solid var(--border-strong, var(--border));
+  border-radius: var(--radius-control, 3px);
+  background: var(--surface-overlay, var(--surface));
+  box-shadow: 0 14px 32px #000a;
+}
+
+.context-menu button {
+  width: 100%;
+  min-height: 34px;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: 2px;
+  background: transparent;
+  color: var(--text, var(--navy));
+  text-align: left;
+}
+
+.context-menu button:hover,
+.context-menu button:focus-visible {
+  background: var(--surface-hover, #24282c);
+}
+
+.context-menu button.is-destructive {
+  color: var(--danger, #cc7272);
+}

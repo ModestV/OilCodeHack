@@ -1,9 +1,9 @@
 import {
-  CalendarDays,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import { DateTimeField } from "./DateTimeField";
 import { HelpTooltip } from "./HelpTooltip";
 export type Mode = "period" | "moment";
 export const fmt = (d: Date) => d.toISOString().slice(0, 19);
@@ -63,25 +63,20 @@ export function TimeControls({
           </HelpTooltip>
         </div>
         <div className="date-control">
-          <CalendarDays />
           {mode === "period" && (
             <>
-              <input
-                type="datetime-local"
-                step="60"
+              <DateTimeField
                 value={from.slice(0, 16)}
-                onChange={(e) => setRange(e.target.value, to)}
-                aria-label="Начало периода"
+                onChange={(value) => setRange(value, to)}
+                ariaLabel="Начало периода"
               />
               <span>→</span>
             </>
           )}
-          <input
-            type="datetime-local"
-            step="60"
+          <DateTimeField
             value={to.slice(0, 16)}
-            onChange={(e) => setRange(from, e.target.value)}
-            aria-label={
+            onChange={(value) => setRange(from, value)}
+            ariaLabel={
               mode === "moment"
                 ? "Момент измерения"
                 : "Конец периода (не включён)"
