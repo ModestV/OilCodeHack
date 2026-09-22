@@ -946,9 +946,13 @@ function PipelinePreview({
             </dd>
           </div>
           <div>
-            <dt>Экономия в деньгах</dt>
+            <dt>Риск S &gt; 10</dt>
             <dd>
-              Не оценивалась
+              {decision?.recommendation?.risk?.exceedance_probability == null
+                ? "—"
+                : `${formatNumber(100 * decision.recommendation.risk.exceedance_probability, 0)}%`}
+              {decision?.recommendation?.risk?.max_exceedance_probability != null &&
+                <span> ≤ {formatNumber(100 * decision.recommendation.risk.max_exceedance_probability, 0)}%</span>}
             </dd>
           </div>
         </dl>
@@ -969,6 +973,10 @@ function PipelinePreview({
             : "Прогноз по наблюдениям и сценарный эффект рассчитаны разными моделями. "}
           Проверка относится к концу горизонта. Без расчёта смеси влияние режима на T95 и цетановое число не оценено; производственная безопасность не подтверждена.
         </p>
+        {decision?.recommendation?.additive && <p className="support-notice">
+          Цетаноповышающая присадка: {formatNumber(decision.recommendation.additive.pct, 2)}% ({formatNumber(decision.recommendation.additive.dose_kg_t, 1)} кг/т),
+          {" "}стоимость продукта ×{formatNumber(decision.recommendation.additive.cost_index, 2)}. Нужна для цетанового числа ≥ 51 по нижней границе последнего анализа ЛИМС; свежий анализ может снизить дозу.
+        </p>}
         {result?.blend && <p className="support-notice">
           Выбранный рецепт: {result.blend.normalized_shares.map(tank => `${tank.name} — ${formatNumber(tank.share, 1)}%`).join("; ")}.
           {" "}Присадка: {formatNumber((result.model_request?.additive_pct ?? 0) * 10, 1)} кг/т.
@@ -1018,6 +1026,7 @@ function PipelinePreview({
               <tr>
                 <th scope="col">Сценарий</th>
                 <th scope="col">Сера товарного продукта</th>
+                <th scope="col">P(S &gt; 10)</th>
                 <th scope="col">Проверка ограничений</th>
                 <th scope="col">Масштаб изменения</th>
                 <th scope="col">Выпуск, Δ%</th>
@@ -1059,6 +1068,11 @@ function PipelinePreview({
                       : `${formatNumber(candidate.product_sulfur ?? candidate.predicted_sulfur)} мг/кг серы`}
                   </td>
                   <td>
+                    {candidate.risk?.exceedance_probability == null
+                      ? "—"
+                      : `${formatNumber(100 * candidate.risk.exceedance_probability, 0)}% (допустимо ≤ ${formatNumber(100 * (candidate.risk.max_exceedance_probability ?? 0), 0)}%)`}
+                  </td>
+                  <td>
                     {candidate.status === "error"
                       ? "Ошибка"
                       : candidate.feasible
@@ -1073,7 +1087,7 @@ function PipelinePreview({
                   </td>
                   <td>{formatNumber(candidate.objectives?.throughput_change_pct, 1)}</td>
                   <td>{formatNumber(candidate.objectives?.energy_cost_index, 3)}</td>
-                  <td>{candidate.scenario?.blend ? formatNumber(candidate.objectives?.blend_cost_index, 3) : "—"}</td>
+                  <td>{candidate.scenario?.blend || candidate.additive ? formatNumber(candidate.objectives?.blend_cost_index, 3) : "—"}</td>
                   <td>{formatNumber(candidate.objectives?.regime_severity.index, 3)}</td>
                   <td className="row-actions">
                     <button
@@ -1188,6 +1202,15 @@ function PipelinePreview({
           </p>
           {!!decision.forecast.warnings.length && (
             <details><summary>Ограничения прогноза</summary><ul>{decision.forecast.warnings.map((warning) => <li key={warning}>{warning}</li>)}</ul></details>
+          )}
+        </section>
+      )}
+      {decision?.explanation && (
+        <section className="support-explanation" aria-label="Объяснение решения">
+          <h3>Объяснение{decision.explanation.source === "llm" ? ` · LLM ${decision.explanation.model ?? ""}` : " · шаблон"}</h3>
+          <p>{decision.explanation.text}</p>
+          {!!decision.conflicts?.length && (
+            <ul>{decision.conflicts.map((conflict) => <li key={conflict.code}>{conflict.message} ({conflict.resolution})</li>)}</ul>
           )}
         </section>
       )}

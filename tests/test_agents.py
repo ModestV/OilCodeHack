@@ -93,8 +93,11 @@ def test_decision_runs_deterministic_agents_and_returns_trace(tmp_path, monkeypa
         "quality",
         "reliability",
         "optimization",
+        "orchestrator",
     ]
     assert all("summary" in item and "status" in item for item in body["trace"])
+    assert body["explanation"]["source"] == "template"
+    assert body["explanation"]["action"] == "Рекомендация не выдана"
     # An unreachable target is diagnostic evidence, never an action suggestion.
     assert body["recommendation"] is None
     assert body["scenario"] is None
@@ -138,7 +141,8 @@ def test_decision_abstains_when_sulfur_baseline_is_missing(tmp_path, monkeypatch
     assert body["scenario"] is None
     assert body["abstain"]["missing"] == ["sulfur_baseline"]
     assert body["agents"]["optimization"]["status"] == "skipped"
-    assert body["trace"][-1]["status"] == "skipped"
+    assert body["trace"][2]["status"] == "skipped"
+    assert body["trace"][-1] == {**body["trace"][-1], "role": "orchestrator", "status": "abstain"}
 
 
 def test_decision_abstains_when_quality_exists_but_controls_are_missing(tmp_path, monkeypatch):

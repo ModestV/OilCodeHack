@@ -1,9 +1,25 @@
 """Declared experimental proxies; neither failure probabilities nor plant costs."""
+from functools import lru_cache
 from math import isfinite
 
 # Freeze the original load proxy reference distribution across forecast upgrades.
 # Its engineering score is independent of the active sulphur model's support gate.
+from .forecast_legacy import ARTIFACT as LOAD_REFERENCE
 from .forecast_legacy import ForecastUnavailable, _load_artifact
+
+
+@lru_cache(maxsize=4)
+def _reference(mtime: float) -> dict:
+    return _load_artifact(LOAD_REFERENCE)
+
+
+def _load_reference() -> dict:
+    """The optimiser scores dozens of grid points per decision; parse the reference once."""
+    try:
+        mtime = LOAD_REFERENCE.stat().st_mtime
+    except OSError as exc:
+        raise ForecastUnavailable("Артефакт модели прогноза серы отсутствует или повреждён") from exc
+    return _reference(mtime)
 
 
 def annotate_pareto(candidates: list[dict]) -> None:
@@ -43,7 +59,7 @@ def regime_severity(controls: dict) -> dict:
     experimental cap is the frozen first-iteration convention, not the new forecast gate.
     """
     try:
-        artifact = _load_artifact()
+        artifact = _load_reference()
     except ForecastUnavailable as exc:
         return {"status": "unavailable", "index": None, "factors": [], "reason": str(exc)}
     factors = []
@@ -65,6 +81,44 @@ def regime_severity(controls: dict) -> dict:
             "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."}
 
 
+SHUTDOWN_FEED_FRACTION = 0.10
+TRANSITION_FEED_FRACTION = 0.60
+
+
+def operating_state(controls: dict) -> dict:
+    """Shutdown / start-up detection from the feed rate F9.
+
+    History contains long stops with F9 ≈ 0 (e.g. April 2024, June 2026) and
+    ramps between them.  Below 10% of the training mean the unit is treated as
+    stopped; below 60% (under the 5th percentile of history) as a start-up,
+    shutdown or deep turndown transition.  Transient regimes are not modelled,
+    so the contour refuses to advise in both states.  Thresholds are explicit
+    prototype assumptions, not plant limits.
+    """
+
+    value = controls.get("ht.F9")
+    if value is None or not isfinite(value):
+        return {"state": "unknown", "feed": None, "feed_fraction_of_train_mean": None,
+                "reason": "Нет значения F9 для определения режима установки"}
+    try:
+        artifact = _load_reference()
+        mean = artifact["mean"][artifact["feature_columns"].index("242000__F9")]
+    except (ForecastUnavailable, KeyError, ValueError) as exc:
+        return {"state": "unknown", "feed": value, "feed_fraction_of_train_mean": None, "reason": str(exc)}
+    fraction = value / mean
+    state = ("shutdown" if fraction < SHUTDOWN_FEED_FRACTION
+             else "transition" if fraction < TRANSITION_FEED_FRACTION else "normal")
+    reason = {
+        "shutdown": f"Установка в режиме останова: подача F9 {value:.1f} — {max(fraction, 0):.0%} от среднего обучения",
+        "transition": f"Режим пуска/останова или глубокого снижения нагрузки: подача F9 {value:.1f} — "
+                      f"{max(fraction, 0):.0%} от среднего обучения; переходные режимы не моделируются",
+        "normal": None,
+    }[state]
+    return {"state": state, "feed": value, "feed_fraction_of_train_mean": fraction, "train_mean": mean,
+            "thresholds": {"shutdown": SHUTDOWN_FEED_FRACTION, "transition": TRANSITION_FEED_FRACTION},
+            "reason": reason, "basis": "feed fraction of train mean; prototype assumption"}
+
+
 def candidate_objectives(scenario: dict, effort: float) -> dict:
     controls = scenario["controls"]
     temperature = controls["ht.T6"]["change"]
@@ -76,13 +130,22 @@ def candidate_objectives(scenario: dict, effort: float) -> dict:
     # This is a configured preference, never a permission to violate quality.
     loss = (0.5 * (1 - throughput) / .10 + .25 * (energy - 1) / .25
             + .25 * severity["index"] + .05 * effort) if severity["index"] is not None else None
-    blend_cost = scenario["blend"]["cost_index"] if scenario.get("blend") else 1.
+    additive = scenario.get("additive")
+    # Recipe cost: supplied blend, or cetane improver dosed into the direct product.
+    blend_cost = (scenario["blend"]["cost_index"] if scenario.get("blend")
+                  else additive["cost_index"] if additive else 1.)
+    risk = scenario.get("risk") or {}
+    probability, budget = risk.get("exceedance_probability"), risk.get("max_exceedance_probability")
+    # Expected off-spec cost, in units of the admissible risk budget; the budget itself is a hard gate.
+    risk_term = .25 * probability / budget if probability is not None and budget else 0.
     if loss is not None:
-        loss += .25 * (blend_cost - 1)
+        loss += .25 * (blend_cost - 1) + risk_term
     return {"throughput_index": throughput, "throughput_change_pct": feed_pct,
             "energy_cost_index": energy, "regime_severity": severity,
             "ranking_loss": loss,
             "blend_cost_index": blend_cost,
-            "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.25*(blend_cost-1)",
+            "exceedance_probability": probability, "risk_term": risk_term,
+            "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort"
+                               " + 0.25*(recipe_cost-1) + 0.25*P(S>10)/P_max",
             "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units",
             "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"}

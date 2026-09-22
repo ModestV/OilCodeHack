@@ -3,13 +3,15 @@
 from __future__ import annotations
 
 from datetime import timedelta
+from math import exp, log
 from pathlib import Path
 from typing import Literal
 
+import numpy as np
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .analytics import parse_time, snapshot
-from .forecast import ForecastUnavailable, forecast_sulfur
+from .forecast import ForecastUnavailable, control_response_defaults, forecast_sulfur
 
 
 # Physical source class is independent of file type: Q21 is also an online analyser.
@@ -25,6 +27,14 @@ SULFUR_PRIORITY_IDS = (
 HARD_SULFUR_MAX = 10.0
 HARD_T95_MAX = 360.0
 HARD_CETANE_MIN = 51.0
+MAX_ADDITIVE_PCT = 3.0
+# Model limit on one recommendation step (≤ 60 min): ≈ 99th percentile of the
+# absolute 60-minute change of T6/P13/F9 in normal operation 2023–2025
+# (6.9 °C, 0.22 MPa, 11.5%).  The observational response coefficients carry no
+# evidence beyond moves the history contains.  Not a plant rate limit.
+STEP_LIMITS = {"temperature": 6.0, "feed_rate_pct": 10.0, "pressure": 0.2}
+# Used when the model artifact carries no alarm threshold for the horizon.
+DEFAULT_MAX_EXCEEDANCE_PROBABILITY = 0.2
 
 
 class FiniteModel(BaseModel):
@@ -46,6 +56,9 @@ class ModelParameters(FiniteModel):
     cetane_gain_per_pct: float = Field(default=4.0, ge=0)
     dead_time_minutes: int = Field(default=0, ge=0, le=180)
     additive_sulfur_mgkg: float | None = Field(default=None, ge=0)
+    # Charge a sulphur-raising move at the larger of the editable coefficient and
+    # the observed step response, credit a sulphur-lowering move at the smaller.
+    asymmetric_response: bool = True
 
 
 class ControlChanges(FiniteModel):
@@ -84,6 +97,11 @@ class ScenarioRequest(FiniteModel):
     production_rate_tph: float | None = Field(default=None, gt=0)
     transport_delay_minutes: int = Field(default=0, ge=0, le=1440)
     intermediate_sulfur_max: float | None = Field(default=None, gt=0)
+    # Expert guidance: keep 1–2 ppm below the 10 mg/kg cap. Applied as a point
+    # margin when no calibrated forecast uncertainty describes the baseline.
+    sulfur_margin_mgkg: float = Field(default=1.0, ge=0, lt=10)
+    # Accepted P(S > 10) at the horizon; None = the model's calibrated alarm threshold.
+    max_exceedance_probability: float | None = Field(default=None, gt=0, lt=1)
     optimize_economics: bool = True
     optimize_recipe: bool = False
     minimum_economic_gain: float = Field(default=0.03, ge=0)
@@ -136,11 +154,11 @@ def select_sulfur(values: dict) -> tuple[float | None, str | None]:
 def _automatic_changes(required_reduction: float, model: ModelParameters) -> ControlChanges:
     if required_reduction <= 0:
         return ControlChanges()
-    temperature = min(10.0, required_reduction / abs(model.temperature_effect))
+    temperature = min(STEP_LIMITS["temperature"], required_reduction / abs(model.temperature_effect))
     remaining = max(0.0, required_reduction + model.temperature_effect * temperature)
-    pressure = min(2.0, remaining / abs(model.pressure_effect))
+    pressure = min(STEP_LIMITS["pressure"], remaining / abs(model.pressure_effect))
     remaining = max(0.0, remaining + model.pressure_effect * pressure)
-    feed_rate = -min(10.0, remaining / model.feed_rate_effect)
+    feed_rate = -min(STEP_LIMITS["feed_rate_pct"], remaining / model.feed_rate_effect)
     return ControlChanges(temperature=temperature, pressure=pressure, feed_rate_pct=feed_rate)
 
 
@@ -216,10 +234,101 @@ def _blend(request: ScenarioRequest, *, produced_sulfur: float | None = None,
     return result
 
 
+def forecast_covers_path(forecast: dict | None, horizon: int) -> bool:
+    return bool(forecast and forecast.get("status") == "ok" and forecast.get("path_supported")
+                and forecast.get("nowcast") and forecast.get("horizon_minutes") == horizon)
+
+
+def risk_policy(request: ScenarioRequest, forecast: dict | None) -> dict:
+    """How much sulphur risk a candidate may carry at the horizon endpoint.
+
+    With an observed forecast the model's out-of-fold ln-residual quantiles give
+    P(S > 10) for any shifted endpoint; the admissible level is the one where this
+    probability equals the calibrated alarm threshold (≈ 8.85 mg/kg at 3 h, i.e.
+    the expert's 1–2 ppm margin).  A manual baseline has no calibrated error, so
+    the explicit point margin is used instead.  ``design_level`` (half the
+    admissible probability, or 1.5 margins) is the middle of the admissible
+    zone: the automatic correction aims there, and a cost-saving move (one
+    that raises sulphur) must end inside it; holding the regime or a move that
+    lowers the risk only has to stay within the admissible probability.
+    """
+    quantiles = (forecast or {}).get("risk_quantiles") if request.current_sulfur is None else None
+    usable = (forecast_covers_path(forecast, request.horizon_minutes) and quantiles
+              and len(quantiles.get("quantiles") or []) >= 3
+              and len(quantiles["quantiles"]) == len(quantiles.get("probabilities") or []))
+    if usable:
+        p_max = float(request.max_exceedance_probability or forecast.get("alarm_probability")
+                      or DEFAULT_MAX_EXCEEDANCE_PROBABILITY)
+        probabilities = np.asarray(quantiles["probabilities"], dtype=float)
+        residuals = np.asarray(quantiles["quantiles"], dtype=float)
+
+        def level(p: float) -> float:
+            return HARD_SULFUR_MAX * exp(-float(np.interp(1 - p, probabilities, residuals)))
+
+        return {"basis": "calibrated_residual_quantiles", "max_exceedance_probability": p_max,
+                "design_max_exceedance_probability": p_max / 2,
+                "safe_level": level(p_max), "design_level": level(p_max / 2),
+                "quantiles": quantiles, "margin_mgkg": None}
+    return {"basis": "point_margin", "max_exceedance_probability": None, "design_max_exceedance_probability": None,
+            "safe_level": HARD_SULFUR_MAX - request.sulfur_margin_mgkg,
+            "design_level": HARD_SULFUR_MAX - 1.5 * request.sulfur_margin_mgkg,
+            "quantiles": None, "margin_mgkg": request.sulfur_margin_mgkg}
+
+
+def candidate_risk(policy: dict, sulfur: float) -> dict:
+    """Risk of one endpoint under ``policy``; P is None without a calibrated error model."""
+    public = {k: v for k, v in policy.items() if k != "quantiles"}
+    if policy["basis"] != "calibrated_residual_quantiles":
+        return {**public, "sulfur": sulfur, "exceedance_probability": None, "upper_80": None,
+                "passed": sulfur <= policy["safe_level"] + 1e-9,
+                "within_design": sulfur <= policy["design_level"] + 1e-9}
+    from tools.modeling.anchored_features import exceedance_probability, interval
+    ln_sulfur = log(max(sulfur, 1e-3))
+    probability = exceedance_probability(policy["quantiles"], ln_sulfur, log(HARD_SULFUR_MAX))
+    return {**public, "sulfur": sulfur, "exceedance_probability": probability,
+            "upper_80": interval(policy["quantiles"], ln_sulfur)[1],
+            "passed": probability <= policy["max_exceedance_probability"] + 1e-9,
+            "within_design": probability <= policy["design_max_exceedance_probability"] + 1e-9}
+
+
+_OBSERVED_RESPONSE: dict | None = None
+
+
+def observed_response() -> dict | None:
+    """Median ln-sulphur step responses of the analyser to T6/F9/P13 (artifact v3), cached."""
+    global _OBSERVED_RESPONSE
+    if _OBSERVED_RESPONSE is None:
+        defaults = control_response_defaults()
+        _OBSERVED_RESPONSE = {} if defaults is None else {
+            "temperature": defaults["temperature_effect"], "feed_rate_pct": defaults["feed_rate_effect"],
+            "pressure": defaults["pressure_effect"], "basis": defaults["basis"]}
+    return _OBSERVED_RESPONSE or None
+
+
+def control_effects(changes: ControlChanges, parameters: ModelParameters, level: float) -> dict:
+    """Per-control sulphur effect (mg/kg) at the full response.
+
+    The editable coefficients are 3–12 times smaller than the median observed
+    step response, which is prudent when crediting a correction and imprudent
+    when judging a cost-saving move.  With ``asymmetric_response`` every
+    control takes whichever of the two estimates is worse for quality.
+    """
+    observed = observed_response() if parameters.asymmetric_response else None
+    effects = {}
+    for name, coefficient in (("temperature", parameters.temperature_effect),
+                              ("feed_rate_pct", parameters.feed_rate_effect),
+                              ("pressure", parameters.pressure_effect)):
+        change = getattr(changes, name)
+        editable = coefficient * change
+        measured = observed[name] * change * max(level, 0.0) if observed else None
+        effects[name] = {"editable": editable, "observed": measured,
+                         "used": editable if measured is None else max(editable, measured)}
+    return effects
+
+
 def _baseline_knots(forecast: dict | None, sulfur: float, horizon: int) -> list[tuple[float, float]]:
     """Scenario interpolation is linear in concentration; exact requested endpoint is retained."""
-    if (forecast and forecast.get("status") == "ok" and forecast.get("path_supported")
-            and forecast.get("nowcast") and forecast.get("horizon_minutes") == horizon):
+    if forecast_covers_path(forecast, horizon):
         rows = [(float(r["minutes"]), float(r["prediction"])) for r in forecast["horizons"]
                 if r["minutes"] < horizon and r.get("prediction") is not None]
         return sorted([*rows, (float(horizon), float(forecast["prediction"]))])
@@ -264,8 +373,7 @@ def calculate_scenario(directory: Path, request: ScenarioRequest, *, frame: dict
             forecast = forecast_sulfur(directory, request.at, horizon_minutes=request.horizon_minutes)
         except ForecastUnavailable:
             forecast = None
-    forecast_ok = bool(forecast and forecast.get("status") == "ok" and forecast.get("path_supported")
-                       and forecast.get("nowcast") and forecast.get("horizon_minutes") == request.horizon_minutes)
+    forecast_ok = forecast_covers_path(forecast, request.horizon_minutes)
     sulfur_source = "request.current_sulfur" if sulfur is not None else None
     if sulfur is None and forecast_ok:
         sulfur, sulfur_source = float(forecast["nowcast"]["prediction"]), "model.nowcast"
@@ -277,6 +385,7 @@ def calculate_scenario(directory: Path, request: ScenarioRequest, *, frame: dict
         raise ValueError("Нет базового значения серы: задайте его в сценарии")
     knots = _baseline_knots(forecast if request.current_sulfur is None else None, sulfur, request.horizon_minutes)
     endpoint = _at_knots(knots, request.horizon_minutes)
+    policy = risk_policy(request, forecast)
 
     feed_effect = request.parameters.feed_sulfur_transfer * (
         request.feed_sulfur - request.baseline_feed_sulfur
@@ -285,20 +394,17 @@ def calculate_scenario(directory: Path, request: ScenarioRequest, *, frame: dict
     if changes is None:
         response = _response_fraction(request.horizon_minutes, request.parameters.lag_minutes, request.parameters.dead_time_minutes)
         # Solve for the requested horizon, not for an unreachable steady state.
-        # An editable target cannot relax the confirmed product sulphur limit.
-        effective_target = min(request.targets.sulfur_max, HARD_SULFUR_MAX)
+        # An editable target cannot relax the confirmed product sulphur limit,
+        # and the solution aims inside the risk margin rather than at 10 itself.
+        effective_target = min(request.targets.sulfur_max, HARD_SULFUR_MAX, policy["design_level"])
         if request.tanks:
             effective_target = request.intermediate_sulfur_max if request.intermediate_sulfur_max is not None else endpoint + max(0, feed_effect)
         changes = _automatic_changes(
             (endpoint - effective_target) / response + feed_effect if response else 0,
             request.parameters,
         )
-    full_effect = (
-        feed_effect
-        + request.parameters.temperature_effect * changes.temperature
-        + request.parameters.feed_rate_effect * changes.feed_rate_pct
-        + request.parameters.pressure_effect * changes.pressure
-    )
+    effects = control_effects(changes, request.parameters, endpoint)
+    full_effect = feed_effect + sum(item["used"] for item in effects.values())
     steady_state_sulfur = max(0.0, endpoint + full_effect)
     target_time = parse_time(request.at)
     minutes = list(range(0, request.horizon_minutes + 1, request.step_minutes))
@@ -345,6 +451,26 @@ def calculate_scenario(directory: Path, request: ScenarioRequest, *, frame: dict
     produced_mass = (request.production_rate_tph or 0) * (1+changes.feed_rate_pct/100) * arriving_duration/60
     blend = _blend(request, produced_sulfur=produced_sulfur, produced_mass=produced_mass)
     product_sulfur = blend["sulfur"] if blend else final_sulfur
+    additive = None
+    if blend is None and request.additive_pct > 0:
+        # Direct route: the hydrotreated product is dosed with cetane improver.
+        # Unknown additive sulphur is taken at the 10 mg/kg product cap, which
+        # never credits dilution below the hydrotreater result.
+        fraction = request.additive_pct / 100
+        additive_sulfur = request.parameters.additive_sulfur_mgkg
+        product_sulfur = final_sulfur * (1 - fraction) + (HARD_SULFUR_MAX if additive_sulfur is None else additive_sulfur) * fraction
+        additive = {
+            "pct": request.additive_pct, "dose_kg_t": request.additive_pct * 10,
+            "cetane_gain": request.parameters.cetane_gain_per_pct * request.additive_pct,
+            "product_cetane": (cetane + request.parameters.cetane_gain_per_pct * request.additive_pct
+                               if cetane is not None else None),
+            "cost_index": (1 - fraction) + 100 * fraction,
+            "sulfur_basis": ("explicit_additive_sulfur" if additive_sulfur is not None
+                             else "assumed_10_mg_kg_no_dilution_credit"),
+        }
+    risk = (candidate_risk(policy, product_sulfur) if blend is None
+            else {**{k: v for k, v in policy.items() if k != "quantiles"}, "basis": "blend_mass_balance",
+                  "sulfur": product_sulfur, "exceedance_probability": None, "upper_80": None, "passed": None})
     return {
         "at": request.at,
         "horizon_minutes": request.horizon_minutes,
@@ -363,17 +489,22 @@ def calculate_scenario(directory: Path, request: ScenarioRequest, *, frame: dict
         "hard_sulfur_limit_met": product_sulfur <= HARD_SULFUR_MAX,
         "intermediate_sulfur_limit_met": request.intermediate_sulfur_max is None or final_sulfur <= request.intermediate_sulfur_max,
         "intermediate_sulfur_max": request.intermediate_sulfur_max,
+        "control_effects": {**effects, "basis": ("worse of editable coefficient and observed median step response "
+                                                 "(ln per unit × baseline endpoint)" if request.parameters.asymmetric_response
+                                                 else "editable coefficients")},
         "batch": {"arriving_minutes": arriving_duration, "produced_t": produced_mass,
                   "produced_sulfur": produced_sulfur, "withdrawal_at_horizon": True},
         "hard_sulfur_max": HARD_SULFUR_MAX,
         "prediction_scope": "horizon_endpoint_surrogate",
         "trajectory": trajectory,
         "blend": blend,
+        "additive": additive,
+        "risk": risk,
         "applied_recipe": {"tanks": [t.model_dump() for t in request.tanks], "additive_pct": request.additive_pct},
         "assumptions": [
             "Простая линейная сценарная модель, не промышленный оптимизатор.",
             "Для наблюдаемого режима база — калиброванный прогноз H0/H1/H2/H3; между опорными точками линейная интерполяция концентрации. Качество поступления интегрируется до горизонта минус доставка, независимо от шага графика.",
-            "Коэффициенты чувствительности и пределы изменения являются редактируемыми модельными допущениями.",
+            "Коэффициенты чувствительности и пределы изменения являются редактируемыми модельными допущениями. По умолчанию изменение, повышающее серу, оценивается по большему из редактируемого коэффициента и медианного наблюдаемого отклика анализатора на ступени T6/F9/P13, а снижающее — по меньшему.",
             "Параметр lag задаёт время линейного нарастания эффекта (0–180 минут), а не подтверждённое время прохождения продукта; значения ЛИМС доступны через 4 часа после отбора пробы.",
             "predicted_sulfur соответствует концу выбранного горизонта; steady_state_sulfur — полному условному эффекту. Проверка конечной точки не гарантирует качество на всём переходе.",
             "T95 и цетановое число гидроочистки не прогнозируются: известные базовые значения служат отдельными ограничениями; неизвестные показатели не считаются прошедшими проверку.",
@@ -382,5 +513,7 @@ def calculate_scenario(directory: Path, request: ScenarioRequest, *, frame: dict
             "Новая партия полностью перемешивается с запасом перед отбором смеси в конце горизонта; непрерывная отгрузка не моделируется. T95 и цетан новой партии задаются пользователем.",
             "Выпуск т/ч задаётся отдельно: спорный объёмный расход F15 не используется для массового баланса. Массовый выпуск меняется пропорционально изменению подачи при неизменном условном выходе.",
             "Дозировка 0–3% — модельный диапазон (0–30 кг/т), не установленный технологический предел. Присадке не приписывается снижение T95.",
+            "Запас по сере: при прогнозе по наблюдениям вариант допустим, если P(S > 10) в конце горизонта не выше порога тревоги модели (≈ 8,85 мг/кг на 3 ч); при ручной базе — если сера не выше 10 минус заданный запас (1 мг/кг по умолчанию). Автоматический вариант целится в середину допустимой зоны; экономичный вариант (повышающий серу ради экономии) должен заканчиваться в её середине (P ≤ половины порога или сера ≤ 10 − 1,5 запаса); удержание и снижающие риск варианты — в пределах порога. Шаг изменения ограничен модельным пределом: T6 ±6 °C, P13 ±0,2 МПа, F9 ±10% (≈ 99-й перцентиль часовых изменений 2023–2025).",
+            "Без смеси присадка дозируется в гидроочищенный продукт; неизвестная сера присадки принимается равной 10 мг/кг, поэтому разбавление не засчитывается.",
         ],
     }

@@ -15,7 +15,7 @@ def evidence(monkeypatch):
     values = [
         {"metric_id": metric, "value": value, "timestamp": AT,
          "available_at": AT, "freshness": "fresh", "flags": []}
-        for metric, value in (("ht.T6", 300), ("ht.F9", 100), ("ht.P13", 5),
+        for metric, value in (("ht.T6", 300), ("ht.F9", 210), ("ht.P13", 5),
                               ("pak.ht.Mg.Sulfur", 8))
     ]
     monkeypatch.setattr(agents, "snapshot", lambda *args, **kwargs: {"values": values})
@@ -54,11 +54,19 @@ def test_zero_horizon_never_credits_future_intervention(tmp_path, evidence, lag)
 
 def test_automatic_changes_solve_requested_horizon(tmp_path, evidence):
     result = calculate_scenario(tmp_path, ScenarioRequest(
-        at=AT, current_sulfur=10.5, horizon_minutes=45, step_minutes=15,
+        at=AT, current_sulfur=10.5, horizon_minutes=45, step_minutes=15, sulfur_margin_mgkg=0,
     ))
     assert result["predicted_sulfur"] == pytest.approx(10)
-    assert result["controls"]["ht.T6"]["change"] == 10
+    assert result["controls"]["ht.T6"]["change"] == 6  # per-step model limit
+    assert result["controls"]["ht.P13"]["change"] == pytest.approx(.2)
     assert result["steady_state_sulfur"] == pytest.approx(9.5)
+
+
+def test_automatic_changes_aim_inside_the_expert_margin_not_at_ten(tmp_path, evidence):
+    result = calculate_scenario(tmp_path, ScenarioRequest(at=AT, current_sulfur=9.5))
+    assert result["predicted_sulfur"] == pytest.approx(8.5)  # middle of the 9-10 margin zone
+    assert result["risk"]["basis"] == "point_margin"
+    assert result["risk"]["passed"] is True
 
 
 def test_all_infeasible_abstains_and_retains_diagnostics(tmp_path, evidence):
@@ -86,9 +94,25 @@ def test_feasible_choice_minimizes_effort_and_retains_manual_input(tmp_path, evi
 
 def test_requested_candidate_can_win_when_feasible_with_less_effort(tmp_path, evidence):
     result = decide(tmp_path, current_sulfur=10.4,
-                    parameters={"pressure_effect": -1}, changes={"pressure": .4})
+                    parameters={"temperature_effect": -.35}, changes={"temperature": 4})
     assert result["selected_candidate"] == "requested"
-    assert result["recommendation"]["predicted_sulfur"] == pytest.approx(10)
+    assert result["recommendation"]["predicted_sulfur"] == pytest.approx(9)
+
+
+def test_step_beyond_the_observed_envelope_is_not_admissible(tmp_path, evidence):
+    result = decide(tmp_path, current_sulfur=8, changes={"pressure": .5})
+    requested = next(c for c in result["candidates"] if c["id"] == "requested")
+    assert requested["feasible"] is False
+    assert "модельного предела" in requested["reason"]
+
+
+def test_endpoint_at_ten_is_not_admissible_without_margin(tmp_path, evidence):
+    result = decide(tmp_path, current_sulfur=10.4,
+                    parameters={"pressure_effect": -1}, changes={"pressure": .4})
+    requested = next(c for c in result["candidates"] if c["id"] == "requested")
+    assert requested["predicted_sulfur"] == pytest.approx(10)
+    assert requested["feasible"] is False
+    assert "не оставляет запаса" in requested["reason"]
 
 
 def test_editable_target_cannot_relax_ten_mg_limit(tmp_path, evidence):
@@ -144,7 +168,7 @@ def test_missing_other_quality_blocks_observed_recommendation(tmp_path, evidence
     assert "Нет обязательного показателя качества" in " ".join(result["safety_gate"]["reasons"])
 
 
-@pytest.mark.parametrize("quality", [{"current_t95": 370}, {"current_cetane": 49}])
+@pytest.mark.parametrize("quality", [{"current_t95": 370}, {"current_cetane": 30}])
 def test_sulfur_target_cannot_override_known_other_quality_failure(tmp_path, evidence, quality):
     result = decide(tmp_path, current_sulfur=8, **quality)
     assert result["status"] == "abstain"
@@ -217,9 +241,39 @@ def test_regime_model_cap_cannot_be_offset_by_quality_or_economics(tmp_path, evi
 
 @pytest.mark.parametrize("quality,targets", [
     ({"current_t95": 370}, {"t95_max": 400}),
-    ({"current_cetane": 49}, {"cetane_min": 40}),
+    ({"current_cetane": 30}, {"cetane_min": 20}),
 ])
 def test_updated_scheme_quality_limits_cannot_be_relaxed(tmp_path, evidence, quality, targets):
     result = decide(tmp_path, current_sulfur=8, targets=targets, **quality)
     assert result["status"] == "abstain"
     assert all(not c["feasible"] for c in result["candidates"])
+
+
+def test_low_cetane_is_resolved_by_improver_dose_for_51_not_the_relaxed_target(tmp_path, evidence):
+    result = decide(tmp_path, current_sulfur=8, current_cetane=49, current_t95=350, targets={"cetane_min": 40})
+    assert result["status"] == "recommendation"
+    additive = result["recommendation"]["additive"]
+    assert additive["pct"] == pytest.approx(0.5)  # (51 - 49) / 4 CN per %
+    assert additive["product_cetane"] == pytest.approx(51)
+    assert additive["cost_index"] == pytest.approx(0.995 + 0.5)
+    assert all((c.get("additive") or {}).get("pct") == pytest.approx(0.5) for c in result["candidates"])
+    assert "присадка" in " ".join(result["explanation"]["action"])
+
+
+def test_cetane_beyond_additive_limit_names_the_required_dose(tmp_path, evidence):
+    result = decide(tmp_path, current_sulfur=8, current_cetane=30, current_t95=350)
+    assert result["status"] == "abstain"
+    assert "больше допустимых 3%" in " ".join(result["safety_gate"]["reasons"])
+
+
+def test_cost_saving_move_is_charged_at_the_observed_response_and_correction_credited_conservatively(tmp_path, evidence):
+    observed = scenarios.observed_response()
+    assert observed and observed["temperature"] < 0
+    lower = calculate_scenario(tmp_path, ScenarioRequest(at=AT, current_sulfur=8, changes={"temperature": -2}))
+    raise_ = calculate_scenario(tmp_path, ScenarioRequest(at=AT, current_sulfur=8, changes={"temperature": 2}))
+    assert lower["steady_state_sulfur"] == pytest.approx(8 + max(.16, observed["temperature"] * -2 * 8))
+    assert lower["steady_state_sulfur"] > 8.16  # worse than the editable coefficient alone
+    assert raise_["steady_state_sulfur"] == pytest.approx(8 - .16)  # credit never exceeds the editable one
+    plain = calculate_scenario(tmp_path, ScenarioRequest(at=AT, current_sulfur=8, changes={"temperature": -2},
+                                                         parameters={"asymmetric_response": False}))
+    assert plain["steady_state_sulfur"] == pytest.approx(8.16)

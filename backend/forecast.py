@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 from datetime import timedelta
 from pathlib import Path
 from typing import Any
@@ -18,9 +19,19 @@ import duckdb
 import numpy as np
 import pandas as pd
 
-from tools.modeling.anchored_features import (ANALYSER_METRICS, CONTROL_METRICS, FEATURE_COLUMNS, LAB_ANCHOR_MAX_AGE_DAYS,
-                                            applicability, build_features, clean_analyser, exceedance_probability, interval,
-                                            predict_portable)
+from tools.modeling.anchored_features import (
+    ANALYSER_METRICS,
+    CONTROL_METRICS,
+    FEATURE_COLUMNS,
+    LAB_ANCHOR_MAX_AGE_DAYS,
+    applicability,
+    build_features,
+    clean_analyser,
+    exceedance_probability,
+    interval,
+    predict_portable,
+)
+
 from .analytics import parse_time
 from .config import ROOT
 
@@ -32,6 +43,10 @@ CONTROL_HISTORY_HOURS = 48
 ANALYSER_HISTORY_DAYS = LAB_ANCHOR_MAX_AGE_DAYS + 1
 LAB_HISTORY_DAYS = 60
 MAX_HORIZON_MINUTES = 180
+# Opt-in shadow model: the repaired two-stage v4r is served only when this
+# variable equals TWO_STAGE_MODEL; v3 stays the default (decision 2026-09-22).
+FORECAST_MODEL_ENV = "OILCODE_FORECAST_MODEL"
+TWO_STAGE_MODEL = "two-stage-v4r"
 
 
 class ForecastUnavailable(ValueError):
@@ -164,7 +179,20 @@ def exceedance_at(artifact: dict, horizon: float, ln_prediction: float, limit: f
             "limit": limit, "interval": "80% (10-90% квантили out-of-fold остатков)"}
 
 
-def forecast_sulfur(directory: Path, at: str, artifact_path: Path = ARTIFACT, horizon_minutes: float = MAX_HORIZON_MINUTES) -> dict[str, Any]:
+def selected_model() -> str:
+    return TWO_STAGE_MODEL if os.environ.get(FORECAST_MODEL_ENV, "").strip() == TWO_STAGE_MODEL else "v3"
+
+
+def forecast_sulfur(directory: Path, at: str, artifact_path: Path | None = None,
+                    horizon_minutes: float = MAX_HORIZON_MINUTES) -> dict[str, Any]:
+    """Nowcast and forecast at ``at``: v3 by default, the two-stage v4r adapter only when opted in."""
+    if selected_model() == TWO_STAGE_MODEL:
+        from . import forecast_two_stage
+        return forecast_two_stage.forecast_sulfur(directory, at, artifact_path or forecast_two_stage.ARTIFACT, horizon_minutes)
+    return forecast_sulfur_v3(directory, at, artifact_path or ARTIFACT, horizon_minutes)
+
+
+def forecast_sulfur_v3(directory: Path, at: str, artifact_path: Path = ARTIFACT, horizon_minutes: float = MAX_HORIZON_MINUTES) -> dict[str, Any]:
     """Issue a nowcast and a forecast for ``horizon_minutes`` at origin ``at``."""
     origin = parse_time(at)
     artifact = _load_artifact(artifact_path)
@@ -252,6 +280,9 @@ def forecast_sulfur(directory: Path, at: str, artifact_path: Path = ARTIFACT, ho
         "exceedance_probability": horizon_result["exceedance_probability"] if horizon_result else None,
         "alarm_probability": alarm_probability,
         "alarm_above_10": (horizon_result["exceedance_probability"] >= alarm_probability or horizon_result["prediction"] > artifact["hard_limit"]) if horizon_result else None,
+        # ln-residual quantile function at the horizon: P(S > limit) for a shifted scenario endpoint.
+        "risk_quantiles": ({"space": "ln_residual", **{k: _blend_quantiles(artifact, horizon)[k] for k in ("probabilities", "quantiles")}}
+                           if horizon_result else None),
         "prediction_previous_lab": previous["value"] if previous else None,
         "previous_lab": previous,
         "lab_anchor": {"level": float(np.exp(features["ln_level"])) if pd.notna(features["ln_level"]) else None,
