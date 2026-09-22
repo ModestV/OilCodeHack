@@ -407,10 +407,6 @@ select:focus-visible,
   background: transparent;
 }
 
-.panel > header {
-  padding-inline: 16px;
-}
-
 .panel h2,
 .panel h3,
 .decision-band h2,

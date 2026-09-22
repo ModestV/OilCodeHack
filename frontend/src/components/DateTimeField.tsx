@@ -51,6 +51,7 @@ const months = [
   "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
   "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь",
 ];
+const monthOptions = months.map((label, value) => ({ value: String(value), label }));
 const hours = Array.from({ length: 24 }, (_, value) => ({
   value: pad(value), label: pad(value),
 }));
@@ -75,12 +76,21 @@ export function DateTimeField({
   });
   const root = useRef<HTMLDivElement>(null);
   const selected = fromValue(value);
+  const yearOptions = useMemo(
+    () => Array.from({ length: 101 }, (_, index) => {
+      const year = month.getFullYear() - 50 + index;
+      return { value: String(year), label: String(year) };
+    }),
+    [month.getFullYear()],
+  );
 
   useEffect(() => setDraft(display(value)), [value]);
   useEffect(() => {
     if (!open) return;
     const close = (event: PointerEvent) => {
-      if (!root.current?.contains(event.target as Node)) setOpen(false);
+      const target = event.target as Node;
+      if (target instanceof Element && target.closest(".ui-select, .ui-select__menu")) return;
+      if (!root.current?.contains(target)) setOpen(false);
     };
     const escape = (event: KeyboardEvent) => {
       if (event.key === "Escape") setOpen(false);
@@ -106,7 +116,7 @@ export function DateTimeField({
 
   function commit() {
     const parsed = parse(draft);
-    if (parsed) onChange(parsed);
+    if (parsed && parsed !== value.slice(0, 16)) onChange(parsed);
     else setDraft(display(value));
   }
 
@@ -152,7 +162,22 @@ export function DateTimeField({
               aria-label="Предыдущий месяц"
               onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))}
             ><ChevronLeft /></button>
-            <strong>{months[month.getMonth()]} {month.getFullYear()}</strong>
+            <div className="datetime-popover__month-year">
+              <UiSelect
+                ariaLabel="Месяц"
+                value={String(month.getMonth())}
+                options={monthOptions}
+                onChange={(next) => setMonth(new Date(month.getFullYear(), Number(next), 1))}
+                menuMinWidth={130}
+              />
+              <UiSelect
+                ariaLabel="Год"
+                value={String(month.getFullYear())}
+                options={yearOptions}
+                onChange={(next) => setMonth(new Date(Number(next), month.getMonth(), 1))}
+                menuMinWidth={84}
+              />
+            </div>
             <button
               type="button"
               aria-label="Следующий месяц"
@@ -192,6 +217,7 @@ export function DateTimeField({
               value={pad(selected.getHours())}
               options={hours}
               onChange={(next) => updatePart("hours", next)}
+              menuMinWidth={64}
             />
             <span>:</span>
             <UiSelect
@@ -200,6 +226,7 @@ export function DateTimeField({
               value={pad(selected.getMinutes())}
               options={minutes}
               onChange={(next) => updatePart("minutes", next)}
+              menuMinWidth={64}
             />
             <button type="button" className="secondary" onClick={() => setOpen(false)}>Готово</button>
           </footer>

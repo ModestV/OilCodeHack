@@ -132,6 +132,19 @@
   font-weight: 600;
 }
 
+.datetime-popover__month-year {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 84px;
+  gap: 6px;
+  min-width: 0;
+}
+
+.datetime-popover__month-year .ui-select__trigger {
+  min-height: 32px;
+  padding: 5px 7px;
+  font-size: 12px;
+}
+
 .datetime-popover > header button,
 .datetime-popover__days button {
   border: 0;

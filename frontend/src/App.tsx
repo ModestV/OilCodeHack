@@ -32,6 +32,7 @@ import type {
   Summary,
 } from "./types";
 import { DataMenu } from "./components/DataMenu";
+import { ContextMenu, type ContextAction } from "./components/ContextMenu";
 import { OperatorPanel, type SidePanelMode } from "./components/OperatorPanel";
 import { TimeControls, offset, type Mode } from "./components/TimeControls";
 import { UploadModal } from "./components/UploadModal";
@@ -51,6 +52,12 @@ import {
 
 type Tab = "overview" | "trends" | "kip" | "quality";
 type Page = "monitoring" | "recommendations" | "sandbox";
+type AppMenu = {
+  x: number;
+  y: number;
+  selection: string;
+  field: HTMLInputElement | HTMLTextAreaElement | null;
+};
 const loadDecisionSupport = () => import("./views/DecisionSupportView");
 const DecisionSupportView = lazy(() =>
   loadDecisionSupport().then((module) => ({
@@ -73,6 +80,31 @@ const MAIN = [
 ].map((x) => "lims.ht.2." + x);
 const SULFUR = ["pak.ht.Mg.Sulfur", "lims.ht.2.Mg.Sulfur"];
 const STORE = "oilcode:monitoring:v2";
+
+async function writeClipboard(value: string) {
+  if (!value) return;
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(value);
+      return;
+    }
+  } catch {
+    /* Fall back to the legacy local clipboard path below. */
+  }
+  const helper = document.createElement("textarea");
+  helper.value = value;
+  helper.setAttribute("readonly", "true");
+  helper.style.position = "fixed";
+  helper.style.opacity = "0";
+  document.body.appendChild(helper);
+  helper.select();
+  try {
+    document.execCommand("copy");
+  } finally {
+    helper.remove();
+  }
+}
+
 function preferences() {
   try {
     const p = JSON.parse(localStorage.getItem(STORE) || "{}");
@@ -92,7 +124,19 @@ function preferences() {
     return { pinned: MAIN, statistic: "median" };
   }
 }
+
+function editableField(target: EventTarget | null) {
+  const element = target instanceof HTMLElement ? target : null;
+  const candidate = element?.closest("input, textarea");
+  return candidate instanceof HTMLTextAreaElement ||
+    (candidate instanceof HTMLInputElement &&
+      ["text", "search", "email", "url", "tel", "password"].includes(candidate.type))
+    ? candidate
+    : null;
+}
+
 export function App() {
+  const [appMenu, setAppMenu] = useState<AppMenu | null>(null);
   const [sandboxSeed, setSandboxSeed] = useState<{ datasetId: string; request: ScenarioRequest } | null>(null);
   const [datasets, setDatasets] = useState<Manifest[]>([]),
     [datasetId, setDatasetId] = useState(""),
@@ -382,6 +426,64 @@ export function App() {
     setMobile(false);
     setSidePanel("closed");
   }
+  const menuActions: ContextAction[] = appMenu?.field
+    ? [
+        {
+          label: "Вырезать",
+          disabled: !appMenu.selection,
+          onSelect: async () => {
+            const field = appMenu.field;
+            if (!field) return;
+            await writeClipboard(appMenu.selection);
+            field.focus();
+            field.setRangeText("", field.selectionStart ?? 0, field.selectionEnd ?? 0, "start");
+            field.dispatchEvent(new Event("input", { bubbles: true }));
+          },
+        },
+        {
+          label: "Копировать",
+          disabled: !appMenu.selection,
+          onSelect: () => writeClipboard(appMenu.selection),
+        },
+        {
+          label: "Вставить",
+          disabled: !navigator.clipboard?.readText,
+          onSelect: async () => {
+            const field = appMenu.field;
+            if (!field) return;
+            const clipboard = await navigator.clipboard.readText();
+            field.focus();
+            field.setRangeText(clipboard, field.selectionStart ?? 0, field.selectionEnd ?? 0, "end");
+            field.dispatchEvent(new Event("input", { bubbles: true }));
+          },
+        },
+        {
+          label: "Выделить всё",
+          onSelect: () => { appMenu.field?.focus(); appMenu.field?.select(); },
+        },
+      ]
+    : [
+        ...(appMenu?.selection ? [{
+          label: "Копировать выделенное",
+          onSelect: () => writeClipboard(appMenu.selection),
+        }] : []),
+        ...(page === "monitoring" ? [
+          {
+            label: "Обновить показатели",
+            onSelect: () => setDataRevision((revision) => revision + 1),
+          },
+          ...tabs.filter(([id]) => id !== tab).map(([id, label]) => ({
+            label: `Открыть: ${label}`,
+            onSelect: () => { setTab(id); setStatsView(false); },
+          })),
+        ] : [{ label: "Открыть мониторинг", onSelect: () => navigate("monitoring") }]),
+        ...(page !== "recommendations" ? [{
+          label: "Открыть рекомендации", onSelect: () => navigate("recommendations"),
+        }] : []),
+        ...(page !== "sandbox" ? [{
+          label: "Открыть песочницу", onSelect: () => navigate("sandbox"),
+        }] : []),
+      ];
   const assessment = buildOperatorAssessment({
     mode,
     snapshot,
@@ -488,7 +590,35 @@ export function App() {
     );
   };
   return (
-    <div className="app">
+    <div
+      className="app"
+      onContextMenu={(event) => {
+        if (event.defaultPrevented) return;
+        event.preventDefault();
+        const field = editableField(event.target);
+        const selection = field
+          ? field.value.slice(field.selectionStart ?? 0, field.selectionEnd ?? 0)
+          : window.getSelection()?.toString() ?? "";
+        setAppMenu({ x: event.clientX, y: event.clientY, field, selection });
+      }}
+      onKeyDown={(event) => {
+        if (event.key !== "ContextMenu" && !(event.shiftKey && event.key === "F10")) return;
+        event.preventDefault();
+        const target = event.target as HTMLElement;
+        const box = target.getBoundingClientRect();
+        const field = editableField(event.target);
+        const selection = field
+          ? field.value.slice(field.selectionStart ?? 0, field.selectionEnd ?? 0)
+          : window.getSelection()?.toString() ?? "";
+        setAppMenu({ x: box.left + 12, y: box.bottom + 4, field, selection });
+      }}
+    >
+      <ContextMenu
+        position={appMenu}
+        actions={menuActions}
+        onClose={() => setAppMenu(null)}
+        label="Действия в рабочем пространстве"
+      />
       {mobile && (
         <div className="nav-backdrop" onClick={() => setMobile(false)} />
       )}

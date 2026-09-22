@@ -24,6 +24,7 @@ export function UiSelect({
   ariaLabel,
   className = "",
   disabled = false,
+  menuMinWidth = 190,
 }: {
   value: string;
   options: readonly SelectOption[];
@@ -31,6 +32,7 @@ export function UiSelect({
   ariaLabel: string;
   className?: string;
   disabled?: boolean;
+  menuMinWidth?: number;
 }) {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
@@ -50,6 +52,7 @@ export function UiSelect({
     setActive(selectedIndex);
     const close = (event: PointerEvent) => {
       const target = event.target as Node;
+      if (target instanceof Element && target.closest(".ui-select, .ui-select__menu")) return;
       if (!root.current?.contains(target) && !menu.current?.contains(target))
         setOpen(false);
     };
@@ -79,14 +82,23 @@ export function UiSelect({
     if (!open || !trigger.current || !menu.current) return;
     const anchor = trigger.current.getBoundingClientRect();
     const box = menu.current.getBoundingClientRect();
-    const width = Math.min(Math.max(anchor.width, 190), window.innerWidth - 16);
+    const width = Math.min(Math.max(anchor.width, menuMinWidth), window.innerWidth - 16);
     const left = Math.max(8, Math.min(anchor.left, window.innerWidth - width - 8));
     const spaceBelow = window.innerHeight - anchor.bottom - 8;
     const top = spaceBelow >= box.height || spaceBelow >= anchor.top
       ? Math.min(anchor.bottom + 4, window.innerHeight - box.height - 8)
       : Math.max(8, anchor.top - box.height - 4);
     setPlacement({ left, top: Math.max(8, top), width });
-  }, [open]);
+    const selectedOption = menu.current.querySelector<HTMLElement>(
+      `[data-option-index="${selectedIndex}"]`,
+    );
+    if (selectedOption) {
+      menu.current.scrollTop = Math.max(
+        0,
+        selectedOption.offsetTop - menu.current.clientHeight / 2,
+      );
+    }
+  }, [menuMinWidth, open, selectedIndex]);
 
   function toggle() {
     if (open) {
@@ -98,7 +110,7 @@ export function UiSelect({
       setPlacement({
         left: Math.max(8, anchor.left),
         top: anchor.bottom + 4,
-        width: Math.min(Math.max(anchor.width, 190), window.innerWidth - 16),
+        width: Math.min(Math.max(anchor.width, menuMinWidth), window.innerWidth - 16),
       });
     }
     setOpen(true);
@@ -170,7 +182,8 @@ export function UiSelect({
           id={listId}
           role="listbox"
           style={placement}
-        >
+          onPointerDown={(event) => event.stopPropagation()}
+          >
           {options.map((option, index) => (
             <button
               type="button"
@@ -179,6 +192,7 @@ export function UiSelect({
               className={index === active ? "is-active" : ""}
               disabled={option.disabled}
               key={option.value}
+              data-option-index={index}
               onPointerMove={() => setActive(index)}
               onClick={() => choose(index)}
             >

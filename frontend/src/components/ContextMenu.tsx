@@ -56,6 +56,18 @@ export function ContextMenu({
       role="menu"
       aria-label={label}
       style={{ left: position.x, top: position.y }}
+      onContextMenu={(event) => { event.preventDefault(); event.stopPropagation(); }}
+      onKeyDown={(event) => {
+        if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        const items = Array.from(menu.current?.querySelectorAll<HTMLButtonElement>("button:not(:disabled)") ?? []);
+        if (!items.length) return;
+        const current = items.indexOf(document.activeElement as HTMLButtonElement);
+        const next = event.key === "Home" ? 0
+          : event.key === "End" ? items.length - 1
+          : (current + (event.key === "ArrowDown" ? 1 : -1) + items.length) % items.length;
+        items[next].focus();
+      }}
     >
       {actions.map((action) => (
         <button
@@ -65,8 +77,13 @@ export function ContextMenu({
           disabled={action.disabled}
           key={action.label}
           onClick={async () => {
-            await action.onSelect();
-            onClose();
+            try {
+              await action.onSelect();
+            } catch {
+              // Actions such as clipboard access can be unavailable in an embedded browser.
+            } finally {
+              onClose();
+            }
           }}
         >
           {action.label}
