@@ -1,7 +1,38 @@
 """Declared experimental proxies; neither failure probabilities nor plant costs."""
 from math import isfinite
 
-from .forecast import ForecastUnavailable, _load_artifact
+# Freeze the original load proxy reference distribution across forecast upgrades.
+# Its engineering score is independent of the active sulphur model's support gate.
+from .forecast_legacy import ForecastUnavailable, _load_artifact
+
+
+def annotate_pareto(candidates: list[dict]) -> None:
+    """Compare feasible candidates with complete objectives; never alter ranking.
+
+    Adapted from the v4 branch. Missing objectives are NOT zero cost/risk.
+    """
+    vectors = {}
+    for item in candidates:
+        item.update(pareto=None, dominated_by=[], pareto_status="infeasible")
+        if not item.get("feasible") or not item.get("safety_gate", {}).get("passed"):
+            continue
+        objectives = item.get("objectives") or {}
+        values = [objectives.get("throughput_index"), objectives.get("energy_cost_index"),
+                  (objectives.get("regime_severity") or {}).get("index"),
+                  objectives.get("blend_cost_index"), item.get("effort")]
+        if any(not isinstance(v, (int, float)) or isinstance(v, bool) or not isfinite(v) for v in values):
+            item["pareto_status"] = "incomplete_objectives"
+            continue
+        vectors[item["id"]] = [-values[0], *values[1:]]
+        item["pareto_status"] = "evaluated"
+    for item in candidates:
+        if item["id"] not in vectors:
+            continue
+        current = vectors[item["id"]]
+        dominators = [key for key, other in vectors.items() if key != item["id"]
+                      and all(a <= b for a, b in zip(other, current))
+                      and any(a < b for a, b in zip(other, current))]
+        item.update(pareto=not dominators, dominated_by=dominators)
 
 
 def regime_severity(controls: dict) -> dict:
@@ -9,7 +40,7 @@ def regime_severity(controls: dict) -> dict:
 
     No failure labels exist. Positive standardized levels are a reproducible
     loading proxy, not a validated relation to equipment life. The 12-sigma
-    experimental cap matches the forecast's extreme-support guard.
+    experimental cap is the frozen first-iteration convention, not the new forecast gate.
     """
     try:
         artifact = _load_artifact()
@@ -45,9 +76,13 @@ def candidate_objectives(scenario: dict, effort: float) -> dict:
     # This is a configured preference, never a permission to violate quality.
     loss = (0.5 * (1 - throughput) / .10 + .25 * (energy - 1) / .25
             + .25 * severity["index"] + .05 * effort) if severity["index"] is not None else None
+    blend_cost = scenario["blend"]["cost_index"] if scenario.get("blend") else 1.
+    if loss is not None:
+        loss += .25 * (blend_cost - 1)
     return {"throughput_index": throughput, "throughput_change_pct": feed_pct,
             "energy_cost_index": energy, "regime_severity": severity,
             "ranking_loss": loss,
-            "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort",
+            "blend_cost_index": blend_cost,
+            "ranking_formula": "0.5*(1-throughput)/0.10 + 0.25*(energy-1)/0.25 + 0.25*severity + 0.05*effort + 0.25*(blend_cost-1)",
             "basis": "scenario assumptions; throughput assumes unchanged yield; energy has no monetary units",
             "energy_formula": "1 + 0.10*delta_T/10 + 0.05*delta_P/2 + 0.10*delta_feed_pct/10"}

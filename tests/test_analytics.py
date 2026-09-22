@@ -108,7 +108,8 @@ def test_expert_formula_overrides_stale_manifest_and_resolves_available_lims(tmp
         if item["id"] == "24-2000:GODT:T95"
     )
     assert result["version"] == "expert-2026-09-13"
-    assert result["result"] == pytest.approx(310.3035)
+    assert result["result"] is None
+    assert result["status"] == "unresolved"  # The Pipeline sampling point is not confirmed.
 
 
 def test_expert_formula_corrections_are_canonical():
@@ -122,7 +123,7 @@ def test_expert_formula_corrections_are_canonical():
         "AVT6:240-350:CFPP": "31,40363 - 0,06784xT33 + 17,411xP67 - 8,11544xP4 - 0,47309x(F65/F32+F30)",
     }
     assert {key: formulas[key]["expression"] for key in expected} == expected
-    assert all(formulas[key]["status"] == "experimental" for key in expected)
+    assert all(formulas[key]["status"] in {"experimental", "unresolved"} for key in expected)
 
 
 def test_period_raw_lab_count_boundary_and_pak_coverage(tmp_path):

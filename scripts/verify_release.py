@@ -113,7 +113,7 @@ def assert_forecast(forecast, origin):
     require(parse_time(forecast.get("prediction_origin")) == origin, "Forecast origin differs from request")
     require(parse_time(forecast.get("target_time")) == origin + timedelta(minutes=180), "Forecast target is not origin + 3h")
     require(parse_time(forecast.get("feature_cutoff")) == origin, "Forecast feature cutoff differs from origin")
-    require(forecast.get("forecast_horizon_minutes") == 180, "Forecast horizon must be 180 min")
+    require(forecast.get("horizon_minutes") == 180, "Forecast horizon must be 180 min")
     require(forecast.get("lims_publication_delay_minutes") == 240, "LIMS publication delay must be separate 240 min")
     require(forecast.get("target", {}).get("metric_id") == "lims.ht.2.Mg.Sulfur", "Wrong model target")
     if forecast.get("feature_time") is not None:
@@ -128,14 +128,15 @@ def assert_forecast(forecast, origin):
     require(leakage.get("passed") is True and leakage.get("violations") == 0, "Forecast leakage check failed/missing")
     if forecast["status"] == "abstain":
         require(forecast.get("reasons"), "Forecast abstain requires reasons")
-        require(forecast.get("prediction_ridge") is None, "Abstain forecast exposes Ridge as usable prediction")
-        require(forecast.get("prediction_risk_guard") is None, "Abstain forecast exposes risk guard as usable prediction")
+        require(forecast.get("prediction") is None, "Abstain forecast exposes a usable prediction")
     else:
-        require(isinstance(forecast.get("prediction_ridge"), (int, float)), "Forecast has no numeric Ridge prediction")
-        require(isinstance(forecast.get("prediction_risk_guard"), (int, float)), "Forecast has no numeric risk guard")
-        require(forecast["prediction_ridge"] >= 0, "Negative predicted sulfur")
-        require(forecast["prediction_risk_guard"] >= forecast["prediction_ridge"], "Risk guard below Ridge")
-        require(forecast.get("alarm_above_10") == (forecast["prediction_risk_guard"] > 10), "Incorrect sulfur alarm")
+        prediction = forecast.get("prediction")
+        probability = forecast.get("exceedance_probability")
+        require(isinstance(prediction, (int, float)) and prediction >= 0, "Invalid forecast prediction")
+        require(isinstance(probability, (int, float)) and 0 <= probability <= 1, "Invalid exceedance probability")
+        require(forecast["prediction_lower"] <= prediction <= forecast["prediction_upper"], "Invalid forecast interval")
+        require(forecast.get("alarm_above_10") == (probability >= forecast["alarm_probability"] or prediction > 10), "Incorrect sulfur alarm")
+
 
 
 def assert_decision(decision, request, expected):
@@ -150,7 +151,7 @@ def assert_decision(decision, request, expected):
     sulfur = evidence.get("sulfur", {})
     if not manual:
         source = sulfur.get("source")
-        require(source is None or source in {"lims.ht.2.Mg.Sulfur", "pak.ht.Mg.Sulfur", "vak.ht.Mg.Sulfur", "ht.Q21"}, "Unexpected sulfur source")
+        require(source is None or source in {"lims.ht.2.Mg.Sulfur", "pak.ht.Mg.Sulfur", "vak.ht.Mg.Sulfur", "ht.Q21", "model.nowcast"}, "Unexpected sulfur source")
         assert_availability(sulfur, origin, "sulfur", lims=bool(source and source.startswith("lims.")), usable=expected == "recommendation")
     for metric in CONTROL_IDS:
         assert_availability(evidence.get("controls", {}).get(metric, {}), origin, metric, usable=expected == "recommendation")
@@ -166,7 +167,7 @@ def assert_decision(decision, request, expected):
             require(trajectory[-1].get("minute") == request.get("horizon_minutes", 180), "Trajectory misses exact horizon")
             require(abs(trajectory[-1]["sulfur"] - candidate["predicted_sulfur"]) < 1e-9, "Candidate prediction is not horizon value")
             if candidate.get("feasible"):
-                require(candidate["predicted_sulfur"] <= min(10, request.get("targets", {}).get("sulfur_max", 10)) + 1e-9, "Feasible candidate exceeds hard sulfur limit")
+                require(candidate["product_sulfur"] <= min(10, request.get("targets", {}).get("sulfur_max", 10)) + 1e-9, "Feasible candidate exceeds hard sulfur limit")
     if expected == "abstain":
         for key in ("recommendation", "selected_candidate", "scenario"):
             require(decision.get(key) is None, f"Unsafe decision exposes {key}")
@@ -183,7 +184,9 @@ def assert_decision(decision, request, expected):
         require(recommendation.get("operational_safety_validated") is False, "Unvalidated process safety claimed")
         if not manual:
             require(decision.get("forecast", {}).get("status") == "ok", "Observed recommendation lacks usable forecast")
-            require(decision["forecast"].get("alarm_above_10") is False, "Observed recommendation ignores independent forecast alarm")
+            require(decision["forecast"].get("path_supported") is True, "Observed recommendation lacks supported forecast path")
+            if not decision["scenario"].get("blend"):
+                require(decision["forecast"].get("alarm_above_10") is False, "Observed recommendation ignores independent forecast alarm")
     return candidates
 
 
@@ -215,10 +218,10 @@ def run_case(api, prefix, case):
         require(len(candidates) >= case["min_candidates"], "Missing diagnostic candidates")
     if case.get("all_candidates_infeasible"):
         require(candidates and not any(candidate.get("feasible") for candidate in candidates), "Expected all candidates infeasible")
-    sulfur = decision.get("agents", {}).get("quality", {}).get("evidence", {}).get("sulfur", {})
     if case.get("observed_sulfur_above_10"):
-        require(sulfur.get("value") is not None and sulfur["value"] > 10, "Danger case does not demonstrate observed sulfur exceedance")
-        require(sulfur.get("source", "").startswith("lims."), "Danger case needs measured LIMS evidence")
+        lab = next((x for x in frame["values"] if x["metric_id"] == "lims.ht.2.Mg.Sulfur"), {})
+        require(lab.get("value") is not None and lab["value"] > 10, "Danger case does not demonstrate observed laboratory exceedance")
+        assert_availability(lab, origin, "measured_exceedance", lims=True, usable=True)
     if case.get("controls_state"):
         controls = decision["agents"]["quality"]["evidence"]["controls"]
         require(all(value.get("freshness") == case["controls_state"] for value in controls.values()), "Case does not demonstrate expected controls state")

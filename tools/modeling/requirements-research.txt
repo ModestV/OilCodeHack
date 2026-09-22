@@ -1,0 +1,6 @@
+# Runtime forecasting only requires the root requirements.txt.
+# These dependencies are for the reproducible challenger fitting scripts.
+-r ../../requirements-dev.txt
+scipy>=1.14,<2
+scikit-learn>=1.5,<2
+threadpoolctl>=3,<4

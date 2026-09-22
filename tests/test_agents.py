@@ -83,7 +83,7 @@ def test_decision_runs_deterministic_agents_and_returns_trace(tmp_path, monkeypa
         assert client.get(f"/api/datasets/{dataset_id}").json()["status"] == "ready"
         result = client.post(
             f"/api/datasets/{dataset_id}/decision",
-            json={"at": "2025-01-01T00:00:00", "current_sulfur": 12},
+            json={"at": "2025-01-01T00:00:00", "current_sulfur": 12, "optimize_economics": False},
         )
 
     assert result.status_code == 200

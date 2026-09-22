@@ -1,0 +1,140 @@
+{
+  "results": {
+    "2025_h0": {
+      "total": 11,
+      "pak_index": {
+        "n": 9,
+        "mae": 1.1525068205066613,
+        "rmse": 1.2986065150378148,
+        "bias": 0.9714626247847625,
+        "violations": 0,
+        "detected": 0,
+        "missed": 0,
+        "false_alarms": 0
+      },
+      "common_index": {
+        "n": 8,
+        "mae": 1.1056364033804433,
+        "rmse": 1.267095342011836,
+        "bias": 0.9019616831933073,
+        "violations": 0,
+        "detected": 0,
+        "missed": 0,
+        "false_alarms": 0
+      },
+      "common_previous": {
+        "n": 8,
+        "mae": 0.93749952316284,
+        "rmse": 1.1429124861332731,
+        "bias": -0.13750028610229492,
+        "violations": 0,
+        "detected": 0,
+        "missed": 0,
+        "false_alarms": 0
+      }
+    },
+    "2026_h0": {
+      "total": 6,
+      "pak_index": {
+        "n": 5,
+        "mae": 1.1951178352889216,
+        "rmse": 1.3906542792213414,
+        "bias": 0.9258551294432905,
+        "violations": 1,
+        "detected": 0,
+        "missed": 1,
+        "false_alarms": 0
+      },
+      "common_index": {
+        "n": 4,
+        "mae": 1.3256081029576325,
+        "rmse": 1.5179308772007252,
+        "bias": 1.3256081029576325,
+        "violations": 1,
+        "detected": 0,
+        "missed": 1,
+        "false_alarms": 0
+      },
+      "common_previous": {
+        "n": 4,
+        "mae": 1.2250003814697283,
+        "rmse": 1.4722430698359108,
+        "bias": 1.2250003814697283,
+        "violations": 1,
+        "detected": 0,
+        "missed": 1,
+        "false_alarms": 0
+      }
+    },
+    "2025_h180": {
+      "total": 11,
+      "pak_index": {
+        "n": 9,
+        "mae": 1.1236301743302866,
+        "rmse": 1.261289964444428,
+        "bias": 0.9197377492100595,
+        "violations": 0,
+        "detected": 0,
+        "missed": 0,
+        "false_alarms": 0
+      },
+      "common_index": {
+        "n": 8,
+        "mae": 1.0733064355232917,
+        "rmse": 1.2241488687282431,
+        "bias": 0.8439274572630362,
+        "violations": 0,
+        "detected": 0,
+        "missed": 0,
+        "false_alarms": 0
+      },
+      "common_previous": {
+        "n": 8,
+        "mae": 1.0374994277954084,
+        "rmse": 1.1773906736387552,
+        "bias": -0.03750038146972656,
+        "violations": 0,
+        "detected": 0,
+        "missed": 0,
+        "false_alarms": 0
+      }
+    },
+    "2026_h180": {
+      "total": 6,
+      "pak_index": {
+        "n": 5,
+        "mae": 1.1845455818197947,
+        "rmse": 1.4250964080088417,
+        "bias": 0.9344775260096426,
+        "violations": 1,
+        "detected": 0,
+        "missed": 1,
+        "false_alarms": 0
+      },
+      "common_index": {
+        "n": 4,
+        "mae": 1.3243894423933984,
+        "rmse": 1.562342884680275,
+        "bias": 1.3243894423933984,
+        "violations": 1,
+        "detected": 0,
+        "missed": 1,
+        "false_alarms": 0
+      },
+      "common_previous": {
+        "n": 4,
+        "mae": 1.2250003814697283,
+        "rmse": 1.4722430698359108,
+        "bias": 1.2250003814697283,
+        "violations": 1,
+        "detected": 0,
+        "missed": 1,
+        "false_alarms": 0
+      }
+    }
+  },
+  "post_hoc": true,
+  "observations_sha256": "9a6d9b644a2b1ddce0da27e816aad31654ea9aaf306f29865bb14503973db37b",
+  "script_sha256": "baa863bdc90c7dcc7c9d1236917ec77e1e9d476e52351014036e26464c031845",
+  "protocol_sha256": "bf50d0cebe62bdef32744198a4f54e9a6e7dafce205c660a056334322adbd78e"
+}

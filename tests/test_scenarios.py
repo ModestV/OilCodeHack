@@ -18,15 +18,16 @@ def evidence(monkeypatch):
         for metric, value in (("ht.T6", 300), ("ht.F9", 100), ("ht.P13", 5),
                               ("pak.ht.Mg.Sulfur", 8))
     ]
-    monkeypatch.setattr(agents, "snapshot", lambda *args: {"values": values})
-    monkeypatch.setattr(scenarios, "snapshot", lambda *args: {"values": values})
-    monkeypatch.setattr(agents, "forecast_sulfur", lambda *args: {
+    monkeypatch.setattr(agents, "snapshot", lambda *args, **kwargs: {"values": values})
+    monkeypatch.setattr(scenarios, "snapshot", lambda *args, **kwargs: {"values": values})
+    monkeypatch.setattr(agents, "forecast_sulfur", lambda *args, **kwargs: {
         "status": "ok", "prediction_ridge": 8, "alarm_above_10": False,
     })
     return values
 
 
 def decide(tmp_path, **kwargs):
+    kwargs.setdefault("optimize_economics", False)
     return agents.make_decision(tmp_path, ScenarioRequest(at=AT, **kwargs))
 
 
@@ -156,13 +157,13 @@ def test_invalid_recipe_retains_each_candidate_error(tmp_path, evidence):
         {"name": "A", "share": 90, "sulfur": 8, "t95": 350, "cetane": 52},
     ])
     assert result["status"] == "abstain"
-    assert len(result["candidates"]) == 3
+    assert len(result["candidates"]) == 1  # Stored-only blend has no linked reactor intervention.
     assert all(item["status"] == "error" for item in result["candidates"])
     assert "100%" in result["safety_gate"]["reasons"][0]
 
 
 def test_forecast_abstain_blocks_observed_decision_but_allows_labeled_what_if(tmp_path, evidence, monkeypatch):
-    monkeypatch.setattr(agents, "forecast_sulfur", lambda *args: {
+    monkeypatch.setattr(agents, "forecast_sulfur", lambda *args, **kwargs: {
         "status": "abstain", "reasons": ["Недостаточное покрытие признаков"],
         "prediction_ridge": None, "alarm_above_10": None,
     })
@@ -175,7 +176,7 @@ def test_forecast_abstain_blocks_observed_decision_but_allows_labeled_what_if(tm
 
 
 def test_forecast_alarm_not_claimed_resolved_by_causal_surrogate(tmp_path, evidence, monkeypatch):
-    monkeypatch.setattr(agents, "forecast_sulfur", lambda *args: {
+    monkeypatch.setattr(agents, "forecast_sulfur", lambda *args, **kwargs: {
         "status": "ok", "prediction_ridge": 11, "alarm_above_10": True,
     })
     assert decide(tmp_path)["status"] == "abstain"

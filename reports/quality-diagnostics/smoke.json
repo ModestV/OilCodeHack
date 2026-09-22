@@ -1,0 +1,31 @@
+{
+  "dataset_sha256": "9a6d9b644a2b1ddce0da27e816aad31654ea9aaf306f29865bb14503973db37b",
+  "at": "2026-08-07T00:00:00",
+  "decision_unchanged": true,
+  "status": "abstain",
+  "abstain": {
+    "reason": "Ни один кандидат не прошёл все применимые проверки; требуется ручной разбор",
+    "missing": []
+  },
+  "cetane_sample": {
+    "metric_id": "lims.ht.2.CetaneNumber",
+    "value": 50.0,
+    "unit": "ед.цет.ч.",
+    "source_units": [
+      "ед.цет.ч."
+    ],
+    "timestamp": "2026-07-21T10:00:00",
+    "available_at": "2026-07-21T14:00:00",
+    "age_hours": 398.0,
+    "freshness": "stale",
+    "flags": [],
+    "usable": false,
+    "reasons": [
+      "Анализ устарел: возраст 398.0 ч при пороге 48 ч."
+    ],
+    "valid_value": true
+  },
+  "cetane_index": 54.161554414219495,
+  "t95_estimate": 354.0,
+  "can_authorize": false
+}

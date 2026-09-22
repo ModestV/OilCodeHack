@@ -1,0 +1,38 @@
+{
+  "n": 253,
+  "same_origins": true,
+  "before": {
+    "recommendations": 9,
+    "forecast_accepted": 214,
+    "fresh_cetane": 11,
+    "fresh_t95": 246,
+    "analyzer_conflicts": 15
+  },
+  "after": {
+    "recommendations": 7,
+    "forecast_accepted": 236,
+    "fresh_cetane": 11,
+    "fresh_t95": 246,
+    "analyzer_conflicts": 15
+  },
+  "changed_decisions": [
+    {
+      "at": "2026-05-27 07:00:00",
+      "before": "recommendation",
+      "after": "abstain",
+      "reasons_before": [],
+      "reasons_after": [
+        "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки"
+      ]
+    },
+    {
+      "at": "2026-06-05 07:00:00",
+      "before": "recommendation",
+      "after": "abstain",
+      "reasons_before": [],
+      "reasons_after": [
+        "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "cetane_h0": {
+    "eligible": false,
+    "enough_samples": false,
+    "winner": "index_offset"
+  },
+  "cetane_h180": {
+    "eligible": false,
+    "enough_samples": false,
+    "winner": "ridge10"
+  },
+  "t95_h0": {
+    "eligible": false,
+    "enough_samples": true,
+    "winner": "median3"
+  },
+  "t95_h180": {
+    "eligible": false,
+    "enough_samples": true,
+    "winner": "median3"
+  }
+}

@@ -14,6 +14,7 @@ import type {
   ScenarioResult,
 } from "../types";
 import { Chart } from "../components/Chart";
+import { QualityDiagnosticsPanel } from "../components/QualityDiagnosticsPanel";
 import { formatNumber } from "../visualization";
 import {
   pipelineStages,
@@ -31,9 +32,17 @@ const initial = (at: string, sandbox: boolean): ScenarioRequest => ({
   step_minutes: 30,
   baseline_feed_sulfur: 15,
   feed_sulfur: 15,
+  batch_mass_t: sandbox ? 100 : undefined,
+  production_rate_tph: sandbox ? 40 : undefined,
+  transport_delay_minutes: 0,
+  optimize_economics: true,
+  optimize_recipe: sandbox,
+  minimum_economic_gain: 0.03,
   targets: { sulfur_max: 10, t95_max: 360, cetane_min: 51 },
   parameters: {
     lag_minutes: 90,
+    dead_time_minutes: 0,
+    additive_sulfur_mgkg: sandbox ? 0 : undefined,
     feed_sulfur_transfer: 0.2,
     temperature_effect: -0.08,
     feed_rate_effect: 0.05,
@@ -47,6 +56,8 @@ const initial = (at: string, sandbox: boolean): ScenarioRequest => ({
     ? [
         {
           name: "Резервуар 1",
+          kind: "hydrotreated_batch",
+          stock_t: 20,
           share: 60,
           sulfur: 8,
           t95: 350,
@@ -55,6 +66,8 @@ const initial = (at: string, sandbox: boolean): ScenarioRequest => ({
         },
         {
           name: "Резервуар 2",
+          kind: "stored",
+          stock_t: 100,
           share: 40,
           sulfur: 12,
           t95: 355,
@@ -64,6 +77,7 @@ const initial = (at: string, sandbox: boolean): ScenarioRequest => ({
       ]
     : [],
   additive_pct: sandbox ? 0.5 : 0,
+  additive_stock_t: sandbox ? 1 : undefined,
 });
 
 const number = (value: string) => Number(value.replace(",", "."));
@@ -118,7 +132,7 @@ export function DecisionSupportView({
     setDecision(null);
     setError("");
   };
-  const update = (path: string, value: number) => {
+  const update = (path: string, value: number | string | boolean | undefined) => {
     setResult(null);
     setDecision(null);
     setRequest((current) => {
@@ -136,7 +150,11 @@ export function DecisionSupportView({
     setLoading(true);
     setError("");
     try {
-      setResult(await api.scenario(datasetId, request));
+      const [nextResult, nextDecision] = await Promise.all([
+        api.scenario(datasetId, request), api.decision(datasetId, request),
+      ]);
+      setResult(nextResult);
+      setDecision(nextDecision);
     } catch (caught) {
       setError(
         caught instanceof Error ? caught.message : "Ошибка сценарного расчёта",
@@ -192,12 +210,14 @@ export function DecisionSupportView({
           data: result?.trajectory.map((p) => p.sulfur) || [],
           markLine: {
             silent: true,
-            data: [{ yAxis: request.targets.sulfur_max, name: "Цель" }],
+            data: result?.blend
+              ? request.intermediate_sulfur_max == null ? [] : [{ yAxis: request.intermediate_sulfur_max, name: "Предел гидроочистки" }]
+              : [{ yAxis: Math.min(10, request.targets.sulfur_max), name: "Цель продукта" }],
           },
         },
       ],
     }),
-    [request.targets.sulfur_max, result],
+    [request.targets.sulfur_max, request.intermediate_sulfur_max, result],
   );
 
   if (!sandbox) {
@@ -280,6 +300,7 @@ export function DecisionSupportView({
         </p>
         {pipelineStarted ? (
           <PipelinePreview
+            datasetId={datasetId}
             onOpenSandbox={onOpenSandbox}
             period={recommendationPeriod}
             result={result}
@@ -379,7 +400,7 @@ export function DecisionSupportView({
             </select>
           </label>
           <label>
-            Задержка отклика, мин
+            Время нарастания отклика, мин
             <input
               type="number"
               min="0"
@@ -450,7 +471,7 @@ export function DecisionSupportView({
           <div className="section-heading">
             <div>
               <h2>Состав смеси</h2>
-              <p>Сумма долей компонентов должна быть ровно 100%.</p>
+              <p>Массовые доли до добавления присадки, сумма 100%. Новая партия поступает только в один выбранный резервуар. Свойства компонентов — условия сценария.</p>
             </div>
           </div>
           <div className="blend-table-wrap">
@@ -458,6 +479,8 @@ export function DecisionSupportView({
               <thead>
                 <tr>
                   <th>Компонент</th>
+                  <th>Поступление</th>
+                  <th>Начальный запас, т</th>
                   <th>Доля, %</th>
                   <th>Сера</th>
                   <th>T95</th>
@@ -468,6 +491,13 @@ export function DecisionSupportView({
                 {request.tanks.map((tank, index) => (
                   <tr key={tank.name}>
                     <td>{tank.name}</td>
+                    <td><select aria-label={`${tank.name}: поступление`} value={tank.kind ?? "stored"}
+                      onChange={(e) => update(`tanks.${index}.kind`, e.target.value)}>
+                      <option value="stored">Только запас</option>
+                      <option value="hydrotreated_batch">Из гидроочистки</option>
+                    </select></td>
+                    <td><input aria-label={`${tank.name}: запас`} type="number" min="0" step="1"
+                      value={tank.stock_t ?? ""} onChange={(e) => update(`tanks.${index}.stock_t`, number(e.target.value))} /></td>
                     {(["share", "sulfur", "t95", "cetane"] as const).map(
                       (key) => (
                         <td key={key}>
@@ -494,16 +524,48 @@ export function DecisionSupportView({
           </div>
           <div className="scenario-fields three">
             <label>
-              Присадка, %
+              Присадка, кг/т товарного продукта
               <input
                 type="number"
                 min="0"
-                max="3"
-                step="0.1"
-                value={request.additive_pct}
-                onChange={(e) => update("additive_pct", number(e.target.value))}
+                max="30"
+                step="1"
+                value={request.additive_pct * 10}
+                onChange={(e) => update("additive_pct", number(e.target.value) / 10)}
               />
             </label>
+            <label>Масса товарной партии, т
+              <input type="number" min="0.1" step="0.1" value={request.batch_mass_t ?? ""}
+                onChange={(e) => update("batch_mass_t", number(e.target.value))} />
+            </label>
+            <label>Доступный запас присадки, т
+              <input type="number" min="0" step="0.1" value={request.additive_stock_t ?? ""}
+                onChange={(e) => update("additive_stock_t", e.target.value === "" ? undefined : number(e.target.value))} />
+            </label>
+            <label>Выпуск гидроочистки, т/ч (допущение)
+              <input type="number" min="0.1" step="0.1" value={request.production_rate_tph ?? ""}
+                onChange={(e) => update("production_rate_tph", number(e.target.value))} />
+            </label>
+            <label>Доставка до резервуара, мин
+              <input type="number" min="0" max="1440" step="15" value={request.transport_delay_minutes ?? 0}
+                onChange={(e) => update("transport_delay_minutes", number(e.target.value))} />
+            </label>
+            <label>Задержка начала отклика, мин
+              <input type="number" min="0" max="180" step="15" value={request.parameters.dead_time_minutes ?? 0}
+                onChange={(e) => update("parameters.dead_time_minutes", number(e.target.value))} />
+            </label>
+            <label>Сера в присадке, мг/кг (допущение)
+              <input type="number" min="0" step="0.1" value={request.parameters.additive_sulfur_mgkg ?? ""}
+                onChange={(e) => update("parameters.additive_sulfur_mgkg", number(e.target.value))} />
+            </label>
+            <label>Минимальное улучшение индекса цели
+              <input type="number" min="0" step="0.01" value={request.minimum_economic_gain ?? 0.03}
+                onChange={(e) => update("minimum_economic_gain", number(e.target.value))} />
+            </label>
+            <label className="scenario-toggle"><input type="checkbox" checked={request.optimize_economics ?? true}
+              onChange={(e) => update("optimize_economics", e.target.checked)} />Сравнить экономические варианты режима</label>
+            <label className="scenario-toggle"><input type="checkbox" checked={request.optimize_recipe ?? false}
+              onChange={(e) => update("optimize_recipe", e.target.checked)} />Сравнить доли компонентов и присадку</label>
             <label>
               Цель T95, °C
               <input
@@ -536,6 +598,14 @@ export function DecisionSupportView({
         <details className="model-parameters">
           <summary>Параметры модели</summary>
           <div className="scenario-fields">
+            <label>Сера после гидроочистки сейчас, мг/кг (пусто — из данных)
+              <input type="number" min="0" step="0.1" value={request.current_sulfur ?? ""}
+                onChange={(e) => update("current_sulfur", e.target.value === "" ? undefined : number(e.target.value))} />
+            </label>
+            <label>Отдельный предел серы гидроочистки (пусто — не задан)
+              <input type="number" min="0.1" step="0.1" value={request.intermediate_sulfur_max ?? ""}
+                onChange={(e) => update("intermediate_sulfur_max", e.target.value === "" ? undefined : number(e.target.value))} />
+            </label>
             <label>
               Перенос серы сырья
               <input
@@ -623,8 +693,8 @@ export function DecisionSupportView({
               <span>мг/кг</span>
             </article>
             <article className={result.sulfur_target_met && result.hard_sulfur_limit_met ? "ok" : "danger"}>
-              <small>Через {result.horizon_minutes} мин</small>
-              <strong>{formatNumber(result.predicted_sulfur, 2)}</strong>
+              <small>Товарный продукт через {result.horizon_minutes} мин</small>
+              <strong>{formatNumber(result.product_sulfur ?? result.predicted_sulfur, 2)}</strong>
               <span>
                 {result.sulfur_target_met && result.hard_sulfur_limit_met ? (
                   <>
@@ -656,7 +726,9 @@ export function DecisionSupportView({
             })}
           </section>
           <section className="decision-band">
-            <h2>Прогноз серы</h2>
+            <h2>Сера на выходе гидроочистки</h2>
+            <p>Конец горизонта: {formatNumber(result.predicted_sulfur, 2)} мг/кг.
+              {result.blend && result.batch && ` Поступит ${formatNumber(result.batch.produced_t, 1)} т; средняя сера новой партии ${formatNumber(result.batch.produced_sulfur, 2)} мг/кг.`}</p>
             <Chart option={option} />
           </section>
           {result.blend && (
@@ -689,6 +761,15 @@ export function DecisionSupportView({
               </article>
             </section>
           )}
+          {result.blend && <div className="decision-band">
+            <h3>Достаточность запасов</h3>
+            <p>{result.blend.stock_constraints_met === true ? "Запасов достаточно для выбранной партии."
+              : result.blend.stock_constraints_met === false ? "Запасов недостаточно: рецепт невыполним."
+              : "Запасы или масса партии не заданы: проверка не выполнена."}</p>
+            <ul>{result.blend.components?.map((tank) => <li key={tank.name}>{tank.name}: доступно {formatNumber(tank.available_t, 1)} т, требуется {formatNumber(tank.required_t, 1)} т</li>)}</ul>
+            {result.blend.additive_inventory && <p>Присадка: доступно {formatNumber(result.blend.additive_inventory.available_t, 2)} т, требуется {formatNumber(result.blend.additive_inventory.required_t, 2)} т.</p>}
+            {result.blend.additive_sulfur_assessed === false && <p>Содержание серы в присадке неизвестно: качество смеси не подтверждено.</p>}
+          </div>}
           <details className="model-assumptions">
             <summary>Допущения модели</summary>
             <ul>
@@ -699,6 +780,13 @@ export function DecisionSupportView({
           </details>
         </>
       )}
+      {decision && <>
+        <PipelinePreview datasetId={datasetId} decision={decision} result={decision.scenario} period="Автоматическое сравнение вариантов при тех же условиях" />
+        {decision.status === "recommendation" && decision.scenario?.model_request && <button type="button" className="secondary"
+          onClick={() => { setRequest(structuredClone(decision.scenario!.model_request!)); setResult(decision.scenario); }}>
+          Перенести выбранный вариант в форму
+        </button>}
+      </>}
       <button
         className="secondary reset-scenario"
         type="button"
@@ -763,11 +851,13 @@ function DatasetRowPicker({
 }
 
 function PipelinePreview({
+  datasetId,
   onOpenSandbox,
   period,
   result,
   decision,
 }: {
+  datasetId: string;
   onOpenSandbox?: (request: ScenarioRequest) => void;
   period: string;
   result: ScenarioResult | null;
@@ -775,14 +865,14 @@ function PipelinePreview({
 }) {
   const [copyStatus, setCopyStatus] = useState("");
   const sulfurEvidence = decision?.agents?.quality.evidence.sulfur;
-  const predicted = result?.predicted_sulfur;
+  const predicted = result?.product_sulfur ?? result?.predicted_sulfur;
   const baseline = result?.baseline.sulfur;
   const reduction =
-    baseline != null && predicted != null ? baseline - predicted : null;
+    !result?.blend && baseline != null && predicted != null ? baseline - predicted : null;
   const summary = decision?.status === "abstain"
     ? `Рекомендация не сформирована: ${decision.abstain?.reason || "Недостаточно подтверждений."}`
     : result
-      ? `Сценарный расчёт: сера ${formatNumber(predicted)} мг/кг после ${result.horizon_minutes} минут; исходное значение ${formatNumber(baseline)} мг/кг. Изменение режима требует проверки технологом; причинные эффекты заданы допущениями.`
+      ? `Сценарный расчёт: сера товарного продукта ${formatNumber(predicted)} мг/кг после ${result.horizon_minutes} минут; исходная сера гидроочистки ${formatNumber(baseline)} мг/кг. Изменение режима требует проверки технологом; причинные эффекты заданы допущениями.`
       : "Нет данных для расчёта.";
   async function copy() {
     try {
@@ -807,13 +897,13 @@ function PipelinePreview({
           {decision?.status === "abstain"
             ? decision.abstain?.reason || "Пайплайн остановлен из-за качества данных."
             : result
-            ? `Прогноз: ${formatNumber(predicted)} мг/кг после ${result.horizon_minutes} минут.`
+            ? `Товарный продукт: ${formatNumber(predicted)} мг/кг после ${result.horizon_minutes} минут.`
             : "Нет данных для сценарного расчёта."}
         </p>
         {sulfurEvidence && (
           <p className="support-notice">
-            Исходная сера: {formatNumber(sulfurEvidence.value)} мг/кг · {sulfurEvidence.source || "источник отсутствует"}
-            {sulfurEvidence.timestamp && ` · проба ${displayTime(sulfurEvidence.timestamp)}`}
+            Исходная сера: {formatNumber(sulfurEvidence.value)} мг/кг · {sulfurEvidence.source === "model.nowcast" ? "модельная оценка текущего качества" : sulfurEvidence.source || "источник отсутствует"}
+            {sulfurEvidence.timestamp && ` · ${sulfurEvidence.source === "model.nowcast" ? "расчёт" : "измерение"} ${displayTime(sulfurEvidence.timestamp)}`}
             {sulfurEvidence.available_at && ` · доступна ${displayTime(sulfurEvidence.available_at)}`}
           </p>
         )}
@@ -858,9 +948,15 @@ function PipelinePreview({
             : "Прогноз по наблюдениям и сценарный эффект рассчитаны разными моделями. "}
           Проверка относится к концу горизонта. Без расчёта смеси влияние режима на T95 и цетановое число не оценено; производственная безопасность не подтверждена.
         </p>
+        {result?.blend && <p className="support-notice">
+          Выбранный рецепт: {result.blend.normalized_shares.map(tank => `${tank.name} — ${formatNumber(tank.share, 1)}%`).join("; ")}.
+          {" "}Присадка: {formatNumber((result.model_request?.additive_pct ?? 0) * 10, 1)} кг/т.
+          {" "}Свойства компонентов и T95/цетан новой партии заданы в сценарии.
+        </p>}
         <div className="recommendation-actions">
-          <button type="button" className="primary" onClick={() => {
+          {onOpenSandbox && <button type="button" className="primary" onClick={() => {
             if (!decision) return;
+            if (result?.model_request) { onOpenSandbox(structuredClone(result.model_request)); return; }
             const seed = initial(decision.at, true);
             seed.tanks = [];
             seed.additive_pct = 0;
@@ -874,7 +970,7 @@ function PipelinePreview({
             onOpenSandbox?.(seed);
           }}>
             Проверить в песочнице <ArrowRight />
-          </button>
+          </button>}
           <button type="button" className="ghost-button" onClick={copy}>
             <Clipboard /> Скопировать текст
           </button>
@@ -883,11 +979,13 @@ function PipelinePreview({
           </span>
         </div>
       </section>
+      {decision && <QualityDiagnosticsPanel datasetId={datasetId} at={decision.at} />}
       <section className="decision-band">
         <div className="section-heading">
           <h2>Сравнение сценариев</h2>
           <span className="support-notice">Проверенные варианты: {decision?.candidates?.length || 0}</span>
         </div>
+        <p className="support-notice">Парето: нет другого прошедшего проверки варианта, не хуже по выпуску, энергии, нагрузке, стоимости смеси и масштабу изменений, и лучше хотя бы по одному критерию. Это сравнение модельных критериев, не подтверждение безопасности.</p>
         <div
           className="scenario-table-scroll"
           tabIndex={0}
@@ -898,11 +996,12 @@ function PipelinePreview({
             <thead>
               <tr>
                 <th scope="col">Сценарий</th>
-                <th scope="col">Сера в конце горизонта</th>
+                <th scope="col">Сера товарного продукта</th>
                 <th scope="col">Проверка ограничений</th>
                 <th scope="col">Масштаб изменения</th>
                 <th scope="col">Выпуск, Δ%</th>
                 <th scope="col">Энергозатраты, индекс</th>
+                <th scope="col">Стоимость смеси, индекс</th>
                 <th scope="col">Нагрузка, индекс</th>
               </tr>
             </thead>
@@ -914,6 +1013,12 @@ function PipelinePreview({
                 >
                   <td>
                     {candidate.label}
+                    {candidate.pareto === true && <span className="support-notice"> · Парето</span>}
+                    {candidate.pareto === false && <details><summary>Есть более выгодные варианты</summary>
+                      <p className="support-notice">Не хуже по всем критериям и лучше хотя бы по одному: {
+                        candidate.dominated_by?.map(id => decision?.candidates?.find(item => item.id === id)?.label || id).join("; ")
+                      }.</p>
+                    </details>}
                     {candidate.id === decision?.selected_candidate && (
                       <span className="support-notice"> · выбрано</span>
                     )}
@@ -921,7 +1026,7 @@ function PipelinePreview({
                   <td>
                     {candidate.predicted_sulfur == null
                       ? "—"
-                      : `${formatNumber(candidate.predicted_sulfur)} мг/кг серы`}
+                      : `${formatNumber(candidate.product_sulfur ?? candidate.predicted_sulfur)} мг/кг серы`}
                   </td>
                   <td>
                     {candidate.status === "error"
@@ -938,23 +1043,29 @@ function PipelinePreview({
                   </td>
                   <td>{formatNumber(candidate.objectives?.throughput_change_pct, 1)}</td>
                   <td>{formatNumber(candidate.objectives?.energy_cost_index, 3)}</td>
+                  <td>{candidate.scenario?.blend ? formatNumber(candidate.objectives?.blend_cost_index, 3) : "—"}</td>
                   <td>{formatNumber(candidate.objectives?.regime_severity.index, 3)}</td>
                 </tr>
               ))}
               {!decision?.candidates?.length && (
-                <tr><td colSpan={7}>Сравнение не выполнено: сначала нужны достоверные исходные данные.</td></tr>
+                <tr><td colSpan={8}>Сравнение не выполнено: сначала нужны достоверные исходные данные.</td></tr>
               )}
             </tbody>
           </table>
         </div>
-        <p className="support-notice">Выпуск предполагает неизменный выход продукта; энергия — условные затраты относительно текущего режима (=1). Нагрузка оценивает высокие T6/P13/F9 относительно обучающей истории, не вероятность отказа. Выбор учитывает все три критерия и масштаб изменений после проверки ограничений.</p>
+        <p className="support-notice">Выпуск предполагает неизменный выход продукта; энергия — условные затраты относительно текущего режима (=1). Нагрузка оценивает высокие T6/P13/F9 относительно обучающей истории, не вероятность отказа. Выбор учитывает эти критерии, условную стоимость смеси и масштаб изменений после проверки ограничений.</p>
+        {decision?.agents?.quality.evidence.reactor_pressure_drop && <p className="support-notice">
+          Перепад давления реактора P8: {formatNumber(decision.agents.quality.evidence.reactor_pressure_drop.value, 3)} {decision.agents.quality.evidence.reactor_pressure_drop.unit}.
+          {decision.agents.quality.evidence.reactor_pressure_drop.freshness !== "fresh" && " Нет свежего подтверждения."}
+          {" "}Промышленный предел и связь с отказами не установлены.
+        </p>}
       </section>
       {decision?.forecast && (
         <section className="decision-band model-forecast" aria-label="Модельный прогноз серы">
           <div className="section-heading">
             <h2>Отдельный прогноз качества</h2>
             <span className="support-notice">
-              Ridge · горизонт {decision.forecast.forecast_horizon_minutes / 60} ч
+              Калиброванный Ridge · горизонт {decision.forecast.horizon_minutes / 60} ч
             </span>
           </div>
           <p className="recommendation-copy">
@@ -968,11 +1079,15 @@ function PipelinePreview({
           <dl className="recommendation-metrics">
             <div>
               <dt>Ridge прогноз</dt>
-              <dd>{formatNumber(decision.forecast.prediction_ridge, 2)} <span>мг/кг</span></dd>
+              <dd>{formatNumber(decision.forecast.prediction, 2)} <span>мг/кг</span></dd>
             </div>
             <div>
-              <dt>Консервативная оценка</dt>
-              <dd>{formatNumber(decision.forecast.prediction_risk_guard, 2)} <span>мг/кг</span></dd>
+              <dt>80% интервал прогноза</dt>
+              <dd>{formatNumber(decision.forecast.prediction_lower, 2)}–{formatNumber(decision.forecast.prediction_upper, 2)} <span>мг/кг</span></dd>
+            </div>
+            <div>
+              <dt>Вероятность S &gt; 10 на выходе ГО</dt>
+              <dd>{formatNumber(decision.forecast.exceedance_probability == null ? null : 100 * decision.forecast.exceedance_probability, 1)} <span>%</span></dd>
             </div>
             <div>
               <dt>Признаки</dt>
@@ -983,7 +1098,7 @@ function PipelinePreview({
             {decision.forecast.status === "abstain"
               ? "Числовой прогноз скрыт, поскольку проверка входных данных не пройдена."
               : decision.forecast.alarm_above_10
-                ? "Консервативная оценка выше 10 мг/кг: нужна проверка технологом."
+                ? "Прогноз без воздействия сигнализирует о риске превышения: нужна проверка технологом."
                 : "Оценка ниже 10 мг/кг не исключает превышение: модель пропускает часть опасных проб."}
             {decision.forecast.leakage_check.passed ? " Временные границы признаков соблюдены." : " Нарушены временные границы признаков."}
           </p>

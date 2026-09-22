@@ -2440,6 +2440,20 @@ select:focus-visible {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px 24px;
 }
+.scenario-fields label.scenario-toggle {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+.scenario-fields label.scenario-toggle input {
+  width: 20px;
+  height: 20px;
+  min-height: 20px;
+  padding: 0;
+  flex: 0 0 20px;
+  margin: 0;
+}
 .scenario-fields label,
 .picker-row label,
 .support-dates label {
@@ -2589,6 +2603,36 @@ select:focus-visible {
   color: var(--muted);
   font-size: 15px;
   line-height: 1.65;
+}
+.quality-diagnostic-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+.quality-diagnostic-card {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  min-width: 0;
+}
+.quality-diagnostic-card h3 { margin: 0 0 18px; }
+.quality-label, .quality-sample {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.quality-label { margin: 0; }
+.quality-value { font-size: 24px; margin: 5px 0; }
+.quality-value span { font-size: 14px; color: var(--muted); }
+.quality-reasons { color: #8a531b; padding-left: 20px; font-size: 14px; }
+.quality-estimate { border-top: 1px solid var(--border); padding-top: 16px; margin-top: 16px; }
+.quality-diagnostic-card details { font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
+.quality-diagnostic-card summary { cursor: pointer; color: var(--blue); }
+.quality-diagnostic-card li + li { margin-top: 8px; }
+.quality-input { border-top: 1px solid var(--border); padding-top: 10px; margin-top: 10px; }
+@media (max-width: 800px) {
+  .quality-diagnostic-grid { grid-template-columns: 1fr; }
 }
 .recommendation-metrics {
   display: grid;

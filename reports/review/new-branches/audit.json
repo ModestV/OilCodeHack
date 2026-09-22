@@ -1,0 +1,202 @@
+{
+  "candidate_sha": "23977690f5f7f9a3e2cde816f55757f0a69e35c7",
+  "baseline_predictions_sha256": "c77f03c272e2055978bb5a84def2adf19c9d0e00dff02382c5c7b24f50f1e166",
+  "candidate_predictions_sha256": "cb2a655b5dd33f5ccafb9558cd4f668bbc7732bcb5020d32feb51c0b81b2750c",
+  "baseline": "2a12b4a / corrected-claude v3",
+  "evaluation": "retrospective 2026, not a new blind holdout",
+  "horizons": {
+    "0": {
+      "total": 253,
+      "common_n": 234,
+      "accepted_old": 235,
+      "accepted_new": 234,
+      "mae_old": 1.1726720682577116,
+      "mae_new": 1.080680373484311,
+      "mae_delta_weekly_95ci": [
+        -0.18507539860852287,
+        -0.0019130299124204015
+      ],
+      "brier_old": 0.11283270788007617,
+      "brier_new": 0.09945962470158783,
+      "brier_delta_weekly_95ci": [
+        -0.029059448961430034,
+        0.000916830520878738
+      ]
+    },
+    "60": {
+      "total": 253,
+      "common_n": 234,
+      "accepted_old": 236,
+      "accepted_new": 234,
+      "mae_old": 1.256785033263417,
+      "mae_new": 1.1490262044922557,
+      "mae_delta_weekly_95ci": [
+        -0.1741547679495412,
+        -0.04599657882341179
+      ],
+      "brier_old": 0.11458370043880618,
+      "brier_new": 0.10734804910514927,
+      "brier_delta_weekly_95ci": [
+        -0.013859786279167036,
+        -0.0004098105341438263
+      ]
+    },
+    "120": {
+      "total": 253,
+      "common_n": 234,
+      "accepted_old": 236,
+      "accepted_new": 234,
+      "mae_old": 1.3564734798281695,
+      "mae_new": 1.3198972854934803,
+      "mae_delta_weekly_95ci": [
+        -0.1563748442361113,
+        0.0653034420142225
+      ],
+      "brier_old": 0.1263888305903792,
+      "brier_new": 0.13640773835519168,
+      "brier_delta_weekly_95ci": [
+        -0.0031734951103002665,
+        0.02378413645348593
+      ]
+    },
+    "180": {
+      "total": 253,
+      "common_n": 234,
+      "accepted_old": 236,
+      "accepted_new": 234,
+      "mae_old": 1.4176188563378707,
+      "mae_new": 1.4028129890525665,
+      "mae_delta_weekly_95ci": [
+        -0.11918137542018628,
+        0.07755122773322151
+      ],
+      "brier_old": 0.12369109295472636,
+      "brier_new": 0.13637140418035104,
+      "brier_delta_weekly_95ci": [
+        -0.00016349309026018855,
+        0.025850803542275022
+      ]
+    }
+  },
+  "stage1_selection_target_windows_crossing_fold_end": [
+    {
+      "fold": "2023H2",
+      "horizon": 60,
+      "analyser": "q21",
+      "crossing_rows": 0
+    },
+    {
+      "fold": "2023H2",
+      "horizon": 60,
+      "analyser": "pak",
+      "crossing_rows": 0
+    },
+    {
+      "fold": "2023H2",
+      "horizon": 120,
+      "analyser": "q21",
+      "crossing_rows": 2
+    },
+    {
+      "fold": "2023H2",
+      "horizon": 120,
+      "analyser": "pak",
+      "crossing_rows": 2
+    },
+    {
+      "fold": "2023H2",
+      "horizon": 180,
+      "analyser": "q21",
+      "crossing_rows": 4
+    },
+    {
+      "fold": "2023H2",
+      "horizon": 180,
+      "analyser": "pak",
+      "crossing_rows": 4
+    },
+    {
+      "fold": "2024",
+      "horizon": 60,
+      "analyser": "q21",
+      "crossing_rows": 3
+    },
+    {
+      "fold": "2024",
+      "horizon": 60,
+      "analyser": "pak",
+      "crossing_rows": 3
+    },
+    {
+      "fold": "2024",
+      "horizon": 120,
+      "analyser": "q21",
+      "crossing_rows": 5
+    },
+    {
+      "fold": "2024",
+      "horizon": 120,
+      "analyser": "pak",
+      "crossing_rows": 4
+    },
+    {
+      "fold": "2024",
+      "horizon": 180,
+      "analyser": "q21",
+      "crossing_rows": 7
+    },
+    {
+      "fold": "2024",
+      "horizon": 180,
+      "analyser": "pak",
+      "crossing_rows": 5
+    },
+    {
+      "fold": "2025",
+      "horizon": 60,
+      "analyser": "q21",
+      "crossing_rows": 3
+    },
+    {
+      "fold": "2025",
+      "horizon": 60,
+      "analyser": "pak",
+      "crossing_rows": 3
+    },
+    {
+      "fold": "2025",
+      "horizon": 120,
+      "analyser": "q21",
+      "crossing_rows": 5
+    },
+    {
+      "fold": "2025",
+      "horizon": 120,
+      "analyser": "pak",
+      "crossing_rows": 5
+    },
+    {
+      "fold": "2025",
+      "horizon": 180,
+      "analyser": "q21",
+      "crossing_rows": 7
+    },
+    {
+      "fold": "2025",
+      "horizon": 180,
+      "analyser": "pak",
+      "crossing_rows": 7
+    }
+  ],
+  "quiet_future_roundtrip_counterexample": {
+    "origin": "2025-01-02 12:00:00",
+    "initial_T6": 350,
+    "intermediate_T6": 360,
+    "final_T6": 350,
+    "classified_quiet": true,
+    "expected_quiet": false
+  },
+  "lab_rows": 1462,
+  "observation_path": "C:\\Users\\Roma\\Desktop\\projects\\oil-hakathon-release\\storage\\hackathon\\observations.parquet",
+  "observations_sha256": "9a6d9b644a2b1ddce0da27e816aad31654ea9aaf306f29865bb14503973db37b"
+}

@@ -1,0 +1,34 @@
+{
+  "0": {
+    "1": false,
+    "2": false,
+    "5": false,
+    "10": false,
+    "20": false,
+    "50": false
+  },
+  "60": {
+    "1": false,
+    "2": false,
+    "5": false,
+    "10": false,
+    "20": false,
+    "50": false
+  },
+  "120": {
+    "1": false,
+    "2": false,
+    "5": false,
+    "10": false,
+    "20": false,
+    "50": false
+  },
+  "180": {
+    "1": false,
+    "2": false,
+    "5": false,
+    "10": false,
+    "20": false,
+    "50": false
+  }
+}

@@ -7,6 +7,6 @@
     {"id":"unsupported_forecast","purpose":"Real episode outside model applicability; forecast refuses numerical output","at":"2026-06-19T12:00:00","decision_status":"abstain","forecast_status":"abstain"},
     {"id":"unreachable_target","purpose":"Explicit hypothetical sulfur 20: diagnostic candidates retained, none recommended","at":"2026-01-08T07:00:00","request":{"current_sulfur":20},"decision_status":"abstain","min_candidates":3,"all_candidates_infeasible":true},
     {"id":"relaxed_target","purpose":"User target 100 cannot relax mandatory sulfur cap 10","at":"2026-01-08T07:00:00","request":{"current_sulfur":20,"targets":{"sulfur_max":100}},"decision_status":"abstain","min_candidates":3,"all_candidates_infeasible":true},
-    {"id":"blend_quality_failure","purpose":"Good sulfur cannot compensate for T95 violation in supplied blend","at":"2026-01-08T07:00:00","request":{"current_sulfur":8,"tanks":[{"name":"off-spec T95","share":100,"sulfur":8,"t95":370,"cetane":52}]},"decision_status":"abstain","min_candidates":3,"all_candidates_infeasible":true}
+    {"id":"blend_quality_failure","purpose":"Good sulfur cannot compensate for T95 violation in supplied blend","at":"2026-01-08T07:00:00","request":{"current_sulfur":8,"tanks":[{"name":"off-spec T95","share":100,"sulfur":8,"t95":370,"cetane":52}]},"decision_status":"abstain","min_candidates":1,"all_candidates_infeasible":true}
   ]
 }

@@ -184,9 +184,18 @@ export interface ScenarioRequest {
   current_sulfur?: number;
   current_t95?: number;
   current_cetane?: number;
+  batch_mass_t?: number;
+  production_rate_tph?: number;
+  transport_delay_minutes?: number;
+  intermediate_sulfur_max?: number;
+  optimize_economics?: boolean;
+  optimize_recipe?: boolean;
+  minimum_economic_gain?: number;
   targets: { sulfur_max: number; t95_max: number; cetane_min: number };
   parameters: {
     lag_minutes: number;
+    dead_time_minutes?: number;
+    additive_sulfur_mgkg?: number;
     feed_sulfur_transfer: number;
     temperature_effect: number;
     feed_rate_effect: number;
@@ -196,6 +205,8 @@ export interface ScenarioRequest {
   changes?: { temperature: number; feed_rate_pct: number; pressure: number };
   tanks: {
     name: string;
+    kind?: "stored" | "hydrotreated_batch";
+    stock_t?: number;
     share: number;
     sulfur: number;
     t95: number;
@@ -203,6 +214,7 @@ export interface ScenarioRequest {
     cost_index: number;
   }[];
   additive_pct: number;
+  additive_stock_t?: number;
 }
 
 export interface ScenarioResult {
@@ -220,6 +232,10 @@ export interface ScenarioResult {
     }
   >;
   predicted_sulfur: number;
+  product_sulfur?: number;
+  product_route?: "blend" | "direct";
+  model_request?: ScenarioRequest;
+  batch?: { arriving_minutes: number; produced_t: number; produced_sulfur: number };
   steady_state_sulfur: number;
   sulfur_target_met: boolean;
   hard_sulfur_limit_met: boolean;
@@ -232,6 +248,10 @@ export interface ScenarioResult {
     normalized_shares: { name: string; share: number }[];
     meets_targets: { sulfur: boolean; t95: boolean; cetane: boolean };
     all_targets_met: boolean;
+    stock_constraints_met?: boolean | null;
+    additive_sulfur_assessed?: boolean;
+    additive_inventory?: { available_t: number | null; required_t: number | null; stock_met: boolean | null };
+    components?: { name: string; available_t: number | null; required_t: number | null; stock_met: boolean | null }[];
   };
   assumptions: string[];
 }
@@ -248,12 +268,17 @@ export interface SulfurForecast {
   status: "ok" | "abstain";
   reasons: string[];
   target_time: string;
-  forecast_horizon_minutes: number;
+  horizon_minutes: number;
   lims_publication_delay_minutes: number;
   target: { metric_id: string; unit: string };
-  prediction_ridge: number | null;
+  prediction: number | null;
+  nowcast: { prediction: number; lower: number; upper: number } | null;
+  prediction_lower: number | null;
+  prediction_upper: number | null;
+  exceedance_probability: number | null;
+  alarm_probability: number;
+  path_supported: boolean;
   prediction_previous_lab: number | null;
-  prediction_risk_guard: number | null;
   alarm_above_10: boolean | null;
   feature_cutoff: string;
   feature_time: string | null;
@@ -262,9 +287,8 @@ export interface SulfurForecast {
   imputed_feature_count: number;
   model: {
     name: string;
-    alpha: number;
+    alpha: Record<string, number>;
     artifact: string;
-    risk_guard: string;
   };
   leakage_check: {
     passed: boolean;
@@ -275,6 +299,45 @@ export interface SulfurForecast {
   warnings: string[];
 }
 
+export interface QualityObservation {
+  metric_id: string;
+  value: number | null;
+  unit: string;
+  timestamp: string | null;
+  available_at: string | null;
+  age_hours: number | null;
+  freshness: "missing" | "fresh" | "stale";
+  flags: string[];
+  usable: boolean;
+  reasons: string[];
+}
+
+export interface QualityDiagnosticTarget {
+  measurement: QualityObservation;
+  reference_warning: string | null;
+  estimate: {
+    method: string;
+    value: number | null;
+    unit: string;
+    status: "available" | "unavailable";
+    inputs: QualityObservation[];
+    reasons: string[];
+    limitations: string[];
+  };
+}
+
+export interface QualityDiagnostics {
+  at: string;
+  scope: string;
+  diagnostic_only: true;
+  can_authorize: false;
+  lims_publication_delay_hours: number;
+  measurement_freshness_hours: number;
+  estimate_max_age_hours: number;
+  t95: QualityDiagnosticTarget;
+  cetane: QualityDiagnosticTarget;
+}
+
 export interface DecisionResult {
   at: string;
   status: "recommendation" | "abstain";
@@ -282,7 +345,7 @@ export interface DecisionResult {
   agents?: { quality: { evidence: { sulfur: {
     source: string | null; value: number | null; timestamp: string | null;
     available_at: string | null; freshness: string;
-  } } } };
+  }; reactor_pressure_drop?: { value: number | null; unit: string | null; freshness: string; change_from_previous: number | null } } } };
   recommendation: {
     action: string;
     predicted_sulfur: number;
@@ -297,13 +360,18 @@ export interface DecisionResult {
     label: string;
     status: string;
     feasible: boolean;
+    pareto?: boolean | null;
+    pareto_status?: "evaluated" | "infeasible" | "incomplete_objectives";
+    dominated_by?: string[];
     reason?: string | null;
     predicted_sulfur?: number;
+    product_sulfur?: number;
     target_met?: boolean;
     effort?: number;
     objectives?: {
       throughput_change_pct: number;
       energy_cost_index: number;
+      blend_cost_index?: number;
       regime_severity: { index: number | null; class?: string };
       ranking_loss: number | null;
     };

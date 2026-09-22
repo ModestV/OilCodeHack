@@ -1,0 +1,3019 @@
+{
+  "winner": [
+    10,
+    3
+  ],
+  "selected": [
+    10,
+    5
+  ],
+  "promoted": false,
+  "winner_2024_mae_ratio": 0.9769263399303583,
+  "winner_2025_mae_ratio": 0.9934881877976351,
+  "winner_2025_rmse_ratio": 0.9976503958752729,
+  "scores": {
+    "(3, 3)": {
+      "0": {
+        "2024": {
+          "candidate": {
+            "n": 340,
+            "mae": 1.5410942382637418,
+            "rmse": 5.504493590810314,
+            "median_absolute_error": 0.9709580971619118,
+            "bias_pred_minus_actual": 0.3086129246990013,
+            "correlation": 0.295131755540905,
+            "actual_above_10": 32,
+            "predicted_above_10": 14,
+            "precision_above_10": 0.42857142857142855,
+            "recall_above_10": 0.1875,
+            "false_alarm_rate": 0.025974025974025976
+          },
+          "incumbent": {
+            "n": 340,
+            "mae": 1.338028877162146,
+            "rmse": 5.4119818301179645,
+            "median_absolute_error": 0.6747113428881684,
+            "bias_pred_minus_actual": -0.13074244681927583,
+            "correlation": 0.31406210479983254,
+            "actual_above_10": 32,
+            "predicted_above_10": 17,
+            "precision_above_10": 0.47058823529411764,
+            "recall_above_10": 0.25,
+            "false_alarm_rate": 0.02922077922077922
+          },
+          "candidate_accepted": 351,
+          "incumbent_accepted": 344
+        },
+        "2025": {
+          "candidate": {
+            "n": 402,
+            "mae": 1.1034844385726865,
+            "rmse": 1.7037344351681254,
+            "median_absolute_error": 0.8270651419289301,
+            "bias_pred_minus_actual": -0.18271246703673427,
+            "correlation": 0.46082658825383793,
+            "actual_above_10": 70,
+            "predicted_above_10": 16,
+            "precision_above_10": 0.4375,
+            "recall_above_10": 0.1,
+            "false_alarm_rate": 0.02710843373493976
+          },
+          "incumbent": {
+            "n": 402,
+            "mae": 1.0420741046674942,
+            "rmse": 1.7781827704920348,
+            "median_absolute_error": 0.7056598700126187,
+            "bias_pred_minus_actual": -0.1009122400464779,
+            "correlation": 0.47201448630695286,
+            "actual_above_10": 70,
+            "predicted_above_10": 30,
+            "precision_above_10": 0.5333333333333333,
+            "recall_above_10": 0.22857142857142856,
+            "false_alarm_rate": 0.04216867469879518
+          },
+          "candidate_accepted": 404,
+          "incumbent_accepted": 407
+        }
+      },
+      "60": {
+        "2024": {
+          "candidate": {
+            "n": 340,
+            "mae": 1.4347199854415802,
+            "rmse": 1.9208491861118862,
+            "median_absolute_error": 1.1434161050390648,
+            "bias_pred_minus_actual": 0.8071310480775209,
+            "correlation": 0.32926737963834557,
+            "actual_above_10": 30,
+            "predicted_above_10": 10,
+            "precision_above_10": 0.1,
+            "recall_above_10": 0.03333333333333333,
+            "false_alarm_rate": 0.02903225806451613
+          },
+          "incumbent": {
+            "n": 340,
+            "mae": 1.1608722405764211,
+            "rmse": 1.7684212200104272,
+            "median_absolute_error": 0.7808505458821768,
+            "bias_pred_minus_actual": 0.3128385496592325,
+            "correlation": 0.40616540993097566,
+            "actual_above_10": 30,
+            "predicted_above_10": 16,
+            "precision_above_10": 0.375,
+            "recall_above_10": 0.2,
+            "false_alarm_rate": 0.03225806451612903
+          },
+          "candidate_accepted": 350,
+          "incumbent_accepted": 345
+        },
+        "2025": {
+          "candidate": {
+            "n": 402,
+            "mae": 1.184652320981872,
+            "rmse": 1.728246745115209,
+            "median_absolute_error": 0.8914596363264362,
+            "bias_pred_minus_actual": -0.24758475956219014,
+            "correlation": 0.43612958394300605,
+            "actual_above_10": 70,
+            "predicted_above_10": 13,
+            "precision_above_10": 0.3076923076923077,
+            "recall_above_10": 0.05714285714285714,
+            "false_alarm_rate": 0.02710843373493976
+          },
+          "incumbent": {
+            "n": 402,
+            "mae": 1.14924823470905,
+            "rmse": 1.7166781757125604,
+            "median_absolute_error": 0.8768129541557546,
+            "bias_pred_minus_actual": -0.22187845583552132,
+            "correlation": 0.4590145077434218,
+            "actual_above_10": 70,
+            "predicted_above_10": 15,
+            "precision_above_10": 0.4666666666666667,
+            "recall_above_10": 0.1,
+            "false_alarm_rate": 0.024096385542168676
+          },
+          "candidate_accepted": 404,
+          "incumbent_accepted": 409
+        }
+      },
+      "120": {
+        "2024": {
+          "candidate": {
+            "n": 343,
+            "mae": 1.4764654994644386,
+            "rmse": 1.945245556503012,
+            "median_absolute_error": 1.1521777843632588,
+            "bias_pred_minus_actual": 0.8549994821982273,
+            "correlation": 0.253273185698768,
+            "actual_above_10": 27,
+            "predicted_above_10": 10,
+            "precision_above_10": 0.0,
+            "recall_above_10": 0.0,
+            "false_alarm_rate": 0.03164556962025317
+          },
+          "incumbent": {
+            "n": 343,
+            "mae": 1.2787072222092755,
+            "rmse": 1.7948246666633076,
+            "median_absolute_error": 1.0044385223117942,
+            "bias_pred_minus_actual": 0.5150747225385074,
+            "correlation": 0.34476197660133084,
+            "actual_above_10": 27,
+            "predicted_above_10": 8,
+            "precision_above_10": 0.25,
+            "recall_above_10": 0.07407407407407407,
+            "false_alarm_rate": 0.0189873417721519
+          },
+          "candidate_accepted": 353,
+          "incumbent_accepted": 346
+        },
+        "2025": {
+          "candidate": {
+            "n": 407,
+            "mae": 1.372876800374862,
+            "rmse": 2.573245848520626,
+            "median_absolute_error": 0.9995577468154355,
+            "bias_pred_minus_actual": -0.32555900787757464,
+            "correlation": 0.2882002921841558,
+            "actual_above_10": 72,
+            "predicted_above_10": 6,
+            "precision_above_10": 0.3333333333333333,
+            "recall_above_10": 0.027777777777777776,
+            "false_alarm_rate": 0.011940298507462687
+          },
+          "incumbent": {
+            "n": 407,
+            "mae": 1.3658276703031016,
+            "rmse": 2.538336234434983,
+            "median_absolute_error": 0.9623370146533308,
+            "bias_pred_minus_actual": -0.28122294986132185,
+            "correlation": 0.3257090573417094,
+            "actual_above_10": 72,
+            "predicted_above_10": 9,
+            "precision_above_10": 0.6666666666666666,
+            "recall_above_10": 0.08333333333333333,
+            "false_alarm_rate": 0.008955223880597015
+          },
+          "candidate_accepted": 409,
+          "incumbent_accepted": 412
+        }
+      },
+      "180": {
+        "2024": {
+          "candidate": {
+            "n": 337,
+            "mae": 1.5197673039006876,
+            "rmse": 2.0641241673266064,
+            "median_absolute_error": 1.1228738114354133,
+            "bias_pred_minus_actual": 0.8402864411569719,
+            "correlation": 0.1645013579506711,
+            "actual_above_10": 26,
+            "predicted_above_10": 1,
+            "precision_above_10": 0.0,
+            "recall_above_10": 0.0,
+            "false_alarm_rate": 0.003215434083601286
+          },
+          "incumbent": {
+            "n": 337,
+            "mae": 1.434134491334771,
+            "rmse": 2.0083823918225527,
+            "median_absolute_error": 1.0654465032268678,
+            "bias_pred_minus_actual": 0.707302551716986,
+            "correlation": 0.2030696580234721,
+            "actual_above_10": 26,
+            "predicted_above_10": 6,
+            "precision_above_10": 0.16666666666666666,
+            "recall_above_10": 0.038461538461538464,
+            "false_alarm_rate": 0.01607717041800643
+          },
+          "candidate_accepted": 348,
+          "incumbent_accepted": 341
+        },
+        "2025": {
+          "candidate": {
+            "n": 406,
+            "mae": 1.5349277579885507,
+            "rmse": 5.808676004167734,
+            "median_absolute_error": 1.016365976462227,
+            "bias_pred_minus_actual": -0.5595674760876419,
+            "correlation": 0.1389742237942696,
+            "actual_above_10": 71,
+            "predicted_above_10": 1,
+            "precision_above_10": 0.0,
+            "recall_above_10": 0.0,
+            "false_alarm_rate": 0.0029850746268656717
+          },
+          "incumbent": {
+            "n": 406,
+            "mae": 1.5458206410739754,
+            "rmse": 5.80885248679698,
+            "median_absolute_error": 1.024664966100855,
+            "bias_pred_minus_actual": -0.518932087392496,
+            "correlation": 0.1309986055749706,
+            "actual_above_10": 71,
+            "predicted_above_10": 2,
+            "precision_above_10": 0.5,
+            "recall_above_10": 0.014084507042253521,
+            "false_alarm_rate": 0.0029850746268656717
+          },
+          "candidate_accepted": 407,
+          "incumbent_accepted": 411
+        }
+      }
+    },
+    "(3, 5)": {
+      "0": {
+        "2024": {
+          "candidate": {
+            "n": 339,
+            "mae": 1.5002593232075745,
+            "rmse": 5.493567216528925,
+            "median_absolute_error": 0.9282828773016547,
+            "bias_pred_minus_actual": 0.27708129633820827,
+            "correlation": 0.3189278876210741,
+            "actual_above_10": 32,
+            "predicted_above_10": 12,
+            "precision_above_10": 0.5,
+            "recall_above_10": 0.1875,
+            "false_alarm_rate": 0.019543973941368076
+          },
+          "incumbent": {
+            "n": 339,
+            "mae": 1.3085016719775588,
+            "rmse": 5.384801793219084,
+            "median_absolute_error": 0.6746410309788482,
+            "bias_pred_minus_actual": -0.16460231077666954,
+            "correlation": 0.3346343699887088,
+            "actual_above_10": 32,
+            "predicted_above_10": 16,
+            "precision_above_10": 0.5,
+            "recall_above_10": 0.25,
+            "false_alarm_rate": 0.026058631921824105
+          },
+          "candidate_accepted": 345,
+          "incumbent_accepted": 344
+        },
+        "2025": {
+          "candidate": {
+            "n": 402,
+            "mae": 1.1063757917611303,
+            "rmse": 1.7037379316418826,
+            "median_absolute_error": 0.8246019833723555,
+            "bias_pred_minus_actual": -0.18188549578633165,
+            "correlation": 0.46111400165774463,
+            "actual_above_10": 70,
+            "predicted_above_10": 16,
+            "precision_above_10": 0.4375,
+            "recall_above_10": 0.1,
+            "false_alarm_rate": 0.02710843373493976
+          },
+          "incumbent": {
+            "n": 402,
+            "mae": 1.0420741046674942,
+            "rmse": 1.7781827704920348,
+            "median_absolute_error": 0.7056598700126187,
+            "bias_pred_minus_actual": -0.1009122400464779,
+            "correlation": 0.47201448630695286,
+            "actual_above_10": 70,
+            "predicted_above_10": 30,
+            "precision_above_10": 0.5333333333333333,
+            "recall_above_10": 0.22857142857142856,
+            "false_alarm_rate": 0.04216867469879518
+          },
+          "candidate_accepted": 404,
+          "incumbent_accepted": 407
+        }
+      },
+      "60": {
+        "2024": {
+          "candidate": {
+            "n": 340,
+            "mae": 1.419160381654323,
+            "rmse": 1.896985265716059,
+            "median_absolute_error": 1.1328803583651492,
+            "bias_pred_minus_actual": 0.8127351772737964,
+            "correlation": 0.3804529961484459,
+            "actual_above_10": 30,
+            "predicted_above_10": 5,
+            "precision_above_10": 0.2,
+            "recall_above_10": 0.03333333333333333,
+            "false_alarm_rate": 0.012903225806451613
+          },
+          "incumbent": {
+            "n": 340,
+            "mae": 1.1608722405764211,
+            "rmse": 1.7684212200104272,
+            "median_absolute_error": 0.7808505458821768,
+            "bias_pred_minus_actual": 0.3128385496592325,
+            "correlation": 0.40616540993097566,
+            "actual_above_10": 30,
+            "predicted_above_10": 16,
+            "precision_above_10": 0.375,
+            "recall_above_10": 0.2,
+            "false_alarm_rate": 0.03225806451612903
+          },
+          "candidate_accepted": 346,
+          "incumbent_accepted": 345
+        },
+        "2025": {
+          "candidate": {
+            "n": 402,
+            "mae": 1.185405768798731,
+            "rmse": 1.7282510296027471,
+            "median_absolute_error": 0.9054255782512932,
+            "bias_pred_minus_actual": -0.24679556614600628,
+            "correlation": 0.43600011044610837,
+            "actual_above_10": 70,
+            "predicted_above_10": 13,
+            "precision_above_10": 0.3076923076923077,
+            "recall_above_10": 0.05714285714285714,
+            "false_alarm_rate": 0.02710843373493976
+          },
+          "incumbent": {
+            "n": 402,
+            "mae": 1.14924823470905,
+            "rmse": 1.7166781757125604,
+            "median_absolute_error": 0.8768129541557546,
+            "bias_pred_minus_actual": -0.22187845583552132,
+            "correlation": 0.4590145077434218,
+            "actual_above_10": 70,
+            "predicted_above_10": 15,
+            "precision_above_10": 0.4666666666666667,
+            "recall_above_10": 0.1,
+            "false_alarm_rate": 0.024096385542168676
+          },
+          "candidate_accepted": 404,
+          "incumbent_accepted": 409
+        }
+      },
+      "120": {
+        "2024": {
+          "candidate": {
+            "n": 343,
+            "mae": 1.5067599047358573,
+            "rmse": 1.9816906916900692,
+            "median_absolute_error": 1.1402127389690406,
+            "bias_pred_minus_actual": 0.9242954133253195,
+            "correlation": 0.23953554845438385,
+            "actual_above_10": 27,
+            "predicted_above_10": 10,
+            "precision_above_10": 0.1,
+            "recall_above_10": 0.037037037037037035,
+            "false_alarm_rate": 0.028481012658227847
+          },
+          "incumbent": {
+            "n": 343,
+            "mae": 1.2787072222092755,
+            "rmse": 1.7948246666633076,
+            "median_absolute_error": 1.0044385223117942,
+            "bias_pred_minus_actual": 0.5150747225385074,
+            "correlation": 0.34476197660133084,
+            "actual_above_10": 27,
+            "predicted_above_10": 8,
+            "precision_above_10": 0.25,
+            "recall_above_10": 0.07407407407407407,
+            "false_alarm_rate": 0.0189873417721519
+          },
+          "candidate_accepted": 349,
+          "incumbent_accepted": 346
+        },
+        "2025": {
+          "candidate": {
+            "n": 407,
+            "mae": 1.377507969576202,
+            "rmse": 2.5770701858860656,
+            "median_absolute_error": 1.002921045078974,
+            "bias_pred_minus_actual": -0.32933898699244596,
+            "correlation": 0.2839587049157938,
+            "actual_above_10": 72,
+            "predicted_above_10": 6,
+            "precision_above_10": 0.3333333333333333,
+            "recall_above_10": 0.027777777777777776,
+            "false_alarm_rate": 0.011940298507462687
+          },
+          "incumbent": {
+            "n": 407,
+            "mae": 1.3658276703031016,
+            "rmse": 2.538336234434983,
+            "median_absolute_error": 0.9623370146533308,
+            "bias_pred_minus_actual": -0.28122294986132185,
+            "correlation": 0.3257090573417094,
+            "actual_above_10": 72,
+            "predicted_above_10": 9,
+            "precision_above_10": 0.6666666666666666,
+            "recall_above_10": 0.08333333333333333,
+            "false_alarm_rate": 0.008955223880597015
+          },
+          "candidate_accepted": 409,
+          "incumbent_accepted": 412
+        }
+      },
+      "180": {
+        "2024": {
+          "candidate": {
+            "n": 337,
+            "mae": 1.586676388860508,
+            "rmse": 2.1396041767879366,
+            "median_absolute_error": 1.228565543079375,
+            "bias_pred_minus_actual": 0.9440278349102554,
+            "correlation": 0.06257204641407207,
+            "actual_above_10": 26,
+            "predicted_above_10": 2,
+            "precision_above_10": 0.0,
+            "recall_above_10": 0.0,
+            "false_alarm_rate": 0.006430868167202572
+          },
+          "incumbent": {
+            "n": 337,
+            "mae": 1.434134491334771,
+            "rmse": 2.0083823918225527,
+            "median_absolute_error": 1.0654465032268678,
+            "bias_pred_minus_actual": 0.707302551716986,
+            "correlation": 0.2030696580234721,
+            "actual_above_10": 26,
+            "predicted_above_10": 6,
+            "precision_above_10": 0.16666666666666666,
+            "recall_above_10": 0.038461538461538464,
+            "false_alarm_rate": 0.01607717041800643
+          },
+          "candidate_accepted": 343,
+          "incumbent_accepted": 341
+        },
+        "2025": {
+          "candidate": {
+            "n": 406,
+            "mae": 1.538252824532198,
+            "rmse": 5.8103280186781046,
+            "median_absolute_error": 1.0263208909129755,
+            "bias_pred_minus_actual": -0.558954310339803,
+            "correlation": 0.1366650352404671,
+            "actual_above_10": 71,
+            "predicted_above_10": 1,
+            "precision_above_10": 0.0,
+            "recall_above_10": 0.0,
+            "false_alarm_rate": 0.0029850746268656717
+          },
+          "incumbent": {
+            "n": 406,
+            "mae": 1.5458206410739754,
+            "rmse": 5.80885248679698,
+            "median_absolute_error": 1.024664966100855,
+            "bias_pred_minus_actual": -0.518932087392496,
+            "correlation": 0.1309986055749706,
+            "actual_above_10": 71,
+            "predicted_above_10": 2,
+            "precision_above_10": 0.5,
+            "recall_above_10": 0.014084507042253521,
+            "false_alarm_rate": 0.0029850746268656717
+          },
+          "candidate_accepted": 407,
+          "incumbent_accepted": 411
+        }
+      }
+    },
+    "(3, 10)": {
+      "0": {
+        "2024": {
+          "candidate": {
+            "n": 325,
+            "mae": 1.4022844735694069,
+            "rmse": 5.585904065081723,
+            "median_absolute_error": 0.7882476681778572,
+            "bias_pred_minus_actual": 0.07869358070675105,
+            "correlation": 0.31480169780269185,
+            "actual_above_10": 31,
+            "predicted_above_10": 9,
+            "precision_above_10": 0.6666666666666666,
+            "recall_above_10": 0.1935483870967742,
+            "false_alarm_rate": 0.01020408163265306
+          },
+          "incumbent": {
+            "n": 325,
+            "mae": 1.3096565735470467,
+            "rmse": 5.488175707428387,
+            "median_absolute_error": 0.6650860675087475,
+            "bias_pred_minus_actual": -0.17125485552496408,
+            "correlation": 0.32892639597717094,
+            "actual_above_10": 31,
+            "predicted_above_10": 16,
+            "precision_above_10": 0.5,
+            "recall_above_10": 0.25806451612903225,
+            "false_alarm_rate": 0.027210884353741496
+          },
+          "candidate_accepted": 332,
+          "incumbent_accepted": 344
+        },
+        "2025": {
+          "candidate": {
+            "n": 402,
+            "mae": 1.0778704218153985,
+            "rmse": 1.6838231713734786,
+            "median_absolute_error": 0.7751751862473606,
+            "bias_pred_minus_actual": -0.12474617605158356,
+            "correlation": 0.4797776691523641,
+            "actual_above_10": 70,
+            "predicted_above_10": 17,
+            "precision_above_10": 0.47058823529411764,
+            "recall_above_10": 0.11428571428571428,
+            "false_alarm_rate": 0.02710843373493976
+          },
+          "incumbent": {
+            "n": 402,
+            "mae": 1.0420741046674942,
+            "rmse": 1.7781827704920348,
+            "median_absolute_error": 0.7056598700126187,
+            "bias_pred_minus_actual": -0.1009122400464779,
+            "correlation": 0.47201448630695286,
+            "actual_above_10": 70,
+            "predicted_above_10": 30,
+            "precision_above_10": 0.5333333333333333,
+            "recall_above_10": 0.22857142857142856,
+            "false_alarm_rate": 0.04216867469879518
+          },
+          "candidate_accepted": 404,
+          "incumbent_accepted": 407
+        }
+      },
+      "60": {
+        "2024": {
+          "candidate": {
+            "n": 327,
+            "mae": 1.2686356138996335,
+            "rmse": 1.7535402937998092,
+            "median_absolute_error": 0.9684774106663436,
+            "bias_pred_minus_actual": 0.5463312316089398,
+            "correlation": 0.4328499891796387,
+            "actual_above_10": 29,
+            "predicted_above_10": 3,
+            "precision_above_10": 0.3333333333333333,
+            "recall_above_10": 0.034482758620689655,
+            "false_alarm_rate": 0.006711409395973154
+          },
+          "incumbent": {
+            "n": 327,
+            "mae": 1.159644781146248,
+            "rmse": 1.782335909270823,
+            "median_absolute_error": 0.7742394793647502,
+            "bias_pred_minus_actual": 0.31507178485325377,
+            "correlation": 0.38031283641462527,
+            "actual_above_10": 29,
+            "predicted_above_10": 15,
+            "precision_above_10": 0.3333333333333333,
+            "recall_above_10": 0.1724137931034483,
+            "false_alarm_rate": 0.03355704697986577
+          },
+          "candidate_accepted": 334,
+          "incumbent_accepted": 345
+        },
+        "2025": {
+          "candidate": {
+            "n": 402,
+            "mae": 1.1597864374865192,
+            "rmse": 1.7008170170647792,
+            "median_absolute_error": 0.8908659764289242,
+            "bias_pred_minus_actual": -0.18777675235955052,
+            "correlation": 0.45804183156609635,
+            "actual_above_10": 70,
+            "predicted_above_10": 14,
+            "precision_above_10": 0.35714285714285715,
+            "recall_above_10": 0.07142857142857142,
+            "false_alarm_rate": 0.02710843373493976
+          },
+          "incumbent": {
+            "n": 402,
+            "mae": 1.14924823470905,
+            "rmse": 1.7166781757125604,
+            "median_absolute_error": 0.8768129541557546,
+            "bias_pred_minus_actual": -0.22187845583552132,
+            "correlation": 0.4590145077434218,
+            "actual_above_10": 70,
+            "predicted_above_10": 15,
+            "precision_above_10": 0.4666666666666667,
+            "recall_above_10": 0.1,
+            "false_alarm_rate": 0.024096385542168676
+          },
+          "candidate_accepted": 404,
+          "incumbent_accepted": 409
+        }
+      },
+      "120": {
+        "2024": {
+          "candidate": {
+            "n": 329,
+            "mae": 1.353824229904437,
+            "rmse": 1.809196667144879,
+            "median_absolute_error": 1.0624225044238838,
+            "bias_pred_minus_actual": 0.6879388571366388,
+            "correlation": 0.3501751897141381,
+            "actual_above_10": 26,
+            "predicted_above_10": 2,
+            "precision_above_10": 0.0,
+            "recall_above_10": 0.0,
+            "false_alarm_rate": 0.006600660066006601
+          },
+          "incumbent": {
+            "n": 329,
+            "mae": 1.2628373070711891,
+            "rmse": 1.7883069957302409,
+            "median_absolute_error": 0.9547950153491733,
+            "bias_pred_minus_actual": 0.49698810521604075,
+            "correlation": 0.32740345852367153,
+            "actual_above_10": 26,
+            "predicted_above_10": 8,
+            "precision_above_10": 0.25,
+            "recall_above_10": 0.07692307692307693,
+            "false_alarm_rate": 0.019801980198019802
+          },
+          "candidate_accepted": 337,
+          "incumbent_accepted": 346
+        },
+        "2025": {
+          "candidate": {
+            "n": 407,
+            "mae": 1.3469372071401924,
+            "rmse": 2.5467175127101522,
+            "median_absolute_error": 0.9488380191656205,
+            "bias_pred_minus_actual": -0.25493021195334264,
+            "correlation": 0.311138257516466,
+            "actual_above_10": 72,
+            "predicted_above_10": 9,
+            "precision_above_10": 0.3333333333333333,
+            "recall_above_10": 0.041666666666666664,
+            "false_alarm_rate": 0.01791044776119403
+          },
+          "incumbent": {
+            "n": 407,
+            "mae": 1.3658276703031016,
+            "rmse": 2.538336234434983,
+            "median_absolute_error": 0.9623370146533308,
+            "bias_pred_minus_actual": -0.28122294986132185,
+            "correlation": 0.3257090573417094,
+            "actual_above_10": 72,
+            "predicted_above_10": 9,
+            "precision_above_10": 0.6666666666666666,
+            "recall_above_10": 0.08333333333333333,
+            "false_alarm_rate": 0.008955223880597015
+          },
+          "candidate_accepted": 409,
+          "incumbent_accepted": 412
+        }
+      },
+      "180": {
+        "2024": {
+          "candidate": {
+            "n": 322,
+            "mae": 1.4318945939373382,
+            "rmse": 1.9821911104573608,
+            "median_absolute_error": 1.0590799724395685,
+            "bias_pred_minus_actual": 0.7347363773863989,
+            "correlation": 0.2658968969785927,
+            "actual_above_10": 25,
+            "predicted_above_10": 0,
+            "precision_above_10": null,
+            "recall_above_10": 0.0,
+            "false_alarm_rate": 0.0
+          },
+          "incumbent": {
+            "n": 322,
+            "mae": 1.3981285965596042,
+            "rmse": 1.9759386437988835,
+            "median_absolute_error": 1.038537191261625,
+            "bias_pred_minus_actual": 0.6660215545736641,
+            "correlation": 0.20792885350809967,
+            "actual_above_10": 25,
+            "predicted_above_10": 6,
+            "precision_above_10": 0.16666666666666666,
+            "recall_above_10": 0.04,
+            "false_alarm_rate": 0.016835016835016835
+          },
+          "candidate_accepted": 329,
+          "incumbent_accepted": 341
+        },
+        "2025": {
+          "candidate": {
+            "n": 406,
+            "mae": 1.5217260796100178,
+            "rmse": 5.79328035778935,
+            "median_absolute_error": 0.9566656959714281,
+            "bias_pred_minus_actual": -0.495731559103744,
+            "correlation": 0.14886539506327393,
+            "actual_above_10": 71,
+            "predicted_above_10": 0,
+            "precision_above_10": null,
+            "recall_above_10": 0.0,
+            "false_alarm_rate": 0.0
+          },
+          "incumbent": {
+            "n": 406,
+            "mae": 1.5458206410739754,
+            "rmse": 5.80885248679698,
+            "median_absolute_error": 1.024664966100855,
+            "bias_pred_minus_actual": -0.518932087392496,
+            "correlation": 0.1309986055749706,
+            "actual_above_10": 71,
+            "predicted_above_10": 2,
+            "precision_above_10": 0.5,
+            "recall_above_10": 0.014084507042253521,
+            "false_alarm_rate": 0.0029850746268656717
+          },
+          "candidate_accepted": 407,
+          "incumbent_accepted": 411
+        }
+      }
+    },
+    "(5, 3)": {
+      "0": {
+        "2024": {
+          "candidate": {
+            "n": 343,
+            "mae": 1.3313127734998043,
+            "rmse": 5.382367179655829,
+            "median_absolute_error": 0.6404863181379801,
+            "bias_pred_minus_actual": -0.05823928461486665,
+            "correlation": 0.32722059379846796,
+            "actual_above_10": 33,
+            "predicted_above_10": 19,
+            "precision_above_10": 0.42105263157894735,
+            "recall_above_10": 0.24242424242424243,
+            "false_alarm_rate": 0.035483870967741936
+          },
+          "incumbent": {
+            "n": 343,
+            "mae": 1.3422108692616905,
+            "rmse": 5.390528172789223,
+            "median_absolute_error": 0.6796483439753551,
+            "bias_pred_minus_actual": -0.1258924344888677,
+            "correlation": 0.321388251453891,
+            "actual_above_10": 33,
+            "predicted_above_10": 18,
+            "precision_above_10": 0.5,
+            "recall_above_10": 0.2727272727272727,
+            "false_alarm_rate": 0.02903225806451613
+          },
+          "candidate_accepted": 354,
+          "incumbent_accepted": 344
+        },
+        "2025": {
+          "candidate": {
+            "n": 404,
+            "mae": 1.0002152567574651,
+            "rmse": 1.6869079628702295,
+            "median_absolute_error": 0.6912730404272232,
+            "bias_pred_minus_actual": -0.13027575484529857,
+            "correlation": 0.5074513153645419,
+            "actual_above_10": 70,
+            "predicted_above_10": 25,
+            "precision_above_10": 0.64,
+            "recall_above_10": 0.22857142857142856,
+            "false_alarm_rate": 0.02694610778443114
+          },
+          "incumbent": {
+            "n": 404,
+            "mae": 1.0291520333068258,
+            "rmse": 1.7583654936904494,
+            "median_absolute_error": 0.7034219761871632,
+            "bias_pred_minus_actual": -0.0890040046855938,
+            "correlation": 0.47737713845242363,
+            "actual_above_10": 70,
+            "predicted_above_10": 30,
+            "precision_above_10": 0.5333333333333333,
+            "recall_above_10": 0.22857142857142856,
+            "false_alarm_rate": 0.041916167664670656
+          },
+          "candidate_accepted": 407,
+          "incumbent_accepted": 407
+        }
+      },
+      "60": {
+        "2024": {
+          "candidate": {
+            "n": 344,
+            "mae": 1.1812857014104838,
+            "rmse": 1.7781842173571898,
+            "median_absolute_error": 0.8278289885688768,
+            "bias_pred_minus_actual": 0.3770265990653382,
+            "correlation": 0.4225731123867152,
+            "actual_above_10": 31,
+            "predicted_above_10": 17,
+            "precision_above_10": 0.29411764705882354,
+            "recall_above_10": 0.16129032258064516,
+            "false_alarm_rate": 0.038338658146964855
+          },
+          "incumbent": {
+            "n": 344,
+            "mae": 1.1814650618852485,
+            "rmse": 1.7932723473292422,
+            "median_absolute_error": 0.7868323669072637,
+            "bias_pred_minus_actual": 0.337200006928477,
+            "correlation": 0.4159423908959336,
+            "actual_above_10": 31,
+            "predicted_above_10": 17,
+            "precision_above_10": 0.4117647058823529,
+            "recall_above_10": 0.22580645161290322,
+            "false_alarm_rate": 0.03194888178913738
+          },
+          "candidate_accepted": 353,
+          "incumbent_accepted": 345
+        },
+        "2025": {
+          "candidate": {
+            "n": 406,
+            "mae": 1.1167413077081378,
+            "rmse": 1.6678907156373057,
+            "median_absolute_error": 0.8215094753787815,
+            "bias_pred_minus_actual": -0.21196287511801,
+            "correlation": 0.49264514764298756,
+            "actual_above_10": 70,
+            "predicted_above_10": 18,
+            "precision_above_10": 0.6111111111111112,
+            "recall_above_10": 0.15714285714285714,
+            "false_alarm_rate": 0.020833333333333332
+          },
+          "incumbent": {
+            "n": 406,
+            "mae": 1.143853842644102,
+            "rmse": 1.709800123367186,
+            "median_absolute_error": 0.8713442398242162,
+            "bias_pred_minus_actual": -0.2195926710577796,
+            "correlation": 0.45984288905770426,
+            "actual_above_10": 70,
+            "predicted_above_10": 15,
+            "precision_above_10": 0.4666666666666667,
+            "recall_above_10": 0.1,
+            "false_alarm_rate": 0.023809523809523808
+          },
+          "candidate_accepted": 407,
+          "incumbent_accepted": 409
+        }
+      },
+      "120": {
+        "2024": {
+          "candidate": {
+            "n": 346,
+            "mae": 1.2899164626363209,
+            "rmse": 1.775828738514206,
+            "median_absolute_error": 0.9745450265832649,
+            "bias_pred_minus_actual": 0.5767886688885827,
+            "correlation": 0.39406064349240816,
+            "actual_above_10": 28,
+            "predicted_above_10": 7,
+            "precision_above_10": 0.42857142857142855,
+            "recall_above_10": 0.10714285714285714,
+            "false_alarm_rate": 0.012578616352201259
+          },
+          "incumbent": {
+            "n": 346,
+            "mae": 1.293006128307509,
+            "rmse": 1.8126246327997868,
+            "median_absolute_error": 1.0133589238137821,
+            "bias_pred_minus_actual": 0.5282598353721293,
+            "correlation": 0.35202058203145326,
+            "actual_above_10": 28,
+            "predicted_above_10": 9,
+            "precision_above_10": 0.3333333333333333,
+            "recall_above_10": 0.10714285714285714,
+            "false_alarm_rate": 0.018867924528301886
+          },
+          "candidate_accepted": 354,
+          "incumbent_accepted": 346
+        },
+        "2025": {
+          "candidate": {
+            "n": 410,
+            "mae": 1.3311057477851056,
+            "rmse": 2.516648760868131,
+            "median_absolute_error": 0.9591381461562856,
+            "bias_pred_minus_actual": -0.28031766336753033,
+            "correlation": 0.339111074978722,
+            "actual_above_10": 72,
+            "predicted_above_10": 10,
+            "precision_above_10": 0.6,
+            "recall_above_10": 0.08333333333333333,
+            "false_alarm_rate": 0.011834319526627219
+          },
+          "incumbent": {
+            "n": 410,
+            "mae": 1.3632913314368065,
+            "rmse": 2.531360287072133,
+            "median_absolute_error": 0.9606766475245756,
+            "bias_pred_minus_actual": -0.281617767602419,
+            "correlation": 0.3258744144588886,
+            "actual_above_10": 72,
+            "predicted_above_10": 9,
+            "precision_above_10": 0.6666666666666666,
+            "recall_above_10": 0.08333333333333333,
+            "false_alarm_rate": 0.008875739644970414
+          },
+          "candidate_accepted": 410,
+          "incumbent_accepted": 412
+        }
+      },
+      "180": {
+        "2024": {
+          "candidate": {
+            "n": 340,
+            "mae": 1.438376208518514,
+            "rmse": 1.997631742475304,
+            "median_absolute_error": 1.0555307525317321,
+            "bias_pred_minus_actual": 0.7024468745097947,
+            "correlation": 0.25515507713376157,
+            "actual_above_10": 27,
+            "predicted_above_10": 4,
+            "precision_above_10": 0.25,
+            "recall_above_10": 0.037037037037037035,
+            "false_alarm_rate": 0.009584664536741214
+          },
+          "incumbent": {
+            "n": 340,
+            "mae": 1.4543395832101913,
+            "rmse": 2.03081147973117,
+            "median_absolute_error": 1.0684524752320401,
+            "bias_pred_minus_actual": 0.7138327085434691,
+            "correlation": 0.20303888444850862,
+            "actual_above_10": 27,
+            "predicted_above_10": 6,
+            "precision_above_10": 0.16666666666666666,
+            "recall_above_10": 0.037037037037037035,
+            "false_alarm_rate": 0.01597444089456869
+          },
+          "candidate_accepted": 351,
+          "incumbent_accepted": 341
+        },
+        "2025": {
+          "candidate": {
+            "n": 409,
+            "mae": 1.5426943559488289,
+            "rmse": 5.796144975639947,
+            "median_absolute_error": 0.9972937475910353,
+            "bias_pred_minus_actual": -0.5329314981834541,
+            "correlation": 0.12852103860098515,
+            "actual_above_10": 72,
+            "predicted_above_10": 1,
+            "precision_above_10": 1.0,
+            "recall_above_10": 0.013888888888888888,
+            "false_alarm_rate": 0.0
+          },
+          "incumbent": {
+            "n": 409,
+            "mae": 1.559236612630572,
+            "rmse": 5.801365134441107,
+            "median_absolute_error": 1.0262577200136302,
+            "bias_pred_minus_actual": -0.5291513452517246,
+            "correlation": 0.12120600351560312,
+            "actual_above_10": 72,
+            "predicted_above_10": 2,
+            "precision_above_10": 0.5,
+            "recall_above_10": 0.013888888888888888,
+            "false_alarm_rate": 0.002967359050445104
+          },
+          "candidate_accepted": 409,
+          "incumbent_accepted": 411
+        }
+      }
+    },
+    "(5, 5)": {
+      "0": {
+        "2024": {
+          "candidate": {
+            "n": 343,
+            "mae": 1.3496203472596013,
+            "rmse": 5.380563380927117,
+            "median_absolute_error": 0.6556951297065412,
+            "bias_pred_minus_actual": 0.018580435303231963,
+            "correlation": 0.3277951493572657,
+            "actual_above_10": 33,
+            "predicted_above_10": 23,
+            "precision_above_10": 0.43478260869565216,
+            "recall_above_10": 0.30303030303030304,
+            "false_alarm_rate": 0.041935483870967745
+          },
+          "incumbent": {
+            "n": 343,
+            "mae": 1.3422108692616905,
+            "rmse": 5.390528172789223,
+            "median_absolute_error": 0.6796483439753551,
+            "bias_pred_minus_actual": -0.1258924344888677,
+            "correlation": 0.321388251453891,
+            "actual_above_10": 33,
+            "predicted_above_10": 18,
+            "precision_above_10": 0.5,
+            "recall_above_10": 0.2727272727272727,
+            "false_alarm_rate": 0.02903225806451613
+          },
+          "candidate_accepted": 349,
+          "incumbent_accepted": 344
+        },
+        "2025": {
+          "candidate": {
+            "n": 404,
+            "mae": 1.0130843337939985,
+            "rmse": 1.6932344101907493,
+            "median_absolute_error": 0.6872612879442359,
+            "bias_pred_minus_actual": -0.14425841930791877,
+            "correlation": 0.5018711988488754,
+            "actual_above_10": 70,
+            "predicted_above_10": 24,
+            "precision_above_10": 0.6666666666666666,
+            "recall_above_10": 0.22857142857142856,
+            "false_alarm_rate": 0.023952095808383235
+          },
+          "incumbent": {
+            "n": 404,
+            "mae": 1.0291520333068258,
+            "rmse": 1.7583654936904494,
+            "median_absolute_error": 0.7034219761871632,
+            "bias_pred_minus_actual": -0.0890040046855938,
+            "correlation": 0.47737713845242363,
+            "actual_above_10": 70,
+            "predicted_above_10": 30,
+            "precision_above_10": 0.5333333333333333,
+            "recall_above_10": 0.22857142857142856,
+            "false_alarm_rate": 0.041916167664670656
+          },
+          "candidate_accepted": 407,
+          "incumbent_accepted": 407
+        }
+      },
+      "60": {
+        "2024": {
+          "candidate": {
+            "n": 343,
+            "mae": 1.2470064094435915,
+            "rmse": 1.8402846163544144,
+            "median_absolute_error": 0.9070350013158652,
+            "bias_pred_minus_actual": 0.5500593697610253,
+            "correlation": 0.40381964025667133,
+            "actual_above_10": 31,
+            "predicted_above_10": 27,
+            "precision_above_10": 0.2962962962962963,
+            "recall_above_10": 0.25806451612903225,
+            "false_alarm_rate": 0.060897435897435896
+          },
+          "incumbent": {
+            "n": 343,
+            "mae": 1.1828073024181383,
+            "rmse": 1.7954624483833241,
+            "median_absolute_error": 0.7888680440307398,
+            "bias_pred_minus_actual": 0.33608083330697386,
+            "correlation": 0.4099799903007082,
+            "actual_above_10": 31,
+            "predicted_above_10": 17,
+            "precision_above_10": 0.4117647058823529,
+            "recall_above_10": 0.22580645161290322,
+            "false_alarm_rate": 0.03205128205128205
+          },
+          "candidate_accepted": 347,
+          "incumbent_accepted": 345
+        },
+        "2025": {
+          "candidate": {
+            "n": 406,
+            "mae": 1.1372403592405487,
+            "rmse": 1.6873453636685123,
+            "median_absolute_error": 0.88579616367781,
+            "bias_pred_minus_actual": -0.23149490785747037,
+            "correlation": 0.47708316485032065,
+            "actual_above_10": 70,
+            "predicted_above_10": 15,
+            "precision_above_10": 0.5333333333333333,
+            "recall_above_10": 0.11428571428571428,
+            "false_alarm_rate": 0.020833333333333332
+          },
+          "incumbent": {
+            "n": 406,
+            "mae": 1.143853842644102,
+            "rmse": 1.709800123367186,
+            "median_absolute_error": 0.8713442398242162,
+            "bias_pred_minus_actual": -0.2195926710577796,
+            "correlation": 0.45984288905770426,
+            "actual_above_10": 70,
+            "predicted_above_10": 15,
+            "precision_above_10": 0.4666666666666667,
+            "recall_above_10": 0.1,
+            "false_alarm_rate": 0.023809523809523808
+          },
+          "candidate_accepted": 407,
+          "incumbent_accepted": 409
+        }
+      },
+      "120": {
+        "2024": {
+          "candidate": {
+            "n": 346,
+            "mae": 1.395474475036789,
+            "rmse": 1.8952569725756112,
+            "median_absolute_error": 1.0701476712564406,
+            "bias_pred_minus_actual": 0.7691444963940817,
+            "correlation": 0.3354918806031624,
+            "actual_above_10": 28,
+            "predicted_above_10": 13,
+            "precision_above_10": 0.23076923076923078,
+            "recall_above_10": 0.10714285714285714,
+            "false_alarm_rate": 0.031446540880503145
+          },
+          "incumbent": {
+            "n": 346,
+            "mae": 1.293006128307509,
+            "rmse": 1.8126246327997868,
+            "median_absolute_error": 1.0133589238137821,
+            "bias_pred_minus_actual": 0.5282598353721293,
+            "correlation": 0.35202058203145326,
+            "actual_above_10": 28,
+            "predicted_above_10": 9,
+            "precision_above_10": 0.3333333333333333,
+            "recall_above_10": 0.10714285714285714,
+            "false_alarm_rate": 0.018867924528301886
+          },
+          "candidate_accepted": 351,
+          "incumbent_accepted": 346
+        },
+        "2025": {
+          "candidate": {
+            "n": 410,
+            "mae": 1.3461810907011047,
+            "rmse": 2.531099989894287,
+            "median_absolute_error": 0.9349979214527746,
+            "bias_pred_minus_actual": -0.30095484762333513,
+            "correlation": 0.32618091436725444,
+            "actual_above_10": 72,
+            "predicted_above_10": 10,
+            "precision_above_10": 0.6,
+            "recall_above_10": 0.08333333333333333,
+            "false_alarm_rate": 0.011834319526627219
+          },
+          "incumbent": {
+            "n": 410,
+            "mae": 1.3632913314368065,
+            "rmse": 2.531360287072133,
+            "median_absolute_error": 0.9606766475245756,
+            "bias_pred_minus_actual": -0.281617767602419,
+            "correlation": 0.3258744144588886,
+            "actual_above_10": 72,
+            "predicted_above_10": 9,
+            "precision_above_10": 0.6666666666666666,
+            "recall_above_10": 0.08333333333333333,
+            "false_alarm_rate": 0.008875739644970414
+          },
+          "candidate_accepted": 410,
+          "incumbent_accepted": 412
+        }
+      },
+      "180": {
+        "2024": {
+          "candidate": {
+            "n": 341,
+            "mae": 1.5212737673667736,
+            "rmse": 2.089762948824419,
+            "median_absolute_error": 1.0923613456173005,
+            "bias_pred_minus_actual": 0.8396244408087326,
+            "correlation": 0.17625218916135557,
+            "actual_above_10": 27,
+            "predicted_above_10": 5,
+            "precision_above_10": 0.2,
+            "recall_above_10": 0.037037037037037035,
+            "false_alarm_rate": 0.012738853503184714
+          },
+          "incumbent": {
+            "n": 341,
+            "mae": 1.4615559485365066,
+            "rmse": 2.0388848630973255,
+            "median_absolute_error": 1.0695707951745046,
+            "bias_pred_minus_actual": 0.7232206482822972,
+            "correlation": 0.20028633203651902,
+            "actual_above_10": 27,
+            "predicted_above_10": 6,
+            "precision_above_10": 0.16666666666666666,
+            "recall_above_10": 0.037037037037037035,
+            "false_alarm_rate": 0.01592356687898089
+          },
+          "candidate_accepted": 347,
+          "incumbent_accepted": 341
+        },
+        "2025": {
+          "candidate": {
+            "n": 410,
+            "mae": 1.5565710996182693,
+            "rmse": 5.796390359593177,
+            "median_absolute_error": 0.9948355485356473,
+            "bias_pred_minus_actual": -0.5449263291672379,
+            "correlation": 0.1202389226684333,
+            "actual_above_10": 72,
+            "predicted_above_10": 2,
+            "precision_above_10": 0.5,
+            "recall_above_10": 0.013888888888888888,
+            "false_alarm_rate": 0.0029585798816568047
+          },
+          "incumbent": {
+            "n": 410,
+            "mae": 1.5624861035437767,
+            "rmse": 5.79604542214294,
+            "median_absolute_error": 1.0335444357186505,
+            "bias_pred_minus_actual": -0.5349132392560971,
+            "correlation": 0.11985229820059033,
+            "actual_above_10": 72,
+            "predicted_above_10": 2,
+            "precision_above_10": 0.5,
+            "recall_above_10": 0.013888888888888888,
+            "false_alarm_rate": 0.0029585798816568047
+          },
+          "candidate_accepted": 410,
+          "incumbent_accepted": 411
+        }
+      }
+    },
+    "(5, 10)": {
+      "0": {
+        "2024": {
+          "candidate": {
+            "n": 327,
+            "mae": 1.3227827924808675,
+            "rmse": 5.478940425332245,
+            "median_absolute_error": 0.6666029095742161,
+            "bias_pred_minus_actual": 0.02963061095865593,
+            "correlation": 0.32946983844977556,
+            "actual_above_10": 31,
+            "predicted_above_10": 20,
+            "precision_above_10": 0.45,
+            "recall_above_10": 0.2903225806451613,
+            "false_alarm_rate": 0.037162162162162164
+          },
+          "incumbent": {
+            "n": 327,
+            "mae": 1.3253822340937578,
+            "rmse": 5.492809378655781,
+            "median_absolute_error": 0.6706156872740197,
+            "bias_pred_minus_actual": -0.11253992102939668,
+            "correlation": 0.3196860776355495,
+            "actual_above_10": 31,
+            "predicted_above_10": 18,
+            "precision_above_10": 0.5,
+            "recall_above_10": 0.2903225806451613,
+            "false_alarm_rate": 0.030405405405405407
+          },
+          "candidate_accepted": 335,
+          "incumbent_accepted": 344
+        },
+        "2025": {
+          "candidate": {
+            "n": 404,
+            "mae": 0.9941711353620305,
+            "rmse": 1.6813687764329726,
+            "median_absolute_error": 0.6983078118636734,
+            "bias_pred_minus_actual": -0.11888593266738849,
+            "correlation": 0.5122088141395414,
+            "actual_above_10": 70,
+            "predicted_above_10": 27,
+            "precision_above_10": 0.6296296296296297,
+            "recall_above_10": 0.24285714285714285,
+            "false_alarm_rate": 0.029940119760479042
+          },
+          "incumbent": {
+            "n": 404,
+            "mae": 1.0291520333068258,
+            "rmse": 1.7583654936904494,
+            "median_absolute_error": 0.7034219761871632,
+            "bias_pred_minus_actual": -0.0890040046855938,
+            "correlation": 0.47737713845242363,
+            "actual_above_10": 70,
+            "predicted_above_10": 30,
+            "precision_above_10": 0.5333333333333333,
+            "recall_above_10": 0.22857142857142856,
+            "false_alarm_rate": 0.041916167664670656
+          },
+          "candidate_accepted": 406,
+          "incumbent_accepted": 407
+        }
+      },
+      "60": {
+        "2024": {
+          "candidate": {
+            "n": 328,
+            "mae": 1.2047881464135812,
+            "rmse": 1.796119101210628,
+            "median_absolute_error": 0.8660550484052676,
+            "bias_pred_minus_actual": 0.48213769468261497,
+            "correlation": 0.3994033997457713,
+            "actual_above_10": 30,
+            "predicted_above_10": 19,
+            "precision_above_10": 0.3157894736842105,
+            "recall_above_10": 0.2,
+            "false_alarm_rate": 0.0436241610738255
+          },
+          "incumbent": {
+            "n": 328,
+            "mae": 1.176742073305084,
+            "rmse": 1.8021865698053312,
+            "median_absolute_error": 0.7808505458821768,
+            "bias_pred_minus_actual": 0.32835459226516217,
+            "correlation": 0.38073647094232016,
+            "actual_above_10": 30,
+            "predicted_above_10": 16,
+            "precision_above_10": 0.375,
+            "recall_above_10": 0.2,
+            "false_alarm_rate": 0.03355704697986577
+          },
+          "candidate_accepted": 335,
+          "incumbent_accepted": 345
+        },
+        "2025": {
+          "candidate": {
+            "n": 406,
+            "mae": 1.114047861195075,
+            "rmse": 1.6654269637605823,
+            "median_absolute_error": 0.8207754315626188,
+            "bias_pred_minus_actual": -0.2046640448184892,
+            "correlation": 0.4943520618546807,
+            "actual_above_10": 70,
+            "predicted_above_10": 18,
+            "precision_above_10": 0.6111111111111112,
+            "recall_above_10": 0.15714285714285714,
+            "false_alarm_rate": 0.020833333333333332
+          },
+          "incumbent": {
+            "n": 406,
+            "mae": 1.143853842644102,
+            "rmse": 1.709800123367186,
+            "median_absolute_error": 0.8713442398242162,
+            "bias_pred_minus_actual": -0.2195926710577796,
+            "correlation": 0.45984288905770426,
+            "actual_above_10": 70,
+            "predicted_above_10": 15,
+            "precision_above_10": 0.4666666666666667,
+            "recall_above_10": 0.1,
+            "false_alarm_rate": 0.023809523809523808
+          },
+          "candidate_accepted": 407,
+          "incumbent_accepted": 409
+        }
+      },
+      "120": {
+        "2024": {
+          "candidate": {
+            "n": 331,
+            "mae": 1.327437474179067,
+            "rmse": 1.8120444484565652,
+            "median_absolute_error": 0.9874746210728595,
+            "bias_pred_minus_actual": 0.684840417490511,
+            "correlation": 0.36390208269607727,
+            "actual_above_10": 27,
+            "predicted_above_10": 11,
+            "precision_above_10": 0.2727272727272727,
+            "recall_above_10": 0.1111111111111111,
+            "false_alarm_rate": 0.02631578947368421
+          },
+          "incumbent": {
+            "n": 331,
+            "mae": 1.2672048554668145,
+            "rmse": 1.7902725799975368,
+            "median_absolute_error": 0.9697248693560585,
+            "bias_pred_minus_actual": 0.4978977334761447,
+            "correlation": 0.3376770930963248,
+            "actual_above_10": 27,
+            "predicted_above_10": 9,
+            "precision_above_10": 0.3333333333333333,
+            "recall_above_10": 0.1111111111111111,
+            "false_alarm_rate": 0.019736842105263157
+          },
+          "candidate_accepted": 338,
+          "incumbent_accepted": 346
+        },
+        "2025": {
+          "candidate": {
+            "n": 410,
+            "mae": 1.3244339098077589,
+            "rmse": 2.5113672099006736,
+            "median_absolute_error": 0.8997713089288117,
+            "bias_pred_minus_actual": -0.2442327704545336,
+            "correlation": 0.3416586737544001,
+            "actual_above_10": 72,
+            "predicted_above_10": 11,
+            "precision_above_10": 0.6363636363636364,
+            "recall_above_10": 0.09722222222222222,
+            "false_alarm_rate": 0.011834319526627219
+          },
+          "incumbent": {
+            "n": 410,
+            "mae": 1.3632913314368065,
+            "rmse": 2.531360287072133,
+            "median_absolute_error": 0.9606766475245756,
+            "bias_pred_minus_actual": -0.281617767602419,
+            "correlation": 0.3258744144588886,
+            "actual_above_10": 72,
+            "predicted_above_10": 9,
+            "precision_above_10": 0.6666666666666666,
+            "recall_above_10": 0.08333333333333333,
+            "false_alarm_rate": 0.008875739644970414
+          },
+          "candidate_accepted": 410,
+          "incumbent_accepted": 412
+        }
+      },
+      "180": {
+        "2024": {
+          "candidate": {
+            "n": 323,
+            "mae": 1.369191916645787,
+            "rmse": 1.9304484353690237,
+            "median_absolute_error": 1.016360082751751,
+            "bias_pred_minus_actual": 0.6253982984446856,
+            "correlation": 0.26807909213716297,
+            "actual_above_10": 26,
+            "predicted_above_10": 4,
+            "precision_above_10": 0.25,
+            "recall_above_10": 0.038461538461538464,
+            "false_alarm_rate": 0.010101010101010102
+          },
+          "incumbent": {
+            "n": 323,
+            "mae": 1.412802353343011,
+            "rmse": 1.9924851058018345,
+            "median_absolute_error": 1.038628981913316,
+            "bias_pred_minus_actual": 0.6618164671047304,
+            "correlation": 0.17025669952618694,
+            "actual_above_10": 26,
+            "predicted_above_10": 6,
+            "precision_above_10": 0.16666666666666666,
+            "recall_above_10": 0.038461538461538464,
+            "false_alarm_rate": 0.016835016835016835
+          },
+          "candidate_accepted": 331,
+          "incumbent_accepted": 341
+        },
+        "2025": {
+          "candidate": {
+            "n": 410,
+            "mae": 1.5299719979734678,
+            "rmse": 5.777521456298395,
+            "median_absolute_error": 0.9705905450138577,
+            "bias_pred_minus_actual": -0.49333806704058286,
+            "correlation": 0.1390021744095371,
+            "actual_above_10": 72,
+            "predicted_above_10": 1,
+            "precision_above_10": 1.0,
+            "recall_above_10": 0.013888888888888888,
+            "false_alarm_rate": 0.0
+          },
+          "incumbent": {
+            "n": 410,
+            "mae": 1.5624861035437767,
+            "rmse": 5.79604542214294,
+            "median_absolute_error": 1.0335444357186505,
+            "bias_pred_minus_actual": -0.5349132392560971,
+            "correlation": 0.11985229820059033,
+            "actual_above_10": 72,
+            "predicted_above_10": 2,
+            "precision_above_10": 0.5,
+            "recall_above_10": 0.013888888888888888,
+            "false_alarm_rate": 0.0029585798816568047
+          },
+          "candidate_accepted": 410,
+          "incumbent_accepted": 411
+        }
+      }
+    },
+    "(10, 3)": {
+      "0": {
+        "2024": {
+          "candidate": {
+            "n": 344,
+            "mae": 1.3488014564140154,
+            "rmse": 5.3885779922191075,
+            "median_absolute_error": 0.700418476963284,
+            "bias_pred_minus_actual": -0.13987121394179797,
+            "correlation": 0.319513649632741,
+            "actual_above_10": 33,
+            "predicted_above_10": 19,
+            "precision_above_10": 0.42105263157894735,
+            "recall_above_10": 0.24242424242424243,
+            "false_alarm_rate": 0.03536977491961415
+          },
+          "incumbent": {
+            "n": 344,
+            "mae": 1.3503681349194574,
+            "rmse": 5.387332205792761,
+            "median_absolute_error": 0.6828801001527705,
+            "bias_pred_minus_actual": -0.11346742666903516,
+            "correlation": 0.31979133316083996,
+            "actual_above_10": 33,
+            "predicted_above_10": 18,
+            "precision_above_10": 0.5,
+            "recall_above_10": 0.2727272727272727,
+            "false_alarm_rate": 0.028938906752411574
+          },
+          "candidate_accepted": 350,
+          "incumbent_accepted": 344
+        },
+        "2025": {
+          "candidate": {
+            "n": 407,
+            "mae": 1.0666068635734154,
+            "rmse": 1.8593452055888182,
+            "median_absolute_error": 0.6942489147994841,
+            "bias_pred_minus_actual": -0.12860108233303202,
+            "correlation": 0.43452768490895605,
+            "actual_above_10": 72,
+            "predicted_above_10": 32,
+            "precision_above_10": 0.53125,
+            "recall_above_10": 0.2361111111111111,
+            "false_alarm_rate": 0.04477611940298507
+          },
+          "incumbent": {
+            "n": 407,
+            "mae": 1.0743575267221275,
+            "rmse": 1.8627830968155168,
+            "median_absolute_error": 0.7060030513758058,
+            "bias_pred_minus_actual": -0.14113933614970037,
+            "correlation": 0.42929561207671385,
+            "actual_above_10": 72,
+            "predicted_above_10": 30,
+            "precision_above_10": 0.5333333333333333,
+            "recall_above_10": 0.2222222222222222,
+            "false_alarm_rate": 0.041791044776119404
+          },
+          "candidate_accepted": 407,
+          "incumbent_accepted": 407
+        }
+      },
+      "60": {
+        "2024": {
+          "candidate": {
+            "n": 345,
+            "mae": 1.160760379322418,
+            "rmse": 1.777526745621139,
+            "median_absolute_error": 0.7375460069208764,
+            "bias_pred_minus_actual": 0.2639839780689303,
+            "correlation": 0.4241522732087227,
+            "actual_above_10": 31,
+            "predicted_above_10": 16,
+            "precision_above_10": 0.375,
+            "recall_above_10": 0.1935483870967742,
+            "false_alarm_rate": 0.03184713375796178
+          },
+          "incumbent": {
+            "n": 345,
+            "mae": 1.1786803352662547,
+            "rmse": 1.7907109498089115,
+            "median_absolute_error": 0.7847966897837875,
+            "bias_pred_minus_actual": 0.33558280581177885,
+            "correlation": 0.4224566476461348,
+            "actual_above_10": 31,
+            "predicted_above_10": 17,
+            "precision_above_10": 0.4117647058823529,
+            "recall_above_10": 0.22580645161290322,
+            "false_alarm_rate": 0.03184713375796178
+          },
+          "candidate_accepted": 351,
+          "incumbent_accepted": 345
+        },
+        "2025": {
+          "candidate": {
+            "n": 409,
+            "mae": 1.1705705871064134,
+            "rmse": 1.7822615311287473,
+            "median_absolute_error": 0.8672543446896963,
+            "bias_pred_minus_actual": -0.24577775453038828,
+            "correlation": 0.42074259349478565,
+            "actual_above_10": 72,
+            "predicted_above_10": 15,
+            "precision_above_10": 0.5333333333333333,
+            "recall_above_10": 0.1111111111111111,
+            "false_alarm_rate": 0.020771513353115726
+          },
+          "incumbent": {
+            "n": 409,
+            "mae": 1.1818563879300583,
+            "rmse": 1.792494827612146,
+            "median_absolute_error": 0.8810271723664567,
+            "bias_pred_minus_actual": -0.26437463814021267,
+            "correlation": 0.4102050911825482,
+            "actual_above_10": 72,
+            "predicted_above_10": 15,
+            "precision_above_10": 0.4666666666666667,
+            "recall_above_10": 0.09722222222222222,
+            "false_alarm_rate": 0.02373887240356083
+          },
+          "candidate_accepted": 409,
+          "incumbent_accepted": 409
+        }
+      },
+      "120": {
+        "2024": {
+          "candidate": {
+            "n": 346,
+            "mae": 1.2481113014716128,
+            "rmse": 1.7611629731484888,
+            "median_absolute_error": 0.9501559108669229,
+            "bias_pred_minus_actual": 0.42322899977306705,
+            "correlation": 0.3763074951164251,
+            "actual_above_10": 28,
+            "predicted_above_10": 8,
+            "precision_above_10": 0.375,
+            "recall_above_10": 0.10714285714285714,
+            "false_alarm_rate": 0.015723270440251572
+          },
+          "incumbent": {
+            "n": 346,
+            "mae": 1.293006128307509,
+            "rmse": 1.8126246327997868,
+            "median_absolute_error": 1.0133589238137821,
+            "bias_pred_minus_actual": 0.5282598353721293,
+            "correlation": 0.35202058203145326,
+            "actual_above_10": 28,
+            "predicted_above_10": 9,
+            "precision_above_10": 0.3333333333333333,
+            "recall_above_10": 0.10714285714285714,
+            "false_alarm_rate": 0.018867924528301886
+          },
+          "candidate_accepted": 351,
+          "incumbent_accepted": 346
+        },
+        "2025": {
+          "candidate": {
+            "n": 412,
+            "mae": 1.3686400377266297,
+            "rmse": 2.537460777704307,
+            "median_absolute_error": 0.9476196847577816,
+            "bias_pred_minus_actual": -0.28253200126771816,
+            "correlation": 0.3206364715912678,
+            "actual_above_10": 73,
+            "predicted_above_10": 10,
+            "precision_above_10": 0.5,
+            "recall_above_10": 0.0684931506849315,
+            "false_alarm_rate": 0.014749262536873156
+          },
+          "incumbent": {
+            "n": 412,
+            "mae": 1.3800567925895324,
+            "rmse": 2.5488942703605497,
+            "median_absolute_error": 0.9627378742997426,
+            "bias_pred_minus_actual": -0.30363407129803044,
+            "correlation": 0.30972048317479417,
+            "actual_above_10": 73,
+            "predicted_above_10": 9,
+            "precision_above_10": 0.6666666666666666,
+            "recall_above_10": 0.0821917808219178,
+            "false_alarm_rate": 0.008849557522123894
+          },
+          "candidate_accepted": 412,
+          "incumbent_accepted": 412
+        }
+      },
+      "180": {
+        "2024": {
+          "candidate": {
+            "n": 340,
+            "mae": 1.3969753187533058,
+            "rmse": 1.9693427178773883,
+            "median_absolute_error": 1.033476078497496,
+            "bias_pred_minus_actual": 0.6159770706091873,
+            "correlation": 0.2552993289108285,
+            "actual_above_10": 27,
+            "predicted_above_10": 4,
+            "precision_above_10": 0.25,
+            "recall_above_10": 0.037037037037037035,
+            "false_alarm_rate": 0.009584664536741214
+          },
+          "incumbent": {
+            "n": 340,
+            "mae": 1.4543395832101913,
+            "rmse": 2.03081147973117,
+            "median_absolute_error": 1.0684524752320401,
+            "bias_pred_minus_actual": 0.7138327085434691,
+            "correlation": 0.20303888444850862,
+            "actual_above_10": 27,
+            "predicted_above_10": 6,
+            "precision_above_10": 0.16666666666666666,
+            "recall_above_10": 0.037037037037037035,
+            "false_alarm_rate": 0.01597444089456869
+          },
+          "candidate_accepted": 346,
+          "incumbent_accepted": 341
+        },
+        "2025": {
+          "candidate": {
+            "n": 410,
+            "mae": 1.5541385508193226,
+            "rmse": 5.791350658854878,
+            "median_absolute_error": 1.0104103325099292,
+            "bias_pred_minus_actual": -0.5280378052401669,
+            "correlation": 0.1253019291395094,
+            "actual_above_10": 72,
+            "predicted_above_10": 4,
+            "precision_above_10": 0.5,
+            "recall_above_10": 0.027777777777777776,
+            "false_alarm_rate": 0.005917159763313609
+          },
+          "incumbent": {
+            "n": 410,
+            "mae": 1.5575062320335968,
+            "rmse": 5.79443796240487,
+            "median_absolute_error": 1.024664966100855,
+            "bias_pred_minus_actual": -0.5299333677459171,
+            "correlation": 0.12139139902773095,
+            "actual_above_10": 72,
+            "predicted_above_10": 2,
+            "precision_above_10": 0.5,
+            "recall_above_10": 0.013888888888888888,
+            "false_alarm_rate": 0.0029585798816568047
+          },
+          "candidate_accepted": 410,
+          "incumbent_accepted": 411
+        }
+      }
+    },
+    "(10, 5)": {
+      "0": {
+        "2024": {
+          "candidate": {
+            "n": 344,
+            "mae": 1.3503681349194574,
+            "rmse": 5.387332205792761,
+            "median_absolute_error": 0.6828801001527705,
+            "bias_pred_minus_actual": -0.11346742666903516,
+            "correlation": 0.31979133316083996,
+            "actual_above_10": 33,
+            "predicted_above_10": 18,
+            "precision_above_10": 0.5,
+            "recall_above_10": 0.2727272727272727,
+            "false_alarm_rate": 0.028938906752411574
+          },
+          "incumbent": {
+            "n": 344,
+            "mae": 1.3503681349194574,
+            "rmse": 5.387332205792761,
+            "median_absolute_error": 0.6828801001527705,
+            "bias_pred_minus_actual": -0.11346742666903516,
+            "correlation": 0.31979133316083996,
+            "actual_above_10": 33,
+            "predicted_above_10": 18,
+            "precision_above_10": 0.5,
+            "recall_above_10": 0.2727272727272727,
+            "false_alarm_rate": 0.028938906752411574
+          },
+          "candidate_accepted": 344,
+          "incumbent_accepted": 344
+        },
+        "2025": {
+          "candidate": {
+            "n": 407,
+            "mae": 1.0743575267221275,
+            "rmse": 1.8627830968155168,
+            "median_absolute_error": 0.7060030513758058,
+            "bias_pred_minus_actual": -0.14113933614970037,
+            "correlation": 0.42929561207671385,
+            "actual_above_10": 72,
+            "predicted_above_10": 30,
+            "precision_above_10": 0.5333333333333333,
+            "recall_above_10": 0.2222222222222222,
+            "false_alarm_rate": 0.041791044776119404
+          },
+          "incumbent": {
+            "n": 407,
+            "mae": 1.0743575267221275,
+            "rmse": 1.8627830968155168,
+            "median_absolute_error": 0.7060030513758058,
+            "bias_pred_minus_actual": -0.14113933614970037,
+            "correlation": 0.42929561207671385,
+            "actual_above_10": 72,
+            "predicted_above_10": 30,
+            "precision_above_10": 0.5333333333333333,
+            "recall_above_10": 0.2222222222222222,
+            "false_alarm_rate": 0.041791044776119404
+          },
+          "candidate_accepted": 407,
+          "incumbent_accepted": 407
+        }
+      },
+      "60": {
+        "2024": {
+          "candidate": {
+            "n": 345,
+            "mae": 1.1786803352662547,
+            "rmse": 1.7907109498089115,
+            "median_absolute_error": 0.7847966897837875,
+            "bias_pred_minus_actual": 0.33558280581177885,
+            "correlation": 0.4224566476461348,
+            "actual_above_10": 31,
+            "predicted_above_10": 17,
+            "precision_above_10": 0.4117647058823529,
+            "recall_above_10": 0.22580645161290322,
+            "false_alarm_rate": 0.03184713375796178
+          },
+          "incumbent": {
+            "n": 345,
+            "mae": 1.1786803352662547,
+            "rmse": 1.7907109498089115,
+            "median_absolute_error": 0.7847966897837875,
+            "bias_pred_minus_actual": 0.33558280581177885,
+            "correlation": 0.4224566476461348,
+            "actual_above_10": 31,
+            "predicted_above_10": 17,
+            "precision_above_10": 0.4117647058823529,
+            "recall_above_10": 0.22580645161290322,
+            "false_alarm_rate": 0.03184713375796178
+          },
+          "candidate_accepted": 345,
+          "incumbent_accepted": 345
+        },
+        "2025": {
+          "candidate": {
+            "n": 409,
+            "mae": 1.1818563879300583,
+            "rmse": 1.792494827612146,
+            "median_absolute_error": 0.8810271723664567,
+            "bias_pred_minus_actual": -0.26437463814021267,
+            "correlation": 0.4102050911825482,
+            "actual_above_10": 72,
+            "predicted_above_10": 15,
+            "precision_above_10": 0.4666666666666667,
+            "recall_above_10": 0.09722222222222222,
+            "false_alarm_rate": 0.02373887240356083
+          },
+          "incumbent": {
+            "n": 409,
+            "mae": 1.1818563879300583,
+            "rmse": 1.792494827612146,
+            "median_absolute_error": 0.8810271723664567,
+            "bias_pred_minus_actual": -0.26437463814021267,
+            "correlation": 0.4102050911825482,
+            "actual_above_10": 72,
+            "predicted_above_10": 15,
+            "precision_above_10": 0.4666666666666667,
+            "recall_above_10": 0.09722222222222222,
+            "false_alarm_rate": 0.02373887240356083
+          },
+          "candidate_accepted": 409,
+          "incumbent_accepted": 409
+        }
+      },
+      "120": {
+        "2024": {
+          "candidate": {
+            "n": 346,
+            "mae": 1.293006128307509,
+            "rmse": 1.8126246327997868,
+            "median_absolute_error": 1.0133589238137821,
+            "bias_pred_minus_actual": 0.5282598353721293,
+            "correlation": 0.35202058203145326,
+            "actual_above_10": 28,
+            "predicted_above_10": 9,
+            "precision_above_10": 0.3333333333333333,
+            "recall_above_10": 0.10714285714285714,
+            "false_alarm_rate": 0.018867924528301886
+          },
+          "incumbent": {
+            "n": 346,
+            "mae": 1.293006128307509,
+            "rmse": 1.8126246327997868,
+            "median_absolute_error": 1.0133589238137821,
+            "bias_pred_minus_actual": 0.5282598353721293,
+            "correlation": 0.35202058203145326,
+            "actual_above_10": 28,
+            "predicted_above_10": 9,
+            "precision_above_10": 0.3333333333333333,
+            "recall_above_10": 0.10714285714285714,
+            "false_alarm_rate": 0.018867924528301886
+          },
+          "candidate_accepted": 346,
+          "incumbent_accepted": 346
+        },
+        "2025": {
+          "candidate": {
+            "n": 412,
+            "mae": 1.3800567925895324,
+            "rmse": 2.5488942703605497,
+            "median_absolute_error": 0.9627378742997426,
+            "bias_pred_minus_actual": -0.30363407129803044,
+            "correlation": 0.30972048317479417,
+            "actual_above_10": 73,
+            "predicted_above_10": 9,
+            "precision_above_10": 0.6666666666666666,
+            "recall_above_10": 0.0821917808219178,
+            "false_alarm_rate": 0.008849557522123894
+          },
+          "incumbent": {
+            "n": 412,
+            "mae": 1.3800567925895324,
+            "rmse": 2.5488942703605497,
+            "median_absolute_error": 0.9627378742997426,
+            "bias_pred_minus_actual": -0.30363407129803044,
+            "correlation": 0.30972048317479417,
+            "actual_above_10": 73,
+            "predicted_above_10": 9,
+            "precision_above_10": 0.6666666666666666,
+            "recall_above_10": 0.0821917808219178,
+            "false_alarm_rate": 0.008849557522123894
+          },
+          "candidate_accepted": 412,
+          "incumbent_accepted": 412
+        }
+      },
+      "180": {
+        "2024": {
+          "candidate": {
+            "n": 341,
+            "mae": 1.4615559485365066,
+            "rmse": 2.0388848630973255,
+            "median_absolute_error": 1.0695707951745046,
+            "bias_pred_minus_actual": 0.7232206482822972,
+            "correlation": 0.20028633203651902,
+            "actual_above_10": 27,
+            "predicted_above_10": 6,
+            "precision_above_10": 0.16666666666666666,
+            "recall_above_10": 0.037037037037037035,
+            "false_alarm_rate": 0.01592356687898089
+          },
+          "incumbent": {
+            "n": 341,
+            "mae": 1.4615559485365066,
+            "rmse": 2.0388848630973255,
+            "median_absolute_error": 1.0695707951745046,
+            "bias_pred_minus_actual": 0.7232206482822972,
+            "correlation": 0.20028633203651902,
+            "actual_above_10": 27,
+            "predicted_above_10": 6,
+            "precision_above_10": 0.16666666666666666,
+            "recall_above_10": 0.037037037037037035,
+            "false_alarm_rate": 0.01592356687898089
+          },
+          "candidate_accepted": 341,
+          "incumbent_accepted": 341
+        },
+        "2025": {
+          "candidate": {
+            "n": 411,
+            "mae": 1.5607520268146453,
+            "rmse": 5.7891417293496845,
+            "median_absolute_error": 1.0262577200136302,
+            "bias_pred_minus_actual": -0.5356793398123372,
+            "correlation": 0.12004387232950996,
+            "actual_above_10": 72,
+            "predicted_above_10": 2,
+            "precision_above_10": 0.5,
+            "recall_above_10": 0.013888888888888888,
+            "false_alarm_rate": 0.0029498525073746312
+          },
+          "incumbent": {
+            "n": 411,
+            "mae": 1.5607520268146453,
+            "rmse": 5.7891417293496845,
+            "median_absolute_error": 1.0262577200136302,
+            "bias_pred_minus_actual": -0.5356793398123372,
+            "correlation": 0.12004387232950996,
+            "actual_above_10": 72,
+            "predicted_above_10": 2,
+            "precision_above_10": 0.5,
+            "recall_above_10": 0.013888888888888888,
+            "false_alarm_rate": 0.0029498525073746312
+          },
+          "candidate_accepted": 411,
+          "incumbent_accepted": 411
+        }
+      }
+    },
+    "(10, 10)": {
+      "0": {
+        "2024": {
+          "candidate": {
+            "n": 328,
+            "mae": 1.349031800587025,
+            "rmse": 5.482629946656061,
+            "median_absolute_error": 0.6805953197876997,
+            "bias_pred_minus_actual": 0.01932575262478165,
+            "correlation": 0.32125264437083534,
+            "actual_above_10": 31,
+            "predicted_above_10": 20,
+            "precision_above_10": 0.45,
+            "recall_above_10": 0.2903225806451613,
+            "false_alarm_rate": 0.037037037037037035
+          },
+          "incumbent": {
+            "n": 328,
+            "mae": 1.3339887219640008,
+            "rmse": 5.489210792420036,
+            "median_absolute_error": 0.6726283591264339,
+            "bias_pred_minus_actual": -0.09954952414963172,
+            "correlation": 0.31806102244476525,
+            "actual_above_10": 31,
+            "predicted_above_10": 18,
+            "precision_above_10": 0.5,
+            "recall_above_10": 0.2903225806451613,
+            "false_alarm_rate": 0.030303030303030304
+          },
+          "candidate_accepted": 332,
+          "incumbent_accepted": 344
+        },
+        "2025": {
+          "candidate": {
+            "n": 407,
+            "mae": 1.0756671454083062,
+            "rmse": 1.8643634328792802,
+            "median_absolute_error": 0.7217914941274977,
+            "bias_pred_minus_actual": -0.14662463610748394,
+            "correlation": 0.4280144781741229,
+            "actual_above_10": 72,
+            "predicted_above_10": 29,
+            "precision_above_10": 0.5517241379310345,
+            "recall_above_10": 0.2222222222222222,
+            "false_alarm_rate": 0.03880597014925373
+          },
+          "incumbent": {
+            "n": 407,
+            "mae": 1.0743575267221275,
+            "rmse": 1.8627830968155168,
+            "median_absolute_error": 0.7060030513758058,
+            "bias_pred_minus_actual": -0.14113933614970037,
+            "correlation": 0.42929561207671385,
+            "actual_above_10": 72,
+            "predicted_above_10": 30,
+            "precision_above_10": 0.5333333333333333,
+            "recall_above_10": 0.2222222222222222,
+            "false_alarm_rate": 0.041791044776119404
+          },
+          "candidate_accepted": 407,
+          "incumbent_accepted": 407
+        }
+      },
+      "60": {
+        "2024": {
+          "candidate": {
+            "n": 328,
+            "mae": 1.1912451704999474,
+            "rmse": 1.8064253391937473,
+            "median_absolute_error": 0.8071693174649308,
+            "bias_pred_minus_actual": 0.3945065745425195,
+            "correlation": 0.38916370096750164,
+            "actual_above_10": 30,
+            "predicted_above_10": 17,
+            "precision_above_10": 0.35294117647058826,
+            "recall_above_10": 0.2,
+            "false_alarm_rate": 0.03691275167785235
+          },
+          "incumbent": {
+            "n": 328,
+            "mae": 1.1773553247491275,
+            "rmse": 1.8023977034782173,
+            "median_absolute_error": 0.7808505458821768,
+            "bias_pred_minus_actual": 0.33213814910833855,
+            "correlation": 0.38319910128332013,
+            "actual_above_10": 30,
+            "predicted_above_10": 16,
+            "precision_above_10": 0.375,
+            "recall_above_10": 0.2,
+            "false_alarm_rate": 0.03355704697986577
+          },
+          "candidate_accepted": 332,
+          "incumbent_accepted": 345
+        },
+        "2025": {
+          "candidate": {
+            "n": 409,
+            "mae": 1.1776974780599287,
+            "rmse": 1.7872815310113566,
+            "median_absolute_error": 0.8777797500249882,
+            "bias_pred_minus_actual": -0.25463550871115365,
+            "correlation": 0.4145851351715175,
+            "actual_above_10": 72,
+            "predicted_above_10": 15,
+            "precision_above_10": 0.4666666666666667,
+            "recall_above_10": 0.09722222222222222,
+            "false_alarm_rate": 0.02373887240356083
+          },
+          "incumbent": {
+            "n": 409,
+            "mae": 1.1818563879300583,
+            "rmse": 1.792494827612146,
+            "median_absolute_error": 0.8810271723664567,
+            "bias_pred_minus_actual": -0.26437463814021267,
+            "correlation": 0.4102050911825482,
+            "actual_above_10": 72,
+            "predicted_above_10": 15,
+            "precision_above_10": 0.4666666666666667,
+            "recall_above_10": 0.09722222222222222,
+            "false_alarm_rate": 0.02373887240356083
+          },
+          "candidate_accepted": 409,
+          "incumbent_accepted": 409
+        }
+      },
+      "120": {
+        "2024": {
+          "candidate": {
+            "n": 330,
+            "mae": 1.3016884834033386,
+            "rmse": 1.820003391017328,
+            "median_absolute_error": 0.9162323446696248,
+            "bias_pred_minus_actual": 0.5795854215021492,
+            "correlation": 0.32871131909916934,
+            "actual_above_10": 27,
+            "predicted_above_10": 11,
+            "precision_above_10": 0.36363636363636365,
+            "recall_above_10": 0.14814814814814814,
+            "false_alarm_rate": 0.0231023102310231
+          },
+          "incumbent": {
+            "n": 330,
+            "mae": 1.2708412571034078,
+            "rmse": 1.7929792471474595,
+            "median_absolute_error": 0.9710368991930647,
+            "bias_pred_minus_actual": 0.4992029014097358,
+            "correlation": 0.332250868556899,
+            "actual_above_10": 27,
+            "predicted_above_10": 9,
+            "precision_above_10": 0.3333333333333333,
+            "recall_above_10": 0.1111111111111111,
+            "false_alarm_rate": 0.019801980198019802
+          },
+          "candidate_accepted": 335,
+          "incumbent_accepted": 346
+        },
+        "2025": {
+          "candidate": {
+            "n": 412,
+            "mae": 1.368084773390018,
+            "rmse": 2.5380822611824523,
+            "median_absolute_error": 0.9392777472253644,
+            "bias_pred_minus_actual": -0.26151898427831305,
+            "correlation": 0.3188003988703681,
+            "actual_above_10": 73,
+            "predicted_above_10": 9,
+            "precision_above_10": 0.6666666666666666,
+            "recall_above_10": 0.0821917808219178,
+            "false_alarm_rate": 0.008849557522123894
+          },
+          "incumbent": {
+            "n": 412,
+            "mae": 1.3800567925895324,
+            "rmse": 2.5488942703605497,
+            "median_absolute_error": 0.9627378742997426,
+            "bias_pred_minus_actual": -0.30363407129803044,
+            "correlation": 0.30972048317479417,
+            "actual_above_10": 73,
+            "predicted_above_10": 9,
+            "precision_above_10": 0.6666666666666666,
+            "recall_above_10": 0.0821917808219178,
+            "false_alarm_rate": 0.008849557522123894
+          },
+          "candidate_accepted": 412,
+          "incumbent_accepted": 412
+        }
+      },
+      "180": {
+        "2024": {
+          "candidate": {
+            "n": 325,
+            "mae": 1.3842397448259403,
+            "rmse": 1.955929765403374,
+            "median_absolute_error": 1.017194975974423,
+            "bias_pred_minus_actual": 0.6256712851159126,
+            "correlation": 0.24420120059125416,
+            "actual_above_10": 26,
+            "predicted_above_10": 4,
+            "precision_above_10": 0.25,
+            "recall_above_10": 0.038461538461538464,
+            "false_alarm_rate": 0.010033444816053512
+          },
+          "incumbent": {
+            "n": 325,
+            "mae": 1.417373350459233,
+            "rmse": 1.9953120116037368,
+            "median_absolute_error": 1.0408167385509142,
+            "bias_pred_minus_actual": 0.6710089158285725,
+            "correlation": 0.19996787460090876,
+            "actual_above_10": 26,
+            "predicted_above_10": 6,
+            "precision_above_10": 0.16666666666666666,
+            "recall_above_10": 0.038461538461538464,
+            "false_alarm_rate": 0.016722408026755852
+          },
+          "candidate_accepted": 329,
+          "incumbent_accepted": 341
+        },
+        "2025": {
+          "candidate": {
+            "n": 411,
+            "mae": 1.5458949896121918,
+            "rmse": 5.775388073904993,
+            "median_absolute_error": 0.990464562076582,
+            "bias_pred_minus_actual": -0.490786801647857,
+            "correlation": 0.13303817867075207,
+            "actual_above_10": 72,
+            "predicted_above_10": 4,
+            "precision_above_10": 0.5,
+            "recall_above_10": 0.027777777777777776,
+            "false_alarm_rate": 0.0058997050147492625
+          },
+          "incumbent": {
+            "n": 411,
+            "mae": 1.5607520268146453,
+            "rmse": 5.7891417293496845,
+            "median_absolute_error": 1.0262577200136302,
+            "bias_pred_minus_actual": -0.5356793398123372,
+            "correlation": 0.12004387232950996,
+            "actual_above_10": 72,
+            "predicted_above_10": 2,
+            "precision_above_10": 0.5,
+            "recall_above_10": 0.013888888888888888,
+            "false_alarm_rate": 0.0029498525073746312
+          },
+          "candidate_accepted": 411,
+          "incumbent_accepted": 411
+        }
+      }
+    },
+    "(20, 3)": {
+      "0": {
+        "2024": {
+          "candidate": {
+            "n": 342,
+            "mae": 1.4115935212447803,
+            "rmse": 5.41415143839523,
+            "median_absolute_error": 0.7251100389733658,
+            "bias_pred_minus_actual": -0.15431800214444974,
+            "correlation": 0.31375564946955903,
+            "actual_above_10": 33,
+            "predicted_above_10": 19,
+            "precision_above_10": 0.47368421052631576,
+            "recall_above_10": 0.2727272727272727,
+            "false_alarm_rate": 0.032362459546925564
+          },
+          "incumbent": {
+            "n": 342,
+            "mae": 1.3564060376892022,
+            "rmse": 5.402989525363215,
+            "median_absolute_error": 0.6883821576447682,
+            "bias_pred_minus_actual": -0.11308044273794739,
+            "correlation": 0.3196310574844669,
+            "actual_above_10": 33,
+            "predicted_above_10": 18,
+            "precision_above_10": 0.5,
+            "recall_above_10": 0.2727272727272727,
+            "false_alarm_rate": 0.02912621359223301
+          },
+          "candidate_accepted": 352,
+          "incumbent_accepted": 344
+        },
+        "2025": {
+          "candidate": {
+            "n": 406,
+            "mae": 1.058645647185546,
+            "rmse": 1.8143766523968554,
+            "median_absolute_error": 0.6872601634614912,
+            "bias_pred_minus_actual": -0.11023097901837227,
+            "correlation": 0.45105820881177716,
+            "actual_above_10": 71,
+            "predicted_above_10": 29,
+            "precision_above_10": 0.5172413793103449,
+            "recall_above_10": 0.2112676056338028,
+            "false_alarm_rate": 0.041791044776119404
+          },
+          "incumbent": {
+            "n": 406,
+            "mae": 1.0559669746385099,
+            "rmse": 1.8162693381640072,
+            "median_absolute_error": 0.7056598700126187,
+            "bias_pred_minus_actual": -0.12045021709422969,
+            "correlation": 0.45074065547188646,
+            "actual_above_10": 71,
+            "predicted_above_10": 30,
+            "precision_above_10": 0.5333333333333333,
+            "recall_above_10": 0.22535211267605634,
+            "false_alarm_rate": 0.041791044776119404
+          },
+          "candidate_accepted": 406,
+          "incumbent_accepted": 407
+        }
+      },
+      "60": {
+        "2024": {
+          "candidate": {
+            "n": 342,
+            "mae": 1.2080683318774252,
+            "rmse": 1.8113094509842411,
+            "median_absolute_error": 0.832785014756404,
+            "bias_pred_minus_actual": 0.20005941600408425,
+            "correlation": 0.39440109787106525,
+            "actual_above_10": 31,
+            "predicted_above_10": 20,
+            "precision_above_10": 0.3,
+            "recall_above_10": 0.1935483870967742,
+            "false_alarm_rate": 0.04501607717041801
+          },
+          "incumbent": {
+            "n": 342,
+            "mae": 1.1804690737165793,
+            "rmse": 1.7959093600693323,
+            "median_absolute_error": 0.7829939165631501,
+            "bias_pred_minus_actual": 0.33270136910986503,
+            "correlation": 0.4174441708078641,
+            "actual_above_10": 31,
+            "predicted_above_10": 17,
+            "precision_above_10": 0.4117647058823529,
+            "recall_above_10": 0.22580645161290322,
+            "false_alarm_rate": 0.03215434083601286
+          },
+          "candidate_accepted": 350,
+          "incumbent_accepted": 345
+        },
+        "2025": {
+          "candidate": {
+            "n": 409,
+            "mae": 1.1750121489168184,
+            "rmse": 1.7746699997124864,
+            "median_absolute_error": 0.8603861347355721,
+            "bias_pred_minus_actual": -0.2584730429391499,
+            "correlation": 0.4238851422946104,
+            "actual_above_10": 72,
+            "predicted_above_10": 17,
+            "precision_above_10": 0.47058823529411764,
+            "recall_above_10": 0.1111111111111111,
+            "false_alarm_rate": 0.026706231454005934
+          },
+          "incumbent": {
+            "n": 409,
+            "mae": 1.1818563879300583,
+            "rmse": 1.792494827612146,
+            "median_absolute_error": 0.8810271723664567,
+            "bias_pred_minus_actual": -0.26437463814021267,
+            "correlation": 0.4102050911825482,
+            "actual_above_10": 72,
+            "predicted_above_10": 15,
+            "precision_above_10": 0.4666666666666667,
+            "recall_above_10": 0.09722222222222222,
+            "false_alarm_rate": 0.02373887240356083
+          },
+          "candidate_accepted": 409,
+          "incumbent_accepted": 409
+        }
+      },
+      "120": {
+        "2024": {
+          "candidate": {
+            "n": 344,
+            "mae": 1.2978865871793703,
+            "rmse": 1.799250259793923,
+            "median_absolute_error": 0.9395841296410818,
+            "bias_pred_minus_actual": 0.3850736983298414,
+            "correlation": 0.3192842592344269,
+            "actual_above_10": 28,
+            "predicted_above_10": 8,
+            "precision_above_10": 0.375,
+            "recall_above_10": 0.10714285714285714,
+            "false_alarm_rate": 0.015822784810126583
+          },
+          "incumbent": {
+            "n": 344,
+            "mae": 1.292157399754408,
+            "rmse": 1.8144624490915826,
+            "median_absolute_error": 1.0081465309887792,
+            "bias_pred_minus_actual": 0.5229649074414969,
+            "correlation": 0.3447370061214026,
+            "actual_above_10": 28,
+            "predicted_above_10": 9,
+            "precision_above_10": 0.3333333333333333,
+            "recall_above_10": 0.10714285714285714,
+            "false_alarm_rate": 0.0189873417721519
+          },
+          "candidate_accepted": 352,
+          "incumbent_accepted": 346
+        },
+        "2025": {
+          "candidate": {
+            "n": 412,
+            "mae": 1.3622719897066677,
+            "rmse": 2.5322029957607954,
+            "median_absolute_error": 0.9426417317550175,
+            "bias_pred_minus_actual": -0.29283447681484015,
+            "correlation": 0.3238578091271524,
+            "actual_above_10": 73,
+            "predicted_above_10": 8,
+            "precision_above_10": 0.625,
+            "recall_above_10": 0.0684931506849315,
+            "false_alarm_rate": 0.008849557522123894
+          },
+          "incumbent": {
+            "n": 412,
+            "mae": 1.3800567925895324,
+            "rmse": 2.5488942703605497,
+            "median_absolute_error": 0.9627378742997426,
+            "bias_pred_minus_actual": -0.30363407129803044,
+            "correlation": 0.30972048317479417,
+            "actual_above_10": 73,
+            "predicted_above_10": 9,
+            "precision_above_10": 0.6666666666666666,
+            "recall_above_10": 0.0821917808219178,
+            "false_alarm_rate": 0.008849557522123894
+          },
+          "candidate_accepted": 412,
+          "incumbent_accepted": 412
+        }
+      },
+      "180": {
+        "2024": {
+          "candidate": {
+            "n": 338,
+            "mae": 1.4331720882420855,
+            "rmse": 1.9997846441819611,
+            "median_absolute_error": 1.0636543594848638,
+            "bias_pred_minus_actual": 0.5972978466257509,
+            "correlation": 0.19224860465213162,
+            "actual_above_10": 27,
+            "predicted_above_10": 4,
+            "precision_above_10": 0.25,
+            "recall_above_10": 0.037037037037037035,
+            "false_alarm_rate": 0.00964630225080386
+          },
+          "incumbent": {
+            "n": 338,
+            "mae": 1.454498456361061,
+            "rmse": 2.0310031656304073,
+            "median_absolute_error": 1.0684524752320401,
+            "bias_pred_minus_actual": 0.7096098842111039,
+            "correlation": 0.20522950244220964,
+            "actual_above_10": 27,
+            "predicted_above_10": 6,
+            "precision_above_10": 0.16666666666666666,
+            "recall_above_10": 0.037037037037037035,
+            "false_alarm_rate": 0.01607717041800643
+          },
+          "candidate_accepted": 346,
+          "incumbent_accepted": 341
+        },
+        "2025": {
+          "candidate": {
+            "n": 410,
+            "mae": 1.5532956455780222,
+            "rmse": 5.790879331223307,
+            "median_absolute_error": 1.0303010364444134,
+            "bias_pred_minus_actual": -0.5457597374022137,
+            "correlation": 0.12797755051225604,
+            "actual_above_10": 72,
+            "predicted_above_10": 2,
+            "precision_above_10": 1.0,
+            "recall_above_10": 0.027777777777777776,
+            "false_alarm_rate": 0.0
+          },
+          "incumbent": {
+            "n": 410,
+            "mae": 1.5575062320335968,
+            "rmse": 5.79443796240487,
+            "median_absolute_error": 1.024664966100855,
+            "bias_pred_minus_actual": -0.5299333677459171,
+            "correlation": 0.12139139902773095,
+            "actual_above_10": 72,
+            "predicted_above_10": 2,
+            "precision_above_10": 0.5,
+            "recall_above_10": 0.013888888888888888,
+            "false_alarm_rate": 0.0029585798816568047
+          },
+          "candidate_accepted": 411,
+          "incumbent_accepted": 411
+        }
+      }
+    },
+    "(20, 5)": {
+      "0": {
+        "2024": {
+          "candidate": {
+            "n": 341,
+            "mae": 1.4123133665026422,
+            "rmse": 5.4215639493826115,
+            "median_absolute_error": 0.7427056273938888,
+            "bias_pred_minus_actual": -0.14855808780699348,
+            "correlation": 0.3124376898578758,
+            "actual_above_10": 33,
+            "predicted_above_10": 18,
+            "precision_above_10": 0.4444444444444444,
+            "recall_above_10": 0.24242424242424243,
+            "false_alarm_rate": 0.032467532467532464
+          },
+          "incumbent": {
+            "n": 341,
+            "mae": 1.360173075963362,
+            "rmse": 5.410904598993754,
+            "median_absolute_error": 0.6906524589593506,
+            "bias_pred_minus_actual": -0.11362274898116911,
+            "correlation": 0.3181615188801979,
+            "actual_above_10": 33,
+            "predicted_above_10": 18,
+            "precision_above_10": 0.5,
+            "recall_above_10": 0.2727272727272727,
+            "false_alarm_rate": 0.02922077922077922
+          },
+          "candidate_accepted": 344,
+          "incumbent_accepted": 344
+        },
+        "2025": {
+          "candidate": {
+            "n": 406,
+            "mae": 1.0628982884424534,
+            "rmse": 1.8168641289433085,
+            "median_absolute_error": 0.6939408986494793,
+            "bias_pred_minus_actual": -0.11936490247750174,
+            "correlation": 0.4472364144203125,
+            "actual_above_10": 71,
+            "predicted_above_10": 27,
+            "precision_above_10": 0.5185185185185185,
+            "recall_above_10": 0.19718309859154928,
+            "false_alarm_rate": 0.03880597014925373
+          },
+          "incumbent": {
+            "n": 406,
+            "mae": 1.0559669746385099,
+            "rmse": 1.8162693381640072,
+            "median_absolute_error": 0.7056598700126187,
+            "bias_pred_minus_actual": -0.12045021709422969,
+            "correlation": 0.45074065547188646,
+            "actual_above_10": 71,
+            "predicted_above_10": 30,
+            "precision_above_10": 0.5333333333333333,
+            "recall_above_10": 0.22535211267605634,
+            "false_alarm_rate": 0.041791044776119404
+          },
+          "candidate_accepted": 406,
+          "incumbent_accepted": 407
+        }
+      },
+      "60": {
+        "2024": {
+          "candidate": {
+            "n": 341,
+            "mae": 1.2189971770880543,
+            "rmse": 1.818318411725307,
+            "median_absolute_error": 0.8505801860623023,
+            "bias_pred_minus_actual": 0.23677863886749834,
+            "correlation": 0.38902531287971126,
+            "actual_above_10": 31,
+            "predicted_above_10": 20,
+            "precision_above_10": 0.3,
+            "recall_above_10": 0.1935483870967742,
+            "false_alarm_rate": 0.04516129032258064
+          },
+          "incumbent": {
+            "n": 341,
+            "mae": 1.1833834782697206,
+            "rmse": 1.7985123259569376,
+            "median_absolute_error": 0.7847966897837875,
+            "bias_pred_minus_actual": 0.33312965136210676,
+            "correlation": 0.4123627321307684,
+            "actual_above_10": 31,
+            "predicted_above_10": 17,
+            "precision_above_10": 0.4117647058823529,
+            "recall_above_10": 0.22580645161290322,
+            "false_alarm_rate": 0.03225806451612903
+          },
+          "candidate_accepted": 343,
+          "incumbent_accepted": 345
+        },
+        "2025": {
+          "candidate": {
+            "n": 409,
+            "mae": 1.1825584962795053,
+            "rmse": 1.7823889734780742,
+            "median_absolute_error": 0.8684728425672432,
+            "bias_pred_minus_actual": -0.27586318784909286,
+            "correlation": 0.4157189620355147,
+            "actual_above_10": 72,
+            "predicted_above_10": 16,
+            "precision_above_10": 0.4375,
+            "recall_above_10": 0.09722222222222222,
+            "false_alarm_rate": 0.026706231454005934
+          },
+          "incumbent": {
+            "n": 409,
+            "mae": 1.1818563879300583,
+            "rmse": 1.792494827612146,
+            "median_absolute_error": 0.8810271723664567,
+            "bias_pred_minus_actual": -0.26437463814021267,
+            "correlation": 0.4102050911825482,
+            "actual_above_10": 72,
+            "predicted_above_10": 15,
+            "precision_above_10": 0.4666666666666667,
+            "recall_above_10": 0.09722222222222222,
+            "false_alarm_rate": 0.02373887240356083
+          },
+          "candidate_accepted": 409,
+          "incumbent_accepted": 409
+        }
+      },
+      "120": {
+        "2024": {
+          "candidate": {
+            "n": 344,
+            "mae": 1.3290558797131207,
+            "rmse": 1.8347320143771706,
+            "median_absolute_error": 0.9810150443278953,
+            "bias_pred_minus_actual": 0.457909447086581,
+            "correlation": 0.29982833547801974,
+            "actual_above_10": 28,
+            "predicted_above_10": 10,
+            "precision_above_10": 0.3,
+            "recall_above_10": 0.10714285714285714,
+            "false_alarm_rate": 0.022151898734177215
+          },
+          "incumbent": {
+            "n": 344,
+            "mae": 1.292157399754408,
+            "rmse": 1.8144624490915826,
+            "median_absolute_error": 1.0081465309887792,
+            "bias_pred_minus_actual": 0.5229649074414969,
+            "correlation": 0.3447370061214026,
+            "actual_above_10": 28,
+            "predicted_above_10": 9,
+            "precision_above_10": 0.3333333333333333,
+            "recall_above_10": 0.10714285714285714,
+            "false_alarm_rate": 0.0189873417721519
+          },
+          "candidate_accepted": 347,
+          "incumbent_accepted": 346
+        },
+        "2025": {
+          "candidate": {
+            "n": 412,
+            "mae": 1.3729273379839324,
+            "rmse": 2.542144991200924,
+            "median_absolute_error": 0.9587830791128056,
+            "bias_pred_minus_actual": -0.3130132708634944,
+            "correlation": 0.31468353206126376,
+            "actual_above_10": 73,
+            "predicted_above_10": 9,
+            "precision_above_10": 0.6666666666666666,
+            "recall_above_10": 0.0821917808219178,
+            "false_alarm_rate": 0.008849557522123894
+          },
+          "incumbent": {
+            "n": 412,
+            "mae": 1.3800567925895324,
+            "rmse": 2.5488942703605497,
+            "median_absolute_error": 0.9627378742997426,
+            "bias_pred_minus_actual": -0.30363407129803044,
+            "correlation": 0.30972048317479417,
+            "actual_above_10": 73,
+            "predicted_above_10": 9,
+            "precision_above_10": 0.6666666666666666,
+            "recall_above_10": 0.0821917808219178,
+            "false_alarm_rate": 0.008849557522123894
+          },
+          "candidate_accepted": 412,
+          "incumbent_accepted": 412
+        }
+      },
+      "180": {
+        "2024": {
+          "candidate": {
+            "n": 339,
+            "mae": 1.4849048214162033,
+            "rmse": 2.0578914650736544,
+            "median_absolute_error": 1.1306640536295056,
+            "bias_pred_minus_actual": 0.686465275699588,
+            "correlation": 0.14433955217697247,
+            "actual_above_10": 27,
+            "predicted_above_10": 4,
+            "precision_above_10": 0.25,
+            "recall_above_10": 0.037037037037037035,
+            "false_alarm_rate": 0.009615384615384616
+          },
+          "incumbent": {
+            "n": 339,
+            "mae": 1.4617569274617181,
+            "rmse": 2.039122758154962,
+            "median_absolute_error": 1.0695707951745046,
+            "bias_pred_minus_actual": 0.7190656667340322,
+            "correlation": 0.20244306000819248,
+            "actual_above_10": 27,
+            "predicted_above_10": 6,
+            "precision_above_10": 0.16666666666666666,
+            "recall_above_10": 0.037037037037037035,
+            "false_alarm_rate": 0.016025641025641024
+          },
+          "candidate_accepted": 341,
+          "incumbent_accepted": 341
+        },
+        "2025": {
+          "candidate": {
+            "n": 411,
+            "mae": 1.558988904969193,
+            "rmse": 5.788063653564475,
+            "median_absolute_error": 1.0218969947984675,
+            "bias_pred_minus_actual": -0.5509225006110469,
+            "correlation": 0.12306248848919088,
+            "actual_above_10": 72,
+            "predicted_above_10": 1,
+            "precision_above_10": 1.0,
+            "recall_above_10": 0.013888888888888888,
+            "false_alarm_rate": 0.0
+          },
+          "incumbent": {
+            "n": 411,
+            "mae": 1.5607520268146453,
+            "rmse": 5.7891417293496845,
+            "median_absolute_error": 1.0262577200136302,
+            "bias_pred_minus_actual": -0.5356793398123372,
+            "correlation": 0.12004387232950996,
+            "actual_above_10": 72,
+            "predicted_above_10": 2,
+            "precision_above_10": 0.5,
+            "recall_above_10": 0.013888888888888888,
+            "false_alarm_rate": 0.0029498525073746312
+          },
+          "candidate_accepted": 412,
+          "incumbent_accepted": 411
+        }
+      }
+    },
+    "(20, 10)": {
+      "0": {
+        "2024": {
+          "candidate": {
+            "n": 326,
+            "mae": 1.4337154047521117,
+            "rmse": 5.529027839556548,
+            "median_absolute_error": 0.7698776832824814,
+            "bias_pred_minus_actual": -0.06290028127571583,
+            "correlation": 0.30368155119756723,
+            "actual_above_10": 32,
+            "predicted_above_10": 22,
+            "precision_above_10": 0.4090909090909091,
+            "recall_above_10": 0.28125,
+            "false_alarm_rate": 0.04421768707482993
+          },
+          "incumbent": {
+            "n": 326,
+            "mae": 1.3634267106544493,
+            "rmse": 5.522167797048614,
+            "median_absolute_error": 0.6772149993864218,
+            "bias_pred_minus_actual": -0.12270316848912513,
+            "correlation": 0.30869107114333644,
+            "actual_above_10": 32,
+            "predicted_above_10": 18,
+            "precision_above_10": 0.5,
+            "recall_above_10": 0.28125,
+            "false_alarm_rate": 0.030612244897959183
+          },
+          "candidate_accepted": 333,
+          "incumbent_accepted": 344
+        },
+        "2025": {
+          "candidate": {
+            "n": 406,
+            "mae": 1.063874178690477,
+            "rmse": 1.8150828826681837,
+            "median_absolute_error": 0.7035082348959527,
+            "bias_pred_minus_actual": -0.11489652673092957,
+            "correlation": 0.44670632011732486,
+            "actual_above_10": 71,
+            "predicted_above_10": 27,
+            "precision_above_10": 0.5185185185185185,
+            "recall_above_10": 0.19718309859154928,
+            "false_alarm_rate": 0.03880597014925373
+          },
+          "incumbent": {
+            "n": 406,
+            "mae": 1.0559669746385099,
+            "rmse": 1.8162693381640072,
+            "median_absolute_error": 0.7056598700126187,
+            "bias_pred_minus_actual": -0.12045021709422969,
+            "correlation": 0.45074065547188646,
+            "actual_above_10": 71,
+            "predicted_above_10": 30,
+            "precision_above_10": 0.5333333333333333,
+            "recall_above_10": 0.22535211267605634,
+            "false_alarm_rate": 0.041791044776119404
+          },
+          "candidate_accepted": 406,
+          "incumbent_accepted": 407
+        }
+      },
+      "60": {
+        "2024": {
+          "candidate": {
+            "n": 325,
+            "mae": 1.2199930552181404,
+            "rmse": 1.8241023385010113,
+            "median_absolute_error": 0.8326721393433099,
+            "bias_pred_minus_actual": 0.2568565648085953,
+            "correlation": 0.36489586537351965,
+            "actual_above_10": 30,
+            "predicted_above_10": 21,
+            "precision_above_10": 0.2857142857142857,
+            "recall_above_10": 0.2,
+            "false_alarm_rate": 0.05084745762711865
+          },
+          "incumbent": {
+            "n": 325,
+            "mae": 1.1808066051247426,
+            "rmse": 1.8087190736409786,
+            "median_absolute_error": 0.7811911433425127,
+            "bias_pred_minus_actual": 0.3336080893948686,
+            "correlation": 0.3839580020114705,
+            "actual_above_10": 30,
+            "predicted_above_10": 16,
+            "precision_above_10": 0.375,
+            "recall_above_10": 0.2,
+            "false_alarm_rate": 0.03389830508474576
+          },
+          "candidate_accepted": 331,
+          "incumbent_accepted": 345
+        },
+        "2025": {
+          "candidate": {
+            "n": 409,
+            "mae": 1.1780560369546298,
+            "rmse": 1.774281745269365,
+            "median_absolute_error": 0.8629355298872792,
+            "bias_pred_minus_actual": -0.2568519220042967,
+            "correlation": 0.4212065638977767,
+            "actual_above_10": 72,
+            "predicted_above_10": 16,
+            "precision_above_10": 0.4375,
+            "recall_above_10": 0.09722222222222222,
+            "false_alarm_rate": 0.026706231454005934
+          },
+          "incumbent": {
+            "n": 409,
+            "mae": 1.1818563879300583,
+            "rmse": 1.792494827612146,
+            "median_absolute_error": 0.8810271723664567,
+            "bias_pred_minus_actual": -0.26437463814021267,
+            "correlation": 0.4102050911825482,
+            "actual_above_10": 72,
+            "predicted_above_10": 15,
+            "precision_above_10": 0.4666666666666667,
+            "recall_above_10": 0.09722222222222222,
+            "false_alarm_rate": 0.02373887240356083
+          },
+          "candidate_accepted": 409,
+          "incumbent_accepted": 409
+        }
+      },
+      "120": {
+        "2024": {
+          "candidate": {
+            "n": 328,
+            "mae": 1.3118552757923043,
+            "rmse": 1.810805605127266,
+            "median_absolute_error": 0.9909037546473782,
+            "bias_pred_minus_actual": 0.46589649726726684,
+            "correlation": 0.2986938743544406,
+            "actual_above_10": 26,
+            "predicted_above_10": 12,
+            "precision_above_10": 0.25,
+            "recall_above_10": 0.11538461538461539,
+            "false_alarm_rate": 0.029801324503311258
+          },
+          "incumbent": {
+            "n": 328,
+            "mae": 1.2620416090237132,
+            "rmse": 1.7841526914208883,
+            "median_absolute_error": 0.9622599423526159,
+            "bias_pred_minus_actual": 0.5084266435906191,
+            "correlation": 0.34409652372716326,
+            "actual_above_10": 26,
+            "predicted_above_10": 9,
+            "precision_above_10": 0.3333333333333333,
+            "recall_above_10": 0.11538461538461539,
+            "false_alarm_rate": 0.019867549668874173
+          },
+          "candidate_accepted": 334,
+          "incumbent_accepted": 346
+        },
+        "2025": {
+          "candidate": {
+            "n": 412,
+            "mae": 1.362104566047971,
+            "rmse": 2.5300064213177778,
+            "median_absolute_error": 0.9133198893543946,
+            "bias_pred_minus_actual": -0.2611932765798638,
+            "correlation": 0.32374820199582,
+            "actual_above_10": 73,
+            "predicted_above_10": 9,
+            "precision_above_10": 0.6666666666666666,
+            "recall_above_10": 0.0821917808219178,
+            "false_alarm_rate": 0.008849557522123894
+          },
+          "incumbent": {
+            "n": 412,
+            "mae": 1.3800567925895324,
+            "rmse": 2.5488942703605497,
+            "median_absolute_error": 0.9627378742997426,
+            "bias_pred_minus_actual": -0.30363407129803044,
+            "correlation": 0.30972048317479417,
+            "actual_above_10": 73,
+            "predicted_above_10": 9,
+            "precision_above_10": 0.6666666666666666,
+            "recall_above_10": 0.0821917808219178,
+            "false_alarm_rate": 0.008849557522123894
+          },
+          "candidate_accepted": 412,
+          "incumbent_accepted": 412
+        }
+      },
+      "180": {
+        "2024": {
+          "candidate": {
+            "n": 321,
+            "mae": 1.3941936348240214,
+            "rmse": 1.964595752471311,
+            "median_absolute_error": 1.0307752664153806,
+            "bias_pred_minus_actual": 0.5510230941627751,
+            "correlation": 0.1410624323809411,
+            "actual_above_10": 26,
+            "predicted_above_10": 4,
+            "precision_above_10": 0.25,
+            "recall_above_10": 0.038461538461538464,
+            "false_alarm_rate": 0.010169491525423728
+          },
+          "incumbent": {
+            "n": 321,
+            "mae": 1.412119071699811,
+            "rmse": 1.991582107743389,
+            "median_absolute_error": 1.038628981913316,
+            "bias_pred_minus_actual": 0.656454145671884,
+            "correlation": 0.15707292167444006,
+            "actual_above_10": 26,
+            "predicted_above_10": 6,
+            "precision_above_10": 0.16666666666666666,
+            "recall_above_10": 0.038461538461538464,
+            "false_alarm_rate": 0.01694915254237288
+          },
+          "candidate_accepted": 326,
+          "incumbent_accepted": 341
+        },
+        "2025": {
+          "candidate": {
+            "n": 411,
+            "mae": 1.5426102448434118,
+            "rmse": 5.773578385317328,
+            "median_absolute_error": 0.9795944474441907,
+            "bias_pred_minus_actual": -0.5007344751011616,
+            "correlation": 0.13617266712947707,
+            "actual_above_10": 72,
+            "predicted_above_10": 2,
+            "precision_above_10": 1.0,
+            "recall_above_10": 0.027777777777777776,
+            "false_alarm_rate": 0.0
+          },
+          "incumbent": {
+            "n": 411,
+            "mae": 1.5607520268146453,
+            "rmse": 5.7891417293496845,
+            "median_absolute_error": 1.0262577200136302,
+            "bias_pred_minus_actual": -0.5356793398123372,
+            "correlation": 0.12004387232950996,
+            "actual_above_10": 72,
+            "predicted_above_10": 2,
+            "precision_above_10": 0.5,
+            "recall_above_10": 0.013888888888888888,
+            "false_alarm_rate": 0.0029498525073746312
+          },
+          "candidate_accepted": 412,
+          "incumbent_accepted": 411
+        }
+      }
+    }
+  },
+  "observations_sha256": "9a6d9b644a2b1ddce0da27e816aad31654ea9aaf306f29865bb14503973db37b",
+  "script_sha256": "c4e5c793bc7573f352a46441a8cd1e0021fb78747afbc4bee0f8ec725b125ca2",
+  "protocol_sha256": "c49e4a3a6746ac4c764e9ac139483a27e912adb6fbd1d2977d50f12f56cdd966"
+}

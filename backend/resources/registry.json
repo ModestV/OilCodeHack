@@ -888,7 +888,7 @@
       "label": "Расход сырья на установку, массовый",
       "source": "kip",
       "unit": "т/ч",
-      "unit_status": "confirmed",
+      "unit_status": "source_declared_unvalidated",
       "plant": "ht",
       "code": "F9",
       "description": "Расход сырья на установку, массовый",
@@ -897,7 +897,8 @@
       "role": "control",
       "control_kind": "feed_mass_flow",
       "control_mapping_status": "working_mapping_from_updates",
-      "control_description": "Массовый расход сырья на установку"
+      "control_description": "Массовый расход сырья на установку",
+      "unit_warning": "Единицы приведены по Updates; парные массовый/объёмный расходы не прошли проверку плотности. Не использовать для физического баланса без уточнения."
     },
     {
       "id": "ht.W10",
@@ -970,12 +971,13 @@
       "label": "Расход сырья на установку, объемный",
       "source": "kip",
       "unit": "м³/ч",
-      "unit_status": "confirmed",
+      "unit_status": "source_declared_unvalidated",
       "plant": "ht",
       "code": "F15",
       "description": "Расход сырья на установку, объемный",
       "group": "Реакторы",
-      "mapping_source": "hakathon-data/Updates/теги АВТ_24-2000.xlsx, лист 24-2000"
+      "mapping_source": "hakathon-data/Updates/теги АВТ_24-2000.xlsx, лист 24-2000",
+      "unit_warning": "Единицы приведены по Updates; парные массовый/объёмный расходы не прошли проверку плотности. Не использовать для физического баланса без уточнения."
     },
     {
       "id": "ht.T16",
@@ -994,12 +996,13 @@
       "label": "Расход гидроочищенного ДТ в цех №8, массовый",
       "source": "kip",
       "unit": "т/ч",
-      "unit_status": "confirmed",
+      "unit_status": "source_declared_unvalidated",
       "plant": "ht",
       "code": "F17",
       "description": "Расход гидроочищенного ДТ в цех №8, массовый",
       "group": "Сырьё и потоки",
-      "mapping_source": "hakathon-data/Updates/теги АВТ_24-2000.xlsx, лист 24-2000"
+      "mapping_source": "hakathon-data/Updates/теги АВТ_24-2000.xlsx, лист 24-2000",
+      "unit_warning": "Единицы приведены по Updates; парные массовый/объёмный расходы не прошли проверку плотности. Не использовать для физического баланса без уточнения."
     },
     {
       "id": "ht.T18",
@@ -1037,7 +1040,9 @@
       "code": "Q20",
       "description": "Поточный анализатор серы в ДТ, Н-202/1,2",
       "group": "Стабилизация",
-      "mapping_source": "hakathon-data/Updates/теги АВТ_24-2000.xlsx, лист 24-2000"
+      "mapping_source": "hakathon-data/Updates/теги АВТ_24-2000.xlsx, лист 24-2000",
+      "measurement_kind": "online_analyzer",
+      "storage_source": "kip"
     },
     {
       "id": "ht.Q21",
@@ -1049,7 +1054,9 @@
       "code": "Q21",
       "description": "Поточный анализатор серы в г/о ДТ",
       "group": "Стабилизация",
-      "mapping_source": "hakathon-data/Updates/теги АВТ_24-2000.xlsx, лист 24-2000"
+      "mapping_source": "hakathon-data/Updates/теги АВТ_24-2000.xlsx, лист 24-2000",
+      "measurement_kind": "online_analyzer",
+      "storage_source": "kip"
     },
     {
       "id": "ht.F22",
@@ -1104,12 +1111,13 @@
       "label": "Расход гидроочищенного ДТ в цех №8, объемный",
       "source": "kip",
       "unit": "м³/ч",
-      "unit_status": "confirmed",
+      "unit_status": "source_declared_unvalidated",
       "plant": "ht",
       "code": "F26",
       "description": "Расход гидроочищенного ДТ в цех №8, объемный",
       "group": "Сырьё и потоки",
-      "mapping_source": "hakathon-data/Updates/теги АВТ_24-2000.xlsx, лист 24-2000"
+      "mapping_source": "hakathon-data/Updates/теги АВТ_24-2000.xlsx, лист 24-2000",
+      "unit_warning": "Единицы приведены по Updates; парные массовый/объёмный расходы не прошли проверку плотности. Не использовать для физического баланса без уточнения."
     },
     {
       "id": "lims.avt.1.CFPP",
@@ -1740,21 +1748,25 @@
       "id": "AVT6:240-350:D15",
       "label": "Плотность при 15 °C · АВТ, 240-350",
       "plant": "avt",
-      "expression": "791,22872 - 5,30294x(F30/(F32+ F30)) + 0,52755xT66 - 0,15629xT33",
-      "version": "source-vak-v1",
+      "expression": "791.22872-5.30294*(F65/(F32+F30))+0.52755*T66-0.15629*T33",
+      "version": "updates-2026-09-14",
       "status": "experimental",
-      "reason": "Результат не валидирован на исторических данных.",
-      "unit": "кг/м³"
+      "reason": "Обновлённая формула, точность на истории требует отдельной проверки.",
+      "unit": "кг/м³",
+      "previous_expression": "791,22872 - 5,30294x(F30/(F32+ F30)) + 0,52755xT66 - 0,15629xT33",
+      "source_reference": "Updates/формулы_ВАК.xlsx, ЭЛОУ-АВТ-6 (9 формул)!C2"
     },
     {
       "id": "AVT6:350:T50",
       "label": "T50 · АВТ, 350",
       "plant": "avt",
-      "expression": "981,06539+ 0,27467xT42 - 0,32983x(F31/F57)  -0,49014xT48",
-      "version": "source-vak-v1",
-      "status": "invalid",
-      "reason": "На исходных данных типичное значение около 881 °C. Проверьте назначение формулы и соответствие тегов.",
-      "unit": "°C"
+      "expression": "493.6798+1.281193*T42-0.955342*T48-0.018454*F31+0.265904*F57-0.082047*T66-0.545083*T33",
+      "version": "updates-2026-09-14",
+      "status": "experimental",
+      "reason": "Обновлённая формула, точность на истории требует отдельной проверки.",
+      "unit": "°C",
+      "previous_expression": "981,06539+ 0,27467xT42 - 0,32983x(F31/F57)  -0,49014xT48",
+      "source_reference": "Updates/формулы_ВАК.xlsx, ЭЛОУ-АВТ-6 (9 формул)!C8"
     },
     {
       "id": "24-2000:GODT:T90",
@@ -1780,11 +1792,13 @@
       "id": "AVT6:350:I350",
       "label": "Доля до 350 °C · АВТ, 350",
       "plant": "avt",
-      "expression": "39.562-1.62865*L43-0.76664*T6-0.22361*T18+0.00031*F64*(T15-T11)",
-      "version": "source-vak-v1",
-      "status": "invalid",
-      "reason": "На исходных данных расчёт даёт отрицательную объёмную долю (около −267%).",
-      "unit": "% об."
+      "expression": "39.562-1.62865*L43+0.76664*T6-0.22361*T18+0.00031*F64*(T15-T11)",
+      "version": "updates-2026-09-14",
+      "status": "experimental",
+      "reason": "Обновлённая формула, точность на истории требует отдельной проверки.",
+      "unit": "% об.",
+      "previous_expression": "39.562-1.62865*L43-0.76664*T6-0.22361*T18+0.00031*F64*(T15-T11)",
+      "source_reference": "Updates/формулы_ВАК.xlsx, ЭЛОУ-АВТ-6 (9 формул)!C9"
     },
     {
       "id": "24-2000:GODT:T50",
@@ -1832,9 +1846,10 @@
       "plant": "avt",
       "expression": "31,40363 - 0,06784xT33 + 17,411xP67 - 8,11544xP4 - 0,47309x(F65/F32+F30)",
       "version": "expert-2026-09-13",
-      "status": "experimental",
-      "reason": "Расстановка скобок подтверждена экспертом; результат ещё не валидирован на отложенной истории.",
-      "unit": "°C"
+      "status": "unresolved",
+      "reason": "Конфликт письменного ответа F65/F32+F30 с Updates F65/(F32+F30); версия не выбрана.",
+      "unit": "°C",
+      "alternative_expression": "31.40363-0.06784*T33+17.411*P67-8.11544*P4-0.47309*F65/(F32+F30)"
     },
     {
       "id": "AVT6:350-500:ViscosityK",
@@ -1882,8 +1897,8 @@
       "plant": "ht",
       "expression": "0.03814*F9-9.201-0.00002*F2+0.50*T6+0.48321*LIMS:24-2000.Pipeline.95%.T",
       "version": "expert-2026-09-13",
-      "status": "experimental",
-      "reason": "Формула исправлена экспертом; Pipeline.95%.T сопоставлен с ЛИМС гидроочистки, точка 2. Результат ещё не валидирован на отложенной истории.",
+      "status": "unresolved",
+      "reason": "Точка LIMS:24-2000.Pipeline.95%.T не подтверждена; автоматическая привязка к точке 2 отозвана.",
       "unit": "°C"
     },
     {

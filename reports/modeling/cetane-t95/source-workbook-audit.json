@@ -1,0 +1,66 @@
+{
+  "t95": {
+    "header_count": 1292,
+    "numeric_rows": 1292,
+    "unique_timestamps": 1291,
+    "duplicate_rows": [
+      [
+        {
+          "row": 1255,
+          "time": "2026-07-05 10:00:00",
+          "value": 351
+        },
+        {
+          "row": 1256,
+          "time": "2026-07-05 10:00:00",
+          "value": 351
+        }
+      ]
+    ],
+    "headers": [
+      [
+        "None",
+        "None"
+      ],
+      [
+        "95%.T",
+        "None"
+      ],
+      [
+        "°С",
+        "None"
+      ],
+      [
+        "Количество значений:",
+        "1292"
+      ]
+    ]
+  },
+  "cetane": {
+    "header_count": 42,
+    "numeric_rows": 42,
+    "unique_timestamps": 42,
+    "duplicate_rows": [],
+    "headers": [
+      [
+        "None",
+        "None"
+      ],
+      [
+        "CetaneNumber",
+        "None"
+      ],
+      [
+        "ед.цет.ч.",
+        "None"
+      ],
+      [
+        "Количество значений:",
+        "42"
+      ]
+    ]
+  },
+  "source_file": "C:\\Users\\Roma\\Desktop\\нефтекод\\hakathon-data\\ЛИМСы 01.01.2023 - н.в_ (2).xlsx",
+  "sheet": "Лист1",
+  "sha256": "7bf3a14d8d3d9d99712beeb9860a2b8988adc554c670e4fa3c5cc5d4c0c02cd2"
+}

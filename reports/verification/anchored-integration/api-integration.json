@@ -1,0 +1,78 @@
+{
+  "at": "2026-05-01T12:00:00",
+  "requests": [
+    {
+      "horizon": 0,
+      "prediction": 6.823320154562165,
+      "path_supported": true,
+      "target_time": "2026-05-01T12:00:00"
+    },
+    {
+      "horizon": 60,
+      "prediction": 6.797627180609105,
+      "path_supported": true,
+      "target_time": "2026-05-01T13:00:00"
+    },
+    {
+      "horizon": 120,
+      "prediction": 6.9661249630502144,
+      "path_supported": true,
+      "target_time": "2026-05-01T14:00:00"
+    },
+    {
+      "horizon": 180,
+      "prediction": 7.210426061593242,
+      "path_supported": true,
+      "target_time": "2026-05-01T15:00:00"
+    }
+  ],
+  "linked_batch": {
+    "request": {
+      "at": "2026-05-01T12:00:00",
+      "horizon_minutes": 60,
+      "step_minutes": 15,
+      "optimize_economics": false,
+      "production_rate_tph": 40,
+      "batch_mass_t": 30,
+      "transport_delay_minutes": 15,
+      "changes": {},
+      "tanks": [
+        {
+          "name": "receiving",
+          "kind": "hydrotreated_batch",
+          "share": 80,
+          "stock_t": 100,
+          "sulfur": 5,
+          "t95": 350,
+          "cetane": 52
+        },
+        {
+          "name": "stock",
+          "share": 20,
+          "stock_t": 100,
+          "sulfur": 2,
+          "t95": 320,
+          "cetane": 53
+        }
+      ]
+    },
+    "status": "recommendation",
+    "selected": "hold",
+    "batch": {
+      "arriving_minutes": 45,
+      "produced_t": 30.0,
+      "produced_sulfur": 6.813685289329768,
+      "withdrawal_at_horizon": true
+    },
+    "product_sulfur": 4.73483420726088,
+    "forecast_horizon": 60.0,
+    "round_trip_equal": true,
+    "basis": "observed forecast with supplied scenario inventory/properties"
+  },
+  "zero_arrival_stock_gate": [
+    "Недостаточно запаса компонента для массы партии"
+  ],
+  "passed": true,
+  "model_sha256": "deed6ff7941fc4b0460b970371ebf8c1dc8ee5cf272dc1afe9f582726d20efb5",
+  "script_sha256": "2ec5dcc4e0f9c1a3876ababc9a4f9c4546df85d0fbf2400b011c697d0ade6a7c"
+}
