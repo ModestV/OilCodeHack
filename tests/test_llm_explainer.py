@@ -158,3 +158,13 @@ def test_validator_accepts_roundings_and_rejects_new_numbers():
     assert llm.validate_numbers("P(>10) = 12%", facts, "P(>10) = 12%")["passed"]
     result = llm.validate_numbers("Сера 7,9 мг/кг", facts, "")
     assert not result["passed"] and result["unknown_numbers"] == ["7,9"]
+
+
+def test_number_glued_to_a_unit_is_still_checked():
+    result = llm.validate_numbers("Сера снизится до 7.9мг/кг", {"prediction": 8.4, "lower": 7.0}, "")
+    assert not result["passed"] and result["unknown_numbers"] == ["7.9"]
+
+
+def test_plant_and_specification_names_are_not_invented_numbers():
+    text = "Реактор Р-202 установки 24-2000: T95 не выше 360 °C, цетановое число не ниже 51."
+    assert llm.validate_numbers(text, {"prediction": 8.4}, "")["passed"]

@@ -63,3 +63,16 @@ def test_api_records_and_serves_decisions(tmp_path, monkeypatch):
     assert stored["decision"]["status"] == "recommendation"
     assert stored["request"]["at"] == DECISION["at"]
     assert client.get("/api/datasets/demo/decisions/nope").status_code == 404
+
+
+def test_log_failure_does_not_break_the_decision(tmp_path, monkeypatch):
+    monkeypatch.setattr(module, "STORAGE", tmp_path)
+    directory = tmp_path / "demo"
+    directory.mkdir()
+    (directory / "manifest.json").write_text(json.dumps({"id": "demo", "status": "ready"}), encoding="utf-8")
+    (directory / "decisions").write_text("not a folder", encoding="utf-8")
+    monkeypatch.setattr(module, "make_decision", lambda *_args: dict(DECISION))
+    response = TestClient(module.app).post("/api/datasets/demo/decision", json={"at": DECISION["at"]})
+    assert response.status_code == 200
+    assert response.json()["status"] == "recommendation"
+    assert response.json()["record_id"] is None

@@ -34,7 +34,12 @@ SYSTEM_PROMPT = (
     "иначе назови каждый изменяемый параметр, ожидаемую серу и главную причину выбора."
 )
 TAGS = {"ht.T6": "T6", "ht.F9": "F9", "ht.P13": "P13"}
-ANSWER_NUMBER = re.compile(r"(?<![\w.,])-?\d+(?:[.,]\d+)?(?![\w])")
+# Digits glued to a preceding letter are tags (T6, P13, T95), not quantities;
+# digits followed by a unit ("7.9мг") are quantities and must be checked.
+ANSWER_NUMBER = re.compile(r"(?<![\w.,])-?\d+(?:[.,]\d+)?")
+# Names and hard specification limits the operator text may always mention:
+# reactor Р-202, unit 24-2000, T95 ≤ 360 °C, cetane ≥ 51, sulphur ≤ 10 mg/kg.
+DOMAIN_NUMBERS = {202.0, 24.0, 2000.0, 360.0, 51.0, 10.0}
 FACT_NUMBER = re.compile(r"-?\d+(?:\.\d+)?(?:[eE]-?\d+)?")
 ADVICE = re.compile(
     r"(рекоменд\w*|предлага\w*|предлож\w*|следует|необходимо|нужно|стоит)\s+(?:\S+\s+){0,2}?"
@@ -107,7 +112,7 @@ def facts(decision: dict[str, Any], template: dict[str, Any]) -> dict[str, Any]:
 
 def validate_numbers(text: str, grounded: Any, template_text: str) -> dict[str, Any]:
     source = json.dumps(grounded, ensure_ascii=False) + " " + (template_text or "")
-    allowed = {float(item) for item in FACT_NUMBER.findall(source)}
+    allowed = {float(item) for item in FACT_NUMBER.findall(source)} | DOMAIN_NUMBERS
     unknown = []
     for raw in ANSWER_NUMBER.findall(text):
         value = float(raw.replace(",", "."))

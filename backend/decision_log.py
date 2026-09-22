@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import os
 import re
 from datetime import datetime
@@ -18,6 +19,7 @@ from typing import Any
 
 from .config import ROOT
 
+logger = logging.getLogger(__name__)
 RECORD_ID = re.compile(r"^[0-9]{8}T[0-9]{12}_[0-9a-f]{10}$")
 
 
@@ -37,12 +39,17 @@ def record(directory: Path, request: dict[str, Any], decision: dict[str, Any]) -
     payload = json.dumps({"request": request, "decision": decision}, ensure_ascii=False, sort_keys=True, default=str)
     record_id = f"{created:%Y%m%dT%H%M%S%f}_{hashlib.sha256(payload.encode()).hexdigest()[:10]}"
     folder = _folder(directory)
-    folder.mkdir(parents=True, exist_ok=True)
     body = {"id": record_id, "created_at": created.isoformat(), "revision": _revision(),
             "request": request, "decision": decision}
-    temporary = folder / f"{record_id}.tmp"
-    temporary.write_text(json.dumps(body, ensure_ascii=False, default=str), encoding="utf-8")
-    temporary.replace(folder / f"{record_id}.json")
+    try:
+        folder.mkdir(parents=True, exist_ok=True)
+        temporary = folder / f"{record_id}.tmp"
+        temporary.write_text(json.dumps(body, ensure_ascii=False, default=str), encoding="utf-8")
+        temporary.replace(folder / f"{record_id}.json")
+    except OSError as exc:
+        # The audit log must never cost the operator the decision itself.
+        logger.warning("Журнал решений недоступен: %s", exc)
+        return None
     return record_id
 
 
