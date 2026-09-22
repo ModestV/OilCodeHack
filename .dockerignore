@@ -1,0 +1,15 @@
+.git
+.github
+.venv
+.superpowers
+**/__pycache__
+**/*.pyc
+.pytest_cache
+.ruff_cache
+storage
+data
+frontend/node_modules
+frontend/dist
+DataMap
+AGENT
+offline

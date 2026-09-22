@@ -1,0 +1,31 @@
+# Adds a local Ollama and points the app's explainer at it:
+#   docker compose -f docker-compose.yml -f docker-compose.llm.yml up --build
+# Model: OILCODE_LLM_MODEL (default qwen2.5:3b-instruct, ~2 GB, runs on CPU).
+# Larger, per organisers' closed-network class: gpt-oss:20b (~14 GB RAM).
+# Any other OpenAI-compatible server: skip this file and set OILCODE_LLM_BASE_URL.
+services:
+  app:
+    environment:
+      OILCODE_LLM_BASE_URL: http://ollama:11434/v1
+      OILCODE_LLM_MODEL: ${OILCODE_LLM_MODEL:-qwen2.5:3b-instruct}
+    depends_on:
+      ollama-pull:
+        condition: service_completed_successfully
+
+  ollama:
+    image: ollama/ollama:latest
+    volumes:
+      - ollama:/root/.ollama
+    restart: unless-stopped
+
+  # One-off: download the model into the ollama volume (needs internet once).
+  ollama-pull:
+    image: ollama/ollama:latest
+    depends_on: [ollama]
+    entrypoint: ["/bin/sh", "-c", "until ollama list >/dev/null 2>&1; do sleep 1; done; ollama pull $${OILCODE_LLM_MODEL:-qwen2.5:3b-instruct}"]
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+      OILCODE_LLM_MODEL: ${OILCODE_LLM_MODEL:-qwen2.5:3b-instruct}
+
+volumes:
+  ollama:

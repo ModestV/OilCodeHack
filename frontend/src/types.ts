@@ -253,14 +253,47 @@ export interface ScenarioResult {
     additive_inventory?: { available_t: number | null; required_t: number | null; stock_met: boolean | null };
     components?: { name: string; available_t: number | null; required_t: number | null; stock_met: boolean | null }[];
   };
+  additive?: SulfurRiskAdditive | null;
+  risk?: SulfurRisk | null;
   assumptions: string[];
+}
+
+export interface SulfurRisk {
+  basis: "calibrated_residual_quantiles" | "point_margin" | "blend_mass_balance";
+  exceedance_probability: number | null;
+  max_exceedance_probability: number | null;
+  safe_level: number;
+  passed: boolean | null;
+}
+
+export interface SulfurRiskAdditive {
+  pct: number;
+  dose_kg_t: number;
+  product_cetane: number | null;
+  cost_index: number;
 }
 
 export interface DecisionTraceItem {
   step: number;
-  role: "quality" | "reliability" | "optimization";
+  role: "quality" | "reliability" | "optimization" | "orchestrator";
   status: string;
   summary: string;
+  consumes?: string[];
+  produces?: string[];
+}
+
+export interface DecisionConflict {
+  code: string;
+  roles: string[];
+  resolution: "abstain" | "warning" | "resolved_by_alternative" | "quality_priority" | "hold";
+  message: string;
+}
+
+export interface DecisionExplanation {
+  source: "template" | "llm";
+  text: string;
+  model?: string | null;
+  fallback_reason?: string | null;
 }
 
 export interface SulfurForecast {
@@ -353,6 +386,8 @@ export interface DecisionResult {
     target_met: boolean;
     controls: ScenarioResult["controls"];
     model_forecast: SulfurForecast | null;
+    additive?: SulfurRiskAdditive | null;
+    risk?: SulfurRisk | null;
   } | null;
   scenario: ScenarioResult | null;
   candidates?: {
@@ -376,6 +411,8 @@ export interface DecisionResult {
       ranking_loss: number | null;
     };
     controls?: ScenarioResult["controls"];
+    risk?: SulfurRisk | null;
+    additive?: SulfurRiskAdditive | null;
     safety_gate?: { passed: boolean; reasons: string[] };
     scenario?: ScenarioResult | null;
   }[];
@@ -384,6 +421,10 @@ export interface DecisionResult {
   abstain: { reason: string; missing: string[] } | null;
   forecast: SulfurForecast | null;
   trace: DecisionTraceItem[];
+  conflicts?: DecisionConflict[];
+  consistency?: { code: string; passed: boolean; message: string }[];
+  explanation?: DecisionExplanation;
+  record_id?: string | null;
   assumptions: string[];
 }
 

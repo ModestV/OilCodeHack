@@ -10,3 +10,10 @@ frontend/dist/
 .DS_Store
 *.log
 build_revision.txt
+
+# Organisers' data kit (see data/README.md)
+data/*
+!data/README.md
+
+# Closed-network bundle from scripts/start.py --prepare-offline
+offline/

@@ -142,7 +142,8 @@ def assert_forecast(forecast, origin):
 def assert_decision(decision, request, expected):
     origin = parse_time(request["at"])
     require(decision.get("status") == expected, f"Expected {expected}, got {decision.get('status')}: {decision.get('abstain')}")
-    require([step.get("role") for step in decision.get("trace", [])] == ["quality", "reliability", "optimization"], "Incomplete ordered agent trace")
+    require([step.get("role") for step in decision.get("trace", [])] == ["quality", "reliability", "optimization", "orchestrator"], "Incomplete ordered agent trace")
+    require(isinstance(decision.get("explanation"), dict) and decision["explanation"].get("text"), "Missing operator explanation")
     agents = decision.get("agents", {})
     reliability = agents.get("reliability", {})
     evidence = agents.get("quality", {}).get("evidence", {})
@@ -186,15 +187,22 @@ def assert_decision(decision, request, expected):
             require(decision.get("forecast", {}).get("status") == "ok", "Observed recommendation lacks usable forecast")
             require(decision["forecast"].get("path_supported") is True, "Observed recommendation lacks supported forecast path")
             if not decision["scenario"].get("blend"):
-                require(decision["forecast"].get("alarm_above_10") is False, "Observed recommendation ignores independent forecast alarm")
+                risk = recommendation.get("risk") or {}
+                require(risk.get("passed") is True, "Observed recommendation exceeds the sulfur risk budget")
+                if decision["forecast"].get("alarm_above_10"):
+                    # An alarm makes holding inadmissible; only a correction inside the budget may be advised.
+                    require(decision.get("selected_candidate") != "hold", "Observed recommendation holds the regime under a forecast alarm")
+                    require(risk.get("exceedance_probability") is not None
+                            and risk["exceedance_probability"] <= risk["max_exceedance_probability"] + 1e-9,
+                            "Correction under a forecast alarm does not restore the risk budget")
     return candidates
 
 
 def compact_decision(decision):
-    result = {key: decision.get(key) for key in ("status", "selected_candidate", "safety_gate", "abstain", "trace", "forecast")}
+    result = {key: decision.get(key) for key in ("status", "selected_candidate", "safety_gate", "abstain", "trace", "forecast", "conflicts", "consistency", "explanation")}
     result["quality_evidence"] = decision.get("agents", {}).get("quality", {}).get("evidence")
     result["reliability"] = decision.get("agents", {}).get("reliability")
-    result["candidates"] = [{key: item.get(key) for key in ("id", "status", "feasible", "predicted_sulfur", "effort", "objectives", "safety_gate")} for item in decision.get("candidates") or []]
+    result["candidates"] = [{key: item.get(key) for key in ("id", "status", "feasible", "predicted_sulfur", "effort", "objectives", "risk", "additive", "safety_gate")} for item in decision.get("candidates") or []]
     result["recommendation"] = {key: value for key, value in (decision.get("recommendation") or {}).items() if key != "model_forecast"} or None
     if result["quality_evidence"]:
         result["quality_evidence"] = {key: value for key, value in result["quality_evidence"].items() if key != "model_forecast"}
@@ -222,6 +230,25 @@ def run_case(api, prefix, case):
         lab = next((x for x in frame["values"] if x["metric_id"] == "lims.ht.2.Mg.Sulfur"), {})
         require(lab.get("value") is not None and lab["value"] > 10, "Danger case does not demonstrate observed laboratory exceedance")
         assert_availability(lab, origin, "measured_exceedance", lims=True, usable=True)
+    recommendation = decision.get("recommendation") or {}
+    if case.get("selected_in"):
+        require(decision.get("selected_candidate") in case["selected_in"], f"Selected {decision.get('selected_candidate')} not in {case['selected_in']}")
+    if case.get("selected_not"):
+        require(decision.get("selected_candidate") not in case["selected_not"], f"Selected {decision.get('selected_candidate')} is excluded")
+    if case.get("min_temperature_change") is not None:
+        change = (recommendation.get("controls") or {}).get("ht.T6", {}).get("change")
+        require(change is not None and change >= case["min_temperature_change"], f"T6 change {change} below {case['min_temperature_change']}")
+    if case.get("max_selected_probability") is not None:
+        probability = (recommendation.get("risk") or {}).get("exceedance_probability")
+        require(probability is not None and probability <= case["max_selected_probability"] + 1e-9,
+                f"Selected P(S>10) {probability} above {case['max_selected_probability']}")
+    if case.get("min_additive_pct") is not None:
+        additive = (recommendation.get("additive") or {}).get("pct") or 0
+        require(additive >= case["min_additive_pct"], f"Additive {additive}% below {case['min_additive_pct']}%")
+    if case.get("conflict"):
+        found = {c["code"]: c["resolution"] for c in decision.get("conflicts") or []}
+        for code, resolution in case["conflict"].items():
+            require(found.get(code) == resolution, f"Conflict {code}: expected {resolution}, got {found.get(code)}")
     if case.get("controls_state"):
         controls = decision["agents"]["quality"]["evidence"]["controls"]
         require(all(value.get("freshness") == case["controls_state"] for value in controls.values()), "Case does not demonstrate expected controls state")

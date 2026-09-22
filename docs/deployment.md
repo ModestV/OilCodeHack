@@ -27,6 +27,30 @@ bash deploy/server/remote_deploy.sh
 
 Workflow сначала выполняет backend/model tests и production build фронтенда. Только после этого копирует release через SSH/rsync, перезапускает сервис и проверяет health endpoint.
 
+## Docker и закрытая сеть
+
+`docker compose up --build` собирает один образ (интерфейс + API) и при первом старте импортирует
+`./data`. Для машины без интернета образы и модель переносятся заранее:
+
+```bash
+# на машине с интернетом
+docker compose -f docker-compose.yml -f docker-compose.llm.yml build
+docker compose -f docker-compose.yml -f docker-compose.llm.yml run --rm ollama-pull
+docker save oilcode:latest ollama/ollama:latest -o oilcode-images.tar
+docker run --rm -v oilcode_ollama:/m -v "$PWD":/out alpine tar -cf /out/ollama-models.tar -C /m .
+# в закрытом контуре
+docker load -i oilcode-images.tar
+docker volume create oilcode_ollama
+docker run --rm -v oilcode_ollama:/m -v "$PWD":/in alpine tar -xf /in/ollama-models.tar -C /m
+docker compose -f docker-compose.yml -f docker-compose.llm.yml up --no-build
+```
+
+Если в контуре уже есть OpenAI-совместимая LLM, Ollama не нужна: задайте `OILCODE_LLM_BASE_URL`
+и `OILCODE_LLM_MODEL` для сервиса `app` и запускайте только `docker compose up`.
+
+Журнал решений пишется в `storage/<id>/decisions` (~200 КБ на решение); `OILCODE_DECISION_LOG=0`
+отключает запись.
+
 ## Ограничения
 
 Сервер не получает исходные большие таблицы автоматически. Их нужно импортировать через UI/API после первого развёртывания или заранее положить в `storage/`. Внешний LLM API в production-контур не требуется.
