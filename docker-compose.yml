@@ -3,6 +3,8 @@
 #   docker compose -f docker-compose.yml -f docker-compose.llm.yml up --build
 #                                             → + local LLM explanations (Ollama)
 # Put the organisers' kit (CSV/XLSX or data.rar) into ./data before the first start.
+name: oilcode
+
 services:
   app:
     build:
