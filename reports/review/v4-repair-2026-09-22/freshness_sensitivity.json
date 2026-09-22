@@ -1,0 +1,159 @@
+{
+  "protocol": "real make_decision at LIMS origins 2024-2026 minus 180 min; horizon 180; runtime freshness 48 h unchanged",
+  "dataset_sha256": "8ef77343c350f600a4fded7dc05186067f43466f8a9880f07aa2f695d4142c56",
+  "script_sha256": "d68e3e8ccb26ef72caa18a93e19f1c812ca70ebfd021fc54720813246ab4a3c3",
+  "policy_48h": {
+    "overall": [
+      {
+        "model": "v3",
+        "origins": 1055.0,
+        "recommended_48h": 7.0,
+        "coverage_48h": 0.006635071090047393,
+        "blocked_only_by_cn_t95_staleness": 142.0,
+        "research_relaxed_upper_bound": 137.0,
+        "coverage_research_upper_bound": 0.12985781990521328,
+        "forecast_ok": 236.0
+      },
+      {
+        "model": "v4r",
+        "origins": 1055.0,
+        "recommended_48h": 41.0,
+        "coverage_48h": 0.03886255924170616,
+        "blocked_only_by_cn_t95_staleness": 707.0,
+        "research_relaxed_upper_bound": 711.0,
+        "coverage_research_upper_bound": 0.6739336492890995,
+        "forecast_ok": 986.0
+      }
+    ],
+    "by_year": [
+      {
+        "model": "v3",
+        "year": "2024",
+        "origins": 385.0,
+        "recommended_48h": 0.0,
+        "coverage_48h": 0.0,
+        "blocked_only_by_cn_t95_staleness": 0.0,
+        "research_relaxed_upper_bound": 0.0,
+        "coverage_research_upper_bound": 0.0,
+        "forecast_ok": 0.0
+      },
+      {
+        "model": "v3",
+        "year": "2025",
+        "origins": 417.0,
+        "recommended_48h": 0.0,
+        "coverage_48h": 0.0,
+        "blocked_only_by_cn_t95_staleness": 0.0,
+        "research_relaxed_upper_bound": 0.0,
+        "coverage_research_upper_bound": 0.0,
+        "forecast_ok": 0.0
+      },
+      {
+        "model": "v3",
+        "year": "2026",
+        "origins": 253.0,
+        "recommended_48h": 7.0,
+        "coverage_48h": 0.02766798418972332,
+        "blocked_only_by_cn_t95_staleness": 142.0,
+        "research_relaxed_upper_bound": 137.0,
+        "coverage_research_upper_bound": 0.541501976284585,
+        "forecast_ok": 236.0
+      },
+      {
+        "model": "v4r",
+        "year": "2024",
+        "origins": 385.0,
+        "recommended_48h": 18.0,
+        "coverage_48h": 0.046753246753246755,
+        "blocked_only_by_cn_t95_staleness": 255.0,
+        "research_relaxed_upper_bound": 270.0,
+        "coverage_research_upper_bound": 0.7012987012987013,
+        "forecast_ok": 341.0
+      },
+      {
+        "model": "v4r",
+        "year": "2025",
+        "origins": 417.0,
+        "recommended_48h": 17.0,
+        "coverage_48h": 0.0407673860911271,
+        "blocked_only_by_cn_t95_staleness": 315.0,
+        "research_relaxed_upper_bound": 309.0,
+        "coverage_research_upper_bound": 0.7410071942446043,
+        "forecast_ok": 411.0
+      },
+      {
+        "model": "v4r",
+        "year": "2026",
+        "origins": 253.0,
+        "recommended_48h": 6.0,
+        "coverage_48h": 0.023715415019762844,
+        "blocked_only_by_cn_t95_staleness": 137.0,
+        "research_relaxed_upper_bound": 132.0,
+        "coverage_research_upper_bound": 0.5217391304347826,
+        "forecast_ok": 234.0
+      }
+    ],
+    "paired_v3_vs_v4r": {
+      "both": 5,
+      "only_v3": 2,
+      "only_v4r": 36,
+      "neither": 1012
+    }
+  },
+  "research_60d_7d": {
+    "research_only": true,
+    "applied_in_runtime": false,
+    "definition": "upper bound: decisions whose only blocking reasons are CN/T95 staleness and whose CN age <= 60 d and T95 age <= 7 d; downstream checks after the gate are not re-run",
+    "note": "no technological or organisational justification for relaxing 48 h was found; not a model gain"
+  },
+  "reason_counts": {
+    "v3": {
+      "cetane: измерение не свежее (stale)": 999,
+      "Нет допустимого модельного прогноза для решения по наблюдаемым данным": 819,
+      "Свежие поточные анализаторы серы расходятся; требуется проверка источников": 142,
+      "Сера в конце горизонта превышает обязательный предел 10 мг/кг": 121,
+      "Цель по сере не достигнута в выбранном горизонте": 121,
+      "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки": 55,
+      "Базовый показатель t95 не выполняет ограничение; его отклик не моделируется": 38,
+      "Базовый показатель cetane не выполняет ограничение; его отклик не моделируется": 19,
+      "t95: измерение не свежее (stale)": 14,
+      "Базовая сера: измерение не свежее (stale)": 6,
+      "ht.P13: измерение не свежее (stale)": 4,
+      "ht.T6: измерение не свежее (stale)": 4,
+      "ht.F9: измерение не свежее (stale)": 4,
+      "Не все горизонты траектории прошли проверку области применимости": 3
+    },
+    "v4r": {
+      "cetane: измерение не свежее (stale)": 999,
+      "Свежие поточные анализаторы серы расходятся; требуется проверка источников": 142,
+      "Независимый прогноз указывает превышение 10 мг/кг; действие требует отдельной проверки": 103,
+      "Нет допустимого модельного прогноза для решения по наблюдаемым данным": 69,
+      "Базовый показатель t95 не выполняет ограничение; его отклик не моделируется": 38,
+      "Сера в конце горизонта превышает обязательный предел 10 мг/кг": 37,
+      "Цель по сере не достигнута в выбранном горизонте": 37,
+      "Базовый показатель cetane не выполняет ограничение; его отклик не моделируется": 19,
+      "t95: измерение не свежее (stale)": 14,
+      "Не все горизонты траектории прошли проверку области применимости": 10,
+      "Базовая сера: измерение не свежее (stale)": 5,
+      "ht.P13: измерение не свежее (stale)": 4,
+      "ht.T6: измерение не свежее (stale)": 4,
+      "ht.F9: измерение не свежее (stale)": 4
+    }
+  },
+  "age_quantiles_days": {
+    "cetane": {
+      "0.1": 3.88,
+      "0.25": 8.88,
+      "0.5": 18.88,
+      "0.75": 29.75,
+      "0.9": 47.88
+    },
+    "t95": {
+      "0.1": 0.42,
+      "0.25": 0.88,
+      "0.5": 0.88,
+      "0.75": 0.88,
+      "0.9": 0.9
+    }
+  }
+}

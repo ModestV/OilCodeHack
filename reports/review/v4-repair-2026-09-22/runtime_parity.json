@@ -1,0 +1,185 @@
+{
+  "passed": true,
+  "artifact_sha256": "229f597790421bf98c59518dc3564870993616f806f69eada5faded93dc16309",
+  "tolerance": 1e-09,
+  "protocol": "every walk-forward origin x horizon (2024-2026), no sampling",
+  "checked": 4222,
+  "failures": [],
+  "failure_count": 0,
+  "by_year_horizon_status": [
+    {
+      "year": "2024",
+      "horizon_minutes": 0,
+      "runtime_status": "abstain",
+      "checked": 40,
+      "matched": 40
+    },
+    {
+      "year": "2024",
+      "horizon_minutes": 0,
+      "runtime_status": "ok",
+      "checked": 346,
+      "matched": 346
+    },
+    {
+      "year": "2024",
+      "horizon_minutes": 60,
+      "runtime_status": "abstain",
+      "checked": 42,
+      "matched": 42
+    },
+    {
+      "year": "2024",
+      "horizon_minutes": 60,
+      "runtime_status": "ok",
+      "checked": 344,
+      "matched": 344
+    },
+    {
+      "year": "2024",
+      "horizon_minutes": 120,
+      "runtime_status": "abstain",
+      "checked": 38,
+      "matched": 38
+    },
+    {
+      "year": "2024",
+      "horizon_minutes": 120,
+      "runtime_status": "ok",
+      "checked": 347,
+      "matched": 347
+    },
+    {
+      "year": "2024",
+      "horizon_minutes": 180,
+      "runtime_status": "abstain",
+      "checked": 44,
+      "matched": 44
+    },
+    {
+      "year": "2024",
+      "horizon_minutes": 180,
+      "runtime_status": "ok",
+      "checked": 341,
+      "matched": 341
+    },
+    {
+      "year": "2025",
+      "horizon_minutes": 0,
+      "runtime_status": "abstain",
+      "checked": 10,
+      "matched": 10
+    },
+    {
+      "year": "2025",
+      "horizon_minutes": 0,
+      "runtime_status": "ok",
+      "checked": 407,
+      "matched": 407
+    },
+    {
+      "year": "2025",
+      "horizon_minutes": 60,
+      "runtime_status": "abstain",
+      "checked": 8,
+      "matched": 8
+    },
+    {
+      "year": "2025",
+      "horizon_minutes": 60,
+      "runtime_status": "ok",
+      "checked": 409,
+      "matched": 409
+    },
+    {
+      "year": "2025",
+      "horizon_minutes": 120,
+      "runtime_status": "abstain",
+      "checked": 7,
+      "matched": 7
+    },
+    {
+      "year": "2025",
+      "horizon_minutes": 120,
+      "runtime_status": "ok",
+      "checked": 410,
+      "matched": 410
+    },
+    {
+      "year": "2025",
+      "horizon_minutes": 180,
+      "runtime_status": "abstain",
+      "checked": 6,
+      "matched": 6
+    },
+    {
+      "year": "2025",
+      "horizon_minutes": 180,
+      "runtime_status": "ok",
+      "checked": 411,
+      "matched": 411
+    },
+    {
+      "year": "2026",
+      "horizon_minutes": 0,
+      "runtime_status": "abstain",
+      "checked": 19,
+      "matched": 19
+    },
+    {
+      "year": "2026",
+      "horizon_minutes": 0,
+      "runtime_status": "ok",
+      "checked": 234,
+      "matched": 234
+    },
+    {
+      "year": "2026",
+      "horizon_minutes": 60,
+      "runtime_status": "abstain",
+      "checked": 19,
+      "matched": 19
+    },
+    {
+      "year": "2026",
+      "horizon_minutes": 60,
+      "runtime_status": "ok",
+      "checked": 234,
+      "matched": 234
+    },
+    {
+      "year": "2026",
+      "horizon_minutes": 120,
+      "runtime_status": "abstain",
+      "checked": 19,
+      "matched": 19
+    },
+    {
+      "year": "2026",
+      "horizon_minutes": 120,
+      "runtime_status": "ok",
+      "checked": 234,
+      "matched": 234
+    },
+    {
+      "year": "2026",
+      "horizon_minutes": 180,
+      "runtime_status": "abstain",
+      "checked": 19,
+      "matched": 19
+    },
+    {
+      "year": "2026",
+      "horizon_minutes": 180,
+      "runtime_status": "ok",
+      "checked": 234,
+      "matched": 234
+    }
+  ],
+  "max_abs_diff": {
+    "max_abs_diff_prediction": 8.881784197001252e-15,
+    "max_abs_diff_prediction_lower": 7.105427357601002e-15,
+    "max_abs_diff_prediction_upper": 8.881784197001252e-15,
+    "max_abs_diff_exceedance_probability": 4.135580766728708e-15
+  }
+}
