@@ -1107,6 +1107,15 @@ function PipelinePreview({
           )}
         </section>
       )}
+      {decision?.explanation && (
+        <section className="support-explanation" aria-label="Объяснение решения">
+          <h3>Объяснение{decision.explanation.source === "llm" ? ` · LLM ${decision.explanation.model ?? ""}` : " · шаблон"}</h3>
+          <p>{decision.explanation.text}</p>
+          {!!decision.conflicts?.length && (
+            <ul>{decision.conflicts.map((conflict) => <li key={conflict.code}>{conflict.message} ({conflict.resolution})</li>)}</ul>
+          )}
+        </section>
+      )}
       <details className="support-details">
         <summary>Как получена рекомендация</summary>
         <p>
