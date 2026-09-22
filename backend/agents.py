@@ -15,7 +15,7 @@ from typing import Any
 from .analytics import parse_time, snapshot
 from .explain import build_explanation
 from .forecast import ForecastUnavailable, forecast_sulfur
-from .objectives import annotate_pareto, candidate_objectives, regime_severity
+from .objectives import annotate_pareto, candidate_objectives, operating_state, regime_severity
 from .scenarios import (
     HARD_CETANE_MIN,
     HARD_SULFUR_MAX,
@@ -203,8 +203,13 @@ class ReliabilityAgent:
         analyzers = quality.get("evidence", {}).get("analyzer_comparison", {})
         if not explicit and analyzers.get("conflict"):
             reasons.append("Свежие поточные анализаторы серы расходятся; требуется проверка источников")
+        control_values = {key: item.get("value") for key, item in quality["evidence"]["controls"].items()}
+        state = operating_state(control_values)
+        if state["state"] in {"shutdown", "transition"}:
+            # Put the regime first: it explains every downstream data failure.
+            reasons.insert(0, state["reason"])
         can_recommend = not reasons
-        severity = regime_severity({key: item.get("value") for key, item in quality["evidence"]["controls"].items()})
+        severity = regime_severity(control_values)
         # Compatibility field only: this is a gate score, not a calibrated
         # confidence, reliability probability, or probability of safe product.
         confidence = 1.0 if can_recommend else 0.0
@@ -220,6 +225,7 @@ class ReliabilityAgent:
             "confidence": confidence,
             "confidence_kind": "binary_data_gate_not_probability",
             "regime_severity": severity,
+            "operating_state": state,
             "can_recommend": can_recommend,
             "basis": "scenario_only" if explicit else "observed_and_forecast",
             "reasons": reasons,

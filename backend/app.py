@@ -26,6 +26,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from . import analytics as a
+from . import decision_log
 from .agents import make_decision
 from .config import ROOT, STORAGE
 from .formulas import formula_results
@@ -263,10 +264,28 @@ def scenario(dataset_id: str, body: ScenarioRequest):
 def decision(dataset_id: str, body: ScenarioRequest):
     """Run the local quality → reliability → optimization agent pipeline."""
 
+    directory = dataset(dataset_id)
     try:
-        return make_decision(dataset(dataset_id), body)
+        result = make_decision(directory, body)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+    result["record_id"] = decision_log.record(directory, body.model_dump(mode="json"), a.clean(result))
+    return result
+
+
+@app.get("/api/datasets/{dataset_id}/decisions")
+def decisions(dataset_id: str, limit: int = Query(default=50, ge=1, le=500)):
+    """Audit log: newest decisions first."""
+
+    return decision_log.list_records(dataset(dataset_id), limit=limit)
+
+
+@app.get("/api/datasets/{dataset_id}/decisions/{record_id}")
+def decision_record(dataset_id: str, record_id: str):
+    try:
+        return decision_log.get_record(dataset(dataset_id), record_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Запись решения не найдена") from exc
 
 
 @app.get("/api/datasets/{dataset_id}/forecast")

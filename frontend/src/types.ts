@@ -403,6 +403,7 @@ export interface DecisionResult {
   conflicts?: DecisionConflict[];
   consistency?: { code: string; passed: boolean; message: string }[];
   explanation?: DecisionExplanation;
+  record_id?: string | null;
   assumptions: string[];
 }
 

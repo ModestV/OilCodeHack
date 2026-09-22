@@ -15,7 +15,7 @@ def evidence(monkeypatch):
     values = [
         {"metric_id": metric, "value": value, "timestamp": AT,
          "available_at": AT, "freshness": "fresh", "flags": []}
-        for metric, value in (("ht.T6", 300), ("ht.F9", 100), ("ht.P13", 5),
+        for metric, value in (("ht.T6", 300), ("ht.F9", 210), ("ht.P13", 5),
                               ("pak.ht.Mg.Sulfur", 8))
     ]
     monkeypatch.setattr(agents, "snapshot", lambda *args, **kwargs: {"values": values})
