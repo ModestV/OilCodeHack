@@ -1,0 +1,40 @@
+{
+  "model": "two-stage v4r (tools/modeling/two_stage_features.py, two_stage_forecast.py; runtime backend/forecast_two_stage.py)",
+  "rule": "every feature at origin t uses only observations with available_at <= t; runtime and offline share the same functions",
+  "families": [
+    {"family": "analyser now", "columns": ["ln_q21_raw", "ln_pak_raw"], "source": ["ht.Q21", "pak.ht.Mg.Sulfur"],
+     "available_at": "reading timestamp", "window": "as-of <= t, at most 30 min old",
+     "cleaning": "causal: range (0,100), importer flatline flag, plateau >= 60 min measured up to the reading",
+     "mutation_test": "test_analyser_cleaning_is_causal, test_dynamics_and_lab_features_ignore_future_mutations"},
+    {"family": "analyser rolling", "columns": ["ln_*_raw_1h", "ln_*_raw_6h", "ln_*_raw_24h", "ln_q21_1h", "ln_pak_1h", "ln_q21_24h", "ln_pak_24h"],
+     "available_at": "reading timestamp", "window": "(t - w, t], minimum counts 3/18/36",
+     "mutation_test": "test_dynamics_and_lab_features_ignore_future_mutations"},
+    {"family": "control moves and levels", "columns": ["dT6_1h", "dT6_3h", "dT6_6h", "dlnF9_*", "dP13_*", "T6", "F9", "P13"],
+     "source": ["ht.T6", "ht.F9", "ht.P13"], "available_at": "reading timestamp",
+     "window": "as-of at t and at t - {1,3,6} h, at most 30 min old", "mutation_test": "test_dynamics_and_lab_features_ignore_future_mutations"},
+    {"family": "lab anchor (offset, level, pairs)", "columns": ["offset_q21", "offset_pak", "ln_level", "anchor_pairs_*"],
+     "source": ["lims.ht.2.Mg.Sulfur", "analysers around sampling time"],
+     "available_at": "sample_time + 240 min (analyser pairing window ends sample + 30 min < publication)",
+     "window": "last 10 published samples within 45 days; level = median of last 5",
+     "mutation_test": "test_dynamics_and_lab_features_ignore_future_mutations (labs sampled before t but published after t are mutated)"},
+    {"family": "previous published lab", "columns": ["ln_previous_lab"], "available_at": "sample_time + 240 min", "window": "<= 48 h old",
+     "mutation_test": "test_dynamics_and_lab_features_ignore_future_mutations"},
+    {"family": "anchored analysers", "columns": ["ln_q21", "ln_pak"], "available_at": "max(reading, offset availability)",
+     "mutation_test": "test_dynamics_and_lab_features_ignore_future_mutations"},
+    {"family": "Stage-1 predictions (Stage-2 inputs)", "columns": ["ln_q21_pred", "ln_pak_pred"],
+     "available_at": "t (computed from the families above with a Stage-1 model fitted on windows ending before its cutoff)",
+     "mutation_test": "test_stage1_fit_ignores_data_after_cutoff, test_fit_procedure_ignores_everything_after_cutoff"}
+  ],
+  "training_only_quantities": [
+    {"name": "Stage-1 target", "definition": "ln mean analyser over (t+h-30, t+h+30] minus ln analyser now",
+     "boundary": "row used before a cutoff / inside a fold only if t+h+30 < boundary"},
+    {"name": "quiet_future mask", "definition": "whole control path (t, t+h+30] within tolerance, observed without gaps > 30 min",
+     "boundary": "same as the Stage-1 target window; never a runtime input"},
+    {"name": "Stage-2 label", "definition": "LIMS at sample time", "boundary": "fit: published before cutoff; fold scoring: published before fold end"},
+    {"name": "support/applicability envelope", "boundary": "labels published before the model set's cutoff (fold start for outer folds)"},
+    {"name": "residual quantiles", "boundary": "outer out-of-fold predictions only (configuration chosen on earlier folds)"},
+    {"name": "control response (scenario defaults)", "boundary": "analyser/control data strictly before fit_end (unchanged from v4)"},
+    {"name": "anomaly thresholds", "boundary": "rows before fit_end, quantiles scored on folds ending by fit_end (unchanged from v4)"}
+  ],
+  "not_used_by_forecast": ["lims.ht.2.CetaneNumber", "lims.ht.2.95%.T", "dataset settings.json freshness"]
+}
