@@ -3,6 +3,7 @@
 import argparse
 import os
 import signal
+import shutil
 import socket
 import subprocess
 import sys
@@ -32,6 +33,9 @@ def main():
     while not free(ui_port) or ui_port == api_port:
         ui_port += 1
     env = {**os.environ, "VITE_API_TARGET": f"http://127.0.0.1:{api_port}"}
+    npm = shutil.which("npm.cmd" if os.name == "nt" else "npm")
+    if npm is None:
+        raise SystemExit("npm не найден. Установите Node.js 22.12+ и добавьте npm в PATH.")
     children = []
     try:
         children.append(
@@ -52,7 +56,7 @@ def main():
         children.append(
             subprocess.Popen(
                 [
-                    "npm",
+                    npm,
                     "run",
                     "dev",
                     "--",
