@@ -130,6 +130,43 @@ const pointY = (point: ChartPoint) => {
 const asSeriesArray = (series: ChartOptionLike["series"]) =>
   Array.isArray(series) ? series : series ? [series] : [];
 
+const chartLabel = {
+  color: "#c7cccf",
+  fontWeight: 500,
+  textBorderWidth: 0,
+  textShadowBlur: 0,
+};
+
+const polishSeriesLabels = (item: ChartSeries): ChartSeries => {
+  const label = item.label as Record<string, unknown> | undefined;
+  const markLine = item.markLine as Record<string, unknown> | undefined;
+  const markLineLabel = markLine?.label as Record<string, unknown> | undefined;
+  return {
+    ...item,
+    ...(label
+      ? { label: { ...label, textBorderWidth: 0, textShadowBlur: 0 } }
+      : {}),
+    ...(markLine
+      ? {
+          markLine: {
+            ...markLine,
+            label: {
+              ...chartLabel,
+              backgroundColor: "#171a1de6",
+              borderColor: "#303539",
+              borderWidth: 1,
+              borderRadius: 2,
+              padding: [2, 4],
+              ...markLineLabel,
+              textBorderWidth: 0,
+              textShadowBlur: 0,
+            },
+          },
+        }
+      : {}),
+  };
+};
+
 const hasNonZeroRange = (
   minSeries: ChartSeries | undefined,
   maxSeries: ChartSeries | undefined,
@@ -218,6 +255,9 @@ export function composeChartOption<T extends ChartOptionLike>(value: T): T {
     },
     color: ["#a5adb1", "#7f898e", "#b39a70", "#8f999e"],
     ...value,
+    ...(value.series
+      ? { series: asSeriesArray(value.series).map(polishSeriesLabels) }
+      : {}),
     tooltip,
     legend: {
       textStyle: { color: "#aab0b4" },

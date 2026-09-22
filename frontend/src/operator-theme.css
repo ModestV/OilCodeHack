@@ -407,6 +407,10 @@ select:focus-visible,
   background: transparent;
 }
 
+.panel > header {
+  padding-inline: 16px;
+}
+
 .panel h2,
 .panel h3,
 .decision-band h2,
@@ -551,6 +555,10 @@ select:focus-visible,
 .formula-list > *,
 .quality-grid > * {
   border-color: var(--border) !important;
+}
+
+.diagnostic-stats article {
+  background: var(--surface) !important;
 }
 
 .overview-grid,
@@ -754,6 +762,28 @@ tbody tr:hover td {
   background: #262a2d !important;
   color: var(--text) !important;
   box-shadow: 0 10px 24px #000b !important;
+}
+
+.help-tooltip__trigger {
+  color: var(--muted);
+}
+
+.help-tooltip__trigger:hover,
+.help-tooltip__trigger:focus-visible,
+.help-tooltip__trigger[aria-expanded="true"] {
+  background: var(--surface-selected);
+  color: var(--text);
+}
+
+.table-scroll {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-panel);
+  background: var(--surface) !important;
+  scrollbar-color: #555c61 var(--surface-inset);
+}
+
+.table-scroll table {
+  background: var(--surface) !important;
 }
 
 .formula-list summary,

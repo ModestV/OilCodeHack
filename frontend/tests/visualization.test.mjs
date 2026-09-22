@@ -92,6 +92,22 @@ test("chart composition formats axis tooltips without binary floats", () => {
   );
 });
 
+test("chart composition removes heavy outlines from data and threshold labels", () => {
+  const option = composeChartOption({
+    series: [{
+      label: { show: true, textBorderWidth: 5 },
+      markLine: {
+        label: { formatter: "10 мг/кг", textBorderWidth: 5 },
+        data: [{ yAxis: 10 }],
+      },
+    }],
+  });
+  assert.equal(option.series[0].label.textBorderWidth, 0);
+  assert.equal(option.series[0].markLine.label.textBorderWidth, 0);
+  assert.equal(option.series[0].markLine.label.textShadowBlur, 0);
+  assert.equal(option.series[0].markLine.label.backgroundColor, "#171a1de6");
+});
+
 test("sulfur overview composition removes slider and zero min/max service series", () => {
   const t = sourceEpoch("2025-07-01T12:03:00");
   const option = composeChartOption({
