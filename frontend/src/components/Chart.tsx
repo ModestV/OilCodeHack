@@ -1,38 +1,7 @@
-import { useEffect, useRef } from "react";
-import { connect, init, use } from "echarts/core";
-import {
-  BarChart,
-  BoxplotChart,
-  LineChart,
-  ScatterChart,
-} from "echarts/charts";
-import {
-  DataZoomComponent,
-  GridComponent,
-  LegendComponent,
-  MarkLineComponent,
-  TitleComponent,
-  TooltipComponent,
-} from "echarts/components";
-import { CanvasRenderer } from "echarts/renderers";
-import type { EChartsCoreOption, ECharts } from "echarts/core";
-import { composeChartOption } from "../visualization";
+import { lazy, Suspense } from "react";
+import type { EChartsCoreOption } from "echarts/core";
 
-use([
-  LineChart,
-  BarChart,
-  BoxplotChart,
-  ScatterChart,
-  GridComponent,
-  LegendComponent,
-  TitleComponent,
-  TooltipComponent,
-  DataZoomComponent,
-  MarkLineComponent,
-  CanvasRenderer,
-]);
-
-interface ChartProps {
+export interface ChartProps {
   option: EChartsCoreOption;
   height?: number;
   onTime?: (time: string) => void;
@@ -41,63 +10,24 @@ interface ChartProps {
   label?: string;
 }
 
-const configured = (value: EChartsCoreOption) => composeChartOption(value);
+const ChartImpl = lazy(() =>
+  import("./ChartImpl").then((module) => ({ default: module.ChartImpl })),
+);
 
-export function Chart({
-  option,
-  height = 300,
-  onTime,
-  onSelectTime,
-  group,
-  label = "График данных",
-}: ChartProps) {
-  const ref = useRef<HTMLDivElement>(null);
-  const chartRef = useRef<ECharts>();
-  const latest = useRef({ option, onTime, onSelectTime });
-  latest.current = { option, onTime, onSelectTime };
-  useEffect(() => {
-    if (!ref.current) return;
-    let chart: ECharts | undefined;
-    const render = () => {
-      if (!ref.current?.clientWidth) return;
-      if (chart) {
-        chart.resize();
-        return;
-      }
-      chart = init(ref.current);
-      chartRef.current = chart;
-      if (group) {
-        chart.group = group;
-        connect(group);
-      }
-      chart.setOption(configured(latest.current.option));
-      chart.on("click", (event: { value?: unknown }) => {
-        const select = latest.current.onSelectTime || latest.current.onTime;
-        if (!select) return;
-        if (Array.isArray(event.value) && event.value[0] != null)
-          select(String(event.value[0]));
-      });
-    };
-    render();
-    const observer = new ResizeObserver(render);
-    observer.observe(ref.current);
-    return () => {
-      observer.disconnect();
-      chart?.dispose();
-      chartRef.current = undefined;
-    };
-  }, [group]);
-  useEffect(() => {
-    chartRef.current?.setOption(configured(option), {
-      replaceMerge: ["series"],
-    });
-  }, [option]);
+export function Chart(props: ChartProps) {
+  const height = props.height ?? 300;
   return (
-    <div
-      ref={ref}
-      style={{ height, minWidth: 0 }}
-      role="img"
-      aria-label={label}
-    />
+    <Suspense
+      fallback={
+        <div
+          className="chart-skeleton"
+          style={{ height }}
+          role="status"
+          aria-label="Подготовка графика"
+        />
+      }
+    >
+      <ChartImpl {...props} />
+    </Suspense>
   );
 }

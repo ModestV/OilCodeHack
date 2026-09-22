@@ -9,6 +9,7 @@ import {
   type KeyboardEvent,
 } from "react";
 import type { Metric } from "../types";
+import { UiSelect } from "./UiSelect";
 import "./SignalSelector.css";
 
 export function SignalSelector({
@@ -207,31 +208,33 @@ export function SignalSelector({
           <div className="signal-selector__filters">
             <label>
               <span>Источник</span>
-              <select
+              <UiSelect
+                ariaLabel="Источник"
                 value={source}
-                onChange={(event) => setSource(event.target.value)}
-              >
-                <option value="">Все</option>
-                {sources.map((item) => (
-                  <option value={item} key={item}>
-                    {item.toUpperCase()}
-                  </option>
-                ))}
-              </select>
+                onChange={setSource}
+                options={[
+                  { value: "", label: "Все" },
+                  ...sources.map((item) => ({
+                    value: item,
+                    label: item.toUpperCase(),
+                  })),
+                ]}
+              />
             </label>
             <label>
               <span>Установка</span>
-              <select
+              <UiSelect
+                ariaLabel="Установка"
                 value={plant}
-                onChange={(event) => setPlant(event.target.value)}
-              >
-                <option value="">Все</option>
-                {plants.map((item) => (
-                  <option value={item} key={item}>
-                    {item.toUpperCase()}
-                  </option>
-                ))}
-              </select>
+                onChange={setPlant}
+                options={[
+                  { value: "", label: "Все" },
+                  ...plants.map((item) => ({
+                    value: item,
+                    label: item.toUpperCase(),
+                  })),
+                ]}
+              />
             </label>
           </div>
           {selectedMetrics.length > 0 && (
