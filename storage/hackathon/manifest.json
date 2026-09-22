@@ -1,0 +1,2536 @@
+{
+  "id": "hackathon",
+  "name": "Нефтекод 2.0 · История 2023–2026",
+  "status": "ready",
+  "created_at": "2026-09-19T22:35:40.949711",
+  "start": "2023-01-01T00:00:00",
+  "end": "2026-08-11T09:54:04",
+  "telemetry_start": "2023-01-01T00:00:00",
+  "telemetry_end": "2026-08-07T00:00:00",
+  "sources": [
+    {
+      "kind": "kip",
+      "filename": "242000_tags.csv",
+      "rows": 4919642,
+      "metrics": 26,
+      "frame_count": 189217,
+      "start": "2023-01-01T00:00:00",
+      "end": "2026-08-07T00:00:00",
+      "invalid_count": 0,
+      "suspect_count": 103113,
+      "duplicate_count": 0
+    },
+    {
+      "kind": "kip",
+      "filename": "avt_tags.csv",
+      "rows": 13434407,
+      "metrics": 71,
+      "frame_count": 189217,
+      "start": "2023-01-01T00:00:00",
+      "end": "2026-08-07T00:00:00",
+      "invalid_count": 0,
+      "suspect_count": 376339,
+      "duplicate_count": 0
+    },
+    {
+      "kind": "pak",
+      "filename": "Выгрузка ПАК 01.01.2023 - н.в_.xlsx",
+      "rows": 265104,
+      "metrics": 2,
+      "frame_count": 189853,
+      "start": "2023-01-01T00:00:00",
+      "end": "2026-08-11T09:54:04",
+      "invalid_count": 0,
+      "suspect_count": 12620,
+      "duplicate_count": 0
+    },
+    {
+      "kind": "lims",
+      "filename": "ЛИМСы 01.01.2023 - н.в_ (2).xlsx",
+      "rows": 36797,
+      "metrics": 54,
+      "frame_count": 3490,
+      "start": "2023-01-01T02:00:00",
+      "end": "2026-08-09T14:00:00",
+      "invalid_count": 6,
+      "suspect_count": 3,
+      "duplicate_count": 9
+    }
+  ],
+  "metrics": [
+    {
+      "id": "ht.F1",
+      "label": "Расход бензина c установки",
+      "source": "kip",
+      "unit": "м³/ч",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "F1",
+      "group": "Сырьё и потоки",
+      "description": "Расход бензина c установки"
+    },
+    {
+      "id": "ht.F2",
+      "label": "Газовая схема. Расход на линии от ЦК-201",
+      "source": "kip",
+      "unit": "нм³/ч",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "F2",
+      "group": "Стабилизация",
+      "description": "Газовая схема. Расход на линии от ЦК-201"
+    },
+    {
+      "id": "ht.P3",
+      "label": "Полисеп. Сепаратор С-201. Давление на входе",
+      "source": "kip",
+      "unit": "МПа",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "P3",
+      "group": "Сырьё и потоки",
+      "description": "Полисеп. Сепаратор С-201. Давление на входе"
+    },
+    {
+      "id": "ht.W4",
+      "label": "Блок стабилизации. Массовый расход бензина в колонну К-206",
+      "source": "kip",
+      "unit": "т/ч",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "W4",
+      "group": "Стабилизация",
+      "description": "Блок стабилизации. Массовый расход бензина в колонну К-206"
+    },
+    {
+      "id": "ht.T5",
+      "label": "Полисеп. Реактор Р-201. Температура ГСС на выходе",
+      "source": "kip",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "T5",
+      "group": "Реакторы",
+      "description": "Полисеп. Реактор Р-201. Температура ГСС на выходе"
+    },
+    {
+      "id": "ht.T6",
+      "label": "Поточный анализатор серы в дизельном топливе между коллекторами нагнетания и приёма Н-202/1,2",
+      "source": "kip",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "T6",
+      "group": "Реакторы",
+      "description": "Поточный анализатор серы в дизельном топливе между коллекторами нагнетания и приёма Н-202/1,2",
+      "role": "control",
+      "control_kind": "reactor_inlet_temperature"
+    },
+    {
+      "id": "ht.W7",
+      "label": "Блок стабилизации. Поточный анализатор содержания серы в гидроочищенном ДТ",
+      "source": "kip",
+      "unit": "т/ч",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "W7",
+      "group": "Стабилизация",
+      "description": "Блок стабилизации. Поточный анализатор содержания серы в гидроочищенном ДТ"
+    },
+    {
+      "id": "ht.P8",
+      "label": "Полисеп. Реактор Р-202. Температура гсс на входе",
+      "source": "kip",
+      "unit": "МПа",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "P8",
+      "group": "Реакторы",
+      "description": "Полисеп. Реактор Р-202. Температура гсс на входе",
+      "mapping_warning": "Ранний ответ организаторов называл этот тег управляющим; обновлённый справочник описывает его иначе."
+    },
+    {
+      "id": "ht.F9",
+      "label": "Блок стабилизации. Расход газа поддува на входе в К-201. Массовый расход (АС КУБ)",
+      "source": "kip",
+      "unit": "т/ч",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "F9",
+      "group": "Сырьё и потоки",
+      "description": "Блок стабилизации. Расход газа поддува на входе в К-201. Массовый расход (АС КУБ)",
+      "role": "control",
+      "control_kind": "feed_mass_flow"
+    },
+    {
+      "id": "ht.W10",
+      "label": "Реактор Р-202. Перепад давления.",
+      "source": "kip",
+      "unit": "т/ч",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "W10",
+      "group": "Реакторы",
+      "description": "Реактор Р-202. Перепад давления."
+    },
+    {
+      "id": "ht.T11",
+      "label": "Расход сырья на установку (массовый)",
+      "source": "kip",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "T11",
+      "group": "Реакторы",
+      "description": "Расход сырья на установку (массовый)",
+      "mapping_warning": "Ранний ответ организаторов называл этот тег управляющим; обновлённый справочник описывает его иначе."
+    },
+    {
+      "id": "ht.T12",
+      "label": "Расход бензина c установки",
+      "source": "kip",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "T12",
+      "group": "Сырьё и потоки",
+      "description": "Расход бензина c установки"
+    },
+    {
+      "id": "ht.P13",
+      "label": "Трубопровод на выходе из реактора Р-202: Качество продукции по S",
+      "source": "kip",
+      "unit": "МПа",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "P13",
+      "group": "Реакторы",
+      "description": "Трубопровод на выходе из реактора Р-202: Качество продукции по S",
+      "role": "control",
+      "control_kind": "reactor_inlet_pressure"
+    },
+    {
+      "id": "ht.F14",
+      "label": "Блок стабилизации. Температура верха колонны К-201 /бензин,УВГ,Н2S",
+      "source": "kip",
+      "unit": "т/ч",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "F14",
+      "group": "Стабилизация",
+      "description": "Блок стабилизации. Температура верха колонны К-201 /бензин,УВГ,Н2S"
+    },
+    {
+      "id": "ht.F15",
+      "label": "Полисеп. Расход квенча в реактор Р-202",
+      "source": "kip",
+      "unit": "м³/ч",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "F15",
+      "group": "Реакторы",
+      "description": "Полисеп. Расход квенча в реактор Р-202"
+    },
+    {
+      "id": "ht.T16",
+      "label": "Блок стабилизации. Колонна К-201. Температура стабильного гидрогенизата низ",
+      "source": "kip",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "T16",
+      "group": "Стабилизация",
+      "description": "Блок стабилизации. Колонна К-201. Температура стабильного гидрогенизата низ"
+    },
+    {
+      "id": "ht.F17",
+      "label": "Расход гидроочищенного ДТ в цех №8 c установки",
+      "source": "kip",
+      "unit": "т/ч",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "F17",
+      "group": "Сырьё и потоки",
+      "description": "Расход гидроочищенного ДТ в цех №8 c установки"
+    },
+    {
+      "id": "ht.T18",
+      "label": "Блок стабилизации. Колонна К-201. Давление на выходе",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "T18",
+      "group": "Стабилизация",
+      "description": "Блок стабилизации. Колонна К-201. Давление на выходе"
+    },
+    {
+      "id": "ht.F19",
+      "label": "Полисеп. Реактор Р-202. Давление на входе",
+      "source": "kip",
+      "unit": "т/ч",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "F19",
+      "group": "Стабилизация",
+      "description": "Полисеп. Реактор Р-202. Давление на входе",
+      "mapping_warning": "Ранний ответ организаторов называл этот тег управляющим; обновлённый справочник описывает его иначе."
+    },
+    {
+      "id": "ht.Q20",
+      "label": "Блок стабилизации. Расход бензина в колонну К-201",
+      "source": "kip",
+      "unit": "ppm",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "Q20",
+      "group": "Стабилизация",
+      "description": "Блок стабилизации. Расход бензина в колонну К-201"
+    },
+    {
+      "id": "ht.Q21",
+      "label": "Блок стабилизации. Расход газа поддува на входе в К-201",
+      "source": "kip",
+      "unit": "ppm",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "Q21",
+      "group": "Стабилизация",
+      "description": "Блок стабилизации. Расход газа поддува на входе в К-201"
+    },
+    {
+      "id": "ht.F22",
+      "label": "Блок стабилизации. Расход газа поддува на входе в К-201Температура в сепараторе С-205",
+      "source": "kip",
+      "unit": "нм³/ч",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "F22",
+      "group": "Стабилизация",
+      "description": "Блок стабилизации. Расход газа поддува на входе в К-201Температура в сепараторе С-205"
+    },
+    {
+      "id": "ht.T23",
+      "label": "Расход гидроочищенного ДТ в цех №8 c установки",
+      "source": "kip",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "T23",
+      "group": "Сырьё и потоки",
+      "description": "Расход гидроочищенного ДТ в цех №8 c установки"
+    },
+    {
+      "id": "ht.P24",
+      "label": "Расход свежего ВСГ с КЦА на установку",
+      "source": "kip",
+      "unit": "МПа",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "P24",
+      "group": "Сырьё и потоки",
+      "description": "Расход свежего ВСГ с КЦА на установку"
+    },
+    {
+      "id": "ht.F25",
+      "label": "APC. Показания виртуального анализатора \"Температура вспышки ГОДТ\"",
+      "source": "kip",
+      "unit": "нм³/ч",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "F25",
+      "group": "Сырьё и потоки",
+      "description": "APC. Показания виртуального анализатора \"Температура вспышки ГОДТ\""
+    },
+    {
+      "id": "ht.F26",
+      "label": "Расход сырья на установку (объемный)",
+      "source": "kip",
+      "unit": "м³/ч",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "F26",
+      "group": "Сырьё и потоки",
+      "description": "Расход сырья на установку (объемный)"
+    },
+    {
+      "id": "avt.T1",
+      "label": "Температура верха К1. Выход на FIRC0955",
+      "source": "kip",
+      "unit": "°C",
+      "unit_status": "inferred",
+      "plant": "avt",
+      "code": "T1",
+      "group": "К-1",
+      "description": "Температура верха К1. Выход на FIRC0955"
+    },
+    {
+      "id": "avt.P2",
+      "label": "Давление бензиновых паров верха К1",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "P2",
+      "group": "К-1",
+      "description": "Давление бензиновых паров верха К1"
+    },
+    {
+      "id": "avt.F3",
+      "label": "Расход бензина на орошение К1",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "F3",
+      "group": "К-1",
+      "description": "Расход бензина на орошение К1"
+    },
+    {
+      "id": "avt.P4",
+      "label": "Давление низа К1 в Е6",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "P4",
+      "group": "К-1",
+      "description": "Давление низа К1 в Е6"
+    },
+    {
+      "id": "avt.F5",
+      "label": "Расход пара в К1",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "F5",
+      "group": "К-1",
+      "description": "Расход пара в К1"
+    },
+    {
+      "id": "avt.T6",
+      "label": "Температура низ К1",
+      "source": "kip",
+      "unit": "°C",
+      "unit_status": "inferred",
+      "plant": "avt",
+      "code": "T6",
+      "group": "К-1",
+      "description": "Температура низ К1"
+    },
+    {
+      "id": "avt.F7",
+      "label": "Расход обессоленной нефти (3-й ход) (Нефть обессоленная в Т-4/2)",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "F7",
+      "group": "Сырьё и потоки",
+      "description": "Расход обессоленной нефти (3-й ход) (Нефть обессоленная в Т-4/2)"
+    },
+    {
+      "id": "avt.F8",
+      "label": "Расход обессоленной нефти (1-й ход) (Нефть обессоленная в Т-6/1)",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "F8",
+      "group": "Сырьё и потоки",
+      "description": "Расход обессоленной нефти (1-й ход) (Нефть обессоленная в Т-6/1)"
+    },
+    {
+      "id": "avt.F9",
+      "label": "Расход обессоленной нефти (2-й ход) (Нефть обессоленная в Т-10/2)",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "F9",
+      "group": "Сырьё и потоки",
+      "description": "Расход обессоленной нефти (2-й ход) (Нефть обессоленная в Т-10/2)"
+    },
+    {
+      "id": "avt.D10",
+      "label": "Плотность. Тр-д подачи обессолен. и обезвожен. Нефти",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "D10",
+      "group": "Сырьё и потоки",
+      "description": "Плотность. Тр-д подачи обессолен. и обезвожен. Нефти"
+    },
+    {
+      "id": "avt.T11",
+      "label": "3-е ЦО после Т-46",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "T11",
+      "group": "Сырьё и потоки",
+      "description": "3-е ЦО после Т-46"
+    },
+    {
+      "id": "avt.F12",
+      "label": "Расход 2 ЦО в К2",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "F12",
+      "group": "К-2",
+      "description": "Расход 2 ЦО в К2"
+    },
+    {
+      "id": "avt.T13",
+      "label": "1-е ЦО К-2 после Т-30",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "T13",
+      "group": "К-2",
+      "description": "1-е ЦО К-2 после Т-30"
+    },
+    {
+      "id": "avt.F14",
+      "label": "Расход 1 ЦО в К2",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "F14",
+      "group": "К-2",
+      "description": "Расход 1 ЦО в К2"
+    },
+    {
+      "id": "avt.T15",
+      "label": "3 -е ЦО К-2",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "T15",
+      "group": "К-2",
+      "description": "3 -е ЦО К-2"
+    },
+    {
+      "id": "avt.F16",
+      "label": "Расход бензина от Н4 в Е6",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "F16",
+      "group": "Сырьё и потоки",
+      "description": "Расход бензина от Н4 в Е6"
+    },
+    {
+      "id": "avt.T17",
+      "label": "2-е ЦО из К-2",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "T17",
+      "group": "К-2",
+      "description": "2-е ЦО из К-2"
+    },
+    {
+      "id": "avt.T18",
+      "label": "1-е ЦО из К-2",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "T18",
+      "group": "К-2",
+      "description": "1-е ЦО из К-2"
+    },
+    {
+      "id": "avt.F19",
+      "label": "Расход остр.орошения К2",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "F19",
+      "group": "К-2",
+      "description": "Расход остр.орошения К2"
+    },
+    {
+      "id": "avt.T20",
+      "label": "Температура верха К2. Выход на FIRC0953",
+      "source": "kip",
+      "unit": "°C",
+      "unit_status": "inferred",
+      "plant": "avt",
+      "code": "T20",
+      "group": "К-2",
+      "description": "Температура верха К2. Выход на FIRC0953"
+    },
+    {
+      "id": "avt.P21",
+      "label": "Давление бензиновых паров верха К2",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "P21",
+      "group": "К-2",
+      "description": "Давление бензиновых паров верха К2"
+    },
+    {
+      "id": "avt.P22",
+      "label": "Давление верха К2",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "P22",
+      "group": "К-2",
+      "description": "Давление верха К2"
+    },
+    {
+      "id": "avt.P23",
+      "label": "Давление верха К-2",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "P23",
+      "group": "К-2",
+      "description": "Давление верха К-2"
+    },
+    {
+      "id": "avt.T24",
+      "label": "Переток из К-2 в К-6",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "T24",
+      "group": "К-2",
+      "description": "Переток из К-2 в К-6"
+    },
+    {
+      "id": "avt.F25",
+      "label": "Расход бензина после Т26",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "F25",
+      "group": "Сырьё и потоки",
+      "description": "Расход бензина после Т26"
+    },
+    {
+      "id": "avt.F26",
+      "label": "Расход пара в К6",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "F26",
+      "group": "Сырьё и потоки",
+      "description": "Расход пара в К6"
+    },
+    {
+      "id": "avt.F27",
+      "label": "Расход пара в К7",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "F27",
+      "group": "Сырьё и потоки",
+      "description": "Расход пара в К7"
+    },
+    {
+      "id": "avt.F28",
+      "label": "Расход пара в К9",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "F28",
+      "group": "Сырьё и потоки",
+      "description": "Расход пара в К9"
+    },
+    {
+      "id": "avt.F29",
+      "label": "Расход пара в К2",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "F29",
+      "group": "К-2",
+      "description": "Расход пара в К2"
+    },
+    {
+      "id": "avt.F30",
+      "label": "Расход фр.290-350°С с установки",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "F30",
+      "group": "Сырьё и потоки",
+      "description": "Расход фр.290-350°С с установки"
+    },
+    {
+      "id": "avt.F31",
+      "label": "Расход нефтепродукта в П3",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "F31",
+      "group": "К-10 и П-3",
+      "description": "Расход нефтепродукта в П3"
+    },
+    {
+      "id": "avt.F32",
+      "label": "Расход фр.240-290°С с установки",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "F32",
+      "group": "Сырьё и потоки",
+      "description": "Расход фр.240-290°С с установки"
+    },
+    {
+      "id": "avt.T33",
+      "label": "Температура низа К-2",
+      "source": "kip",
+      "unit": "°C",
+      "unit_status": "inferred",
+      "plant": "avt",
+      "code": "T33",
+      "group": "К-2",
+      "description": "Температура низа К-2"
+    },
+    {
+      "id": "avt.F34",
+      "label": "Расход фр.150-250°С с установки",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "F34",
+      "group": "Сырьё и потоки",
+      "description": "Расход фр.150-250°С с установки"
+    },
+    {
+      "id": "avt.F35",
+      "label": "Расход ВЦО в К-10",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "F35",
+      "group": "К-10 и П-3",
+      "description": "Расход ВЦО в К-10"
+    },
+    {
+      "id": "avt.F36",
+      "label": "Расход СЦО в К-10",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "F36",
+      "group": "К-10 и П-3",
+      "description": "Расход СЦО в К-10"
+    },
+    {
+      "id": "avt.T37",
+      "label": "Температура ВЦО в К-10",
+      "source": "kip",
+      "unit": "°C",
+      "unit_status": "inferred",
+      "plant": "avt",
+      "code": "T37",
+      "group": "К-10 и П-3",
+      "description": "Температура ВЦО в К-10"
+    },
+    {
+      "id": "avt.T38",
+      "label": "Температура доп. ВЦО К10",
+      "source": "kip",
+      "unit": "°C",
+      "unit_status": "inferred",
+      "plant": "avt",
+      "code": "T38",
+      "group": "К-10 и П-3",
+      "description": "Температура доп. ВЦО К10"
+    },
+    {
+      "id": "avt.T39",
+      "label": "Температура в К10 (над секцией рег.насадки 1а)",
+      "source": "kip",
+      "unit": "°C",
+      "unit_status": "inferred",
+      "plant": "avt",
+      "code": "T39",
+      "group": "К-10 и П-3",
+      "description": "Температура в К10 (над секцией рег.насадки 1а)"
+    },
+    {
+      "id": "avt.T40",
+      "label": "Температура ВЦО из К10",
+      "source": "kip",
+      "unit": "°C",
+      "unit_status": "inferred",
+      "plant": "avt",
+      "code": "T40",
+      "group": "К-10 и П-3",
+      "description": "Температура ВЦО из К10"
+    },
+    {
+      "id": "avt.F41",
+      "label": "Расход доп. ВЦО в К-10",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "F41",
+      "group": "К-10 и П-3",
+      "description": "Расход доп. ВЦО в К-10"
+    },
+    {
+      "id": "avt.T42",
+      "label": "Температура фр.420-500°С из К10 в Е12",
+      "source": "kip",
+      "unit": "°C",
+      "unit_status": "inferred",
+      "plant": "avt",
+      "code": "T42",
+      "group": "К-10 и П-3",
+      "description": "Температура фр.420-500°С из К10 в Е12"
+    },
+    {
+      "id": "avt.L43",
+      "label": "Уровень в К10",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "L43",
+      "group": "К-10 и П-3",
+      "description": "Уровень в К10"
+    },
+    {
+      "id": "avt.P44",
+      "label": "Вакуум низа К10",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "P44",
+      "group": "К-10 и П-3",
+      "description": "Вакуум низа К10"
+    },
+    {
+      "id": "avt.F45",
+      "label": "Расход холодного гудрона в К10",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "F45",
+      "group": "К-10 и П-3",
+      "description": "Расход холодного гудрона в К10"
+    },
+    {
+      "id": "avt.F46",
+      "label": "Расход НЦО К10 фракции 350-560",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "F46",
+      "group": "К-10 и П-3",
+      "description": "Расход НЦО К10 фракции 350-560"
+    },
+    {
+      "id": "avt.T47",
+      "label": "Температура фр.350-560 °C после Т-40",
+      "source": "kip",
+      "unit": "°C",
+      "unit_status": "inferred",
+      "plant": "avt",
+      "code": "T47",
+      "group": "Сырьё и потоки",
+      "description": "Температура фр.350-560 °C после Т-40"
+    },
+    {
+      "id": "avt.T48",
+      "label": "Описание: Температура низа К10",
+      "source": "kip",
+      "unit": "°C",
+      "unit_status": "inferred",
+      "plant": "avt",
+      "code": "T48",
+      "group": "К-10 и П-3",
+      "description": "Описание: Температура низа К10"
+    },
+    {
+      "id": "avt.T49",
+      "label": "Описание: Температура верха К10",
+      "source": "kip",
+      "unit": "°C",
+      "unit_status": "inferred",
+      "plant": "avt",
+      "code": "T49",
+      "group": "К-10 и П-3",
+      "description": "Описание: Температура верха К10"
+    },
+    {
+      "id": "avt.P50",
+      "label": "Вакуум верха К10",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "P50",
+      "group": "К-10 и П-3",
+      "description": "Вакуум верха К10"
+    },
+    {
+      "id": "avt.P51",
+      "label": "Вакуум верха К-10 (пересчёт на мм рт.ст. с кгс/см2 от AVT6:PIR0825.P)",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "P51",
+      "group": "К-10 и П-3",
+      "description": "Вакуум верха К-10 (пересчёт на мм рт.ст. с кгс/см2 от AVT6:PIR0825.P)"
+    },
+    {
+      "id": "avt.P52",
+      "label": "Перепад давления над 4-й пак.насад. К10",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "P52",
+      "group": "К-10 и П-3",
+      "description": "Перепад давления над 4-й пак.насад. К10"
+    },
+    {
+      "id": "avt.F53",
+      "label": "Расход НЦО  К10 (Регулятор)",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "F53",
+      "group": "К-10 и П-3",
+      "description": "Расход НЦО  К10 (Регулятор)"
+    },
+    {
+      "id": "avt.F54",
+      "label": "Расход от Н-34/1,2  К10",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "F54",
+      "group": "К-10 и П-3",
+      "description": "Расход от Н-34/1,2  К10"
+    },
+    {
+      "id": "avt.T55",
+      "label": "Температура на выходе из печи П3 (общ. Выход на FIRC2470)",
+      "source": "kip",
+      "unit": "°C",
+      "unit_status": "inferred",
+      "plant": "avt",
+      "code": "T55",
+      "group": "К-10 и П-3",
+      "description": "Температура на выходе из печи П3 (общ. Выход на FIRC2470)"
+    },
+    {
+      "id": "avt.F56",
+      "label": "Расход в трубопроводе фракции до 350 с установки",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "F56",
+      "group": "Сырьё и потоки",
+      "description": "Расход в трубопроводе фракции до 350 с установки"
+    },
+    {
+      "id": "avt.F57",
+      "label": "Расход в трубопроводе фракции до 350 с установки",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "F57",
+      "group": "Сырьё и потоки",
+      "description": "Расход в трубопроводе фракции до 350 с установки"
+    },
+    {
+      "id": "avt.T58",
+      "label": "Температура фракции до 350 С от Т-37",
+      "source": "kip",
+      "unit": "°C",
+      "unit_status": "inferred",
+      "plant": "avt",
+      "code": "T58",
+      "group": "Сырьё и потоки",
+      "description": "Температура фракции до 350 С от Т-37"
+    },
+    {
+      "id": "avt.F59",
+      "label": "Расход фр.420-500°С с установки. Объемный расход",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "F59",
+      "group": "Сырьё и потоки",
+      "description": "Расход фр.420-500°С с установки. Объемный расход"
+    },
+    {
+      "id": "avt.F60",
+      "label": "Расход в трубопроводе фракции 350-560 с установки",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "F60",
+      "group": "Сырьё и потоки",
+      "description": "Расход в трубопроводе фракции 350-560 с установки"
+    },
+    {
+      "id": "avt.T61",
+      "label": "Температура НЦО в К-10",
+      "source": "kip",
+      "unit": "°C",
+      "unit_status": "inferred",
+      "plant": "avt",
+      "code": "T61",
+      "group": "К-10 и П-3",
+      "description": "Температура НЦО в К-10"
+    },
+    {
+      "id": "avt.F62",
+      "label": "Расход НЦО К-10",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "F62",
+      "group": "К-10 и П-3",
+      "description": "Расход НЦО К-10"
+    },
+    {
+      "id": "avt.F63",
+      "label": "Расход гудрона на битумную установку",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "F63",
+      "group": "Сырьё и потоки",
+      "description": "Расход гудрона на битумную установку"
+    },
+    {
+      "id": "avt.F64",
+      "label": "Расход 3-го ЦО в К2",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "F64",
+      "group": "К-2",
+      "description": "Расход 3-го ЦО в К2"
+    },
+    {
+      "id": "avt.F65",
+      "label": "Производительность К-2 по отбензиненной нефти",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "F65",
+      "group": "К-2",
+      "description": "Производительность К-2 по отбензиненной нефти"
+    },
+    {
+      "id": "avt.T66",
+      "label": "Переток в К-9",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "T66",
+      "group": "Сырьё и потоки",
+      "description": "Переток в К-9"
+    },
+    {
+      "id": "avt.P67",
+      "label": "Давление верха К2.",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "P67",
+      "group": "К-2",
+      "description": "Давление верха К2."
+    },
+    {
+      "id": "avt.F68",
+      "label": "Расход гудрона с установки",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "F68",
+      "group": "Сырьё и потоки",
+      "description": "Расход гудрона с установки"
+    },
+    {
+      "id": "avt.F69",
+      "label": "Расход гудрона с установки",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "F69",
+      "group": "Сырьё и потоки",
+      "description": "Расход гудрона с установки"
+    },
+    {
+      "id": "avt.W70",
+      "label": "Массовый расход фр.290-350°С с установки",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "W70",
+      "group": "Сырьё и потоки",
+      "description": "Массовый расход фр.290-350°С с установки"
+    },
+    {
+      "id": "avt.T71",
+      "label": "Фр.290-350°С из К-2",
+      "source": "kip",
+      "unit": null,
+      "unit_status": "unknown",
+      "plant": "avt",
+      "code": "T71",
+      "group": "К-2",
+      "description": "Фр.290-350°С из К-2"
+    },
+    {
+      "id": "pak.ht.Mg.Sulfur",
+      "label": "Массовая концентрация серы",
+      "source": "pak",
+      "unit": "мг/кг",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "Mg.Sulfur",
+      "group": "24-2000",
+      "source_unit": "ppm",
+      "description": "Сера в дизеле после ГО, точка отбора 2; массовое ppm = мг/кг"
+    },
+    {
+      "id": "pak.ht.D15",
+      "label": "Плотность при 15 °C",
+      "source": "pak",
+      "unit": "кг/м³",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "D15",
+      "group": "24-2000",
+      "source_unit": "кг/м3"
+    },
+    {
+      "id": "lims.avt.1.CFPP",
+      "label": "Предельная температура фильтруемости",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "avt",
+      "code": "CFPP",
+      "group": "Установка 'АВТ'. Точка отбора '1'. Продукт 'Дизельное топливо'",
+      "source_unit": "°С",
+      "point": "1"
+    },
+    {
+      "id": "lims.avt.1.90%.T",
+      "label": "Температура выкипания 90%",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "avt",
+      "code": "90%.T",
+      "group": "Установка 'АВТ'. Точка отбора '1'. Продукт 'Дизельное топливо'",
+      "source_unit": "°С",
+      "point": "1"
+    },
+    {
+      "id": "lims.avt.1.50%.T",
+      "label": "Температура выкипания 50%",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "avt",
+      "code": "50%.T",
+      "group": "Установка 'АВТ'. Точка отбора '1'. Продукт 'Дизельное топливо'",
+      "source_unit": "кг/м3",
+      "point": "1"
+    },
+    {
+      "id": "lims.avt.1.EBP.T",
+      "label": "Конец кипения",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "avt",
+      "code": "EBP.T",
+      "group": "Установка 'АВТ'. Точка отбора '1'. Продукт 'Дизельное топливо'",
+      "source_unit": "% об.",
+      "point": "1"
+    },
+    {
+      "id": "lims.avt.1.PourPoint",
+      "label": "Температура застывания",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "avt",
+      "code": "PourPoint",
+      "group": "Установка 'АВТ'. Точка отбора '1'. Продукт 'Дизельное топливо'",
+      "source_unit": "°С",
+      "point": "1"
+    },
+    {
+      "id": "lims.avt.1.D15",
+      "label": "Плотность при 15 °C",
+      "source": "lims",
+      "unit": "кг/м³",
+      "unit_status": "confirmed",
+      "plant": "avt",
+      "code": "D15",
+      "group": "Установка 'АВТ'. Точка отбора '1'. Продукт 'Дизельное топливо'",
+      "source_unit": "°С",
+      "point": "1"
+    },
+    {
+      "id": "lims.avt.1.I350",
+      "label": "Отгон до 350 °C",
+      "source": "lims",
+      "unit": "% об.",
+      "unit_status": "confirmed",
+      "plant": "avt",
+      "code": "I350",
+      "group": "Установка 'АВТ'. Точка отбора '1'. Продукт 'Дизельное топливо'",
+      "source_unit": "°С",
+      "point": "1"
+    },
+    {
+      "id": "lims.avt.1.CloudPoint",
+      "label": "Температура помутнения",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "avt",
+      "code": "CloudPoint",
+      "group": "Установка 'АВТ'. Точка отбора '1'. Продукт 'Дизельное топливо'",
+      "source_unit": "°С",
+      "point": "1"
+    },
+    {
+      "id": "lims.avt.1.CloudPoint_1",
+      "label": "Температура помутнения (доп.)",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "avt",
+      "code": "CloudPoint_1",
+      "group": "Установка 'АВТ'. Точка отбора '1'. Продукт 'Дизельное топливо'",
+      "source_unit": "°С",
+      "point": "1"
+    },
+    {
+      "id": "lims.avt.1.95%.T",
+      "label": "Температура выкипания 95%",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "avt",
+      "code": "95%.T",
+      "group": "Установка 'АВТ'. Точка отбора '1'. Продукт 'Дизельное топливо'",
+      "source_unit": "°С",
+      "point": "1"
+    },
+    {
+      "id": "lims.avt.1.IBP.T",
+      "label": "Начало кипения",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "avt",
+      "code": "IBP.T",
+      "group": "Установка 'АВТ'. Точка отбора '1'. Продукт 'Дизельное топливо'",
+      "source_unit": "°С",
+      "point": "1"
+    },
+    {
+      "id": "lims.avt.2.50%.T",
+      "label": "Температура выкипания 50%",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "avt",
+      "code": "50%.T",
+      "group": "Установка 'АВТ'. Точка отбора '2'. Продукт 'Дизельное топливо'",
+      "source_unit": "°С",
+      "point": "2"
+    },
+    {
+      "id": "lims.avt.2.EBP.T",
+      "label": "Конец кипения",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "avt",
+      "code": "EBP.T",
+      "group": "Установка 'АВТ'. Точка отбора '2'. Продукт 'Дизельное топливо'",
+      "source_unit": "°С",
+      "point": "2"
+    },
+    {
+      "id": "lims.avt.2.D15",
+      "label": "Плотность при 15 °C",
+      "source": "lims",
+      "unit": "кг/м³",
+      "unit_status": "confirmed",
+      "plant": "avt",
+      "code": "D15",
+      "group": "Установка 'АВТ'. Точка отбора '2'. Продукт 'Дизельное топливо'",
+      "source_unit": "кг/м3",
+      "point": "2"
+    },
+    {
+      "id": "lims.avt.2.CloudPoint",
+      "label": "Температура помутнения",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "avt",
+      "code": "CloudPoint",
+      "group": "Установка 'АВТ'. Точка отбора '2'. Продукт 'Дизельное топливо'",
+      "source_unit": "°С",
+      "point": "2"
+    },
+    {
+      "id": "lims.avt.2.IBP.T",
+      "label": "Начало кипения",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "avt",
+      "code": "IBP.T",
+      "group": "Установка 'АВТ'. Точка отбора '2'. Продукт 'Дизельное топливо'",
+      "source_unit": "°С",
+      "point": "2"
+    },
+    {
+      "id": "lims.avt.2.90%.T",
+      "label": "Температура выкипания 90%",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "avt",
+      "code": "90%.T",
+      "group": "Установка 'АВТ'. Точка отбора '2'. Продукт 'Дизельное топливо'",
+      "source_unit": "°С",
+      "point": "2"
+    },
+    {
+      "id": "lims.avt.2.95%.T",
+      "label": "Температура выкипания 95%",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "avt",
+      "code": "95%.T",
+      "group": "Установка 'АВТ'. Точка отбора '2'. Продукт 'Дизельное топливо'",
+      "source_unit": "°С",
+      "point": "2"
+    },
+    {
+      "id": "lims.avt.2.1.CloudPoint",
+      "label": "Температура помутнения",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "avt",
+      "code": "CloudPoint",
+      "group": "Установка 'АВТ'. Точка отбора '2.1'. Продукт 'Дизельное топливо'",
+      "source_unit": "°С",
+      "point": "2.1"
+    },
+    {
+      "id": "lims.avt.2.1.EBP.T",
+      "label": "Конец кипения",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "avt",
+      "code": "EBP.T",
+      "group": "Установка 'АВТ'. Точка отбора '2.1'. Продукт 'Дизельное топливо'",
+      "source_unit": "°С",
+      "point": "2.1"
+    },
+    {
+      "id": "lims.avt.2.1.D15",
+      "label": "Плотность при 15 °C",
+      "source": "lims",
+      "unit": "кг/м³",
+      "unit_status": "confirmed",
+      "plant": "avt",
+      "code": "D15",
+      "group": "Установка 'АВТ'. Точка отбора '2.1'. Продукт 'Дизельное топливо'",
+      "source_unit": "кг/м3",
+      "point": "2.1"
+    },
+    {
+      "id": "lims.avt.2.1.50%.T",
+      "label": "Температура выкипания 50%",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "avt",
+      "code": "50%.T",
+      "group": "Установка 'АВТ'. Точка отбора '2.1'. Продукт 'Дизельное топливо'",
+      "source_unit": "°С",
+      "point": "2.1"
+    },
+    {
+      "id": "lims.avt.2.1.IBP.T",
+      "label": "Начало кипения",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "avt",
+      "code": "IBP.T",
+      "group": "Установка 'АВТ'. Точка отбора '2.1'. Продукт 'Дизельное топливо'",
+      "source_unit": "°С",
+      "point": "2.1"
+    },
+    {
+      "id": "lims.avt.2.1.90%.T",
+      "label": "Температура выкипания 90%",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "avt",
+      "code": "90%.T",
+      "group": "Установка 'АВТ'. Точка отбора '2.1'. Продукт 'Дизельное топливо'",
+      "source_unit": "°С",
+      "point": "2.1"
+    },
+    {
+      "id": "lims.avt.2.1.95%.T",
+      "label": "Температура выкипания 95%",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "avt",
+      "code": "95%.T",
+      "group": "Установка 'АВТ'. Точка отбора '2.1'. Продукт 'Дизельное топливо'",
+      "source_unit": "°С",
+      "point": "2.1"
+    },
+    {
+      "id": "lims.avt.3.90%.T",
+      "label": "Температура выкипания 90%",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "avt",
+      "code": "90%.T",
+      "group": "Установка 'АВТ'. Точка отбора '3'. Продукт 'Дизельное топливо'",
+      "source_unit": "°С",
+      "point": "3"
+    },
+    {
+      "id": "lims.avt.3.50%.T",
+      "label": "Температура выкипания 50%",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "avt",
+      "code": "50%.T",
+      "group": "Установка 'АВТ'. Точка отбора '3'. Продукт 'Дизельное топливо'",
+      "source_unit": "°С",
+      "point": "3"
+    },
+    {
+      "id": "lims.avt.3.FilterabilityLimit.T",
+      "label": "Предельная температура фильтруемости",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "avt",
+      "code": "FilterabilityLimit.T",
+      "group": "Установка 'АВТ'. Точка отбора '3'. Продукт 'Дизельное топливо'",
+      "source_unit": "°С",
+      "point": "3"
+    },
+    {
+      "id": "lims.avt.3.95%.T",
+      "label": "Температура выкипания 95%",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "avt",
+      "code": "95%.T",
+      "group": "Установка 'АВТ'. Точка отбора '3'. Продукт 'Дизельное топливо'",
+      "source_unit": "°С",
+      "point": "3"
+    },
+    {
+      "id": "lims.avt.3.IBP.T",
+      "label": "Начало кипения",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "avt",
+      "code": "IBP.T",
+      "group": "Установка 'АВТ'. Точка отбора '3'. Продукт 'Дизельное топливо'",
+      "source_unit": "°С",
+      "point": "3"
+    },
+    {
+      "id": "lims.avt.3.EBP.T",
+      "label": "Конец кипения",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "avt",
+      "code": "EBP.T",
+      "group": "Установка 'АВТ'. Точка отбора '3'. Продукт 'Дизельное топливо'",
+      "source_unit": "°С",
+      "point": "3"
+    },
+    {
+      "id": "lims.avt.3.CloudPoint",
+      "label": "Температура помутнения",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "avt",
+      "code": "CloudPoint",
+      "group": "Установка 'АВТ'. Точка отбора '3'. Продукт 'Дизельное топливо'",
+      "source_unit": "°С",
+      "point": "3"
+    },
+    {
+      "id": "lims.avt.3.D15",
+      "label": "Плотность при 15 °C",
+      "source": "lims",
+      "unit": "кг/м³",
+      "unit_status": "confirmed",
+      "plant": "avt",
+      "code": "D15",
+      "group": "Установка 'АВТ'. Точка отбора '3'. Продукт 'Дизельное топливо'",
+      "source_unit": "кг/м3",
+      "point": "3"
+    },
+    {
+      "id": "lims.ht.1.90%.T",
+      "label": "Температура выкипания 90%",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "90%.T",
+      "group": "Установка 'Гидроочистка'. Точка отбора '1'. Продукт 'ФРАКЦ_ДИЗ'.",
+      "source_unit": "°С",
+      "point": "1"
+    },
+    {
+      "id": "lims.ht.1.IBP.T",
+      "label": "Начало кипения",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "IBP.T",
+      "group": "Установка 'Гидроочистка'. Точка отбора '1'. Продукт 'ФРАКЦ_ДИЗ'.",
+      "source_unit": "°С",
+      "point": "1"
+    },
+    {
+      "id": "lims.ht.1.50%.T",
+      "label": "Температура выкипания 50%",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "50%.T",
+      "group": "Установка 'Гидроочистка'. Точка отбора '1'. Продукт 'ФРАКЦ_ДИЗ'.",
+      "source_unit": "°С",
+      "point": "1"
+    },
+    {
+      "id": "lims.ht.1.95%.T",
+      "label": "Температура выкипания 95%",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "95%.T",
+      "group": "Установка 'Гидроочистка'. Точка отбора '1'. Продукт 'ФРАКЦ_ДИЗ'.",
+      "source_unit": "°С",
+      "point": "1"
+    },
+    {
+      "id": "lims.ht.1.CloudPoint",
+      "label": "Температура помутнения",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "CloudPoint",
+      "group": "Установка 'Гидроочистка'. Точка отбора '1'. Продукт 'ФРАКЦ_ДИЗ'.",
+      "source_unit": "°С",
+      "point": "1"
+    },
+    {
+      "id": "lims.ht.1.EBP.T",
+      "label": "Конец кипения",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "EBP.T",
+      "group": "Установка 'Гидроочистка'. Точка отбора '1'. Продукт 'ФРАКЦ_ДИЗ'.",
+      "source_unit": "°С",
+      "point": "1"
+    },
+    {
+      "id": "lims.ht.1.D15",
+      "label": "Плотность при 15 °C",
+      "source": "lims",
+      "unit": "кг/м³",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "D15",
+      "group": "Установка 'Гидроочистка'. Точка отбора '1'. Продукт 'ФРАКЦ_ДИЗ'.",
+      "source_unit": "кг/м3",
+      "point": "1"
+    },
+    {
+      "id": "lims.ht.1.Mass.Sulfur",
+      "label": "Массовая доля серы",
+      "source": "lims",
+      "unit": "% масс.",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "Mass.Sulfur",
+      "group": "Установка 'Гидроочистка'. Точка отбора '1'. Продукт 'ФРАКЦ_ДИЗ'.",
+      "source_unit": "% масс.",
+      "point": "1"
+    },
+    {
+      "id": "lims.ht.2.CloudPoint",
+      "label": "Температура помутнения",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "CloudPoint",
+      "group": "Установка 'Гидроочистка'.. Точка отбора '2'. Продукт 'Дизельное топливо'",
+      "source_unit": "°С",
+      "point": "2",
+      "primary": true
+    },
+    {
+      "id": "lims.ht.2.D15",
+      "label": "Плотность при 15 °C",
+      "source": "lims",
+      "unit": "кг/м³",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "D15",
+      "group": "Установка 'Гидроочистка'.. Точка отбора '2'. Продукт 'Дизельное топливо'",
+      "source_unit": "кг/м3",
+      "point": "2",
+      "primary": true
+    },
+    {
+      "id": "lims.ht.2.FlashPoint",
+      "label": "Температура вспышки",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "FlashPoint",
+      "group": "Установка 'Гидроочистка'.. Точка отбора '2'. Продукт 'Дизельное топливо'",
+      "source_unit": "°С",
+      "point": "2",
+      "primary": true
+    },
+    {
+      "id": "lims.ht.2.IBP.T",
+      "label": "Начало кипения",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "IBP.T",
+      "group": "Установка 'Гидроочистка'.. Точка отбора '2'. Продукт 'Дизельное топливо'",
+      "source_unit": "°С",
+      "point": "2"
+    },
+    {
+      "id": "lims.ht.2.I250",
+      "label": "Отгон до 250 °C",
+      "source": "lims",
+      "unit": "% об.",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "I250",
+      "group": "Установка 'Гидроочистка'.. Точка отбора '2'. Продукт 'Дизельное топливо'",
+      "source_unit": "% об.",
+      "point": "2"
+    },
+    {
+      "id": "lims.ht.2.95%.T",
+      "label": "Температура выкипания 95%",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "95%.T",
+      "group": "Установка 'Гидроочистка'.. Точка отбора '2'. Продукт 'Дизельное топливо'",
+      "source_unit": "°С",
+      "point": "2",
+      "primary": true
+    },
+    {
+      "id": "lims.ht.2.Mg.Sulfur",
+      "label": "Массовая концентрация серы",
+      "source": "lims",
+      "unit": "мг/кг",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "Mg.Sulfur",
+      "group": "Установка 'Гидроочистка'.. Точка отбора '2'. Продукт 'Дизельное топливо'",
+      "source_unit": "мг/кг",
+      "point": "2",
+      "primary": true
+    },
+    {
+      "id": "lims.ht.2.CFPP",
+      "label": "Предельная температура фильтруемости",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "CFPP",
+      "group": "Установка 'Гидроочистка'.. Точка отбора '2'. Продукт 'Дизельное топливо'",
+      "source_unit": "°С",
+      "point": "2",
+      "primary": true
+    },
+    {
+      "id": "lims.ht.2.PourPoint",
+      "label": "Температура застывания",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "PourPoint",
+      "group": "Установка 'Гидроочистка'.. Точка отбора '2'. Продукт 'Дизельное топливо'",
+      "source_unit": "°С",
+      "point": "2"
+    },
+    {
+      "id": "lims.ht.2.50%.T",
+      "label": "Температура выкипания 50%",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "50%.T",
+      "group": "Установка 'Гидроочистка'.. Точка отбора '2'. Продукт 'Дизельное топливо'",
+      "source_unit": "°С",
+      "point": "2"
+    },
+    {
+      "id": "lims.ht.2.CetaneNumber",
+      "label": "Цетановое число",
+      "source": "lims",
+      "unit": "ед.цет.ч.",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "CetaneNumber",
+      "group": "Установка 'Гидроочистка'.. Точка отбора '2'. Продукт 'Дизельное топливо'",
+      "source_unit": "ед.цет.ч.",
+      "point": "2"
+    },
+    {
+      "id": "lims.ht.2.90%.T",
+      "label": "Температура выкипания 90%",
+      "source": "lims",
+      "unit": "°C",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "90%.T",
+      "group": "Установка 'Гидроочистка'.. Точка отбора '2'. Продукт 'Дизельное топливо'",
+      "source_unit": "°С",
+      "point": "2"
+    },
+    {
+      "id": "lims.ht.2.I350",
+      "label": "Отгон до 350 °C",
+      "source": "lims",
+      "unit": "% об.",
+      "unit_status": "confirmed",
+      "plant": "ht",
+      "code": "I350",
+      "group": "Установка 'Гидроочистка'.. Точка отбора '2'. Продукт 'Дизельное топливо'",
+      "source_unit": "% об.",
+      "point": "2"
+    }
+  ],
+  "formulas": [
+    {
+      "id": "AVT6:240-350:D15",
+      "label": "Плотность при 15 °C · АВТ, 240-350",
+      "plant": "avt",
+      "expression": "791,22872 - 5,30294x(F30/(F32+ F30)) + 0,52755xT66 - 0,15629xT33",
+      "version": "source-vak-v1",
+      "status": "experimental",
+      "reason": "Результат не валидирован на исторических данных.",
+      "unit": "кг/м³"
+    },
+    {
+      "id": "AVT6:350:T50",
+      "label": "T50 · АВТ, 350",
+      "plant": "avt",
+      "expression": "981,06539+ 0,27467xT42 - 0,32983x(F31/F57)  -0,49014xT48",
+      "version": "source-vak-v1",
+      "status": "invalid",
+      "reason": "На исходных данных типичное значение около 881 °C. Проверьте назначение формулы и соответствие тегов.",
+      "unit": "°C"
+    },
+    {
+      "id": "24-2000:GODT:T90",
+      "label": "T90 · Дизель после ГО",
+      "plant": "ht",
+      "expression": "162.998+0.12945*T12+59.57*(F15/2000)+0.00036*W7+0.26366*T23-424.72638*F1/F26",
+      "version": "expert-2026-09-13",
+      "status": "experimental",
+      "reason": "Формула исправлена экспертом; результат ещё не валидирован на отложенной истории.",
+      "unit": "°C",
+      "source_expression": "162.998+0.12945*T12+59.57*F15+0.00036*W7+T23*0.26366-424.72638*F1/F26"
+    },
+    {
+      "id": "AVT6:240-350:T50",
+      "label": "T50 · АВТ, 240-350",
+      "plant": "avt",
+      "expression": "283.177+F7*(-0.01685)+0.06248*F30+0.22048*F34-0.25816*F45-0.12159*F59+0.01221*F63",
+      "version": "source-vak-v1",
+      "status": "experimental",
+      "reason": "Результат не валидирован на исторических данных.",
+      "unit": "°C"
+    },
+    {
+      "id": "AVT6:350:I350",
+      "label": "Доля до 350 °C · АВТ, 350",
+      "plant": "avt",
+      "expression": "39.562-1.62865*L43-0.76664*T6-0.22361*T18+0.00031*F64*(T15-T11)",
+      "version": "source-vak-v1",
+      "status": "invalid",
+      "reason": "На исходных данных расчёт даёт отрицательную объёмную долю (около −267%).",
+      "unit": "% об."
+    },
+    {
+      "id": "24-2000:GODT:T50",
+      "label": "T50 · Дизель после ГО",
+      "plant": "ht",
+      "expression": "44.625+10.0224*P13+0.06981*F9+0.471*T6",
+      "version": "expert-2026-09-13",
+      "status": "experimental",
+      "reason": "Результат не валидирован на исторических данных.",
+      "unit": "°C",
+      "source_expression": "44.625+10.0224*P13+0.06981*F9+0.8052*T6"
+    },
+    {
+      "id": "AVT6:240-350:EBP",
+      "label": "Конец кипения · АВТ, 240-350",
+      "plant": "avt",
+      "expression": "813.883+2.66463*F30-0.20239*T33-3.65888*F36-14.08235*T37-1.32603*T40+14.60206*T58",
+      "version": "source-vak-v1",
+      "status": "experimental",
+      "reason": "Результат не валидирован на исторических данных.",
+      "unit": "°C"
+    },
+    {
+      "id": "AVT6:350:D15",
+      "label": "Плотность при 15 °C · АВТ, 350",
+      "plant": "avt",
+      "expression": "983.092+0.27467*T42-0.49014*T48-0.32983*F31/F57",
+      "version": "source-vak-v1",
+      "status": "experimental",
+      "reason": "Результат не валидирован на исторических данных.",
+      "unit": "кг/м³"
+    },
+    {
+      "id": "24-2000:GODT:I250",
+      "label": "Доля до 250 °C · Дизель после ГО",
+      "plant": "ht",
+      "expression": "84.585-0.21172*T5+0.12137*T11-0.00014*F25+0.56248*F14-0.16317*T23+0.20272*T16",
+      "version": "source-vak-v1",
+      "status": "experimental",
+      "reason": "Результат не валидирован на исторических данных.",
+      "unit": "% об."
+    },
+    {
+      "id": "AVT6:240-350:CFPP",
+      "label": "ПТФ · АВТ, 240-350",
+      "plant": "avt",
+      "expression": "31,40363 - 0,06784xT33 + 17,411xP67 - 8,11544xP4 - 0,47309x(F65/F32+F30)",
+      "version": "expert-2026-09-13",
+      "status": "experimental",
+      "reason": "Расстановка скобок подтверждена экспертом; результат ещё не валидирован на отложенной истории.",
+      "unit": "°C",
+      "source_expression": "31,40363 - 0,06784xT33 + 17,411xP67 - 8,11544xP4 - 0,47309x(F65/F32+F30))"
+    },
+    {
+      "id": "AVT6:350-500:ViscosityK",
+      "label": "Кинематическая вязкость · АВТ, 350-500",
+      "plant": "avt",
+      "expression": "5.831+0.00976*T6+0.01188*T13+0.00224*T18+0.01905*T20+0.00794*L43-0.02496*T48-0.00008*P50-0.00882*F53-0.00394*P51-0.00255*F59+0.01153*T61",
+      "version": "source-vak-v1",
+      "status": "experimental",
+      "reason": "Результат не валидирован на исторических данных.",
+      "unit": null
+    },
+    {
+      "id": "24-2000:GODT:D15",
+      "label": "Плотность при 15 °C · Дизель после ГО",
+      "plant": "ht",
+      "expression": "667.881+0.15417*LIMS:24-2000.Pipeline.D15+0.00005*F22+0.10774*T11",
+      "version": "source-vak-v1",
+      "status": "unresolved",
+      "reason": "Неразрешённый алиас LIMS:24-2000.Pipeline.D15.",
+      "unit": "кг/м³"
+    },
+    {
+      "id": "AVT6:350:CFPP",
+      "label": "ПТФ · АВТ, 350",
+      "plant": "avt",
+      "expression": "19,27111 - 0,10582xT48 + 0,13836xT40 - 0,42304x(F31/F57)",
+      "version": "source-vak-v1",
+      "status": "experimental",
+      "reason": "Результат не валидирован на исторических данных.",
+      "unit": "°C"
+    },
+    {
+      "id": "24-2000:GODT:CloudPoint",
+      "label": "Температура помутнения · Дизель после ГО",
+      "plant": "ht",
+      "expression": "0.0002*F22+0.0021*W7+0.00008*F25-0.30656*F1+0.12018*T6+0.01916*F9-48.254-0.05249*T16+0.00011",
+      "version": "expert-2026-09-13",
+      "status": "experimental",
+      "reason": "Формула исправлена экспертом; результат ещё не валидирован на отложенной истории.",
+      "unit": "°C",
+      "source_expression": "F22+0.0021*W7+0.00008*F25-0.30656*F1+0.12018*T6+0.01916*F9-48.254-0.05249*T16+0.00011"
+    },
+    {
+      "id": "24-2000:GODT:T95",
+      "label": "T95 · Дизель после ГО",
+      "plant": "ht",
+      "expression": "0.03814*F9-9.201-0.00002*F2+0.50*T6+0.48321*LIMS:24-2000.Pipeline.95%.T",
+      "version": "expert-2026-09-13",
+      "status": "experimental",
+      "reason": "Формула исправлена экспертом; Pipeline.95%.T сопоставлен с ЛИМС гидроочистки, точка 2. Результат ещё не валидирован на отложенной истории.",
+      "unit": "°C",
+      "source_expression": "0.03814*F9-9.201-0.00002*F2+0.62259*T6+0.48321*LIMS:24-2000.Pipeline.95%.T"
+    },
+    {
+      "id": "24-2000:GODT:CFPP",
+      "label": "ПТФ · Дизель после ГО",
+      "plant": "ht",
+      "expression": "0.22088*T23-102.375-47.75834*P8+0.03862*F9+43.60207*W7+43.81849*P24",
+      "version": "expert-2026-09-13",
+      "status": "experimental",
+      "reason": "Результат не валидирован на исторических данных.",
+      "unit": "°C",
+      "source_expression": "0.22088*T6-102.375-47.75834*P8+0.03862*F9+43.60207*W7+43.81849*P24"
+    },
+    {
+      "id": "24-2000:GODT:IBP",
+      "label": "Начало кипения · Дизель после ГО",
+      "plant": "ht",
+      "expression": "137.762-0.0653*F26+0.00011*F22+5.78137*P13-34.58028*P24-0.00993*F14-0.99962*W4+0.32232*T23-0.09406*T16",
+      "version": "source-vak-v1",
+      "status": "experimental",
+      "reason": "Результат не валидирован на исторических данных.",
+      "unit": "°C"
+    }
+  ],
+  "issues": [
+    {
+      "code": "duplicate",
+      "message": "Одинаковые наблюдения метрики в один момент объединены",
+      "count": 1,
+      "metric_id": "lims.avt.1.95%.T"
+    },
+    {
+      "code": "duplicate",
+      "message": "Одинаковые наблюдения метрики в один момент объединены",
+      "count": 1,
+      "metric_id": "lims.ht.2.95%.T"
+    },
+    {
+      "code": "duplicate",
+      "message": "Одинаковые наблюдения метрики в один момент объединены",
+      "count": 3,
+      "metric_id": "lims.ht.2.CloudPoint"
+    },
+    {
+      "code": "duplicate",
+      "message": "Одинаковые наблюдения метрики в один момент объединены",
+      "count": 2,
+      "metric_id": "lims.ht.2.I250"
+    },
+    {
+      "code": "duplicate",
+      "message": "Одинаковые наблюдения метрики в один момент объединены",
+      "count": 2,
+      "metric_id": "lims.ht.2.I350"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 189135,
+      "metric_id": "avt.D10"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 519,
+      "metric_id": "avt.F12"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 5390,
+      "metric_id": "avt.F14"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 524,
+      "metric_id": "avt.F19"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 4456,
+      "metric_id": "avt.F25"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 71326,
+      "metric_id": "avt.F26"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 3696,
+      "metric_id": "avt.F27"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 7253,
+      "metric_id": "avt.F28"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 4837,
+      "metric_id": "avt.F29"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 5836,
+      "metric_id": "avt.F3"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 877,
+      "metric_id": "avt.F30"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 1379,
+      "metric_id": "avt.F31"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 1479,
+      "metric_id": "avt.F32"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 3537,
+      "metric_id": "avt.F34"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 109,
+      "metric_id": "avt.F35"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 14,
+      "metric_id": "avt.F36"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 196,
+      "metric_id": "avt.F41"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 24,
+      "metric_id": "avt.F45"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 18,
+      "metric_id": "avt.F46"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 1721,
+      "metric_id": "avt.F5"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 874,
+      "metric_id": "avt.F53"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 603,
+      "metric_id": "avt.F54"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 136,
+      "metric_id": "avt.F56"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 7295,
+      "metric_id": "avt.F57"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 136,
+      "metric_id": "avt.F60"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 92,
+      "metric_id": "avt.F62"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 1920,
+      "metric_id": "avt.F63"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 1492,
+      "metric_id": "avt.F64"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 2475,
+      "metric_id": "avt.F65"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 4339,
+      "metric_id": "avt.F68"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 2577,
+      "metric_id": "avt.F69"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 61,
+      "metric_id": "avt.F7"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 253,
+      "metric_id": "avt.F8"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 1244,
+      "metric_id": "avt.F9"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 1294,
+      "metric_id": "avt.P2"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 1473,
+      "metric_id": "avt.P21"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 3293,
+      "metric_id": "avt.P22"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 1746,
+      "metric_id": "avt.P23"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 15,
+      "metric_id": "avt.P4"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 39,
+      "metric_id": "avt.P44"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 1831,
+      "metric_id": "avt.P52"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 1768,
+      "metric_id": "avt.P67"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 1638,
+      "metric_id": "avt.T1"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 2263,
+      "metric_id": "avt.T11"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 240,
+      "metric_id": "avt.T13"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 2205,
+      "metric_id": "avt.T15"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 3171,
+      "metric_id": "avt.T17"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 1785,
+      "metric_id": "avt.T18"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 2975,
+      "metric_id": "avt.T20"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 1791,
+      "metric_id": "avt.T24"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 1276,
+      "metric_id": "avt.T33"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 42,
+      "metric_id": "avt.T37"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 15585,
+      "metric_id": "avt.T39"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 42,
+      "metric_id": "avt.T49"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 25,
+      "metric_id": "avt.T55"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 855,
+      "metric_id": "avt.T6"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 76,
+      "metric_id": "avt.T61"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 2682,
+      "metric_id": "avt.T66"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 1414,
+      "metric_id": "avt.T71"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 992,
+      "metric_id": "avt.W70"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 2694,
+      "metric_id": "ht.F14"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 4060,
+      "metric_id": "ht.F15"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 9153,
+      "metric_id": "ht.F17"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 2288,
+      "metric_id": "ht.F19"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 6070,
+      "metric_id": "ht.F2"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 8373,
+      "metric_id": "ht.F22"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 6295,
+      "metric_id": "ht.F25"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 2227,
+      "metric_id": "ht.F26"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 2263,
+      "metric_id": "ht.F9"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 21795,
+      "metric_id": "ht.Q20"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 5369,
+      "metric_id": "ht.Q21"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 9,
+      "metric_id": "ht.T11"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 6248,
+      "metric_id": "ht.T12"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 3144,
+      "metric_id": "ht.T16"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 12178,
+      "metric_id": "ht.T18"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 1399,
+      "metric_id": "ht.T23"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 3144,
+      "metric_id": "ht.W10"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 4402,
+      "metric_id": "ht.W4"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 2002,
+      "metric_id": "ht.W7"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 83,
+      "metric_id": "pak.ht.D15"
+    },
+    {
+      "code": "flatline",
+      "message": "Неизменное значение сохраняется не менее шести часов непрерывных измерений",
+      "count": 12537,
+      "metric_id": "pak.ht.Mg.Sulfur"
+    },
+    {
+      "code": "suspect",
+      "message": "Значение выходит за физически обоснованный диапазон контроля качества",
+      "count": 1,
+      "metric_id": "lims.avt.3.D15"
+    },
+    {
+      "code": "suspect",
+      "message": "Значение выходит за физически обоснованный диапазон контроля качества",
+      "count": 1,
+      "metric_id": "lims.ht.1.50%.T"
+    },
+    {
+      "code": "suspect",
+      "message": "Значение выходит за физически обоснованный диапазон контроля качества",
+      "count": 1,
+      "metric_id": "lims.ht.2.I350"
+    }
+  ],
+  "assumptions": [
+    "Время источников хранится без часового пояса и без преобразования.",
+    "Поле rows источника считает записанные наблюдения после объединения одинаковых дублей.",
+    "Поле frame_count считает различные временные метки источника.",
+    "Единицы КИП берутся только из реестра; неизвестные единицы не создаются.",
+    "Метка ЛИМС означает момент отбора; в историческом кадре результат доступен через 4 часа."
+  ]
+}
