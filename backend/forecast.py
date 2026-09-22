@@ -280,6 +280,9 @@ def forecast_sulfur_v3(directory: Path, at: str, artifact_path: Path = ARTIFACT,
         "exceedance_probability": horizon_result["exceedance_probability"] if horizon_result else None,
         "alarm_probability": alarm_probability,
         "alarm_above_10": (horizon_result["exceedance_probability"] >= alarm_probability or horizon_result["prediction"] > artifact["hard_limit"]) if horizon_result else None,
+        # ln-residual quantile function at the horizon: P(S > limit) for a shifted scenario endpoint.
+        "risk_quantiles": ({"space": "ln_residual", **{k: _blend_quantiles(artifact, horizon)[k] for k in ("probabilities", "quantiles")}}
+                           if horizon_result else None),
         "prediction_previous_lab": previous["value"] if previous else None,
         "previous_lab": previous,
         "lab_anchor": {"level": float(np.exp(features["ln_level"])) if pd.notna(features["ln_level"]) else None,

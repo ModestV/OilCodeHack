@@ -25,7 +25,19 @@ def _fmt(value: Any, digits: int = 1, suffix: str = "") -> str:
     return f"{value:.{digits}f}{suffix}"
 
 
-def _action_lines(controls: dict[str, Any]) -> list[str]:
+def _additive_line(additive: dict[str, Any] | None, cetane: dict[str, Any]) -> str | None:
+    if not additive:
+        return None
+    line = (f"Цетаноповышающая присадка: {additive['pct']:.2f}% ({additive['dose_kg_t']:.1f} кг/т), "
+            f"стоимость продукта ×{additive['cost_index']:.2f}")
+    if cetane.get("age_days") and cetane.get("allowance"):
+        line += (f"; нижняя граница ЦЧ {cetane['lower_bound']:.1f} = проба {cetane['value']:.1f} "
+                 f"({cetane['age_days']:.0f} сут назад) − дрейф {cetane['allowance']:.1f}. "
+                 "Запросите свежий анализ ЦЧ: он может снизить дозу")
+    return line
+
+
+def _action_lines(controls: dict[str, Any], additive_line: str | None = None) -> list[str]:
     lines = []
     for metric_id, (name, unit, digits) in CONTROL_NAMES.items():
         item = controls.get(metric_id) or {}
@@ -37,7 +49,8 @@ def _action_lines(controls: dict[str, Any]) -> list[str]:
             lines.append(f"{name}: {_fmt(current, digits)} → {_fmt(recommended, digits)} ({change:+.1f} {unit})")
         else:
             lines.append(f"{name}: {_fmt(current, digits)} → {_fmt(recommended, digits)} {unit} ({change:+.{digits}f} {unit})")
-    return lines or ["Удержать текущий режим: изменений не требуется"]
+    lines = lines or ["Удержать текущий режим: изменений не требуется"]
+    return lines + ([additive_line] if additive_line else [])
 
 
 def _state(decision: dict[str, Any]) -> str:
@@ -100,10 +113,17 @@ def build_explanation(decision: dict[str, Any]) -> dict[str, Any]:
     selected = recommendation.get("candidate_id")
     objectives = recommendation.get("objectives") or {}
     severity = objectives.get("regime_severity") or {}
-    action_lines = _action_lines(recommendation.get("controls") or {})
+    cetane = decision["agents"]["quality"].get("evidence", {}).get("other_quality", {}).get("cetane") or {}
+    action_lines = _action_lines(recommendation.get("controls") or {},
+                                 _additive_line(recommendation.get("additive"), cetane))
+    risk = recommendation.get("risk") or {}
+    risk_text = (f"P(S > 10) = {_fmt(risk['exceedance_probability'] * 100, 0, '%')} "
+                 f"(допустимо ≤ {_fmt(risk['max_exceedance_probability'] * 100, 0, '%')}); "
+                 if risk.get("exceedance_probability") is not None else
+                 f"запас до 10 мг/кг не меньше {_fmt(risk.get('margin_mgkg'))} мг/кг; " if risk.get("margin_mgkg") else "")
     effect = (
         f"Сера в конце горизонта: {_fmt(recommendation.get('predicted_sulfur'))} мг/кг "
-        f"(цель ≤ {_fmt(recommendation.get('target_sulfur'))}); выпуск ×{_fmt(objectives.get('throughput_index'), 3)}, "
+        f"(цель ≤ {_fmt(recommendation.get('target_sulfur'))}); {risk_text}выпуск ×{_fmt(objectives.get('throughput_index'), 3)}, "
         f"индекс энергозатрат {_fmt(objectives.get('energy_cost_index'), 3)}, "
         f"индекс нагрузки {_fmt(severity.get('index'), 2)} ({severity.get('class') or '—'})"
     )
@@ -121,7 +141,7 @@ def build_explanation(decision: dict[str, Any]) -> dict[str, Any]:
     else:
         rationale = (
             f"Выбран допустимый вариант с наименьшими взвешенными потерями ({_fmt(objectives.get('ranking_loss'), 3)}: "
-            "выпуск, энергия, нагрузка, масштаб изменения)"
+            "выпуск, энергия, нагрузка, масштаб изменения, стоимость рецептуры, риск)"
         )
     if comparison:
         rationale += f". Допустимые альтернативы — {'; '.join(comparison)}"

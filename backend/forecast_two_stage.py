@@ -247,6 +247,16 @@ def exceedance_at(entry: dict, horizon: float, ln_prediction: float, *, persiste
             "limit": float(limit), "interval": "80% (10-90% квантили вложенных out-of-fold остатков)"}
 
 
+def _risk_quantiles(entry: dict, horizon: float, lower_item: dict, upper_item: dict) -> dict:
+    """The same ln-residual quantile function ``exceedance_at`` used for the horizon forecast."""
+    horizons = sorted(int(h) for h in entry["stage2"])
+    lower, upper, weight = _bracket(horizons, horizon)
+    key = ("residual_quantiles_persistence" if lower_item.get("fallback") or upper_item.get("fallback")
+           else "residual_quantiles")
+    quantiles = _blend(entry["stage2"][str(lower)][key], entry["stage2"][str(upper)][key], weight)
+    return {"space": "ln_residual", "probabilities": list(quantiles["probabilities"]), "quantiles": list(quantiles["quantiles"])}
+
+
 def forecast_sulfur(directory: Path, at: str, artifact_path: Path = ARTIFACT, horizon_minutes: float = MAX_HORIZON_MINUTES) -> dict[str, Any]:
     """Nowcast and forecast at origin ``at`` in the v3 output contract."""
     origin = parse_time(at)
@@ -361,6 +371,7 @@ def forecast_sulfur(directory: Path, at: str, artifact_path: Path = ARTIFACT, ho
         "exceedance_probability": horizon_result["exceedance_probability"] if horizon_result else None,
         "alarm_probability": alarm_probability,
         "alarm_above_10": (horizon_result["exceedance_probability"] >= alarm_probability or horizon_result["prediction"] > hard_limit) if horizon_result else None,
+        "risk_quantiles": _risk_quantiles(entry, horizon, per_horizon[lower_h], per_horizon[upper_h]) if horizon_result else None,
         "prediction_previous_lab": previous["value"] if previous else None, "previous_lab": previous,
         "lab_anchor": {"level": float(np.exp(features["ln_level"])) if pd.notna(features["ln_level"]) else None,
                        "samples": int(artifact.get("lab_anchor_samples", 0)), "pairs": anchor_pairs},

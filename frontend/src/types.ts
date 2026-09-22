@@ -253,7 +253,24 @@ export interface ScenarioResult {
     additive_inventory?: { available_t: number | null; required_t: number | null; stock_met: boolean | null };
     components?: { name: string; available_t: number | null; required_t: number | null; stock_met: boolean | null }[];
   };
+  additive?: SulfurRiskAdditive | null;
+  risk?: SulfurRisk | null;
   assumptions: string[];
+}
+
+export interface SulfurRisk {
+  basis: "calibrated_residual_quantiles" | "point_margin" | "blend_mass_balance";
+  exceedance_probability: number | null;
+  max_exceedance_probability: number | null;
+  safe_level: number;
+  passed: boolean | null;
+}
+
+export interface SulfurRiskAdditive {
+  pct: number;
+  dose_kg_t: number;
+  product_cetane: number | null;
+  cost_index: number;
 }
 
 export interface DecisionTraceItem {
@@ -369,6 +386,8 @@ export interface DecisionResult {
     target_met: boolean;
     controls: ScenarioResult["controls"];
     model_forecast: SulfurForecast | null;
+    additive?: SulfurRiskAdditive | null;
+    risk?: SulfurRisk | null;
   } | null;
   scenario: ScenarioResult | null;
   candidates?: {
@@ -392,6 +411,8 @@ export interface DecisionResult {
       ranking_loss: number | null;
     };
     controls?: ScenarioResult["controls"];
+    risk?: SulfurRisk | null;
+    additive?: SulfurRiskAdditive | null;
     safety_gate?: { passed: boolean; reasons: string[] };
     scenario?: ScenarioResult | null;
   }[];
