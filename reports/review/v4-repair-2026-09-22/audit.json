@@ -1,0 +1,58 @@
+{
+  "date": "2026-09-22",
+  "base_main_sha": "bbb6a34f8995a71edceb41957972e4e840f4072e",
+  "candidate_source_sha": "23977690f5f7f9a3e2cde816f55757f0a69e35c7",
+  "candidate_source_branch": "origin/feat/forecast-v4-contour-v2 (unchanged)",
+  "repair_branch": "fix/forecast-v4-repair",
+  "protocol_commits": [
+    "d6a4939 (frozen protocol)",
+    "a48a177 (flatline correction before any computation)"
+  ],
+  "dataset": {
+    "path": "storage/hackathon/observations.parquet",
+    "sha256": "8ef77343c350f600a4fded7dc05186067f43466f8a9880f07aa2f695d4142c56",
+    "handoff_sha256": "9a6d9b644a2b1ddce0da27e816aad31654ea9aaf306f29865bb14503973db37b",
+    "sha_matches_handoff": false,
+    "content_hash_sorted_rows": "25c9cb1952e76b7d24d0b30a2f69c31c4ca0b474d7b87fe5c5863806cdee3a73",
+    "rows": 18655950,
+    "sulfur_lab_rows": 1462,
+    "sulfur_lab_rows_2026": 253,
+    "consistency_with_handoff": "lab rows 1462 and 253 samples in 2026 match reports/review/new-branches/audit.json; Stage-1 crossing counts reproduce the audit exactly; v3 2026 H0 paired MAE 1.173 on 234 rows reproduces it; byte-level identity not verifiable (different machine/file)"
+  },
+  "sources": {
+    "tools/modeling/two_stage_features.py": "f8c69fa185624f3007dc7da6f0c40812fcbd53e846fd4ea0b3993acf7716bb09",
+    "tools/modeling/two_stage_forecast.py": "d3a264c56ad35051397b83cd8270f7e13b3a13656a4d896cf6b72774eb26211a",
+    "tools/modeling/compare_forecast_candidates.py": "c21a5a55c94d31f16bbbc2e3e86dafb65ed43b63051e6215b65a7a4cc3e36696",
+    "tools/modeling/verify_two_stage_parity.py": "57c194e1049f4354837e9d9c61e3cc0e3ffee678eafba26f571c95a0c2c77307",
+    "tools/modeling/freshness_sensitivity.py": "d68e3e8ccb26ef72caa18a93e19f1c812ca70ebfd021fc54720813246ab4a3c3",
+    "backend/forecast_two_stage.py": "0eb95186a8d5db84be2215a87838465bbca97378cae31f4d64a4c15533b3cd63",
+    "backend/forecast.py": "c9303166fe328d0be80c863bdb073e2552bdc45dba9be3926aae4fc48a7476bd",
+    "tests/test_two_stage_temporal.py": "8e13f4b1d8ebe2a778eae6274114536eda5ec191c9a112758dcc908583569738",
+    "tests/test_two_stage_runtime.py": "71ea45c205ff6d43068189aa532ea7cbc02aa3981a894cfe46b0ee167b5c9d1d"
+  },
+  "artifacts": {
+    "reports/modeling/two-stage-v4r/model.json": "229f597790421bf98c59518dc3564870993616f806f69eada5faded93dc16309",
+    "reports/modeling/two-stage-v4r/predictions.csv": "a88fc4171017a39593bf1e7cdb2d3e4f8522adc65fe5fec89f68e2bd220fde1e",
+    "reports/modeling/causal-anchored/corrected-claude/model.json": "df3e7aaba5ea5b6ae3a424a80401ee5a0985d4233001da6ac6187d37d2dd9b9a",
+    "reports/modeling/causal-anchored/corrected-claude/predictions.csv": "85b1f7eac29ab484751b7a3281b1142888ce2f178c4b743cf378bab4a15ed79a"
+  },
+  "environment": {
+    "python": "3.13.6",
+    "platform": "macOS-27.0-arm64-arm-64bit-Mach-O",
+    "numpy": "2.5.3",
+    "pandas": "2.3.3",
+    "scikit_learn": "1.9.1",
+    "duckdb": "1.5.5"
+  },
+  "commands": [
+    "python tools/modeling/two_stage_forecast.py --dataset storage/hackathon --output reports/modeling/two-stage-v4r",
+    "python tools/modeling/compare_forecast_candidates.py --dataset storage/hackathon --output reports/review/v4-repair-2026-09-22",
+    "python tools/modeling/verify_two_stage_parity.py --dataset storage/hackathon --output reports/review/v4-repair-2026-09-22/runtime_parity.json",
+    "python tools/modeling/freshness_sensitivity.py --dataset storage/hackathon --output reports/review/v4-repair-2026-09-22",
+    "python scripts/verify_release.py --local --dataset hackathon --output reports/review/v4-repair-2026-09-22/acceptance-v3-default.json",
+    "OILCODE_FORECAST_MODEL=two-stage-v4r python scripts/verify_release.py --local --dataset hackathon --output reports/review/v4-repair-2026-09-22/acceptance-v4r-adapter.json",
+    "python -m pytest tests tools/modeling/test_sulfur_forecast.py tools/modeling/test_sulfur_first_iteration.py tools/modeling/research_tests -q",
+    "python -m unittest discover -s tools/modeling -p 'test_*.py'",
+    "npm --prefix frontend test && npm --prefix frontend run build"
+  ]
+}

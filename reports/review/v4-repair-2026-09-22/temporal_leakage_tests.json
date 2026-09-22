@@ -1,0 +1,490 @@
+{
+  "source_sha": "a48a177ca9a2eb05359b6f6ba97f1079a55f7683",
+  "uncommitted_changes_at_run": true,
+  "tests": [
+    {
+      "file": "tests.test_two_stage_temporal",
+      "test": "test_target_window_crossing_fold_end_is_not_a_fold_row",
+      "passed": true,
+      "time_s": 0.037,
+      "covers": "handoff #1: whole target window before fold end"
+    },
+    {
+      "file": "tests.test_two_stage_temporal",
+      "test": "test_crossing_report_counts_removed_rows",
+      "passed": true,
+      "time_s": 0.035,
+      "covers": "handoff #1: removed rows reported per fold/horizon/analyser"
+    },
+    {
+      "file": "tests.test_two_stage_temporal",
+      "test": "test_quiet_rejects_intermediate_round_trip",
+      "passed": true,
+      "time_s": 0.264,
+      "covers": "handoff #2: 350->360->350 is not quiet"
+    },
+    {
+      "file": "tests.test_two_stage_temporal",
+      "test": "test_quiet_rejects_two_small_steps_adding_up",
+      "passed": true,
+      "time_s": 0.015,
+      "covers": "handoff #2: two jumps"
+    },
+    {
+      "file": "tests.test_two_stage_temporal",
+      "test": "test_quiet_accepts_noise_within_tolerance_and_constant_path",
+      "passed": true,
+      "time_s": 0.087,
+      "covers": "handoff #2: noise within tolerance, flat path"
+    },
+    {
+      "file": "tests.test_two_stage_temporal",
+      "test": "test_quiet_rejects_missing_path",
+      "passed": true,
+      "time_s": 0.175,
+      "covers": "handoff #2: gap / missing tail"
+    },
+    {
+      "file": "tests.test_two_stage_temporal",
+      "test": "test_quiet_step_at_window_boundaries",
+      "passed": true,
+      "time_s": 0.08,
+      "covers": "handoff #2: step at window end / after / at origin"
+    },
+    {
+      "file": "tests.test_two_stage_temporal",
+      "test": "test_quiet_checks_feed_and_pressure_paths",
+      "passed": true,
+      "time_s": 0.193,
+      "covers": "handoff #2: F9 and P13 paths"
+    },
+    {
+      "file": "tests.test_two_stage_temporal",
+      "test": "test_quiet_treats_flatline_control_readings_as_missing",
+      "passed": true,
+      "time_s": 0.202,
+      "covers": "handoff #2: flatline semantics"
+    },
+    {
+      "file": "tests.test_two_stage_temporal",
+      "test": "test_future_path_quiet_log_mode",
+      "passed": true,
+      "time_s": 0.002,
+      "covers": "handoff #2: ln F9 tolerance"
+    },
+    {
+      "file": "tests.test_two_stage_temporal",
+      "test": "test_analyser_cleaning_is_causal",
+      "passed": true,
+      "time_s": 0.007,
+      "covers": "handoff #5: analyser cleaning mutation"
+    },
+    {
+      "file": "tests.test_two_stage_temporal",
+      "test": "test_dynamics_and_lab_features_ignore_future_mutations",
+      "passed": true,
+      "time_s": 0.107,
+      "covers": "handoff #5: dynamics, rolling, lag, lab-anchor features mutation"
+    },
+    {
+      "file": "tests.test_two_stage_temporal",
+      "test": "test_stage1_fit_ignores_data_after_cutoff",
+      "passed": true,
+      "time_s": 0.069,
+      "covers": "handoff #5: Stage-1 targets/quiet mask mutation"
+    },
+    {
+      "file": "tests.test_two_stage_temporal",
+      "test": "test_fit_procedure_ignores_everything_after_cutoff",
+      "passed": true,
+      "time_s": 32.741,
+      "covers": "handoff #5: whole model set mutation invariance"
+    },
+    {
+      "file": "tests.test_two_stage_temporal",
+      "test": "test_outer_fold_model_set_does_not_see_outer_labels",
+      "passed": true,
+      "time_s": 11.992,
+      "covers": "handoff #3/#4: nested calibration and fold-local support"
+    },
+    {
+      "file": "tests.test_two_stage_temporal",
+      "test": "test_first_fold_uses_preregistered_configuration",
+      "passed": true,
+      "time_s": 2.344,
+      "covers": "handoff #3: no same-fold selection for the first fold"
+    },
+    {
+      "file": "tests.test_two_stage_temporal",
+      "test": "test_residual_quantiles_come_only_from_outer_predictions",
+      "passed": true,
+      "time_s": 12.381,
+      "covers": "handoff #3: quantiles only from outer OOF rows; fixed alarm"
+    },
+    {
+      "file": "tests.test_two_stage_temporal",
+      "test": "test_fold_rows_require_publication_before_fold_end",
+      "passed": true,
+      "time_s": 0.475,
+      "covers": "protocol #5: labels published before fold end"
+    },
+    {
+      "file": "tests.test_two_stage_runtime",
+      "test": "test_runtime_reproduces_offline_walk_forward_rows",
+      "passed": true,
+      "time_s": 25.128,
+      "covers": "runtime/offline parity (synthetic)"
+    },
+    {
+      "file": "tests.test_two_stage_runtime",
+      "test": "test_terminal_level_is_shared_by_point_interval_probability_and_trajectory",
+      "passed": true,
+      "time_s": 0.103,
+      "covers": "handoff #4: one terminal level"
+    },
+    {
+      "file": "tests.test_two_stage_runtime",
+      "test": "test_output_keeps_the_v3_contract_used_by_agents",
+      "passed": true,
+      "time_s": 0.102,
+      "covers": "handoff #8: adapter contract"
+    },
+    {
+      "file": "tests.test_two_stage_runtime",
+      "test": "test_forecast_ignores_quality_freshness_settings",
+      "passed": true,
+      "time_s": 0.289,
+      "covers": "handoff #6: CN/T95 freshness does not move forecast"
+    },
+    {
+      "file": "tests.test_two_stage_runtime",
+      "test": "test_dispatch_defaults_to_v3_and_opts_in_by_environment",
+      "passed": true,
+      "time_s": 0.0,
+      "covers": "runtime unchanged by default"
+    },
+    {
+      "file": "tests.test_two_stage_runtime",
+      "test": "test_adapter_rejects_unrepaired_v4_and_undeployable_artifacts",
+      "passed": true,
+      "time_s": 0.009,
+      "covers": "flawed v4 artifact cannot be served"
+    },
+    {
+      "file": "tests.test_pareto",
+      "test": "test_front_keeps_tradeoffs_and_equal_points_without_changing_order_or_gates",
+      "passed": true,
+      "time_s": 0.0,
+      "covers": "main: Pareto incomplete objectives (handoff #7)"
+    },
+    {
+      "file": "tests.test_pareto",
+      "test": "test_missing_objective_cannot_become_zero_risk_winner[None]",
+      "passed": true,
+      "time_s": 0.0,
+      "covers": "main: Pareto incomplete objectives (handoff #7)"
+    },
+    {
+      "file": "tests.test_pareto",
+      "test": "test_missing_objective_cannot_become_zero_risk_winner[nan]",
+      "passed": true,
+      "time_s": 0.0,
+      "covers": "main: Pareto incomplete objectives (handoff #7)"
+    },
+    {
+      "file": "tests.test_pareto",
+      "test": "test_missing_objective_cannot_become_zero_risk_winner[inf]",
+      "passed": true,
+      "time_s": 0.0,
+      "covers": "main: Pareto incomplete objectives (handoff #7)"
+    },
+    {
+      "file": "tests.test_pareto",
+      "test": "test_missing_objective_cannot_become_zero_risk_winner[True]",
+      "passed": true,
+      "time_s": 0.0,
+      "covers": "main: Pareto incomplete objectives (handoff #7)"
+    },
+    {
+      "file": "tests.test_pareto",
+      "test": "test_gate_failure_cannot_appear_on_front_even_if_feasible_flag_disagrees",
+      "passed": true,
+      "time_s": 0.0,
+      "covers": "main: Pareto incomplete objectives (handoff #7)"
+    }
+  ],
+  "passed": true,
+  "pipeline_leakage_checks": {
+    "2024-01-01T00:00:00": {
+      "0": {
+        "fit_label_latest_available_at": "2023-12-31T14:00:00",
+        "labels_published_after_fit_end_in_fit": 0,
+        "previous_lab_published_after_origin": 0,
+        "origin_horizon_mismatch": 0,
+        "window_origins_before_fit_end": 0,
+        "passed": true
+      },
+      "60": {
+        "fit_label_latest_available_at": "2023-12-31T14:00:00",
+        "labels_published_after_fit_end_in_fit": 0,
+        "previous_lab_published_after_origin": 0,
+        "origin_horizon_mismatch": 0,
+        "window_origins_before_fit_end": 0,
+        "stage1_q21_target_windows_after_fit_end": 0,
+        "stage1_pak_target_windows_after_fit_end": 0,
+        "passed": true
+      },
+      "120": {
+        "fit_label_latest_available_at": "2023-12-31T14:00:00",
+        "labels_published_after_fit_end_in_fit": 0,
+        "previous_lab_published_after_origin": 0,
+        "origin_horizon_mismatch": 0,
+        "window_origins_before_fit_end": 0,
+        "stage1_q21_target_windows_after_fit_end": 0,
+        "stage1_pak_target_windows_after_fit_end": 0,
+        "passed": true
+      },
+      "180": {
+        "fit_label_latest_available_at": "2023-12-31T14:00:00",
+        "labels_published_after_fit_end_in_fit": 0,
+        "previous_lab_published_after_origin": 0,
+        "origin_horizon_mismatch": 0,
+        "window_origins_before_fit_end": 0,
+        "stage1_q21_target_windows_after_fit_end": 0,
+        "stage1_pak_target_windows_after_fit_end": 0,
+        "passed": true
+      }
+    },
+    "2025-01-01T00:00:00": {
+      "0": {
+        "fit_label_latest_available_at": "2024-12-31T14:00:00",
+        "labels_published_after_fit_end_in_fit": 0,
+        "previous_lab_published_after_origin": 0,
+        "origin_horizon_mismatch": 0,
+        "window_origins_before_fit_end": 0,
+        "passed": true
+      },
+      "60": {
+        "fit_label_latest_available_at": "2024-12-31T14:00:00",
+        "labels_published_after_fit_end_in_fit": 0,
+        "previous_lab_published_after_origin": 0,
+        "origin_horizon_mismatch": 0,
+        "window_origins_before_fit_end": 0,
+        "stage1_q21_target_windows_after_fit_end": 0,
+        "stage1_pak_target_windows_after_fit_end": 0,
+        "passed": true
+      },
+      "120": {
+        "fit_label_latest_available_at": "2024-12-31T14:00:00",
+        "labels_published_after_fit_end_in_fit": 0,
+        "previous_lab_published_after_origin": 0,
+        "origin_horizon_mismatch": 0,
+        "window_origins_before_fit_end": 0,
+        "stage1_q21_target_windows_after_fit_end": 0,
+        "stage1_pak_target_windows_after_fit_end": 0,
+        "passed": true
+      },
+      "180": {
+        "fit_label_latest_available_at": "2024-12-31T14:00:00",
+        "labels_published_after_fit_end_in_fit": 0,
+        "previous_lab_published_after_origin": 0,
+        "origin_horizon_mismatch": 0,
+        "window_origins_before_fit_end": 0,
+        "stage1_q21_target_windows_after_fit_end": 0,
+        "stage1_pak_target_windows_after_fit_end": 0,
+        "passed": true
+      }
+    },
+    "2026-01-01T00:00:00": {
+      "0": {
+        "fit_label_latest_available_at": "2025-12-31T14:00:00",
+        "labels_published_after_fit_end_in_fit": 0,
+        "previous_lab_published_after_origin": 0,
+        "origin_horizon_mismatch": 0,
+        "window_origins_before_fit_end": 0,
+        "passed": true
+      },
+      "60": {
+        "fit_label_latest_available_at": "2025-12-31T14:00:00",
+        "labels_published_after_fit_end_in_fit": 0,
+        "previous_lab_published_after_origin": 0,
+        "origin_horizon_mismatch": 0,
+        "window_origins_before_fit_end": 0,
+        "stage1_q21_target_windows_after_fit_end": 0,
+        "stage1_pak_target_windows_after_fit_end": 0,
+        "passed": true
+      },
+      "120": {
+        "fit_label_latest_available_at": "2025-12-31T14:00:00",
+        "labels_published_after_fit_end_in_fit": 0,
+        "previous_lab_published_after_origin": 0,
+        "origin_horizon_mismatch": 0,
+        "window_origins_before_fit_end": 0,
+        "stage1_q21_target_windows_after_fit_end": 0,
+        "stage1_pak_target_windows_after_fit_end": 0,
+        "passed": true
+      },
+      "180": {
+        "fit_label_latest_available_at": "2025-12-31T14:00:00",
+        "labels_published_after_fit_end_in_fit": 0,
+        "previous_lab_published_after_origin": 0,
+        "origin_horizon_mismatch": 0,
+        "window_origins_before_fit_end": 0,
+        "stage1_q21_target_windows_after_fit_end": 0,
+        "stage1_pak_target_windows_after_fit_end": 0,
+        "passed": true
+      }
+    }
+  },
+  "stage1_target_window_crossings_removed": [
+    {
+      "fold": "2023H2",
+      "horizon": 60,
+      "analyser": "q21",
+      "origin_only_rows": 8792,
+      "kept_rows": 8792,
+      "removed_rows": 0
+    },
+    {
+      "fold": "2023H2",
+      "horizon": 60,
+      "analyser": "pak",
+      "origin_only_rows": 8784,
+      "kept_rows": 8784,
+      "removed_rows": 0
+    },
+    {
+      "fold": "2023H2",
+      "horizon": 120,
+      "analyser": "q21",
+      "origin_only_rows": 8793,
+      "kept_rows": 8791,
+      "removed_rows": 2
+    },
+    {
+      "fold": "2023H2",
+      "horizon": 120,
+      "analyser": "pak",
+      "origin_only_rows": 8777,
+      "kept_rows": 8775,
+      "removed_rows": 2
+    },
+    {
+      "fold": "2023H2",
+      "horizon": 180,
+      "analyser": "q21",
+      "origin_only_rows": 8792,
+      "kept_rows": 8788,
+      "removed_rows": 4
+    },
+    {
+      "fold": "2023H2",
+      "horizon": 180,
+      "analyser": "pak",
+      "origin_only_rows": 8770,
+      "kept_rows": 8766,
+      "removed_rows": 4
+    },
+    {
+      "fold": "2024",
+      "horizon": 60,
+      "analyser": "q21",
+      "origin_only_rows": 15561,
+      "kept_rows": 15558,
+      "removed_rows": 3
+    },
+    {
+      "fold": "2024",
+      "horizon": 60,
+      "analyser": "pak",
+      "origin_only_rows": 14886,
+      "kept_rows": 14883,
+      "removed_rows": 3
+    },
+    {
+      "fold": "2024",
+      "horizon": 120,
+      "analyser": "q21",
+      "origin_only_rows": 15558,
+      "kept_rows": 15553,
+      "removed_rows": 5
+    },
+    {
+      "fold": "2024",
+      "horizon": 120,
+      "analyser": "pak",
+      "origin_only_rows": 14855,
+      "kept_rows": 14851,
+      "removed_rows": 4
+    },
+    {
+      "fold": "2024",
+      "horizon": 180,
+      "analyser": "q21",
+      "origin_only_rows": 15551,
+      "kept_rows": 15544,
+      "removed_rows": 7
+    },
+    {
+      "fold": "2024",
+      "horizon": 180,
+      "analyser": "pak",
+      "origin_only_rows": 14828,
+      "kept_rows": 14823,
+      "removed_rows": 5
+    },
+    {
+      "fold": "2025",
+      "horizon": 60,
+      "analyser": "q21",
+      "origin_only_rows": 17427,
+      "kept_rows": 17424,
+      "removed_rows": 3
+    },
+    {
+      "fold": "2025",
+      "horizon": 60,
+      "analyser": "pak",
+      "origin_only_rows": 17369,
+      "kept_rows": 17366,
+      "removed_rows": 3
+    },
+    {
+      "fold": "2025",
+      "horizon": 120,
+      "analyser": "q21",
+      "origin_only_rows": 17422,
+      "kept_rows": 17417,
+      "removed_rows": 5
+    },
+    {
+      "fold": "2025",
+      "horizon": 120,
+      "analyser": "pak",
+      "origin_only_rows": 17355,
+      "kept_rows": 17350,
+      "removed_rows": 5
+    },
+    {
+      "fold": "2025",
+      "horizon": 180,
+      "analyser": "q21",
+      "origin_only_rows": 17414,
+      "kept_rows": 17407,
+      "removed_rows": 7
+    },
+    {
+      "fold": "2025",
+      "horizon": 180,
+      "analyser": "pak",
+      "origin_only_rows": 17345,
+      "kept_rows": 17338,
+      "removed_rows": 7
+    }
+  ],
+  "original_v4_counterexample": {
+    "source": "reports/review/new-branches/audit.json (2397769)",
+    "classified_quiet": true,
+    "now": "not quiet (test_quiet_rejects_intermediate_round_trip)"
+  }
+}
