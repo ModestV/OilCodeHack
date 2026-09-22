@@ -65,6 +65,44 @@ def regime_severity(controls: dict) -> dict:
             "assumption": "Большие T6/P13/F9 условно повышают нагрузку. Порог 12σ — экспериментальный, не промышленный предел."}
 
 
+SHUTDOWN_FEED_FRACTION = 0.10
+TRANSITION_FEED_FRACTION = 0.60
+
+
+def operating_state(controls: dict) -> dict:
+    """Shutdown / start-up detection from the feed rate F9.
+
+    History contains long stops with F9 ≈ 0 (e.g. April 2024, June 2026) and
+    ramps between them.  Below 10% of the training mean the unit is treated as
+    stopped; below 60% (under the 5th percentile of history) as a start-up,
+    shutdown or deep turndown transition.  Transient regimes are not modelled,
+    so the contour refuses to advise in both states.  Thresholds are explicit
+    prototype assumptions, not plant limits.
+    """
+
+    value = controls.get("ht.F9")
+    if value is None or not isfinite(value):
+        return {"state": "unknown", "feed": None, "feed_fraction_of_train_mean": None,
+                "reason": "Нет значения F9 для определения режима установки"}
+    try:
+        artifact = _load_artifact()
+        mean = artifact["mean"][artifact["feature_columns"].index("242000__F9")]
+    except (ForecastUnavailable, KeyError, ValueError) as exc:
+        return {"state": "unknown", "feed": value, "feed_fraction_of_train_mean": None, "reason": str(exc)}
+    fraction = value / mean
+    state = ("shutdown" if fraction < SHUTDOWN_FEED_FRACTION
+             else "transition" if fraction < TRANSITION_FEED_FRACTION else "normal")
+    reason = {
+        "shutdown": f"Установка в режиме останова: подача F9 {value:.1f} — {max(fraction, 0):.0%} от среднего обучения",
+        "transition": f"Режим пуска/останова или глубокого снижения нагрузки: подача F9 {value:.1f} — "
+                      f"{max(fraction, 0):.0%} от среднего обучения; переходные режимы не моделируются",
+        "normal": None,
+    }[state]
+    return {"state": state, "feed": value, "feed_fraction_of_train_mean": fraction, "train_mean": mean,
+            "thresholds": {"shutdown": SHUTDOWN_FEED_FRACTION, "transition": TRANSITION_FEED_FRACTION},
+            "reason": reason, "basis": "feed fraction of train mean; prototype assumption"}
+
+
 def candidate_objectives(scenario: dict, effort: float) -> dict:
     controls = scenario["controls"]
     temperature = controls["ht.T6"]["change"]

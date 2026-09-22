@@ -1,0 +1,67 @@
+name: ci
+
+# Checks every pull request and feature branch without deploying.
+on:
+  pull_request:
+  push:
+    branches-ignore: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Tests
+        run: |
+          python -m pip install -r requirements-dev.txt
+          python -m pytest -q
+          python -m unittest discover -s tools/modeling -p 'test_*.py' -v
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Test and build
+        run: |
+          npm --prefix frontend ci
+          npm --prefix frontend test
+          npm --prefix frontend run build
+
+  # Proves the README Docker path: image builds, starts without data, serves UI and API.
+  docker-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compose up
+        run: |
+          mkdir -p data storage
+          REVISION=${{ github.sha }} docker compose up --build -d
+      - name: Health, UI and API
+        run: |
+          for i in $(seq 1 60); do
+            curl -fsS http://127.0.0.1:8000/api/health && break
+            sleep 2
+          done
+          curl -fsS http://127.0.0.1:8000/api/health | grep -q '"revision":"${{ github.sha }}"'
+          curl -fsS http://127.0.0.1:8000/ | grep -q '<div id="root">'
+          curl -fsS http://127.0.0.1:8000/api/datasets
+      - name: Logs
+        if: always()
+        run: docker compose logs --no-color | tail -n 200

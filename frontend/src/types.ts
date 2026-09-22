@@ -258,9 +258,25 @@ export interface ScenarioResult {
 
 export interface DecisionTraceItem {
   step: number;
-  role: "quality" | "reliability" | "optimization";
+  role: "quality" | "reliability" | "optimization" | "orchestrator";
   status: string;
   summary: string;
+  consumes?: string[];
+  produces?: string[];
+}
+
+export interface DecisionConflict {
+  code: string;
+  roles: string[];
+  resolution: "abstain" | "warning" | "resolved_by_alternative" | "quality_priority" | "hold";
+  message: string;
+}
+
+export interface DecisionExplanation {
+  source: "template" | "llm";
+  text: string;
+  model?: string | null;
+  fallback_reason?: string | null;
 }
 
 export interface SulfurForecast {
@@ -384,6 +400,10 @@ export interface DecisionResult {
   abstain: { reason: string; missing: string[] } | null;
   forecast: SulfurForecast | null;
   trace: DecisionTraceItem[];
+  conflicts?: DecisionConflict[];
+  consistency?: { code: string; passed: boolean; message: string }[];
+  explanation?: DecisionExplanation;
+  record_id?: string | null;
   assumptions: string[];
 }
 

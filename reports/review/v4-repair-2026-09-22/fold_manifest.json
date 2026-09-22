@@ -1,0 +1,74 @@
+{
+  "folds": {
+    "2023H2": {
+      "start": "2023-07-01T00:00:00",
+      "end": "2024-01-01T00:00:00",
+      "outer_model_cutoff": "2023-07-01T00:00:00",
+      "outer_model_configured_on": [],
+      "configuration": "preregistered",
+      "row_rule": "origin >= start and label published (sample + delay) < end; Stage-1 rows: target window ends < end"
+    },
+    "2024": {
+      "start": "2024-01-01T00:00:00",
+      "end": "2025-01-01T00:00:00",
+      "outer_model_cutoff": "2024-01-01T00:00:00",
+      "outer_model_configured_on": [
+        "2023H2"
+      ],
+      "configuration": "earlier folds",
+      "row_rule": "origin >= start and label published (sample + delay) < end; Stage-1 rows: target window ends < end"
+    },
+    "2025": {
+      "start": "2025-01-01T00:00:00",
+      "end": "2026-01-01T00:00:00",
+      "outer_model_cutoff": "2025-01-01T00:00:00",
+      "outer_model_configured_on": [
+        "2023H2",
+        "2024"
+      ],
+      "configuration": "earlier folds",
+      "row_rule": "origin >= start and label published (sample + delay) < end; Stage-1 rows: target window ends < end"
+    }
+  },
+  "walk_forward": [
+    {
+      "fit_end": "2024-01-01T00:00:00",
+      "configuration_folds": [
+        "2023H2"
+      ],
+      "labels_published_before": "2024-01-01T00:00:00",
+      "evaluation_window": [
+        "2024-01-01T00:00:00",
+        "2025-01-01T00:00:00"
+      ],
+      "role": "development year (decision)"
+    },
+    {
+      "fit_end": "2025-01-01T00:00:00",
+      "configuration_folds": [
+        "2023H2",
+        "2024"
+      ],
+      "labels_published_before": "2025-01-01T00:00:00",
+      "evaluation_window": [
+        "2025-01-01T00:00:00",
+        "2026-01-01T00:00:00"
+      ],
+      "role": "development year (decision)"
+    },
+    {
+      "fit_end": "2026-01-01T00:00:00",
+      "configuration_folds": [
+        "2023H2",
+        "2024",
+        "2025"
+      ],
+      "labels_published_before": "2026-01-01T00:00:00",
+      "evaluation_window": [
+        "2026-01-01T00:00:00",
+        "end of data"
+      ],
+      "role": "retrospective audit (seen in earlier work)"
+    }
+  ]
+}

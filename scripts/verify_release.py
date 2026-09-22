@@ -142,7 +142,8 @@ def assert_forecast(forecast, origin):
 def assert_decision(decision, request, expected):
     origin = parse_time(request["at"])
     require(decision.get("status") == expected, f"Expected {expected}, got {decision.get('status')}: {decision.get('abstain')}")
-    require([step.get("role") for step in decision.get("trace", [])] == ["quality", "reliability", "optimization"], "Incomplete ordered agent trace")
+    require([step.get("role") for step in decision.get("trace", [])] == ["quality", "reliability", "optimization", "orchestrator"], "Incomplete ordered agent trace")
+    require(isinstance(decision.get("explanation"), dict) and decision["explanation"].get("text"), "Missing operator explanation")
     agents = decision.get("agents", {})
     reliability = agents.get("reliability", {})
     evidence = agents.get("quality", {}).get("evidence", {})
@@ -191,7 +192,7 @@ def assert_decision(decision, request, expected):
 
 
 def compact_decision(decision):
-    result = {key: decision.get(key) for key in ("status", "selected_candidate", "safety_gate", "abstain", "trace", "forecast")}
+    result = {key: decision.get(key) for key in ("status", "selected_candidate", "safety_gate", "abstain", "trace", "forecast", "conflicts", "consistency", "explanation")}
     result["quality_evidence"] = decision.get("agents", {}).get("quality", {}).get("evidence")
     result["reliability"] = decision.get("agents", {}).get("reliability")
     result["candidates"] = [{key: item.get(key) for key in ("id", "status", "feasible", "predicted_sulfur", "effort", "objectives", "safety_gate")} for item in decision.get("candidates") or []]
